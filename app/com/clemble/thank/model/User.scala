@@ -13,11 +13,11 @@ import play.api.libs.json.Json
   *    - receives thanks from owned urls
   */
 case class User(
+                 id: UserId,
                  firstName: String,
                  lastName: String,
-                 nickName: String,
                  url: String,
-                 owned: List[String],
+                 integrations: List[Integration],
                  balance: Amount,
                  bankDetails: BankDetails,
                  email: Option[Email],

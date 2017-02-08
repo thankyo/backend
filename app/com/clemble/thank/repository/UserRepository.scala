@@ -1,6 +1,6 @@
 package com.clemble.thank.repository
 
-import com.clemble.thank.model.User
+import com.clemble.thank.model.{User, UserId}
 import play.api.libs.iteratee.Enumerator
 
 import scala.concurrent.Future
@@ -12,6 +12,6 @@ trait UserRepository {
 
   def findAll(): Enumerator[User]
 
-  def findByNickname(nickname: String): Future[Option[User]]
+  def findById(id: UserId): Future[Option[User]]
 
 }

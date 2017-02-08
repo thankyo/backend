@@ -11,7 +11,6 @@ val reactiveMongoVer = "0.12.1"
 libraryDependencies ++= Seq(
   cache,
   ws,
-  evolutions,
 
   "org.reactivemongo" %% "reactivemongo" % reactiveMongoVer,
   "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVer,

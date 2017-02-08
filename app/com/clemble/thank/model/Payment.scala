@@ -17,6 +17,7 @@ object PaymentOperation {
     override def reads(json: JsValue): JsResult[PaymentOperation] = json match {
       case DEBIT => JsSuccess(Debit)
       case CREDIT => JsSuccess(Credit)
+      case unknown => JsError(s"Invalid PaymentOperation value ${unknown}")
     }
 
     override def writes(o: PaymentOperation): JsValue = o match {

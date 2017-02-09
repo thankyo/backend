@@ -2,7 +2,7 @@ package com.clemble.thank.model
 
 import com.clemble.thank.test.util.Generator
 import org.specs2.mutable.Specification
-import play.api.libs.json.{Format, JsSuccess, JsValue, Json}
+import play.api.libs.json.{Format, JsValue, Json}
 
 import scala.util.Try
 
@@ -20,8 +20,8 @@ trait SerializationSpec[T] extends Specification {
 
     "deserialize" in {
       val presentation = Json.toJson(value)(jsonFormat)
-      val readValue = Json.fromJson[T](presentation)(jsonFormat)
-      readValue must (beEqualTo(JsSuccess(value)))
+      val readValue = Json.fromJson[T](presentation)(jsonFormat).asOpt
+      readValue must (beEqualTo(Some(value)))
     }
   }
 

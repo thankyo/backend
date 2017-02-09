@@ -15,7 +15,7 @@ object UserGenerator extends Generator[User] {
       random(10),
       List.empty,
       nextLong(0, Long.MaxValue),
-      PayPalBankDetails(random(12)),
+      BankDetailsGenerator.generate(),
       Some(random(12)),
       new DateTime(nextLong(0, Long.MaxValue))
     )

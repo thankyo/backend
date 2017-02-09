@@ -10,6 +10,8 @@ dependencies:
     - docker-compose up -d
 
 test:
+  override:
+    - sbt test
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/*/target/test-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;

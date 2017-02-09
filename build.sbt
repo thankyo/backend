@@ -1,4 +1,4 @@
-name := """thanks-backend"""
+name := "thanks-backend"
 
 version := "1.0-SNAPSHOT"
 
@@ -15,5 +15,7 @@ libraryDependencies ++= Seq(
 
   specs2 % Test
 )
+
+testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxml")
 
 

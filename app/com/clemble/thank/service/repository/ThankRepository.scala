@@ -1,4 +1,4 @@
-package com.clemble.thank.repository
+package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.Thank
 import play.api.libs.iteratee.Enumerator

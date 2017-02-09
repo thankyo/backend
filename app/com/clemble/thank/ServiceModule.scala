@@ -1,7 +1,7 @@
 package com.clemble.thank
 
-import com.clemble.thank.service.repository.{MongoThankRepository, MongoUserRepository, ThankRepository, UserRepository}
-import com.clemble.thank.service.{SimpleThankService, SimpleUserService, ThankService, UserService}
+import com.clemble.thank.service.repository._
+import com.clemble.thank.service._
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -22,6 +22,9 @@ class ServiceModule extends AbstractModule {
 
     bind(classOf[ThankService]).to(classOf[SimpleThankService])
     bind(classOf[ThankRepository]).to(classOf[MongoThankRepository])
+
+    bind(classOf[UserPaymentService]).to(classOf[SimpleUserPaymentService])
+    bind(classOf[PaymentRepository]).to(classOf[MongoPaymentRepository])
   }
 
   @Provides
@@ -39,6 +42,15 @@ class ServiceModule extends AbstractModule {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.
       map(_.collection[JSONCollection]("thank", FailoverStrategy.default))(ec)
+    Await.result(fCollection, 1 minute)
+  }
+
+  @Provides
+  @Named("payment")
+  def paymentMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    val fCollection: Future[JSONCollection] = mongoApi.
+      database.
+      map(_.collection[JSONCollection]("payment", FailoverStrategy.default))(ec)
     Await.result(fCollection, 1 minute)
   }
 

@@ -23,7 +23,7 @@ trait PaymentRepository {
     * @param user user identifier
     * @return all payments done by the user
     */
-  def findByCustomer(user: String): Enumerator[Payment]
+  def findByUser(user: String): Enumerator[Payment]
 
   /**
     * Saves payment for future reference

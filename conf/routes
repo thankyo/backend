@@ -3,13 +3,15 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
+GET         /                        controllers.HomeController.index
 
-POST    /user                       @com.clemble.thank.controller.UserController.create
-GET     /user/:id                   @com.clemble.thank.controller.UserController.get(id)
+POST        /user                    @com.clemble.thank.controller.UserController.create
+GET         /user/:id                @com.clemble.thank.controller.UserController.get(id)
 
-GET     /thank/*url                 @com.clemble.thank.controller.ThankController.get(url)
-PUT     /thank/*url                 @com.clemble.thank.controller.ThankController.thank(url)
+GET         /thank/*url              @com.clemble.thank.controller.ThankController.get(url)
+PUT         /thank/*url              @com.clemble.thank.controller.ThankController.thank(url)
+
+GET         /payment/user/:id        @com.clemble.thank.controller.UserPaymentController.payments(id)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file            controllers.Assets.versioned(path="/public", file: Asset)

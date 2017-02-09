@@ -7,7 +7,6 @@ import play.api.libs.json._
   * Bank details abstraction
   */
 sealed trait BankDetails
-
 case class PayPalBankDetails (email: Email) extends BankDetails
 
 object PayPalBankDetails {

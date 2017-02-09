@@ -1,18 +1,18 @@
 package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.Thank
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.google.inject.name.Named
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import reactivemongo.api.ReadPreference
 import reactivemongo.play.json.collection.JSONCollection
-
 import reactivemongo.play.iteratees.cursorProducer
 import play.modules.reactivemongo.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 case class MongoThankRepository @Inject()(
                                            @Named("thank") collection: JSONCollection,
                                            implicit val ec: ExecutionContext

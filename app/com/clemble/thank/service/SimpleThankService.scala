@@ -2,10 +2,11 @@ package com.clemble.thank.service
 
 import com.clemble.thank.model.Thank
 import com.clemble.thank.service.repository.ThankRepository
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 case class SimpleThankService @Inject()(repository: ThankRepository, implicit val ec: ExecutionContext) extends ThankService {
 
   override def get(url: String): Future[Thank] = {

@@ -30,7 +30,7 @@ object PaymentOperation {
 }
 
 case class Payment (
-                     customer: String,
+                     user: UserId,
                      amount: Amount,
                      bankDetails: BankDetails,
                      operation: PaymentOperation,
@@ -39,7 +39,26 @@ case class Payment (
 
 object Payment {
 
-  PaymentOperation.json
-  val json = Json.format[Payment]
+  implicit val json = Json.format[Payment]
+
+  def debit(user: User, amount: Amount): Payment = {
+    Payment(
+      user.id,
+      amount,
+      user.bankDetails,
+      Debit,
+      DateTime.now()
+    )
+  }
+
+  def credit(user: User, amount: Amount): Payment = {
+    Payment(
+      user.id,
+      amount,
+      user.bankDetails,
+      Credit,
+      DateTime.now()
+    )
+  }
 
 }

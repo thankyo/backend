@@ -11,11 +11,18 @@ import scala.concurrent.Future
 trait ThankRepository {
 
   /**
+    * Create appropriate url
+    * @param thank object to create
+    * @return persisted Thank
+    */
+  def create(thank: Thank): Future[Thank]
+
+  /**
     * Find [[Thank]]
     *
     * @return existing or creates new [[Thank]]
     */
-  def findOrCreate(url: String): Future[Thank]
+  def findByUrl(url: String): Future[Option[Thank]]
 
   /**
     * Increases number of thanks given

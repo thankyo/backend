@@ -8,5 +8,8 @@ GET     /                           controllers.HomeController.index
 POST    /user                       @com.clemble.thank.controller.UserController.create
 GET     /user/:id                   @com.clemble.thank.controller.UserController.get(id)
 
+GET     /thank/*url                 @com.clemble.thank.controller.ThankController.get(url)
+PUT     /thank/*url                 @com.clemble.thank.controller.ThankController.thank(url)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

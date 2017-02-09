@@ -12,6 +12,9 @@ case class Thank(
 
 object Thank {
 
-  implicit val json = Json.format[Thank]
+  /**
+    * JSON format for [[Thank]]
+    */
+  implicit val jsonFormat = Json.format[Thank]
 
 }

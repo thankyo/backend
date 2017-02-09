@@ -9,14 +9,11 @@ scalaVersion := "2.11.8"
 val reactiveMongoVer = "0.12.1"
 
 libraryDependencies ++= Seq(
-  cache,
-  ws,
-
   "org.reactivemongo" %% "reactivemongo" % reactiveMongoVer,
   "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVer,
   "org.reactivemongo" %% "reactivemongo-iteratees" % reactiveMongoVer,
 
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+  specs2 % Test
 )
 
 

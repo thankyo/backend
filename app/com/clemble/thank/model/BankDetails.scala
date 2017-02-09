@@ -11,23 +11,29 @@ case class PayPalBankDetails (email: Email) extends BankDetails
 
 object PayPalBankDetails {
 
-  implicit val json = Json.format[PayPalBankDetails]
+  /**
+    * JSON format for [[PayPalBankDetails]]
+    */
+  implicit val jsonFormat = Json.format[PayPalBankDetails]
 
 }
 
 object BankDetails {
 
-  implicit val format = new Format[BankDetails] {
+  /**
+    * JSON format for [[BankDetails]]
+    */
+  implicit val jsonFormat = new Format[BankDetails] {
 
     val PAY_PAL = JsString("payPal")
 
-    override def reads(json: JsValue): JsResult[BankDetails] = json \ "type" match {
-      case PAY_PAL => PayPalBankDetails.json.reads(json)
+    override def reads(json: JsValue): JsResult[BankDetails] = (json \ "type") match {
+      case JsDefined(PAY_PAL) => PayPalBankDetails.jsonFormat.reads(json)
       case unknown => JsError(__ \ "type", ValidationError(s"Invalid BankDetails value ${unknown}"))
     }
 
     override def writes(o: BankDetails): JsValue = o match {
-      case pp : PayPalBankDetails => PayPalBankDetails.json.writes(pp) + ("type" -> PAY_PAL)
+      case pp : PayPalBankDetails => PayPalBankDetails.jsonFormat.writes(pp) + ("type" -> PAY_PAL)
     }
   }
 

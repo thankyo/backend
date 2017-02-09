@@ -9,7 +9,10 @@ case object Credit extends PaymentOperation
 
 object PaymentOperation {
 
-  implicit val json = new Format[PaymentOperation] {
+  /**
+    * JSON format for [[PaymentOperation]]
+    */
+  implicit val jsonFormat = new Format[PaymentOperation] {
 
     val DEBIT = JsString("debit")
     val CREDIT = JsString("credit")
@@ -39,7 +42,10 @@ case class Payment (
 
 object Payment {
 
-  implicit val json = Json.format[Payment]
+  /**
+    * JSON format for [[Payment]]
+    */
+  implicit val jsonFormat = Json.format[Payment]
 
   def debit(user: User, amount: Amount): Payment = {
     Payment(

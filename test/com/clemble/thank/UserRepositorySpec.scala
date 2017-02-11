@@ -10,6 +10,7 @@ import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.iteratee.Iteratee
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -54,11 +55,24 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends Specification {
 
   }
 
-//  def findAll(): Enumerator[User]
-//
-//  def findById(id: UserId): Future[Option[User]]
-//
-//  def create(user: User): Future[User]
+  "SEARCH" should {
 
+    "find all" in {
+      val A = UserGenerator.generate()
+      val B = UserGenerator.generate()
+
+      val fAll = for {
+        _ <- userRepository.create(A)
+        _ <- userRepository.create(B)
+        all <- userRepository.findAll().run(Iteratee.fold(List.empty[User])((a, b) => b :: a))
+      } yield {
+        all
+      }
+
+      fAll must await(contain[User](A))
+      fAll must await(contain[User](B))
+    }
+
+  }
 
 }

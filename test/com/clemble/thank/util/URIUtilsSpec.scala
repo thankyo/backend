@@ -1,6 +1,5 @@
-package com.clemble.thank
+package com.clemble.thank.util
 
-import com.clemble.thank.util.URIUtils
 import org.specs2.mutable.Specification
 
 class URIUtilsSpec extends Specification {

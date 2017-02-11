@@ -6,7 +6,6 @@ import com.clemble.thank.test.util.UserGenerator
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
-import play.api.libs.iteratee.Iteratee
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -47,22 +46,36 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   }
 
-  "SEARCH" should {
+  "CHANGE balance" should {
 
-    "find all" in {
-      val A = UserGenerator.generate()
-      val B = UserGenerator.generate()
+    "increase when possitive" in {
+      val user = UserGenerator.generate()
 
-      val fAll = for {
-        _ <- userRepository.save(A)
-        _ <- userRepository.save(B)
-        all <- userRepository.findAll().run(Iteratee.fold(List.empty[User])((a, b) => b :: a))
+      val matchResult = for {
+        savedUser <- userRepository.save(user)
+        _ <- userRepository.changeBalance(user.id, 10)
+        updatedUser <- userRepository.findById(user.id).map(_.get)
       } yield {
-        all
+        savedUser.balance shouldEqual 0
+        updatedUser.balance shouldEqual 10
       }
 
-      fAll must await(contain[User](A))
-      fAll must await(contain[User](B))
+      matchResult.await
+    }
+
+    "decrease when negative" in {
+      val user = UserGenerator.generate()
+
+      val matchResult = for {
+        savedUser <- userRepository.save(user)
+        _ <- userRepository.changeBalance(user.id, -10)
+        updatedUser <- userRepository.findById(user.id).map(_.get)
+      } yield {
+        savedUser.balance shouldEqual 0
+        updatedUser.balance shouldEqual -10
+      }
+
+      matchResult.await
     }
 
   }

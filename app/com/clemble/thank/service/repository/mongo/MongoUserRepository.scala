@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository.mongo
 
-import com.clemble.thank.model.{User, UserId}
+import com.clemble.thank.model.{Amount, User, UserId}
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -18,8 +18,10 @@ case class MongoUserRepository @Inject()(
                                           implicit val ec: ExecutionContext
                                         ) extends UserRepository {
 
-  override def findAll(): Enumerator[User] = {
-    collection.find(Json.obj()).cursor[User](ReadPreference.nearest).enumerator()
+  override def save(user: User): Future[User] = {
+    val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
+    val fInsert = collection.insert(userJson)
+    MongoExceptionUtils.safe(() => user, fInsert)
   }
 
   override def findById(id: UserId): Future[Option[User]] = {
@@ -27,10 +29,10 @@ case class MongoUserRepository @Inject()(
     MongoExceptionUtils.safe(fUser)
   }
 
-  override def save(user: User): Future[User] = {
-    val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
-    val fInsert = collection.insert(userJson)
-    MongoExceptionUtils.safe(() => user, fInsert)
+  override def changeBalance(id: UserId, diff: Amount): Future[Boolean] = {
+    val query = Json.obj("_id" -> id)
+    val change = Json.obj("$inc" -> Json.obj("balance" -> diff))
+    MongoExceptionUtils.safe(() => true, collection.update(query, change))
   }
 
 }

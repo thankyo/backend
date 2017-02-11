@@ -1,13 +1,12 @@
 package com.clemble.thank.service
 
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
-import com.clemble.thank.service.repository.RepositorySpec
 import com.clemble.thank.test.util.UserGenerator
 import org.specs2.concurrent.ExecutionEnv
 
 import scala.util.{Failure, Success}
 
-class UserServiceSpec(implicit ee: ExecutionEnv) extends RepositorySpec {
+class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   val service = application.injector.instanceOf[UserService]
 
@@ -29,6 +28,5 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends RepositorySpec {
     }
 
   }
-
 
 }

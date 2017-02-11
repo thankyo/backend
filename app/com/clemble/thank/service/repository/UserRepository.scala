@@ -1,8 +1,7 @@
 package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.error.RepositoryException
-import com.clemble.thank.model.{User, UserId}
-import play.api.libs.iteratee.Enumerator
+import com.clemble.thank.model.{Amount, User, UserId}
 
 import scala.concurrent.Future
 
@@ -11,8 +10,11 @@ import scala.concurrent.Future
   */
 trait UserRepository {
 
-  def findAll(): Enumerator[User]
-
+  /**
+    * Find [[User]] by ID
+    *
+    * @return
+    */
   def findById(id: UserId): Future[Option[User]]
 
   /**
@@ -24,5 +26,12 @@ trait UserRepository {
     */
   @throws[RepositoryException]
   def save(user: User): Future[User]
+
+  /**
+    * Change user balance
+    *
+    * @return
+    */
+  def changeBalance(id: UserId, diff: Amount): Future[Boolean]
 
 }

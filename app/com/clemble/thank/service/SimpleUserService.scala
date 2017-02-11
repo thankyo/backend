@@ -1,6 +1,6 @@
 package com.clemble.thank.service
 
-import com.clemble.thank.model.{User, UserId}
+import com.clemble.thank.model.{Amount, User, UserId}
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.{Inject, Singleton}
 
@@ -15,6 +15,10 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
 
   override def get(id: UserId): Future[Option[User]] = {
     repository.findById(id)
+  }
+
+  override def updateBalance(user: UserId, change: Amount): Future[Boolean] = {
+    repository.changeBalance(user, change)
   }
 
 }

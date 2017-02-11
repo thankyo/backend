@@ -42,6 +42,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     "list all transactions" in {
       val user = UserGenerator.generate()
       val matchResult = for {
+        _ <- userService.create(user)
         A <- paymentService.debit(user, 100)
         B <- paymentService.credit(user, 10)
         payments <- paymentService.payments(user).run(Iteratee.fold(List.empty[Payment]){ (agg, el) => el :: agg})

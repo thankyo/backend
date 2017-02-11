@@ -27,7 +27,8 @@ case class MongoThankRepository @Inject()(
   }
 
   override def findByURI(uri: String): Future[Option[Thank]] = {
-    collection.find(Json.obj("_id" -> uri)).one[Thank]
+    val fSearchResult = collection.find(Json.obj("_id" -> uri)).one[Thank]
+    MongoExceptionUtils.safe(fSearchResult)
   }
 
   override def increase(uri: String): Future[Boolean] = {

@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository.mongo
 
-import com.clemble.thank.model.Payment
+import com.clemble.thank.model.{Payment, UserId}
 import com.clemble.thank.service.repository.PaymentRepository
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
@@ -20,7 +20,7 @@ case class MongoPaymentRepository @Inject()(@Named("payment") collection: JSONCo
     collection.find(Json.obj()).cursor[Payment](ReadPreference.nearest).enumerator()
   }
 
-  override def findByUser(user: String): Enumerator[Payment] = {
+  override def findByUser(user: UserId): Enumerator[Payment] = {
     collection.find(Json.obj("user" -> user)).cursor[Payment](ReadPreference.nearest).enumerator()
   }
 

@@ -10,10 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class SimpleUserService @Inject()(repository: UserRepository, implicit val ec: ExecutionContext) extends UserService {
 
   override def create(user: User): Future[User] = {
-    repository.
-      findById(user.id).
-      filter(_.isEmpty).
-      flatMap(_ => repository.save(user))
+    repository.save(user)
   }
 
   override def get(id: UserId): Future[Option[User]] = {

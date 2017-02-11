@@ -2,13 +2,12 @@ package com.clemble.thank.service.repository.mongo
 
 import com.clemble.thank.model.Thank
 import com.clemble.thank.service.repository.ThankRepository
+import com.clemble.thank.util.URIUtils
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
-import play.api.libs.iteratee.Enumerator
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsArray, JsObject, JsString, Json}
 import play.modules.reactivemongo.json._
-import reactivemongo.api.ReadPreference
-import reactivemongo.play.iteratees.cursorProducer
+import reactivemongo.api
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,22 +18,32 @@ case class MongoThankRepository @Inject()(
                                            implicit val ec: ExecutionContext
                                          ) extends ThankRepository {
 
-  override def create(thank: Thank): Future[Thank] = {
-    val thankJson = Json.toJson(thank).as[JsObject] + ("_id" -> JsString(thank.uri))
-    val fThank = collection.insert(thankJson)
-    MongoExceptionUtils.safe(() => thank, fThank)
+  override def create(thank: Thank): Future[Boolean] = {
+    val withParents = thank.withParents().map(t => {
+      Json.toJson(t).as[JsObject] + ("_id" -> JsString(t.uri))
+    })
+    val fInsert = collection.bulkInsert(withParents.toStream, false, api.commands.WriteConcern.Acknowledged)
+    MongoExceptionUtils.safe(fInsert.map(_ => true))
   }
 
-  override def findByUrl(url: String): Future[Option[Thank]] = {
-    collection.find(Json.obj("url" -> url)).one[Thank]
+  override def findByURI(uri: String): Future[Option[Thank]] = {
+    collection.find(Json.obj("_id" -> uri)).one[Thank]
   }
 
-  override def increase(url: String): Future[Boolean] = {
-    val query = Json.obj("url" -> Json.obj("$regex" -> s"$url.*"))
-    collection.update(
+  override def increase(uri: String): Future[Boolean] = {
+    val query = Json.obj("_id" ->
+      Json.obj("$in" ->
+        JsArray(URIUtils.toParents(uri).map(JsString(_))
+        )
+      )
+    )
+    val increase = Json.obj("$inc" -> Json.obj("given" -> 1))
+    val fIncrease = collection.update(
       query,
-      Json.obj("$inc" -> Json.obj("given" -> 1))
-    ).map(wrRes => wrRes.ok)
+      increase,
+      multi = true
+    )
+    MongoExceptionUtils.safe(fIncrease.map(_ => true))
   }
 
 }

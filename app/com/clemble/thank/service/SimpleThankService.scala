@@ -15,18 +15,18 @@ case class SimpleThankService @Inject()(repository: ThankRepository, implicit va
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
       thankOpt match {
         case Some(thank) => Future.successful(thank)
-        case None => repository.create(blankThank(url))
+        case None => repository.create(blankThank(url)).flatMap(_ => repository.findByURI(url).map(_.get))
       }
     }
 
-    repository.findByUrl(url).flatMap(createIfMissing)
+    repository.findByURI(url).flatMap(createIfMissing)
   }
 
   override def thank(url: String): Future[Thank] = {
     get(url).
       flatMap(_ => repository.increase(url)).
       filter(_ == true).
-      flatMap(_ => repository.findByUrl(url).map(_.get))
+      flatMap(_ => repository.findByURI(url).map(_.get))
   }
 
 }

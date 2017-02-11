@@ -10,7 +10,7 @@ class URIUtilsSpec extends Specification {
     parts must beEqualTo(List("http", "example.com", "some", "what"))
   }
 
-  "to parents" in {
+  "generate all parent URL's" in {
     val parts = URIUtils.toParents("http://example.com/some/what")
     parts must beEqualTo(List(
       "http/example.com/some/what",
@@ -19,5 +19,9 @@ class URIUtilsSpec extends Specification {
     ))
   }
 
+  "normalize" in {
+    val normalized = URIUtils.normalize(List("http", "example.com", "some", "what"))
+    normalized must beEqualTo("http/example.com/some/what")
+  }
 
 }

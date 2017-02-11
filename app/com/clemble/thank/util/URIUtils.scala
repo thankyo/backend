@@ -10,7 +10,7 @@ object URIUtils {
     val uri = new URI(uriStr)
     val host = uri.getHost()
     val path = uri.getPath().split("\\/").toList.filterNot(_.isEmpty())
-    uri.getScheme :: host :: path
+    (uri.getScheme :: host :: path).filterNot(_ == null)
   }
 
   def toParents(uriStr: String): List[String] = {
@@ -20,10 +20,6 @@ object URIUtils {
       else toParents(uri.tail, normalize(uri.reverse) :: agg)
     }
     toParents(split(uriStr).reverse, List.empty[String]).reverse
-  }
-
-  def normalize(uriStr: String): String = {
-    split(uriStr).mkString("/")
   }
 
   def normalize(uri: List[String]): String = {

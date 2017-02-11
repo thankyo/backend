@@ -5,21 +5,14 @@ import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
 import com.clemble.thank.test.util.UserGenerator
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
-import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import play.api.Mode
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.iteratee.Iteratee
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @RunWith(classOf[JUnitRunner])
-class UserRepositorySpec(implicit val ee: ExecutionEnv) extends Specification {
-
-  val application = new GuiceApplicationBuilder().
-    in(Mode.Test).
-    build
+class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   val userRepository = application.injector.instanceOf[UserRepository]
 

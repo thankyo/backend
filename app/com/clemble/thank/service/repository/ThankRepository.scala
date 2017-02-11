@@ -13,16 +13,16 @@ trait ThankRepository {
   /**
     * Create appropriate url
     * @param thank object to create
-    * @return persisted Thank
+    * @return true if create was a success
     */
-  def create(thank: Thank): Future[Thank]
+  def create(thank: Thank): Future[Boolean]
 
   /**
     * Find [[Thank]]
     *
     * @return existing or creates new [[Thank]]
     */
-  def findByUrl(url: String): Future[Option[Thank]]
+  def findByURI(uri: String): Future[Option[Thank]]
 
   /**
     * Increases number of thanks given

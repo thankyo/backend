@@ -27,15 +27,8 @@ trait ThankRepository {
   /**
     * Increases number of thanks given
     *
-    * @return updated [[Thank]]
+    * @return true, if update passed
     */
-  def increase(url: String): Future[Thank]
-
-  /**
-    * Finds all thanks which this Thank is a root of
-    *
-    * @return [[Enumerator]] of [[Thank]]
-    */
-  def findAllIncludingSub(url: String): Enumerator[Thank]
+  def increase(url: String): Future[Boolean]
 
 }

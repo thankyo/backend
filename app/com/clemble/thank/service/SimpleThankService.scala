@@ -23,7 +23,10 @@ case class SimpleThankService @Inject()(repository: ThankRepository, implicit va
   }
 
   override def thank(url: String): Future[Thank] = {
-    get(url).flatMap(_ => repository.increase(url))
+    get(url).
+      flatMap(_ => repository.increase(url)).
+      filter(_ == true).
+      flatMap(_ => repository.findByUrl(url).map(_.get))
   }
 
 }

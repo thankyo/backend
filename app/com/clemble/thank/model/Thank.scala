@@ -1,14 +1,23 @@
 package com.clemble.thank.model
 
+import com.clemble.thank.util.URIUtils
 import play.api.libs.json.Json
+
+import scala.annotation.tailrec
 
 /**
   * Thank abstraction
   */
 case class Thank(
-                  url: String,
-                  given: Amount
-                )
+                  uri: String,
+                  given: Amount = 0L
+) {
+
+  def withParents(): List[Thank] = {
+    URIUtils.toParents(uri).map(Thank(_))
+  }
+
+}
 
 object Thank {
 

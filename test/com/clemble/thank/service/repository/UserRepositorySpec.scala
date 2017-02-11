@@ -1,8 +1,7 @@
-package com.clemble.thank
+package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.User
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
-import com.clemble.thank.service.repository.UserRepository
 import com.clemble.thank.test.util.UserGenerator
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv

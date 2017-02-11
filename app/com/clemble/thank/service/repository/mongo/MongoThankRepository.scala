@@ -1,14 +1,15 @@
-package com.clemble.thank.service.repository
+package com.clemble.thank.service.repository.mongo
 
 import com.clemble.thank.model.Thank
-import com.google.inject.{Inject, Singleton}
+import com.clemble.thank.service.repository.ThankRepository
 import com.google.inject.name.Named
+import com.google.inject.{Inject, Singleton}
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
-import reactivemongo.api.ReadPreference
-import reactivemongo.play.json.collection.JSONCollection
-import reactivemongo.play.iteratees.cursorProducer
 import play.modules.reactivemongo.json._
+import reactivemongo.api.ReadPreference
+import reactivemongo.play.iteratees.cursorProducer
+import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 

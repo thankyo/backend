@@ -2,6 +2,7 @@ package com.clemble.thank
 
 import com.clemble.thank.service.repository._
 import com.clemble.thank.service._
+import com.clemble.thank.service.repository.mongo.{MongoPaymentRepository, MongoThankRepository, MongoUserRepository}
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import play.modules.reactivemongo.ReactiveMongoApi

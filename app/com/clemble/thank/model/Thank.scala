@@ -3,8 +3,6 @@ package com.clemble.thank.model
 import com.clemble.thank.util.URIUtils
 import play.api.libs.json.Json
 
-import scala.annotation.tailrec
-
 /**
   * Thank abstraction
   */

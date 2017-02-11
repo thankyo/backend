@@ -16,8 +16,7 @@ case class User(
                  id: UserId,
                  firstName: String,
                  lastName: String,
-                 url: String,
-                 integrations: List[Integration],
+                 owns: List[String],
                  balance: Amount,
                  bankDetails: BankDetails,
                  email: Option[Email],
@@ -40,5 +39,18 @@ object User {
     * JSON format for [[User]]
     */
   implicit val jsonFormat = Json.format[User]
+
+  def empty(uri: String) = {
+    User(
+      uri,
+      uri,
+      uri,
+      List(uri),
+      0L,
+      EmptyBankDetails,
+      None,
+      new DateTime(0)
+    )
+  }
 
 }

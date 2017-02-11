@@ -12,7 +12,6 @@ object UserGenerator extends Generator[User] {
       random(10),
       random(10),
       random(10),
-      random(10),
       List.empty,
       0,
       BankDetailsGenerator.generate(),

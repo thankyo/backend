@@ -12,10 +12,13 @@ trait UserRepository {
 
   /**
     * Find [[User]] by ID
-    *
-    * @return
     */
   def findById(id: UserId): Future[Option[User]]
+
+  /**
+    * Find owner of provided uri
+    */
+  def findOwner(uri: String): Future[Option[User]]
 
   /**
     * Create a new user in the system

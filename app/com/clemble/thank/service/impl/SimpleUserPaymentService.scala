@@ -1,7 +1,8 @@
-package com.clemble.thank.service
+package com.clemble.thank.service.impl
 
 import com.clemble.thank.model.{Amount, Payment, User}
-import com.clemble.thank.service.repository.{PaymentRepository, UserRepository}
+import com.clemble.thank.service.repository.PaymentRepository
+import com.clemble.thank.service.{UserPaymentService, UserService}
 import com.google.inject.{Inject, Singleton}
 import play.api.libs.iteratee.Enumerator
 

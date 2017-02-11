@@ -10,6 +10,8 @@ trait UserService {
 
   def get(user: UserId): Future[Option[User]]
 
+  def updateOwnerBalance(url: String, change: Amount): Future[Boolean]
+
   def updateBalance(user: UserId, change: Amount): Future[Boolean]
 
 }

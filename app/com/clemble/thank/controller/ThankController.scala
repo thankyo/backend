@@ -18,8 +18,9 @@ case class ThankController @Inject()(service: ThankService, implicit val ec: Exe
     })
   })
 
-  def thank(url: String) = Action.async(req => {
-    val fThank = service.thank(url)
+  def thank(uri: String) = Action.async(req => {
+    val user = req.queryString.get("user").flatMap(_.headOption).getOrElse("unknown")
+    val fThank = service.thank(user, uri)
     fThank.map(thank => {
       Ok(Json.toJson(thank))
     }).recover({

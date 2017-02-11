@@ -20,7 +20,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
     "support single create" in {
       val user = UserGenerator.generate()
-      val fCreate: Future[User] = userRepository.create(user)
+      val fCreate: Future[User] = userRepository.save(user)
       fCreate must await(beEqualTo(user))
 
       val fSearch: Future[Option[User]] = userRepository.findById(user.id)
@@ -31,8 +31,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = UserGenerator.generate()
 
       val fSecondCreate: Future[User] = for {
-        _ <- userRepository.create(user)
-        sCreate <- userRepository.create(user)
+        _ <- userRepository.save(user)
+        sCreate <- userRepository.save(user)
       } yield {
         sCreate
       }
@@ -54,8 +54,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val B = UserGenerator.generate()
 
       val fAll = for {
-        _ <- userRepository.create(A)
-        _ <- userRepository.create(B)
+        _ <- userRepository.save(A)
+        _ <- userRepository.save(B)
         all <- userRepository.findAll().run(Iteratee.fold(List.empty[User])((a, b) => b :: a))
       } yield {
         all

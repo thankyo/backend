@@ -18,7 +18,7 @@ case class MongoThankRepository @Inject()(
                                            implicit val ec: ExecutionContext
                                          ) extends ThankRepository {
 
-  override def create(thank: Thank): Future[Boolean] = {
+  override def save(thank: Thank): Future[Boolean] = {
     val withParents = thank.withParents().map(t => {
       Json.toJson(t).as[JsObject] + ("_id" -> JsString(t.uri))
     })

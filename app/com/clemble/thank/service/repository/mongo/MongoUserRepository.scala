@@ -27,7 +27,7 @@ case class MongoUserRepository @Inject()(
     MongoExceptionUtils.safe(fUser)
   }
 
-  override def create(user: User): Future[User] = {
+  override def save(user: User): Future[User] = {
     val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
     val fInsert = collection.insert(userJson)
     MongoExceptionUtils.safe(() => user, fInsert)

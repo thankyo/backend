@@ -11,13 +11,6 @@ import scala.concurrent.Future
 trait PaymentRepository {
 
   /**
-    * Find all payments in the system
-    *
-    * @return all payments done in the system
-    */
-  def findAll(): Enumerator[Payment]
-
-  /**
     * Find all payments done by the customer
     *
     * @param user user identifier

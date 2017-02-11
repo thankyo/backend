@@ -13,7 +13,7 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
     repository.
       findById(user.id).
       filter(_.isEmpty).
-      flatMap(_ => repository.create(user))
+      flatMap(_ => repository.save(user))
   }
 
   override def get(id: UserId): Future[Option[User]] = {

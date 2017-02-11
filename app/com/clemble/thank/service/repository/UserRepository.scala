@@ -23,6 +23,6 @@ trait UserRepository {
     * @throws RepositoryException in case of duplicate code or any other problem
     */
   @throws[RepositoryException]
-  def create(user: User): Future[User]
+  def save(user: User): Future[User]
 
 }

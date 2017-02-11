@@ -15,7 +15,7 @@ trait ThankRepository {
     * @param thank object to create
     * @return true if create was a success
     */
-  def create(thank: Thank): Future[Boolean]
+  def save(thank: Thank): Future[Boolean]
 
   /**
     * Find [[Thank]]

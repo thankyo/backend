@@ -16,10 +16,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class MongoPaymentRepository @Inject()(@Named("payment") collection: JSONCollection, implicit val ec: ExecutionContext) extends PaymentRepository {
 
-  override def findAll(): Enumerator[Payment] = {
-    collection.find(Json.obj()).cursor[Payment](ReadPreference.nearest).enumerator()
-  }
-
   override def findByUser(user: UserId): Enumerator[Payment] = {
     collection.find(Json.obj("user" -> user)).cursor[Payment](ReadPreference.nearest).enumerator()
   }

@@ -26,7 +26,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val urlParents = URIUtils.toParents(thank.uri)
 
       val allCreatedUri = for {
-        _ <- repository.create(thank)
+        _ <- repository.save(thank)
         search <- findAll(urlParents).map(_.map(_.uri))
       } yield {
         search
@@ -48,7 +48,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val urlParents = URIUtils.toParents(thank.uri)
 
       val fAllThanks = for {
-        _ <- repository.create(thank)
+        _ <- repository.save(thank)
         _ <- increaseAll(urlParents)
         allThanks <- findAll(urlParents).map(_.map(_.given))
       } yield {

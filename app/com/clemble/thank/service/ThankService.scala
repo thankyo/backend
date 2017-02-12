@@ -6,8 +6,8 @@ import scala.concurrent.Future
 
 trait ThankService {
 
-  def get(url: String): Future[Thank]
+  def get(uri: String): Future[Thank]
 
-  def thank(user: UserId, url: String): Future[Thank]
+  def thank(user: UserId, uri: String): Future[Thank]
 
 }

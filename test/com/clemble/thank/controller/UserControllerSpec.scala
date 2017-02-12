@@ -10,13 +10,11 @@ import play.api.test.FakeRequest
 
 class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
-  implicit val materializer = application.injector.instanceOf[Materializer]
-
   "CREATE" should {
 
     "Support single create" in {
       val user = UserGenerator.generate()
-      val req = FakeRequest("POST", "/user").withJsonBody(Json.toJson(user))
+      val req = FakeRequest(POST, "/user").withJsonBody(Json.toJson(user))
       val fRes = route(application, req).get
 
       val res = await(fRes)
@@ -29,7 +27,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
     "Return error on same create" in {
       val user = UserGenerator.generate()
-      val req = FakeRequest("POST", "/user").withJsonBody(Json.toJson(user))
+      val req = FakeRequest(POST, "/user").withJsonBody(Json.toJson(user))
 
       await(route(application, req).get)
       val secondRes = await(route(application, req).get)
@@ -46,10 +44,10 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
     "return after creation" in {
       val user = UserGenerator.generate()
-      val req = FakeRequest("POST", "/user").withJsonBody(Json.toJson(user))
+      val req = FakeRequest(POST, "/user").withJsonBody(Json.toJson(user))
       await(route(application, req).get)
 
-      val readReq = FakeRequest("GET", s"/user/${user.id}")
+      val readReq = FakeRequest(GET, s"/user/${user.id}")
       val readUserStr = await(route(application, readReq).get.flatMap(_.body.consumeData))
 
       val readUser = Json.parse(readUserStr.utf8String).as[User]

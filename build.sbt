@@ -18,4 +18,5 @@ libraryDependencies ++= Seq(
 
 testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxml")
 
+coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;"""
 

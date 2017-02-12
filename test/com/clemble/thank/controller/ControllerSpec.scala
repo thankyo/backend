@@ -2,7 +2,7 @@ package com.clemble.thank.controller
 
 import akka.stream.Materializer
 import com.clemble.thank.model.{User, UserId}
-import com.clemble.thank.test.util.UserGenerator
+import com.clemble.thank.test.util.{ThankSpecification, UserGenerator}
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -10,11 +10,7 @@ import play.api.test.{FakeRequest, PlaySpecification}
 
 import scala.concurrent.ExecutionContext
 
-trait ControllerSpec extends PlaySpecification {
-
-  implicit val application = new GuiceApplicationBuilder().
-    in(Mode.Test).
-    build
+trait ControllerSpec extends ThankSpecification {
 
   implicit val materializer = application.injector.instanceOf[Materializer]
   implicit val ec = application.injector.instanceOf[ExecutionContext]

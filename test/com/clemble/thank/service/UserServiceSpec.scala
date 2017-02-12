@@ -65,7 +65,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
       await(service.updateOwnerBalance(url, 99))
-      await(service.get(user.id)).get.balance shouldEqual 0
+      await(service.get(user.id)).get.balance shouldEqual 99
     }
   }
 
@@ -102,8 +102,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
       await(service.updateOwnerBalance(url, 99))
-      await(service.get(user.id)).get.balance shouldEqual 0
-      await(service.get(parentUser.id)).get.balance shouldEqual 99
+      await(service.get(user.id)).get.balance shouldEqual 99
+      await(service.get(parentUser.id)).get.balance shouldEqual 0
     }
   }
 
@@ -133,7 +133,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       await(service.get(parentUser.id)).get.balance shouldEqual 0
     }
 
-    "IGNORE with PARTIAL url control" in {
+    "PARTIAL url control" in {
       val parentUrl = s"example.com/some/${randomNumeric(10)}"
       val url = s"${parentUrl}/${randomNumeric(10)}"
 
@@ -141,8 +141,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
       await(service.updateOwnerBalance(url, 99))
-      await(service.get(user.id)).get.balance shouldEqual 0
-      await(service.get(parentUser.id)).get.balance shouldEqual 99
+      await(service.get(user.id)).get.balance shouldEqual 99
+      await(service.get(parentUser.id)).get.balance shouldEqual 0
     }
   }
 
@@ -179,7 +179,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
       await(service.updateOwnerBalance(url, 99))
-      await(service.get(user.id)).get.balance shouldEqual 0
+      await(service.get(user.id)).get.balance shouldEqual 99
       await(service.get(parentUser.id)).get.balance shouldEqual 0
     }
   }

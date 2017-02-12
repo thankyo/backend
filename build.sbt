@@ -20,3 +20,5 @@ testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxm
 
 coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;"""
 
+enablePlugins(DockerPlugin)
+

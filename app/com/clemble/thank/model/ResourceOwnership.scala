@@ -17,11 +17,12 @@ object ResourceOwnership {
   def unrealized(uri: String): ResourceOwnership = UnrealizedResourceOwnership(uri)
 
   def toPossibleOwnerships(uriStr: String): List[ResourceOwnership] = {
-    URIUtils.
+    val fullAndUnrealized = URIUtils.
       toParents(uriStr).
       flatMap(uri => {
         List(ResourceOwnership.full(uri), ResourceOwnership.unrealized(uri))
       })
+    ResourceOwnership.partial(uriStr) :: fullAndUnrealized
   }
 
   implicit val jsonFormat = new Format[ResourceOwnership] {

@@ -1,5 +1,6 @@
 package com.clemble.thank.controller
 
+import com.clemble.thank.model.error.{RepositoryException, ThankException}
 import com.clemble.thank.model.{User, UserId}
 import com.clemble.thank.service.UserService
 import com.google.inject.{Inject, Singleton}
@@ -20,7 +21,10 @@ case class UserController @Inject()(
     fSavedUser.map(user => {
       Created(Json.toJson(user))
     }).recover({
-      case t: Throwable => InternalServerError(t.getMessage)
+      case re: ThankException =>
+        BadRequest(Json.toJson(re))
+      case t: Throwable =>
+        InternalServerError(t.getMessage)
     })
   }
   }
@@ -31,7 +35,10 @@ case class UserController @Inject()(
       case Some(user) => Ok(Json.toJson(user))
       case None => NotFound
     }).recover({
-      case t: Throwable => InternalServerError(t.getMessage())
+      case re: ThankException =>
+        BadRequest(Json.toJson(re))
+      case t: Throwable =>
+        InternalServerError(t.getMessage())
     })
   })
 

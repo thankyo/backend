@@ -1,6 +1,6 @@
 package com.clemble.thank.test.util
 
-import com.clemble.thank.model.{PayPalBankDetails, User}
+import com.clemble.thank.model.{PayPalBankDetails, ResourceOwnership, User}
 import org.apache.commons.lang3.RandomStringUtils.random
 import org.apache.commons.lang3.RandomUtils.nextLong
 import org.joda.time.DateTime
@@ -18,6 +18,10 @@ object UserGenerator extends Generator[User] {
       Some(random(12)),
       new DateTime(nextLong(0, Long.MaxValue))
     )
+  }
+
+  def generate(ownership: ResourceOwnership): User = {
+    generate().copy(owns = List(ownership))
   }
 
 }

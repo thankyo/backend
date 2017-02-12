@@ -1,8 +1,8 @@
 package com.clemble.thank.service
 
+import com.clemble.thank.model.ResourceOwnership
 import com.clemble.thank.test.util.UserGenerator
 import org.specs2.concurrent.ExecutionEnv
-
 import org.apache.commons.lang3.RandomStringUtils._
 
 class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
@@ -26,7 +26,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
     "Increment for the owner" in {
       val url = s"http/example.com/some/${randomNumeric(10)}"
-      val owner = UserGenerator.generate().copy(owns = List(url))
+      val owner = UserGenerator.generate(ResourceOwnership.full(url))
       val giver = UserGenerator.generate()
 
       await(userService.create(giver))

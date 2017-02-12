@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository.mongo
 
-import com.clemble.thank.model.{Amount, User, UserId}
+import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -33,7 +33,7 @@ case class MongoUserRepository @Inject()(
   }
 
   override def findOwner(uri: String): Future[Option[User]] = {
-    val query = Json.obj("owns" -> uri)
+    val query = Json.obj("owns" -> Json.toJson(ResourceOwnership.full(uri)))
     MongoSafeUtils.safe(collection.find(query).one[User])
   }
 }

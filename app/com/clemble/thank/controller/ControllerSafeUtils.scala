@@ -7,9 +7,6 @@ import play.api.mvc.{Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
-  * Created by mavarazy on 2/12/17.
-  */
 object ControllerSafeUtils extends Results {
 
   def okChunked[T](fEnum: Future[Enumerator[T]])(implicit ec: ExecutionContext, writes: Writes[T]): Future[Result] = {

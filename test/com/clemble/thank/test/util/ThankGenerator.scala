@@ -8,7 +8,7 @@ object ThankGenerator extends Generator[Thank] {
 
   override def generate(): Thank = {
     Thank(
-      s"http://${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}",
+      s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}",
       nextLong(0, Long.MaxValue)
     )
   }

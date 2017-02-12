@@ -18,7 +18,7 @@ case class UserController @Inject()(
     val userOpt = req.body.asOpt[User]
     val fSavedUser = userOpt.map(service.create).getOrElse(Future.failed(new IllegalArgumentException("Invalid User format")))
     fSavedUser.map(user => {
-      Ok(Json.toJson(user))
+      Created(Json.toJson(user))
     }).recover({
       case t: Throwable => InternalServerError(t.getMessage)
     })

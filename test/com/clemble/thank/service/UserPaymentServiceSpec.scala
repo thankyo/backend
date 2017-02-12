@@ -14,42 +14,36 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
     "Debit increases User balance" in {
       val user = UserGenerator.generate()
-      val matchResult = for {
-        savedUser <- userService.create(user)
-        _ <- paymentService.debit(user, 100)
-        readUser <- userService.get(user.id).map(_.get)
-      } yield {
-        savedUser.balance shouldEqual 0
-        readUser.balance shouldEqual 100
-      }
-      matchResult.await
+
+      val savedUser = await(userService.create(user))
+      await(paymentService.debit(user, 100))
+      val readUser = await(userService.get(user.id).map(_.get))
+
+      savedUser.balance shouldEqual 0
+      readUser.balance shouldEqual 100
     }
 
     "Credit decrease User balance" in {
       val user = UserGenerator.generate()
-      val matchResult = for {
-        savedUser <- userService.create(user)
-        _ <- paymentService.debit(user, 100)
-        _ <- paymentService.credit(user, 10)
-        readUser <- userService.get(user.id).map(_.get)
-      } yield {
-        savedUser.balance shouldEqual 0
-        readUser.balance shouldEqual 90
-      }
-      matchResult.await
+
+      val savedUser = await(userService.create(user))
+      await(paymentService.debit(user, 100))
+      await(paymentService.credit(user, 10))
+      val readUser = await(userService.get(user.id).map(_.get))
+
+      savedUser.balance shouldEqual 0
+      readUser.balance shouldEqual 90
     }
 
     "list all transactions" in {
       val user = UserGenerator.generate()
-      val matchResult = for {
-        _ <- userService.create(user)
-        A <- paymentService.debit(user, 100)
-        B <- paymentService.credit(user, 10)
-        payments <- paymentService.payments(user).run(Iteratee.fold(List.empty[Payment]){ (agg, el) => el :: agg})
-      } yield {
-        payments must containAllOf(Seq(A, B))
-      }
-      matchResult.await
+
+      await(userService.create(user))
+      val A = await(paymentService.debit(user, 100))
+      val B = await(paymentService.credit(user, 10))
+      val payments = await(paymentService.payments(user).run(Iteratee.fold(List.empty[Payment]){ (agg, el) => el :: agg}))
+
+      payments must containAllOf(Seq(A, B))
     }
 
   }

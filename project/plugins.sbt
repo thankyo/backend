@@ -13,6 +13,3 @@ addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.6")
 // Coverage plugins
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.5")
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
-
-// Docker plugins
-libraryDependencies += "com.spotify" % "docker-client" % "3.5.13"

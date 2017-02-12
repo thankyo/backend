@@ -20,6 +20,11 @@ deployment:
   prod:
     branch: master
     commands:
+      # Coverall publish
       - sbt clean coverage test coverageReport
       - sbt coverageAggregate
       - sbt coveralls
+      # Docker publish
+      - sbt docker:publishLocal
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push circleci/elasticsearch

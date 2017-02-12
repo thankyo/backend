@@ -2,7 +2,9 @@ name := "thanks-backend"
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).
+  enablePlugins(PlayScala).
+  enablePlugins(DockerPlugin)
 
 scalaVersion := "2.11.8"
 
@@ -18,7 +20,10 @@ libraryDependencies ++= Seq(
 
 testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxml")
 
-coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;"""
+coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;com\.clemble\.thank\.controller\.*Reverse.*"""
 
-enablePlugins(DockerPlugin)
+version in Docker := "latest"
+maintainer in Docker := "antono@clemble.com"
+dockerBaseImage := "java:8u111-jre"
+dockerRepository := Some("mavarazy")
 

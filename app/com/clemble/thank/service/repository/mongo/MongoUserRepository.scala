@@ -18,22 +18,22 @@ case class MongoUserRepository @Inject()(
   override def save(user: User): Future[User] = {
     val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
     val fInsert = collection.insert(userJson)
-    MongoExceptionUtils.safe(() => user, fInsert)
+    MongoSafeUtils.safe(() => user, fInsert)
   }
 
   override def findById(id: UserId): Future[Option[User]] = {
     val fUser = collection.find(Json.obj("_id" -> id)).one[User]
-    MongoExceptionUtils.safe(fUser)
+    MongoSafeUtils.safe(fUser)
   }
 
   override def changeBalance(id: UserId, diff: Amount): Future[Boolean] = {
     val query = Json.obj("_id" -> id)
     val change = Json.obj("$inc" -> Json.obj("balance" -> diff))
-    MongoExceptionUtils.safe(() => true, collection.update(query, change))
+    MongoSafeUtils.safe(() => true, collection.update(query, change))
   }
 
   override def findOwner(uri: String): Future[Option[User]] = {
     val query = Json.obj("owns" -> uri)
-    MongoExceptionUtils.safe(collection.find(query).one[User])
+    MongoSafeUtils.safe(collection.find(query).one[User])
   }
 }

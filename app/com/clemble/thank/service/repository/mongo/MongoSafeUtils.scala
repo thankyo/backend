@@ -6,7 +6,7 @@ import reactivemongo.core.errors.DatabaseException
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object MongoExceptionUtils {
+object MongoSafeUtils {
 
   def toError(code: Int, msg: String) = {
     code match {
@@ -33,7 +33,7 @@ object MongoExceptionUtils {
       if (res.ok && res.n == 1) {
         Future.successful(success())
       } else {
-        val exception = MongoExceptionUtils.toException(res.writeErrors)
+        val exception = MongoSafeUtils.toException(res.writeErrors)
         Future.failed(exception)
       }
     })

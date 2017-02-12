@@ -42,4 +42,20 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
   }
 
+  "GET" should {
+
+    "return after creation" in {
+      val user = UserGenerator.generate()
+      val req = FakeRequest("POST", "/user").withJsonBody(Json.toJson(user))
+      await(route(application, req).get)
+
+      val readReq = FakeRequest("GET", s"/user/${user.id}")
+      val readUserStr = await(route(application, readReq).get.flatMap(_.body.consumeData))
+
+      val readUser = Json.parse(readUserStr.utf8String).as[User]
+      readUser must beEqualTo(user)
+    }
+
+  }
+
 }

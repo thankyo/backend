@@ -23,12 +23,12 @@ case class MongoThankRepository @Inject()(
       Json.toJson(t).as[JsObject] + ("_id" -> JsString(t.uri))
     })
     val fInsert = collection.bulkInsert(withParents.toStream, false, api.commands.WriteConcern.Acknowledged)
-    MongoExceptionUtils.safe(fInsert.map(_ => true))
+    MongoSafeUtils.safe(fInsert.map(_ => true))
   }
 
   override def findByURI(uri: String): Future[Option[Thank]] = {
     val fSearchResult = collection.find(Json.obj("_id" -> uri)).one[Thank]
-    MongoExceptionUtils.safe(fSearchResult)
+    MongoSafeUtils.safe(fSearchResult)
   }
 
   override def increase(uri: String): Future[Boolean] = {
@@ -44,7 +44,7 @@ case class MongoThankRepository @Inject()(
       increase,
       multi = true
     )
-    MongoExceptionUtils.safe(fIncrease.map(_ => true))
+    MongoSafeUtils.safe(fIncrease.map(_ => true))
   }
 
 }

@@ -1,7 +1,8 @@
 package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.error.RepositoryException
-import com.clemble.thank.model.{Amount, User, UserId}
+import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
+import play.api.libs.iteratee.Enumerator
 
 import scala.concurrent.Future
 
@@ -18,7 +19,7 @@ trait UserRepository {
   /**
     * Find owner of provided uri
     */
-  def findOwner(uri: String): Future[Option[User]]
+  def findOwners(uris: List[ResourceOwnership]): Future[List[User]]
 
   /**
     * Create a new user in the system

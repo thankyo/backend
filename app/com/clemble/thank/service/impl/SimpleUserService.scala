@@ -1,6 +1,6 @@
 package com.clemble.thank.service.impl
 
-import com.clemble.thank.model.{Amount, User, UserId}
+import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
 import com.clemble.thank.service.UserService
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.{Inject, Singleton}
@@ -23,15 +23,30 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
   }
 
   override def updateOwnerBalance(uri: String, change: Amount): Future[Boolean] = {
-    def createOwnerIfMissing(userOpt: Option[User]): Future[UserId] = {
+    def createOwnerIfMissing(userOpt: Option[String]): Future[UserId] = {
       userOpt match {
-        case Some(user) => Future.successful(user.id)
+        case Some(id) => Future.successful(id)
         case None => repository.save(User.empty(uri)).map(_.id)
       }
     }
 
+    def chooseOwner(uri: String): Future[Option[UserId]] = {
+      val ownerships = ResourceOwnership.toPossibleOwnerships(uri)
+      for {
+        owners <- repository.findOwners(ownerships)
+      } yield {
+        val resToOwner = owners.
+          flatMap(owner => {
+            owner.owns.filter(ownerships.contains).map(res => res.uri -> owner.id)
+          }).
+          sortBy({ case(uri, _) => - uri.length })
+
+        resToOwner.headOption.map({ case (_, userId) => userId })
+      }
+    }
+
     for {
-      ownerOpt <- repository.findOwner(uri)
+      ownerOpt <- chooseOwner(uri)
       ownerId <- createOwnerIfMissing(ownerOpt)
       update <- updateBalance(ownerId, change)
     } yield {

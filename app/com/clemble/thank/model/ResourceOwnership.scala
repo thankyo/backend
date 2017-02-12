@@ -1,5 +1,6 @@
 package com.clemble.thank.model
 
+import com.clemble.thank.util.URIUtils
 import play.api.libs.json._
 
 sealed trait ResourceOwnership {
@@ -11,9 +12,17 @@ case class UnrealizedResourceOwnership(uri: String) extends ResourceOwnership
 
 object ResourceOwnership {
 
-  def full(uri: String) = FullResourceOwnership(uri)
-  def partial(uri: String) = PartialResourceOwnership(uri)
-  def unrealized(uri: String) = UnrealizedResourceOwnership(uri)
+  def full(uri: String): ResourceOwnership = FullResourceOwnership(uri)
+  def partial(uri: String): ResourceOwnership = PartialResourceOwnership(uri)
+  def unrealized(uri: String): ResourceOwnership = UnrealizedResourceOwnership(uri)
+
+  def toPossibleOwnerships(uriStr: String): List[ResourceOwnership] = {
+    URIUtils.
+      toParents(uriStr).
+      flatMap(uri => {
+        List(ResourceOwnership.full(uri), ResourceOwnership.unrealized(uri))
+      })
+  }
 
   implicit val jsonFormat = new Format[ResourceOwnership] {
 

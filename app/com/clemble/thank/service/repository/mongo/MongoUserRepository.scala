@@ -4,8 +4,10 @@ import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsArray, JsObject, JsString, Json}
 import play.modules.reactivemongo.json._
+import reactivemongo.api.Cursor.ContOnError
+import reactivemongo.api.ReadPreference
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,8 +34,16 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(() => true, collection.update(query, change))
   }
 
-  override def findOwner(uri: String): Future[Option[User]] = {
-    val query = Json.obj("owns" -> Json.toJson(ResourceOwnership.full(uri)))
-    MongoSafeUtils.safe(collection.find(query).one[User])
+  override def findOwners(uris: List[ResourceOwnership]): Future[List[User]] = {
+    val query = Json.obj("owns" -> Json.obj(
+      "$in" -> JsArray(uris.map(Json.toJson(_)))
+    ))
+    MongoSafeUtils.safe(
+      collection.
+        find(query).
+        cursor[User](ReadPreference.nearest).
+        collect[List](Int.MaxValue, ContOnError[List[User]]())
+    )
   }
+
 }

@@ -3,14 +3,16 @@ machine:
     - docker
   java:
     version: oraclejdk8
-  cache_directories:
-    - "~/.sbt"
-    - "~/.ivy2"
 
 dependencies:
   override:
     - sudo service mongod stop
     - docker-compose up -d
+  cache_directories:
+    - "~/.sbt"
+    - "~/.ivy2"
+    - "~/.m2"
+
 
 test:
   override:

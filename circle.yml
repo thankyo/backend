@@ -3,6 +3,9 @@ machine:
     - docker
   java:
     version: oraclejdk8
+  cache_directories:
+    - "~/.sbt"
+    - "~/.ivy2"
 
 dependencies:
   override:

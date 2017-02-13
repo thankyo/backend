@@ -20,6 +20,7 @@ libraryDependencies ++= Seq(
 
 testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxml")
 coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;com\.clemble\.thank\.controller\.*Reverse.*;.*\.template\.scala"""
+coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*"""
 
 javaOptions in Universal ++= Seq(
   "-Dpidfile.path=/dev/null"
@@ -28,4 +29,5 @@ version in Docker := "latest"
 maintainer in Docker := "antono@clemble.com"
 dockerBaseImage := "java:8u111-jre"
 dockerRepository := Some("mavarazy")
+dockerExposedPorts := Seq(9000, 9443)
 

@@ -17,7 +17,8 @@ case class UserController @Inject()(
     val userOpt = req.body.asOpt[User]
     val fSavedUser = userOpt.map(service.create).getOrElse(Future.failed(new IllegalArgumentException("Invalid User format")))
     ControllerSafeUtils.created(fSavedUser)
-  }}
+  }
+  }
 
   def get(id: UserId) = Action.async({
     val fUserOpt = service.get(id)

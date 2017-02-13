@@ -1,7 +1,6 @@
 package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.Thank
-import play.api.libs.iteratee.Enumerator
 
 import scala.concurrent.Future
 
@@ -12,6 +11,7 @@ trait ThankRepository {
 
   /**
     * Create appropriate url
+    *
     * @param thank object to create
     * @return true if create was a success
     */

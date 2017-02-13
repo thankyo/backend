@@ -6,14 +6,19 @@ import play.api.libs.json._
 sealed trait ResourceOwnership {
   val uri: String
 }
+
 case class FullResourceOwnership(uri: String) extends ResourceOwnership
+
 case class PartialResourceOwnership(uri: String) extends ResourceOwnership
+
 case class UnrealizedResourceOwnership(uri: String) extends ResourceOwnership
 
 object ResourceOwnership {
 
   def full(uri: String): ResourceOwnership = FullResourceOwnership(uri)
+
   def partial(uri: String): ResourceOwnership = PartialResourceOwnership(uri)
+
   def unrealized(uri: String): ResourceOwnership = UnrealizedResourceOwnership(uri)
 
   def toPossibleOwnerships(uriStr: String): List[ResourceOwnership] = {
@@ -42,7 +47,9 @@ object ResourceOwnership {
         }
       }).
         map(JsSuccess(_)).
-        getOrElse({ JsError(s"Can't read ${json}") })
+        getOrElse({
+          JsError(s"Can't read ${json}")
+        })
     }
 
     override def writes(o: ResourceOwnership): JsValue = {

@@ -1,10 +1,10 @@
 package com.clemble.thank.service
 
-import com.clemble.thank.model.{ResourceOwnership, User}
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
+import com.clemble.thank.model.{ResourceOwnership, User}
 import com.clemble.thank.test.util.UserGenerator
-import org.specs2.concurrent.ExecutionEnv
 import org.apache.commons.lang3.RandomStringUtils._
+import org.specs2.concurrent.ExecutionEnv
 
 import scala.util.{Failure, Success}
 
@@ -24,7 +24,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = UserGenerator.generate()
       val createAndCreate = service.create(user).flatMap(_ => service.create(user)).
         map(Success(_)).
-        recover({ case t: Throwable => Failure(t)})
+        recover({ case t: Throwable => Failure(t) })
 
       createAndCreate must await(beEqualTo(Failure(new RepositoryException(RepositoryError.duplicateKey()))))
     }

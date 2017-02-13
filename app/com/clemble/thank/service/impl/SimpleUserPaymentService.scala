@@ -9,7 +9,7 @@ import play.api.libs.iteratee.Enumerator
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class SimpleUserPaymentService @Inject() (userService: UserService, repository: PaymentRepository, implicit val ec: ExecutionContext) extends UserPaymentService{
+case class SimpleUserPaymentService @Inject()(userService: UserService, repository: PaymentRepository, implicit val ec: ExecutionContext) extends UserPaymentService {
 
   override def payments(user: User): Enumerator[Payment] = {
     repository.findByUser(user.id)

@@ -3,6 +3,7 @@ package com.clemble.thank.model.error
 import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException
+
 case class RepositoryException(errors: Seq[RepositoryError]) extends ThankException {
   def this(error: RepositoryError) = this(Seq(error))
 }

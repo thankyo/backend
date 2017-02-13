@@ -27,4 +27,4 @@ deployment:
       # Docker publish
       - sbt docker:publishLocal
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push mavarazy/thanks-backend
+      - docker push mavarazy/thanks-backend:latest

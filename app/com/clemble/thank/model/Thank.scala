@@ -9,7 +9,7 @@ import play.api.libs.json.Json
 case class Thank(
                   uri: String,
                   given: Amount = 0L
-) {
+                ) {
 
   def withParents(): List[Thank] = {
     URIUtils.toParents(uri).map(Thank(_))

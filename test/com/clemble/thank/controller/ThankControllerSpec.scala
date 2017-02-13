@@ -24,7 +24,7 @@ class ThankControllerSpec extends ControllerSpec {
       val thanks = for {
         uri <- uriVariations
       } yield {
-        val req = FakeRequest(PUT, s"/thank/${uri}?user=${giver.id}")
+        val req = FakeRequest(PUT, s"/api/v1/thank/${uri}?user=${giver.id}")
         route(application, req).get
       }
       val updateReq = await(Future.sequence(thanks)).map(_.header.status)

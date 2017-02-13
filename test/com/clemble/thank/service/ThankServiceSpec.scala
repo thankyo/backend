@@ -3,8 +3,8 @@ package com.clemble.thank.service
 import com.clemble.thank.model.ResourceOwnership
 import com.clemble.thank.test.util.UserGenerator
 import com.clemble.thank.util.URIUtilsSpec
-import org.specs2.concurrent.ExecutionEnv
 import org.apache.commons.lang3.RandomStringUtils._
+import org.specs2.concurrent.ExecutionEnv
 
 class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 

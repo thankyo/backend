@@ -39,7 +39,7 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
           flatMap(owner => {
             owner.owns.filter(ownerships.contains).map(res => res.uri -> owner.id)
           }).
-          sortBy({ case(uri, _) => - uri.length })
+          sortBy({ case (uri, _) => -uri.length })
 
         resToOwner.headOption.map({ case (_, userId) => userId })
       }

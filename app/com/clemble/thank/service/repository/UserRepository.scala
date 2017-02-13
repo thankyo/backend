@@ -2,7 +2,6 @@ package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.error.RepositoryException
 import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
-import play.api.libs.iteratee.Enumerator
 
 import scala.concurrent.Future
 

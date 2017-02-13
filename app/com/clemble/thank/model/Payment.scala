@@ -4,7 +4,9 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 
 sealed trait PaymentOperation
+
 case object Debit extends PaymentOperation
+
 case object Credit extends PaymentOperation
 
 object PaymentOperation {
@@ -32,13 +34,13 @@ object PaymentOperation {
 
 }
 
-case class Payment (
-                     user: UserId,
-                     amount: Amount,
-                     bankDetails: BankDetails,
-                     operation: PaymentOperation,
-                     createdDate: DateTime
-)
+case class Payment(
+                    user: UserId,
+                    amount: Amount,
+                    bankDetails: BankDetails,
+                    operation: PaymentOperation,
+                    createdDate: DateTime
+                  )
 
 object Payment {
 

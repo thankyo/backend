@@ -1,9 +1,9 @@
 package com.clemble.thank.test.util
 
-import com.clemble.thank.model.{Payment, User, UserId}
+import com.clemble.thank.model.{Payment, User}
 import org.apache.commons.lang3.RandomUtils._
 
-object PaymentGenerator extends Generator[Payment]{
+object PaymentGenerator extends Generator[Payment] {
 
   override def generate(): Payment = {
     if (nextInt(0, 1) == 0)

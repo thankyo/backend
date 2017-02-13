@@ -1,7 +1,5 @@
 package com.clemble.thank.util
 
-import java.net.URI
-
 import scala.annotation.tailrec
 
 object URIUtils {
@@ -31,15 +29,18 @@ object URIUtils {
         uri
       }
     }
+
     def removeMultipleSlashes(uri: String): String = {
       uri.split("\\/").filterNot(_.isEmpty).mkString("/")
     }
+
     def removePrefix(uri: String): String = {
       if (uri.startsWith("/"))
         uri.substring(1)
       else
         uri
     }
+
     removePrefix(
       removeHttpPrefix(removeMultipleSlashes(uri))
     )

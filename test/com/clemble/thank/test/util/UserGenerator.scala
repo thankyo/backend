@@ -1,6 +1,6 @@
 package com.clemble.thank.test.util
 
-import com.clemble.thank.model.{PayPalBankDetails, ResourceOwnership, User}
+import com.clemble.thank.model.{ResourceOwnership, User}
 import org.apache.commons.lang3.RandomStringUtils.random
 import org.apache.commons.lang3.RandomUtils.nextLong
 import org.joda.time.DateTime

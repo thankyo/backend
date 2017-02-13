@@ -27,7 +27,7 @@ class URIUtilsSpec extends Specification {
 object URIUtilsSpec {
 
   def generateVariations(masterURI: String): List[String] = {
-    List (
+    List(
       masterURI,
       s"http//$masterURI",
       s"https//$masterURI",

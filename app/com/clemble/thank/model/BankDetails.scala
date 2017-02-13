@@ -7,8 +7,10 @@ import play.api.libs.json._
   * Bank details abstraction
   */
 sealed trait BankDetails
+
 case object EmptyBankDetails extends BankDetails
-case class PayPalBankDetails (email: Email) extends BankDetails
+
+case class PayPalBankDetails(email: Email) extends BankDetails
 
 object PayPalBankDetails {
 
@@ -36,7 +38,7 @@ object BankDetails {
     }
 
     override def writes(o: BankDetails): JsValue = o match {
-      case pp : PayPalBankDetails => PayPalBankDetails.jsonFormat.writes(pp) + ("type" -> PAY_PAL)
+      case pp: PayPalBankDetails => PayPalBankDetails.jsonFormat.writes(pp) + ("type" -> PAY_PAL)
       case EmptyBankDetails => JsObject(Seq("type" -> EMPTY))
     }
   }

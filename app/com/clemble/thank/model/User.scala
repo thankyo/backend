@@ -21,7 +21,7 @@ case class User(
                  bankDetails: BankDetails,
                  email: Option[Email],
                  dateOfBirth: DateTime
-) {
+               ) {
 
   def increase(thanks: Int): User = {
     copy(balance = balance + thanks)

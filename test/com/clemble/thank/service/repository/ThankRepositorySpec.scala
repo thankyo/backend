@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
-import scala.concurrent.{Future}
+import scala.concurrent.Future
 
 @RunWith(classOf[JUnitRunner])
 class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {

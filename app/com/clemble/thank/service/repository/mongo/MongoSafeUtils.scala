@@ -28,7 +28,7 @@ object MongoSafeUtils {
     new RepositoryException(err)
   }
 
-  def safe[T](success:() => T, fTask: Future[WriteResult])(implicit ec: ExecutionContext): Future[T] = {
+  def safe[T](success: () => T, fTask: Future[WriteResult])(implicit ec: ExecutionContext): Future[T] = {
     val fTranslated = fTask.flatMap(res => {
       if (res.ok && res.n == 1) {
         Future.successful(success())

@@ -41,7 +41,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       await(userService.create(user))
       val A = await(paymentService.debit(user, 100))
       val B = await(paymentService.credit(user, 10))
-      val payments = await(paymentService.payments(user).run(Iteratee.fold(List.empty[Payment]){ (agg, el) => el :: agg}))
+      val payments = await(paymentService.payments(user).run(Iteratee.fold(List.empty[Payment]) { (agg, el) => el :: agg }))
 
       payments must containAllOf(Seq(A, B))
     }

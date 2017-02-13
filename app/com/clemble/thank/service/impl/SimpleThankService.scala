@@ -1,8 +1,8 @@
 package com.clemble.thank.service.impl
 
 import com.clemble.thank.model.{Thank, UserId}
-import com.clemble.thank.service.{ThankService, UserService}
 import com.clemble.thank.service.repository.ThankRepository
+import com.clemble.thank.service.{ThankService, UserService}
 import com.clemble.thank.util.URIUtils
 import com.google.inject.{Inject, Singleton}
 

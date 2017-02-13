@@ -3,10 +3,13 @@ package com.clemble.thank.controller
 import com.clemble.thank.model.User
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
 import com.clemble.thank.test.util.UserGenerator
+import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
+import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 
+@RunWith(classOf[JUnitRunner])
 class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
   "CREATE" should {

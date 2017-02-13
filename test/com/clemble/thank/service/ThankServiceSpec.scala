@@ -4,8 +4,11 @@ import com.clemble.thank.model.ResourceOwnership
 import com.clemble.thank.test.util.UserGenerator
 import com.clemble.thank.util.URIUtilsSpec
 import org.apache.commons.lang3.RandomStringUtils._
+import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   val thankService = application.injector.instanceOf[ThankService]

@@ -2,9 +2,12 @@ package com.clemble.thank.service
 
 import com.clemble.thank.model.Payment
 import com.clemble.thank.test.util.UserGenerator
+import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
+import org.specs2.runner.JUnitRunner
 import play.api.libs.iteratee.Iteratee
 
+@RunWith(classOf[JUnitRunner])
 class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   val paymentService = application.injector.instanceOf[UserPaymentService]

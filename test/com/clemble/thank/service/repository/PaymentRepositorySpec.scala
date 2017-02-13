@@ -2,9 +2,12 @@ package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.Payment
 import com.clemble.thank.test.util.{PaymentGenerator, UserGenerator}
+import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
+import org.specs2.runner.JUnitRunner
 import play.api.libs.iteratee.Iteratee
 
+@RunWith(classOf[JUnitRunner])
 class PaymentRepositorySpec(implicit ee: ExecutionEnv) extends RepositorySpec {
 
   val repository = application.injector.instanceOf[PaymentRepository]
@@ -23,8 +26,9 @@ class PaymentRepositorySpec(implicit ee: ExecutionEnv) extends RepositorySpec {
       } yield {
         transactions
       }
+      val transactions = await(fTransactions)
 
-      fTransactions must await(containAllOf(Seq(A, B)))
+      transactions must containAllOf(Seq(A, B)).exactly
     }
 
   }

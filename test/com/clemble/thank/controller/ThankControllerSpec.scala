@@ -4,10 +4,13 @@ import com.clemble.thank.model.ResourceOwnership
 import com.clemble.thank.test.util.UserGenerator
 import com.clemble.thank.util.URIUtilsSpec
 import org.apache.commons.lang3.RandomStringUtils._
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 
+@RunWith(classOf[JUnitRunner])
 class ThankControllerSpec extends ControllerSpec {
 
   "UPDATE" should {

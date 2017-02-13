@@ -26,5 +26,4 @@ deployment:
       - sbt coveralls
       # Docker publish
       - sbt docker:publishLocal
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - for i in {1..5}; do docker push mavarazy/thanks-backend && break || sleep 15; done
+      - sbt docker:publish

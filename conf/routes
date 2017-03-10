@@ -1,9 +1,11 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
+->          /api/auth                           securesocial.Routes
 
 # An example controller showing a sample home page
-GET         /                        controllers.HomeController.index
+GET         /                               controllers.HomeController.index
+
 
 POST        /api/v1/user                    @com.clemble.thank.controller.UserController.create
 GET         /api/v1/user/:id                @com.clemble.thank.controller.UserController.get(id)
@@ -14,4 +16,6 @@ PUT         /api/v1/thank/*url              @com.clemble.thank.controller.ThankC
 GET         /api/v1/payment/user/:id        @com.clemble.thank.controller.UserPaymentController.payments(id)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file            controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                   controllers.Assets.versioned(path="/public", file: Asset)
+
+

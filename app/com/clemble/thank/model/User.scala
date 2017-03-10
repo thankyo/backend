@@ -20,6 +20,7 @@ case class User(
                  balance: Amount,
                  bankDetails: BankDetails,
                  email: Option[Email],
+                 thumbnail: Option[String],
                  dateOfBirth: DateTime
                ) {
 
@@ -48,6 +49,7 @@ object User {
       List(ResourceOwnership.unrealized(uri)),
       0L,
       EmptyBankDetails,
+      None,
       None,
       new DateTime(0)
     )

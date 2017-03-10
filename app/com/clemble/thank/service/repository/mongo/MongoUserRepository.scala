@@ -5,12 +5,12 @@ import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import play.api.libs.json.{JsArray, JsObject, JsString, Json}
-import play.modules.reactivemongo.json._
 import reactivemongo.api.Cursor.ContOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
+import play.modules.reactivemongo.json._
 
 case class MongoUserRepository @Inject()(
                                           @Named("user") collection: JSONCollection,

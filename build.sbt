@@ -15,6 +15,8 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVer,
   "org.reactivemongo" %% "reactivemongo-iteratees" % reactiveMongoVer,
 
+  "ws.securesocial" % "securesocial_2.11" % "3.0-M6",
+
   specs2 % Test
 )
 

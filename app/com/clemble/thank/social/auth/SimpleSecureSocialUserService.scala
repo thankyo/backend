@@ -21,15 +21,19 @@ case class SimpleSecureSocialUserService @Inject()(
   override def save(profile: BasicProfile, mode: SaveMode): Future[User] = {
     userRep.
       findLinked(profile.providerId, profile.userId).
-      flatMap(userOpt => {
-        val user = userOpt.map(_.link(profile)).getOrElse(User.fromProfile(profile))
-        userRep.save(user)
+      flatMap(_ match {
+        case Some(user) => userRep.update(user link profile)
+        case None => userRep.save(User from profile)
       })
   }
 
   override def link(current: User, to: BasicProfile): Future[User] = {
     val updatedUser = current.link(to)
-    userRep.save(updatedUser)
+    val changed = updatedUser != current
+    if (changed)
+      userRep.update(updatedUser)
+    else
+      Future.successful(current)
   }
 
   override def findByEmailAndProvider(email: String, providerId: String): Future[Option[BasicProfile]] = ???

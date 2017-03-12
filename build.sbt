@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
 
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
-  "ws.securesocial" % "securesocial_2.11" % "3.0-M7",
+  "ws.securesocial" % "securesocial_2.11" % "3.0-M6",
 
   specs2 % Test
 )

@@ -76,7 +76,7 @@ object User {
     }
   }
 
-  def fromProfile(user: BasicProfile): User = {
+  def from(user: BasicProfile): User = {
     User(BSONObjectID.generate().toString()).link(user)
   }
 

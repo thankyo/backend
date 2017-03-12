@@ -23,6 +23,13 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(() => user, fInsert)
   }
 
+  override def update(user: User): Future[User] = {
+    val selector = Json.obj("_id" -> JsString(user.id))
+    val update = Json.toJson(user).as[JsObject]
+    val fUpdate = collection.update(selector, update)
+    MongoSafeUtils.safe(() => user, fUpdate)
+  }
+
   override def findById(id: UserId): Future[Option[User]] = {
     val query = Json.obj("_id" -> id)
     val fUser = collection.find(query).one[User]

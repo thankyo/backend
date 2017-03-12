@@ -36,6 +36,11 @@ trait UserRepository {
   def save(user: User): Future[User]
 
   /**
+    * Update existing user
+    */
+  def update(user: User): Future[User]
+
+  /**
     * Change user balance
     *
     * @return

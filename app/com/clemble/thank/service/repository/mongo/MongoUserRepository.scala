@@ -24,7 +24,14 @@ case class MongoUserRepository @Inject()(
   }
 
   override def findById(id: UserId): Future[Option[User]] = {
-    val fUser = collection.find(Json.obj("_id" -> id)).one[User]
+    val query = Json.obj("_id" -> id)
+    val fUser = collection.find(query).one[User]
+    MongoSafeUtils.safe(fUser)
+  }
+
+  override def findLinked(providerId: String, providerUserId: String): Future[Option[User]] = {
+    val query = Json.obj("profiles.providerId" -> providerId, "profiles.userId" -> providerUserId)
+    val fUser = collection.find(query).one[User]
     MongoSafeUtils.safe(fUser)
   }
 
@@ -38,12 +45,11 @@ case class MongoUserRepository @Inject()(
     val query = Json.obj("owns" -> Json.obj(
       "$in" -> JsArray(uris.map(Json.toJson(_)))
     ))
-    MongoSafeUtils.safe(
-      collection.
-        find(query).
-        cursor[User](ReadPreference.nearest).
-        collect[List](Int.MaxValue, ContOnError[List[User]]())
-    )
+    val fOwners = collection.
+      find(query).
+      cursor[User](ReadPreference.nearest).
+      collect[List](Int.MaxValue, ContOnError[List[User]]())
+    MongoSafeUtils.safe(fOwners)
   }
 
 }

@@ -21,6 +21,11 @@ trait UserRepository {
   def findOwners(uris: List[ResourceOwnership]): Future[List[User]]
 
   /**
+    * Finds user linked to provided profile
+    */
+  def findLinked(providerId: String, providerUserId: String): Future[Option[User]]
+
+  /**
     * Create a new user in the system
     *
     * @param user user to create

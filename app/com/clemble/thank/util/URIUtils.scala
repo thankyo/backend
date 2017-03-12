@@ -1,8 +1,14 @@
 package com.clemble.thank.util
 
+import securesocial.core.GenericProfile
+
 import scala.annotation.tailrec
 
 object URIUtils {
+
+  def toUri(profile: GenericProfile): String = {
+    profile.providerId + "//" + profile.userId
+  }
 
   def toParents(uriStr: String): List[String] = {
     def toURI(uri: List[String]): String = {

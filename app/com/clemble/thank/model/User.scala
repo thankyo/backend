@@ -74,7 +74,7 @@ object User {
   val DEFAULT_AMOUNT = 0L
   val DEFAULT_DATE_OF_BIRTH = new DateTime(0)
 
-  implicit val format = Json.format[User]
+  implicit val jsonFormat = Json.format[User]
 
   implicit class ExtendedBasicProfile(basicProfile: LoginInfo) {
     def toResource(): ResourceOwnership = {

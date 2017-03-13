@@ -2,6 +2,7 @@ package com.clemble.thank.controller
 
 import akka.stream.Materializer
 import com.clemble.thank.model.{User, UserId}
+import com.clemble.thank.service.repository.UserRepository
 import com.clemble.thank.test.util.{ThankSpecification, UserGenerator}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
@@ -13,17 +14,10 @@ trait ControllerSpec extends ThankSpecification {
   implicit val materializer = application.injector.instanceOf[Materializer]
   implicit val ec = application.injector.instanceOf[ExecutionContext]
 
+  lazy val userRep = application.injector.instanceOf[UserRepository]
+
   def createUser(user: User = UserGenerator.generate()): User = {
-    val req = FakeRequest(POST, "/api/v1/user").withJsonBody(Json.toJson(user))
-    val fRes = route(application, req).get
-
-    val res = await(fRes)
-    res.header.status must beEqualTo(201)
-
-    val bodyStr = await(res.body.consumeData).utf8String
-    val readUser = Json.parse(bodyStr).as[User]
-    user shouldEqual readUser
-
+    await(userRep.save(user))
     user
   }
 

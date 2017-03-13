@@ -16,7 +16,7 @@ case class UserController @Inject()(
                                      implicit val ec: ExecutionContext
                                    ) extends Controller {
 
-  def get(id: UserId) = silhouette.UserAwareAction.async(implicit req => {
+  def get(id: UserId) = silhouette.SecuredAction.async(implicit req => {
     val realId = AuthUtils.whoAmI(id)
     val fUserOpt = repository.findById(realId)
     ControllerSafeUtils.okOrNotFound(fUserOpt)

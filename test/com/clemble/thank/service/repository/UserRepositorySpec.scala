@@ -13,16 +13,16 @@ import scala.util.{Failure, Success}
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val userRepository = application.injector.instanceOf[UserRepository]
+  val userRepo = application.injector.instanceOf[UserRepository]
 
   "CREATE" should {
 
     "support single create" in {
       val user = UserGenerator.generate()
-      val fCreate: Future[User] = userRepository.save(user)
+      val fCreate: Future[User] = userRepo.save(user)
       fCreate must await(beEqualTo(user))
 
-      val fSearch: Future[Option[User]] = userRepository.findById(user.id)
+      val fSearch: Future[Option[User]] = userRepo.findById(user.id)
       fSearch must await(beEqualTo(Some(user)))
     }
 
@@ -30,8 +30,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = UserGenerator.generate()
 
       val fSecondCreate: Future[User] = for {
-        _ <- userRepository.save(user)
-        sCreate <- userRepository.save(user)
+        _ <- userRepo.save(user)
+        sCreate <- userRepo.save(user)
       } yield {
         sCreate
       }
@@ -52,9 +52,9 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = UserGenerator.generate()
 
       val matchResult = for {
-        savedUser <- userRepository.save(user)
-        _ <- userRepository.changeBalance(user.id, 10)
-        updatedUser <- userRepository.findById(user.id).map(_.get)
+        savedUser <- userRepo.save(user)
+        _ <- userRepo.changeBalance(user.id, 10)
+        updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
         savedUser.balance shouldEqual 0
         updatedUser.balance shouldEqual 10
@@ -67,9 +67,9 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = UserGenerator.generate()
 
       val matchResult = for {
-        savedUser <- userRepository.save(user)
-        _ <- userRepository.changeBalance(user.id, -10)
-        updatedUser <- userRepository.findById(user.id).map(_.get)
+        savedUser <- userRepo.save(user)
+        _ <- userRepo.changeBalance(user.id, -10)
+        updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
         savedUser.balance shouldEqual 0
         updatedUser.balance shouldEqual -10

@@ -13,7 +13,7 @@ import org.specs2.runner.JUnitRunner
 class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   val thankService = application.injector.instanceOf[ThankService]
-  val userService = application.injector.instanceOf[UserRepository]
+  val userRepo = application.injector.instanceOf[UserRepository]
 
   "Thank " should {
 
@@ -22,9 +22,9 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
       val giver = UserGenerator.generate()
 
-      val beforeThank = await(userService.save(giver))
+      val beforeThank = await(userRepo.save(giver))
       val thank = await(thankService.thank(giver.id, url))
-      val afterThank = await(userService.findById(giver.id).map(_.get))
+      val afterThank = await(userRepo.findById(giver.id).map(_.get))
       thank.given shouldEqual 1
       beforeThank.balance - 1 shouldEqual afterThank.balance
     }
@@ -34,10 +34,10 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       val owner = UserGenerator.generate(ResourceOwnership.full(url))
       val giver = UserGenerator.generate()
 
-      await(userService.save(giver))
-      val beforeThank = await(userService.save(owner))
+      await(userRepo.save(giver))
+      val beforeThank = await(userRepo.save(owner))
       val thank = await(thankService.thank(giver.id, url))
-      val afterThank = await(userService.findById(owner.id).map(_.get))
+      val afterThank = await(userRepo.findById(owner.id).map(_.get))
 
       thank.given shouldEqual 1
       (beforeThank.balance + 1) shouldEqual afterThank.balance
@@ -52,14 +52,14 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       val owner = UserGenerator.generate(ResourceOwnership.full(url))
       val giver = UserGenerator.generate()
 
-      await(userService.save(giver))
-      val beforeThank = await(userService.save(owner))
+      await(userRepo.save(giver))
+      val beforeThank = await(userRepo.save(owner))
       for {
         variation <- allVariations
       } yield {
         await(thankService.thank(giver.id, variation))
       }
-      val afterThank = await(userService.findById(owner.id).map(_.get))
+      val afterThank = await(userRepo.findById(owner.id).map(_.get))
 
       val thank = await(thankService.get(url))
       thank.given shouldEqual allVariations.length

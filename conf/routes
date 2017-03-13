@@ -3,17 +3,10 @@
 # ~~~~
 GET         /api/v1/auth/authenticate/:provider     @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider)
 
-# An example controller showing a sample home page
-GET         /                                       controllers.HomeController.index
-
 GET         /api/v1/user/:id                        @com.clemble.thank.controller.UserController.get(id)
 
 GET         /api/v1/thank/*url                      @com.clemble.thank.controller.ThankController.get(url)
 PUT         /api/v1/thank/*url                      @com.clemble.thank.controller.ThankController.thank(url)
 
 GET         /api/v1/payment/user/:id                @com.clemble.thank.controller.UserPaymentController.payments(id)
-
-# Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                           controllers.Assets.versioned(path="/public", file: Asset)
-
 

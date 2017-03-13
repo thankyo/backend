@@ -12,16 +12,16 @@ import play.api.libs.iteratee.Iteratee
 class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   val paymentService = application.injector.instanceOf[UserPaymentService]
-  val userService = application.injector.instanceOf[UserRepository]
+  val userRepo = application.injector.instanceOf[UserRepository]
 
   "PAYMENT" should {
 
     "Debit increases User balance" in {
       val user = UserGenerator.generate()
 
-      val savedUser = await(userService.save(user))
+      val savedUser = await(userRepo.save(user))
       await(paymentService.debit(user, 100))
-      val readUser = await(userService.findById(user.id).map(_.get))
+      val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 0
       readUser.balance shouldEqual 100
@@ -30,10 +30,10 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     "Credit decrease User balance" in {
       val user = UserGenerator.generate()
 
-      val savedUser = await(userService.save(user))
+      val savedUser = await(userRepo.save(user))
       await(paymentService.debit(user, 100))
       await(paymentService.credit(user, 10))
-      val readUser = await(userService.findById(user.id).map(_.get))
+      val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 0
       readUser.balance shouldEqual 90
@@ -42,7 +42,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     "list all transactions" in {
       val user = UserGenerator.generate()
 
-      await(userService.save(user))
+      await(userRepo.save(user))
       val A = await(paymentService.debit(user, 100))
       val B = await(paymentService.credit(user, 10))
       val payments = await(paymentService.payments(user).run(Iteratee.fold(List.empty[Payment]) { (agg, el) => el :: agg }))

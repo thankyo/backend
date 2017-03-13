@@ -1,4 +1,0 @@
-sealed traits for Events & AuthenticationMethod
-basic implementation for UserService InMemory & Mongo & JDBC
-HttpService switch to inject WS
-separate token repository to separate dependency

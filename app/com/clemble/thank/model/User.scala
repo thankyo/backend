@@ -2,10 +2,11 @@ package com.clemble.thank.model
 
 import com.clemble.thank.model.User.ExtendedBasicProfile
 import com.clemble.thank.util.URIUtils
+import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
+import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, SocialProfile}
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import reactivemongo.bson.BSONObjectID
-import securesocial.core._
 
 /**
   * User abstraction
@@ -20,14 +21,14 @@ case class User(
                  id: UserId,
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
-                 owns: List[ResourceOwnership] = List.empty,
+                 owns: Set[ResourceOwnership] = Set.empty,
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
                  dateOfBirth: Option[DateTime] = None,
                  balance: Amount = 0L,
                  bankDetails: BankDetails = EmptyBankDetails,
-                 profiles: List[BasicProfile] = List.empty
-               ) {
+                 profiles: Set[LoginInfo] = Set.empty
+               ) extends Identity {
 
   def increase(thanks: Int): User = {
     copy(balance = balance + thanks)
@@ -37,19 +38,15 @@ case class User(
     copy(balance = balance - 1)
   }
 
-  def link(user: BasicProfile): User = {
+  def link(socialProfile: CommonSocialProfile): User = {
     this.copy(
-      firstName = firstName.orElse(user.firstName),
-      lastName = lastName.orElse(user.lastName),
-      email = email.orElse(user.email),
-      thumbnail = thumbnail.orElse(user.avatarUrl),
-      owns = (user.toResource() :: owns).distinct,
-      profiles = (user :: profiles).distinct
+      firstName = firstName.orElse(socialProfile.firstName),
+      lastName = lastName.orElse(socialProfile.lastName),
+      email = email.orElse(socialProfile.email),
+      owns = owns + socialProfile.loginInfo.toResource(),
+      thumbnail = thumbnail.orElse(socialProfile.avatarURL),
+      profiles = profiles + socialProfile.loginInfo
     )
-  }
-
-  def findBySocialProfile(providerId: String, providerUserId: String): Option[BasicProfile] = {
-    profiles.find(p => p.providerId == providerId && p.userId == providerUserId)
   }
 
 }
@@ -59,31 +56,23 @@ object User {
   val DEFAULT_AMOUNT = 0L
   val DEFAULT_DATE_OF_BIRTH = new DateTime(0)
 
-  /**
-    * JSON format for [[User]]
-    */
-  implicit val authMethodFormat = Json.format[AuthenticationMethod]
-  implicit val oauth1InfoFormat = Json.format[OAuth1Info]
-  implicit val oauth2InfoFormat = Json.format[OAuth2Info]
-  implicit val passwordInfoFormat = Json.format[PasswordInfo]
-  implicit val basicProfileFormat = Json.format[BasicProfile]
-  implicit val jsonFormat = Json.format[User]
+  implicit val format = Json.format[User]
 
-  implicit class ExtendedBasicProfile(basicProfile: BasicProfile) {
+  implicit class ExtendedBasicProfile(basicProfile: LoginInfo) {
     def toResource(): ResourceOwnership = {
       val uri = URIUtils.toUri(basicProfile)
       ResourceOwnership.full(uri)
     }
   }
 
-  def from(user: BasicProfile): User = {
-    User(BSONObjectID.generate().toString()).link(user)
+  def from(profile: CommonSocialProfile): User = {
+    User(BSONObjectID.generate().toString()).link(profile)
   }
 
   def empty(uri: String) = {
     User(
       id = uri,
-      owns = List(ResourceOwnership.unrealized(uri))
+      owns = Set(ResourceOwnership.unrealized(uri))
     )
   }
 

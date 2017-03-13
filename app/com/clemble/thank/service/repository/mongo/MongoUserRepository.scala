@@ -4,6 +4,7 @@ import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json.{JsArray, JsObject, JsString, Json}
 import reactivemongo.api.Cursor.ContOnError
 import reactivemongo.api.ReadPreference
@@ -36,8 +37,8 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(fUser)
   }
 
-  override def findLinked(providerId: String, providerUserId: String): Future[Option[User]] = {
-    val query = Json.obj("profiles.providerId" -> providerId, "profiles.userId" -> providerUserId)
+  override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
+    val query = Json.obj("profiles.providerID" -> loginInfo.providerID, "profiles.providerKey" -> loginInfo.providerKey)
     val fUser = collection.find(query).one[User]
     MongoSafeUtils.safe(fUser)
   }

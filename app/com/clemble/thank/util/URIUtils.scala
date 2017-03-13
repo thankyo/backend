@@ -1,13 +1,13 @@
 package com.clemble.thank.util
 
-import securesocial.core.GenericProfile
+import com.mohiva.play.silhouette.api.LoginInfo
 
 import scala.annotation.tailrec
 
 object URIUtils {
 
-  def toUri(profile: GenericProfile): String = {
-    profile.providerId + "//" + profile.userId
+  def toUri(profile: LoginInfo): String = {
+    profile.providerID + "//" + profile.providerKey
   }
 
   def toParents(uriStr: String): List[String] = {

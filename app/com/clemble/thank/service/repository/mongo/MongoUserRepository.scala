@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository.mongo
 
-import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
+import com.clemble.thank.model._
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -37,9 +37,9 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(fUser)
   }
 
-  override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
+  override def retrieve(loginInfo: LoginInfo): Future[Option[UserIdentity]] = {
     val query = Json.obj("profiles.providerID" -> loginInfo.providerID, "profiles.providerKey" -> loginInfo.providerKey)
-    val fUser = collection.find(query).one[User]
+    val fUser = collection.find(query).one[User].map(_.map(_.toIdentity()))
     MongoSafeUtils.safe(fUser)
   }
 

@@ -6,8 +6,6 @@ GET         /api/v1/auth/authenticate/:provider     @com.clemble.thank.social.au
 # An example controller showing a sample home page
 GET         /                                       controllers.HomeController.index
 
-
-POST        /api/v1/user                            @com.clemble.thank.controller.UserController.create
 GET         /api/v1/user/:id                        @com.clemble.thank.controller.UserController.get(id)
 
 GET         /api/v1/thank/*url                      @com.clemble.thank.controller.ThankController.get(url)

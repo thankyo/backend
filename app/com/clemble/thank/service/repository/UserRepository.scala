@@ -1,8 +1,7 @@
 package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.error.RepositoryException
-import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
-import com.mohiva.play.silhouette.api.LoginInfo
+import com.clemble.thank.model._
 import com.mohiva.play.silhouette.api.services.IdentityService
 
 import scala.concurrent.Future
@@ -10,7 +9,7 @@ import scala.concurrent.Future
 /**
   * [[User]] repository
   */
-trait UserRepository extends IdentityService[User] {
+trait UserRepository extends IdentityService[UserIdentity] {
 
   /**
     * Find [[User]] by ID
@@ -21,11 +20,6 @@ trait UserRepository extends IdentityService[User] {
     * Find owner of provided uri
     */
   def findOwners(uris: List[ResourceOwnership]): Future[List[User]]
-
-  /**
-    * Finds user linked to provided profile
-    */
-  def retrieve(loginInfo: LoginInfo): Future[Option[User]]
 
   /**
     * Create a new user in the system

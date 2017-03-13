@@ -1,26 +1,24 @@
 package com.clemble.thank.controller
 
-import com.clemble.thank.model.{User, UserId}
-import com.clemble.thank.service.UserService
+import com.clemble.thank.model.{UserId}
+import com.clemble.thank.service.repository.UserRepository
+import com.clemble.thank.util.AuthEnv
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, BodyParsers, Controller}
+import com.mohiva.play.silhouette.api.Silhouette
+import play.api.mvc.{Controller}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext}
 
 @Singleton
 case class UserController @Inject()(
-                                     service: UserService,
+                                     repository: UserRepository,
+                                     silhouette: Silhouette[AuthEnv],
                                      implicit val ec: ExecutionContext
                                    ) extends Controller {
 
-  def create() = Action.async(BodyParsers.parse.json) { req => {
-    val userOpt = req.body.asOpt[User]
-    val fSavedUser = userOpt.map(service.create).getOrElse(Future.failed(new IllegalArgumentException("Invalid User format")))
-    ControllerSafeUtils.created(fSavedUser)
-  }}
-
-  def get(id: UserId) = Action.async({
-    val fUserOpt = service.get(id)
+  def get(id: UserId) = silhouette.UserAwareAction.async(implicit req => {
+    val realId = AuthUtils.whoAmI(id)
+    val fUserOpt = repository.findById(realId)
     ControllerSafeUtils.okOrNotFound(fUserOpt)
   })
 

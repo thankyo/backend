@@ -8,6 +8,14 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 import reactivemongo.bson.BSONObjectID
 
+trait UserProfile {
+  val id: UserId
+  val firstName: Option[String]
+  val lastName: Option[String]
+  val thumbnail: Option[String]
+  val dateOfBirth: Option[DateTime]
+}
+
 /**
   * User abstraction
   *
@@ -28,7 +36,7 @@ case class User(
                  balance: Amount = 0L,
                  bankDetails: BankDetails = EmptyBankDetails,
                  profiles: Set[LoginInfo] = Set.empty
-               ) extends Identity {
+               ) extends Identity with UserProfile {
 
   def increase(thanks: Int): User = {
     copy(balance = balance + thanks)
@@ -49,6 +57,16 @@ case class User(
     )
   }
 
+  def toIdentity(): UserIdentity = {
+    UserIdentity(
+      id,
+      firstName,
+      lastName,
+      thumbnail,
+      dateOfBirth
+    )
+  }
+
 }
 
 object User {
@@ -66,7 +84,7 @@ object User {
   }
 
   def from(profile: CommonSocialProfile): User = {
-    User(BSONObjectID.generate().toString()).link(profile)
+    User(BSONObjectID.generate().stringify).link(profile)
   }
 
   def empty(uri: String) = {

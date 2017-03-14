@@ -3,7 +3,7 @@ GET         /auth/authenticate/:provider     @com.clemble.thank.social.auth.Soci
 GET         /user/:id                        @com.clemble.thank.controller.UserController.get(id)
 
 POST        /ownership/me                    @com.clemble.thank.controller.ResourceOwnershipController.assignOwnership()
-GET         /payment/user/me                 @com.clemble.thank.controller.UserPaymentController.myPayments()
+GET         /transaction/user/me             @com.clemble.thank.controller.UserPaymentController.myPayments()
 
 GET         /thank/*url                      @com.clemble.thank.controller.ThankController.get(url)
 PUT         /thank/*url                      @com.clemble.thank.controller.ThankController.thank(url)

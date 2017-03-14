@@ -2,11 +2,10 @@ package com.clemble.thank.model
 
 import org.joda.time.DateTime
 import play.api.libs.json._
+import reactivemongo.bson.BSONObjectID
 
 sealed trait PaymentOperation
-
 case object Debit extends PaymentOperation
-
 case object Credit extends PaymentOperation
 
 object PaymentOperation {
@@ -35,6 +34,7 @@ object PaymentOperation {
 }
 
 case class Payment(
+                    id: PaymentId,
                     user: UserId,
                     amount: Amount,
                     bankDetails: BankDetails,
@@ -51,6 +51,7 @@ object Payment {
 
   def debit(user: User, amount: Amount): Payment = {
     Payment(
+      BSONObjectID.generate().stringify,
       user.id,
       amount,
       user.bankDetails,
@@ -61,6 +62,7 @@ object Payment {
 
   def credit(user: User, amount: Amount): Payment = {
     Payment(
+      BSONObjectID.generate().stringify,
       user.id,
       amount,
       user.bankDetails,

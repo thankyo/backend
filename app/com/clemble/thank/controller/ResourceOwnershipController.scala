@@ -19,7 +19,7 @@ class ResourceOwnershipController @Inject()(
                                            ) extends Controller {
 
   def assignOwnership() = silhouette.SecuredAction.async(parse.json[ResourceOwnership])(implicit req => {
-    val fOwnership = userService.assignOwnership(req.identity.id, req.body)
+    val fOwnership = userService.assignOwnership(req.identity.id, req.body.normalize())
     ControllerSafeUtils.created(fOwnership)
   })
 

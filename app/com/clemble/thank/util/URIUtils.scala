@@ -1,5 +1,6 @@
 package com.clemble.thank.util
 
+import com.clemble.thank.model.URI
 import com.mohiva.play.silhouette.api.LoginInfo
 
 import scala.annotation.tailrec
@@ -10,7 +11,7 @@ object URIUtils {
     profile.providerID + "//" + profile.providerKey
   }
 
-  def toParents(uriStr: String): List[String] = {
+  def toParents(uriStr: URI): List[String] = {
     def toURI(uri: List[String]): String = {
       uri.mkString("/")
     }

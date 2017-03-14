@@ -1,6 +1,6 @@
 package com.clemble.thank.service.impl
 
-import com.clemble.thank.model.{Thank, UserId}
+import com.clemble.thank.model.{Thank, URI, UserId}
 import com.clemble.thank.service.repository.ThankRepository
 import com.clemble.thank.service.{ThankService, UserService}
 import com.clemble.thank.util.URIUtils
@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class SimpleThankService @Inject()(userService: UserService, repository: ThankRepository, implicit val ec: ExecutionContext) extends ThankService {
 
-  override def findAll(uri: String): Future[Thank] = {
+  override def findAll(uri: URI): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
       thankOpt match {
         case Some(thank) => Future.successful(thank)
@@ -24,8 +24,8 @@ case class SimpleThankService @Inject()(userService: UserService, repository: Th
     repository.findByURI(uri).flatMap(createIfMissing)
   }
 
-  override def thank(user: UserId, uri: String): Future[Thank] = {
-    val normUri: String = URIUtils.normalize(uri)
+  override def thank(user: UserId, uri: URI): Future[Thank] = {
+    val normUri: URI = URIUtils.normalize(uri)
     for {
       _ <- findAll(normUri) // Ensure Thank exists
       _ <- userService.updateBalance(user, -1)

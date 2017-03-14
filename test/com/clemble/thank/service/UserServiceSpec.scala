@@ -13,6 +13,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   val service = application.injector.instanceOf[UserService]
   val repo = application.injector.instanceOf[UserRepository]
+  val paymentService = application.injector.instanceOf[UserPaymentService]
+
+  val giver = UserGenerator.generate()
+  await(repo.save(giver))
 
   "CREATE" should {
 
@@ -48,7 +52,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
       val user = createUserWithOwnership(ResourceOwnership.full(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
     }
 
@@ -57,7 +61,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
     }
 
@@ -66,7 +70,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
     }
   }
@@ -79,7 +83,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.full(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -91,7 +95,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -103,7 +107,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -118,7 +122,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.full(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -130,7 +134,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -142,7 +146,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -156,7 +160,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.full(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -168,7 +172,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -180,7 +184,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
-      await(service.updateOwnerBalance(url, 99))
+      await(paymentService.operation(giver.id, url, 99))
       await(repo.findById(user.id)).get.balance shouldEqual 99
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }

@@ -12,9 +12,6 @@ trait UserService {
 
   def findResourceOwner(uri: URI): Future[User]
 
-  @deprecated
-  def updateOwnerBalance(uri: URI, change: Amount): Future[Boolean]
-
   def updateBalance(user: UserId, change: Amount): Future[Boolean]
 
 }

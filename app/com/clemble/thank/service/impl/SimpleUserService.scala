@@ -76,13 +76,4 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
     repository.changeBalance(user, change)
   }
 
-  override def updateOwnerBalance(uri: String, change: Amount): Future[Boolean] = {
-    for {
-      owner <- findResourceOwner(uri)
-      update <- updateBalance(owner.id, change)
-    } yield {
-      update
-    }
-  }
-
 }

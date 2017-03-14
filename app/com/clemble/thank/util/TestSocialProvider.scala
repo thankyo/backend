@@ -32,7 +32,6 @@ class TestSocialProvider(
     Future.successful(Right(OAuth2Info(accessToken = user.loginInfo.providerKey)))
   }
 
-
   override def withSettings(f: (Settings) => Settings) = {
     new TestSocialProvider(httpLayer, stateProvider, f(settings))
   }

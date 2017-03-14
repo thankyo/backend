@@ -1,13 +1,10 @@
 package com.clemble.thank.controller
 
 import com.clemble.thank.model.User
-import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
-import com.clemble.thank.test.util.UserGenerator
+import com.clemble.thank.test.util.{CommonSocialProfileGenerator}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
-import play.api.libs.json.Json
-import play.api.test.FakeRequest
 
 @RunWith(classOf[JUnitRunner])
 class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
@@ -15,45 +12,24 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
   "CREATE" should {
 
     "Support single create" in {
-      val user = UserGenerator.generate()
-      val req = FakeRequest(POST, "/api/v1/user").withJsonBody(Json.toJson(user))
-      val fRes = route(application, req).get
+      val socialProfile = CommonSocialProfileGenerator.generate()
+      val userAuth = createUser(socialProfile)
 
-      val res = await(fRes)
-      res.header.status must beEqualTo(201)
-
-      val body = await(res.body.consumeData)
-      val savedUser = Json.parse(body.utf8String).as[User]
-      savedUser must beEqualTo(user)
+      val savedUser = getMyUser()(userAuth)
+      val expectedUser = (User from socialProfile).copy(id = savedUser.id)
+      savedUser must beEqualTo(expectedUser)
     }
 
-    "Return error on same create" in {
-      val user = UserGenerator.generate()
-      val req = FakeRequest(POST, "/api/v1/user").withJsonBody(Json.toJson(user))
+    "Return same user on the same authentication" in {
+      val socialProfile = CommonSocialProfileGenerator.generate()
+      val firstAuth = createUser(socialProfile)
+      val firstUser = getMyUser()(firstAuth)
 
-      await(route(application, req).get)
-      val secondRes = await(route(application, req).get)
-      secondRes.header.status must beEqualTo(BAD_REQUEST)
+      val secondAuth = createUser(socialProfile)
+      val secondUser = getMyUser()(firstAuth)
 
-      val body = await(secondRes.body.consumeData)
-      val exc = Json.parse(body.utf8String).as[RepositoryException]
-      exc.errors must containAllOf(Seq(RepositoryError.duplicateKey()))
-    }
-
-  }
-
-  "GET" should {
-
-    "return after creation" in {
-      val user = UserGenerator.generate()
-      val req = FakeRequest(POST, "/api/v1/user").withJsonBody(Json.toJson(user))
-      await(route(application, req).get)
-
-      val readReq = FakeRequest(GET, s"/api/v1/user/${user.id}")
-      val readUserStr = await(route(application, readReq).get.flatMap(_.body.consumeData))
-
-      val readUser = Json.parse(readUserStr.utf8String).as[User]
-      readUser must beEqualTo(user)
+      firstAuth shouldNotEqual secondAuth
+      secondUser shouldEqual firstUser
     }
 
   }

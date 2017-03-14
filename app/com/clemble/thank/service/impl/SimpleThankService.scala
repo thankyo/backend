@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class SimpleThankService @Inject()(userService: UserService, repository: ThankRepository, implicit val ec: ExecutionContext) extends ThankService {
 
-  override def get(uri: String): Future[Thank] = {
+  override def findAll(uri: String): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
       thankOpt match {
         case Some(thank) => Future.successful(thank)
@@ -27,7 +27,7 @@ case class SimpleThankService @Inject()(userService: UserService, repository: Th
   override def thank(user: UserId, uri: String): Future[Thank] = {
     val normUri: String = URIUtils.normalize(uri)
     for {
-      _ <- get(normUri) // Ensure Thank exists
+      _ <- findAll(normUri) // Ensure Thank exists
       _ <- userService.updateBalance(user, -1)
       _ <- userService.updateOwnerBalance(normUri, 1)
       _ <- repository.increase(normUri)

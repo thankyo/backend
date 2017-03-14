@@ -61,7 +61,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       }
       val afterThank = await(userRepo.findById(owner.id).map(_.get))
 
-      val thank = await(thankService.get(url))
+      val thank = await(thankService.findAll(url))
       thank.given shouldEqual allVariations.length
       (beforeThank.balance + allVariations.length) shouldEqual afterThank.balance
     }

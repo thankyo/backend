@@ -6,7 +6,7 @@ import scala.concurrent.Future
 
 trait ThankService {
 
-  def get(uri: String): Future[Thank]
+  def findAll(uri: String): Future[Thank]
 
   def thank(user: UserId, uri: String): Future[Thank]
 

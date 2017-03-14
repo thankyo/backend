@@ -22,6 +22,11 @@ trait UserRepository extends IdentityService[UserIdentity] {
   def findOwners(uris: List[ResourceOwnership]): Future[List[User]]
 
   /**
+    * Looks for all related Resources based on the provided URL
+    */
+  def findRelated(uri: ResourceOwnership): Future[List[User]]
+
+  /**
     * Create a new user in the system
     *
     * @param user user to create
@@ -35,6 +40,14 @@ trait UserRepository extends IdentityService[UserIdentity] {
     * Update existing user
     */
   def update(user: User): Future[User]
+
+  /**
+    * Remove users
+    *
+    * @param users
+    * @return
+    */
+  def remove(users: Seq[UserId]): Future[Boolean]
 
   /**
     * Change user balance

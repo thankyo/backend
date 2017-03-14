@@ -38,6 +38,10 @@ case class User(
                  profiles: Set[LoginInfo] = Set.empty
                ) extends Identity with UserProfile {
 
+  def assignOwnership(pendingBalance: Amount, resource: ResourceOwnership): User = {
+    copy(balance = balance + pendingBalance, owns = owns + resource)
+  }
+
   def increase(thanks: Int): User = {
     copy(balance = balance + thanks)
   }

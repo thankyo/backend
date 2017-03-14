@@ -5,13 +5,20 @@ import play.api.libs.json._
 
 sealed trait ResourceOwnership {
   val uri: String
+  def owns(resource: ResourceOwnership): Boolean
 }
 
-case class FullResourceOwnership(uri: String) extends ResourceOwnership
+case class FullResourceOwnership(uri: String) extends ResourceOwnership {
+  override def owns(resource: ResourceOwnership): Boolean = resource.uri.startsWith(uri)
+}
 
-case class PartialResourceOwnership(uri: String) extends ResourceOwnership
+case class PartialResourceOwnership(uri: String) extends ResourceOwnership {
+  override def owns(resource: ResourceOwnership): Boolean = resource.uri == uri
+}
 
-case class UnrealizedResourceOwnership(uri: String) extends ResourceOwnership
+case class UnrealizedResourceOwnership(uri: String) extends ResourceOwnership {
+  override def owns(resource: ResourceOwnership): Boolean = resource.uri == uri
+}
 
 object ResourceOwnership {
 

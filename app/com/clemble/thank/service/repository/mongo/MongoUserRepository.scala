@@ -49,15 +49,28 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(() => true, collection.update(query, change))
   }
 
+  override def findRelated(uri: ResourceOwnership): Future[List[User]] = {
+    val query = Json.obj("owns.uri" -> Json.obj("$regex" -> s"${uri.uri}.*"))
+    doFind(query)
+  }
+
+  override def remove(users: Seq[UserId]): Future[Boolean] = {
+    val query = Json.obj("_id" -> Json.obj("$in" -> JsArray(users.map(JsString))))
+    val fRemove = collection.remove(query).map(_.ok)
+    MongoSafeUtils.safe(fRemove)
+  }
+
   override def findOwners(uris: List[ResourceOwnership]): Future[List[User]] = {
-    val query = Json.obj("owns" -> Json.obj(
-      "$in" -> JsArray(uris.map(Json.toJson(_)))
-    ))
-    val fOwners = collection.
+    val query = Json.obj("owns" -> Json.obj("$in" -> JsArray(uris.map(Json.toJson(_)))))
+    doFind(query)
+  }
+
+  private def doFind(query: JsObject): Future[List[User]] = {
+    val users = collection.
       find(query).
       cursor[User](ReadPreference.nearest).
       collect[List](Int.MaxValue, ContOnError[List[User]]())
-    MongoSafeUtils.safe(fOwners)
+    MongoSafeUtils.safe(users)
   }
 
 }

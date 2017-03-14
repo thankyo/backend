@@ -1,10 +1,13 @@
 GET         /auth/authenticate/:provider     @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider)
-POST        /auth/authenticate/test          @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider = "test")
 
 GET         /user/:id                        @com.clemble.thank.controller.UserController.get(id)
+
+POST        /ownership/me                    @com.clemble.thank.controller.ResourceOwnershipController.assignOwnership()
+GET         /payment/user/me                 @com.clemble.thank.controller.UserPaymentController.myPayments()
 
 GET         /thank/*url                      @com.clemble.thank.controller.ThankController.get(url)
 PUT         /thank/*url                      @com.clemble.thank.controller.ThankController.thank(url)
 
-GET         /payment/user/:id                @com.clemble.thank.controller.UserPaymentController.payments(id)
+# Test Endpoint for creating users, this won't work in production
+POST        /auth/authenticate/test          @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider = "test")
 

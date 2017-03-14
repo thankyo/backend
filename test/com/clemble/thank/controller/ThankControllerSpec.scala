@@ -19,9 +19,8 @@ class ThankControllerSpec extends ControllerSpec {
       val masterUrl = s"example.com/${randomNumeric(10)}/${randomNumeric(10)}"
 
       val giver = createUser()
-      val owner = createUser(
-        UserGenerator.generate(ResourceOwnership.full(masterUrl))
-      )
+      val owner = createUser()
+      addOwnership(owner, ResourceOwnership.full(masterUrl))
 
       val uriVariations = URIUtilsSpec.generateVariations(masterUrl)
       val thanks = for {

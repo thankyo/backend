@@ -74,6 +74,8 @@ object User {
   val DEFAULT_AMOUNT = 0L
   val DEFAULT_DATE_OF_BIRTH = new DateTime(0)
 
+  implicit val socialProfileJsonFormat = Json.format[CommonSocialProfile]
+
   implicit val jsonFormat = Json.format[User]
 
   implicit class ExtendedBasicProfile(basicProfile: LoginInfo) {
@@ -89,7 +91,7 @@ object User {
 
   def empty(uri: String) = {
     User(
-      id = uri,
+      id = BSONObjectID.generate().stringify,
       owns = Set(ResourceOwnership.unrealized(uri))
     )
   }

@@ -1,7 +1,7 @@
 package com.clemble.thank
 
 import com.clemble.thank.service.repository.UserRepository
-import com.clemble.thank.util.AuthEnv
+import com.clemble.thank.util.{AuthEnv, TestSocialProvider}
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.crypto.{CookieSigner, Crypter, CrypterAuthenticatorEncoder}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
@@ -20,8 +20,9 @@ import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepo
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
-import play.api.Configuration
+import play.api
 import play.api.libs.ws.WSClient
+import play.api.{Configuration, Mode}
 
 import scala.concurrent.ExecutionContext
 
@@ -44,10 +45,10 @@ class SocialModule extends AbstractModule with ScalaModule {
 
   @Provides
   def environment(
-                          userService: UserRepository,
-                          authenticatorService: AuthenticatorService[JWTAuthenticator],
-                          eventBus: EventBus,
-                          ec: ExecutionContext): Environment[AuthEnv] = {
+                   userService: UserRepository,
+                   authenticatorService: AuthenticatorService[JWTAuthenticator],
+                   eventBus: EventBus,
+                   ec: ExecutionContext): Environment[AuthEnv] = {
     Environment[AuthEnv](
       userService,
       authenticatorService,
@@ -58,17 +59,33 @@ class SocialModule extends AbstractModule with ScalaModule {
 
   @Provides
   def facebookProvider(
-                               httpLayer: HTTPLayer,
-                               stateProvider: OAuth2StateProvider,
-                               configuration: Configuration
-                             ): FacebookProvider = {
+                        httpLayer: HTTPLayer,
+                        stateProvider: OAuth2StateProvider,
+                        configuration: Configuration
+                      ): FacebookProvider = {
     val facebookConfig = configuration.underlying.as[OAuth2Settings]("silhouette.facebook")
     new FacebookProvider(httpLayer, stateProvider, facebookConfig)
   }
 
   @Provides
-  def socialProviderRegistry(fp: FacebookProvider): SocialProviderRegistry = {
-    SocialProviderRegistry(Seq(fp))
+  def testProvider(
+                    httpLayer: HTTPLayer,
+                    stateProvider: OAuth2StateProvider,
+                    configuration: Configuration
+                  ): TestSocialProvider = {
+    val testConfig = new OAuth2Settings(
+      accessTokenURL = "",
+      redirectURL = "",
+      clientID = "",
+      clientSecret = ""
+    )
+    new TestSocialProvider(httpLayer, stateProvider, testConfig)
+  }
+
+  @Provides
+  def socialProviderRegistry(env: api.Environment, fp: FacebookProvider, tp: TestSocialProvider): SocialProviderRegistry = {
+    val providers = if (env.mode == Mode.Prod) Seq(fp) else Seq(fp, tp)
+    SocialProviderRegistry(providers)
   }
 
   @Provides
@@ -105,10 +122,10 @@ class SocialModule extends AbstractModule with ScalaModule {
 
   @Provides
   def oAuth2StateProvider(
-                                  idGenerator: IDGenerator,
-                                  cookieSigner: CookieSigner,
-                                  configuration: Configuration,
-                                  clock: Clock): OAuth2StateProvider = {
+                           idGenerator: IDGenerator,
+                           cookieSigner: CookieSigner,
+                           configuration: Configuration,
+                           clock: Clock): OAuth2StateProvider = {
     val settings = configuration.underlying.as[CookieStateSettings]("silhouette.oauth2StateProvider")
     new CookieStateProvider(settings, idGenerator, cookieSigner, clock)
   }

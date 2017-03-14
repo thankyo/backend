@@ -1,12 +1,5 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-GET         /api/v1/auth/authenticate/:provider     @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider)
-
-GET         /api/v1/user/:id                        @com.clemble.thank.controller.UserController.get(id)
-
-GET         /api/v1/thank/*url                      @com.clemble.thank.controller.ThankController.get(url)
-PUT         /api/v1/thank/*url                      @com.clemble.thank.controller.ThankController.thank(url)
-
-GET         /api/v1/payment/user/:id                @com.clemble.thank.controller.UserPaymentController.payments(id)
+->         /api/v1                                  v1.Routes
 

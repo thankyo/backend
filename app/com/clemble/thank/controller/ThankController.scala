@@ -15,7 +15,7 @@ case class ThankController @Inject()(
                                     ) extends Controller {
 
   def get(url: String) = silhouette.UnsecuredAction.async(implicit req => {
-    val fThank = service.findAll(url)
+    val fThank = service.getOrCreate(url)
     ControllerSafeUtils.ok(fThank)
   })
 

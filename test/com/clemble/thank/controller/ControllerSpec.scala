@@ -1,7 +1,7 @@
 package com.clemble.thank.controller
 
 import akka.stream.Materializer
-import com.clemble.thank.model.{ResourceOwnership, User, UserId}
+import com.clemble.thank.model.{Payment, ResourceOwnership, User, UserId}
 import com.clemble.thank.test.util.{CommonSocialProfileGenerator, ThankSpecification, UserGenerator}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.libs.json.Json
@@ -47,6 +47,15 @@ trait ControllerSpec extends ThankSpecification {
       case NOT_FOUND => None
       case OK => Json.parse(await(resp.body.consumeData).utf8String).asOpt[User]
     }
+  }
+
+  def getMyPayments()(implicit authHeaders: Seq[(String, String)]): List[Payment] = {
+    val req = FakeRequest(GET, s"/api/v1/transaction/user/me").withHeaders(authHeaders:_*)
+    val fRes = route(application, req).get
+
+    val res = await(fRes)
+    val payments = Json.parse(await(res.body.consumeData).utf8String).as[List[Payment]]
+    payments
   }
 
 }

@@ -1,7 +1,7 @@
 package com.clemble.thank.service.impl
 
 import akka.stream.scaladsl.Source
-import com.clemble.thank.model.{Amount, Payment, User, UserId}
+import com.clemble.thank.model._
 import com.clemble.thank.service.repository.PaymentRepository
 import com.clemble.thank.service.{UserPaymentService, UserService}
 import com.google.inject.{Inject, Singleton}
@@ -13,6 +13,18 @@ case class SimpleUserPaymentService @Inject()(userService: UserService, reposito
 
   override def payments(user: UserId): Source[Payment, _] = {
     repository.findByUser(user)
+  }
+
+  override def operation(giverId: UserId, url: URI, amount: Amount): Future[List[Payment]] = {
+    for {
+      giverOpt <- userService.findById(giverId) if (giverOpt.isDefined)
+      giver = giverOpt.get
+      owner <- userService.findResourceOwner(url)
+      ownerDebitOp <- debit(owner, amount)
+      giverCreditOp <- credit(giver, amount)
+    } yield {
+      List(ownerDebitOp, giverCreditOp)
+    }
   }
 
   override def debit(user: User, amount: Amount): Future[Payment] = {

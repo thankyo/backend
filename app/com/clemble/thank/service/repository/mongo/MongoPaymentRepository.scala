@@ -10,7 +10,7 @@ import reactivemongo.api.ReadPreference
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 import akka.stream.scaladsl.Source
-import reactivemongo.akkastream.{cursorProducer, State}
+import reactivemongo.akkastream.{cursorProducer}
 
 import scala.concurrent.{ExecutionContext, Future}
 

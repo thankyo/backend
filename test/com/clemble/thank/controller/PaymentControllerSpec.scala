@@ -1,9 +1,12 @@
 package com.clemble.thank.controller
 
 import com.clemble.thank.model.{Payment, ResourceOwnership}
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 
+@RunWith(classOf[JUnitRunner])
 class PaymentControllerSpec extends ControllerSpec {
 
   "GET" should {

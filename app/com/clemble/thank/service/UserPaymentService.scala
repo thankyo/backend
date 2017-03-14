@@ -1,13 +1,13 @@
 package com.clemble.thank.service
 
-import com.clemble.thank.model.{Amount, Payment, User}
-import play.api.libs.iteratee.Enumerator
+import akka.stream.scaladsl.Source
+import com.clemble.thank.model.{Amount, Payment, User, UserId}
 
 import scala.concurrent.Future
 
 trait UserPaymentService {
 
-  def payments(user: User): Enumerator[Payment]
+  def payments(user: UserId): Source[Payment, _]
 
   def debit(user: User, amount: Amount): Future[Payment]
 

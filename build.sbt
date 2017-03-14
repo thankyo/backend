@@ -13,12 +13,9 @@ val reactiveMongoVer = "0.12.1"
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % reactiveMongoVer,
   "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVer,
-  "org.reactivemongo" %% "reactivemongo-iteratees" % reactiveMongoVer,
+  "org.reactivemongo" %% "reactivemongo-akkastream" % reactiveMongoVer,
 
   "net.codingwell" %% "scala-guice" % "4.1.0",
-
-  "com.pauldijou" %% "jwt-play" % "0.12.0",
-  "com.pauldijou" %% "jwt-play-json" % "0.12.0",
 
   "com.iheart" %% "ficus" % "1.2.6",
 
@@ -27,7 +24,6 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
   "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
 
-  "com.mohiva" %% "play-silhouette-testkit" % "4.0.0" % "test",
   specs2 % Test
 )
 

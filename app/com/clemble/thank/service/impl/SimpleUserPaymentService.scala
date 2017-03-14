@@ -1,18 +1,18 @@
 package com.clemble.thank.service.impl
 
-import com.clemble.thank.model.{Amount, Payment, User}
+import akka.stream.scaladsl.Source
+import com.clemble.thank.model.{Amount, Payment, User, UserId}
 import com.clemble.thank.service.repository.PaymentRepository
 import com.clemble.thank.service.{UserPaymentService, UserService}
 import com.google.inject.{Inject, Singleton}
-import play.api.libs.iteratee.Enumerator
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 case class SimpleUserPaymentService @Inject()(userService: UserService, repository: PaymentRepository, implicit val ec: ExecutionContext) extends UserPaymentService {
 
-  override def payments(user: User): Enumerator[Payment] = {
-    repository.findByUser(user.id)
+  override def payments(user: UserId): Source[Payment, _] = {
+    repository.findByUser(user)
   }
 
   override def debit(user: User, amount: Amount): Future[Payment] = {

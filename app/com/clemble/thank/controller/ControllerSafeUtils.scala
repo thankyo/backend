@@ -1,7 +1,8 @@
 package com.clemble.thank.controller
 
+import akka.stream.scaladsl.Source
 import com.clemble.thank.model.error.ThankException
-import play.api.libs.iteratee.Enumerator
+import play.api.http.{HttpChunk, HttpEntity, Writeable}
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.{Result, Results}
 
@@ -9,12 +10,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object ControllerSafeUtils extends Results {
 
-  def okChunked[T](fEnum: Future[Enumerator[T]])(implicit ec: ExecutionContext, writes: Writes[T]): Future[Result] = {
-    val jsonResult = fEnum.map(enum => {
-      val jsonPaymentSource = enum.map(payment => Json.toJson(payment))
-      Ok.chunked(jsonPaymentSource)
-    })
-    safe(jsonResult)
+  def ok[T](source: Source[T, _])(implicit ec: ExecutionContext, writeable: Writeable[T]): Result = {
+    val httpSource: Source[HttpChunk, _] = source.map[HttpChunk](c => HttpChunk.Chunk(writeable.transform(c)))
+    Result(
+      header = Ok.header,
+      body = HttpEntity.Chunked(httpSource, writeable.contentType)
+    )
   }
 
   def ok[T](f: Future[T])(implicit ec: ExecutionContext, writes: Writes[T]): Future[Result] = {

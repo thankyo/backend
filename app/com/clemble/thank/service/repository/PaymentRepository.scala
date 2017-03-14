@@ -1,7 +1,7 @@
 package com.clemble.thank.service.repository
 
+import akka.stream.scaladsl.Source
 import com.clemble.thank.model.{Payment, UserId}
-import play.api.libs.iteratee.Enumerator
 
 import scala.concurrent.Future
 
@@ -16,7 +16,7 @@ trait PaymentRepository {
     * @param user user identifier
     * @return all payments done by the user
     */
-  def findByUser(user: UserId): Enumerator[Payment]
+  def findByUser(user: UserId): Source[Payment, _]
 
   /**
     * Saves payment for future reference

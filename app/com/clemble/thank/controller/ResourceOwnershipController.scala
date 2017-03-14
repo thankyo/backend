@@ -9,9 +9,6 @@ import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
-/**
-  * Created by mavarazy on 3/14/17.
-  */
 class ResourceOwnershipController @Inject()(
                                              userService: UserService,
                                              silhouette: Silhouette[AuthEnv],

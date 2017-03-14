@@ -1,3 +1,5 @@
+# Test Endpoint for creating users, this won't work in production
+POST        /auth/authenticate/test          @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider = "test")
 GET         /auth/authenticate/:provider     @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider)
 
 GET         /user/:id                        @com.clemble.thank.controller.UserController.get(id)
@@ -8,6 +10,4 @@ GET         /transaction/user/me             @com.clemble.thank.controller.UserP
 GET         /thank/*url                      @com.clemble.thank.controller.ThankController.get(url)
 PUT         /thank/*url                      @com.clemble.thank.controller.ThankController.thank(url)
 
-# Test Endpoint for creating users, this won't work in production
-POST        /auth/authenticate/test          @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider = "test")
 

@@ -1,11 +1,13 @@
 package com.clemble.thank.service.repository
 
+import akka.stream.scaladsl.Sink
 import com.clemble.thank.model.Payment
 import com.clemble.thank.test.util.{PaymentGenerator, UserGenerator}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
-import play.api.libs.iteratee.Iteratee
+
+import scala.collection.immutable.Seq
 
 @RunWith(classOf[JUnitRunner])
 class PaymentRepositorySpec(implicit ee: ExecutionEnv) extends RepositorySpec {
@@ -22,7 +24,7 @@ class PaymentRepositorySpec(implicit ee: ExecutionEnv) extends RepositorySpec {
       val fTransactions = for {
         _ <- repository.save(A)
         _ <- repository.save(B)
-        transactions <- repository.findByUser(user.id).run(Iteratee.fold(List.empty[Payment])((agg, b) => b :: agg))
+        transactions <- repository.findByUser(user.id).runWith(Sink.seq[Payment])
       } yield {
         transactions
       }

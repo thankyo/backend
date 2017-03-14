@@ -12,7 +12,6 @@ import scala.concurrent.ExecutionContext
 
 trait ControllerSpec extends ThankSpecification {
 
-  implicit val materializer = application.injector.instanceOf[Materializer]
   implicit val ec = application.injector.instanceOf[ExecutionContext]
 
   def createUser(socialProfile: CommonSocialProfile = CommonSocialProfileGenerator.generate()): Seq[(String, String)] = {

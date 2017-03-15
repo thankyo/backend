@@ -7,6 +7,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.{JsArray, JsObject, JsString, Json}
 import play.modules.reactivemongo.json._
 import reactivemongo.api
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,6 +17,15 @@ case class MongoThankRepository @Inject()(
                                            @Named("thank") collection: JSONCollection,
                                            implicit val ec: ExecutionContext
                                          ) extends ThankRepository {
+
+  collection.indexesManager.
+    ensure(Index(
+      key = Seq("resource.type" -> IndexType.Ascending, "resource.uri" -> IndexType.Ascending),
+      name = Some("recourse_is_unique"),
+      unique = true
+    )).
+    filter(_ == true).
+    onFailure({ case _ => System.exit(1) })
 
   override def save(thank: Thank): Future[Boolean] = {
     val withParents = thank.withParents().map(t => {
@@ -31,7 +41,7 @@ case class MongoThankRepository @Inject()(
   }
 
   override def increase(resource: Resource): Future[Boolean] = {
-    val query = Json.obj("_id" ->
+    val query = Json.obj("resource" ->
       Json.obj("$in" ->
         JsArray(resource.parents().map(Json.toJson(_))
         )

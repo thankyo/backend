@@ -28,6 +28,7 @@ case class HttpResource(uri: String) extends Resource {
     parentUri.map(HttpResource)
   }
 }
+
 case class FacebookResource(uri: String) extends Resource {
   override def stringify(): String = s"facebook/${uri}"
   override def parents(): List[Resource] = List(this)
@@ -68,6 +69,7 @@ object Resource {
   def from(loginInfo: LoginInfo) = {
     loginInfo.providerID match {
       case "facebook" => FacebookResource(loginInfo.providerKey)
+      case "test"     => FacebookResource(loginInfo.providerKey)
     }
   }
 

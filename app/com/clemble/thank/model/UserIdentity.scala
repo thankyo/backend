@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 case class UserIdentity(
-                         id: UserId,
+                         id: UserID,
                          firstName: Option[String],
                          lastName: Option[String],
                          thumbnail: Option[String],

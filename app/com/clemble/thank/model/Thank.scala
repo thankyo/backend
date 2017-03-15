@@ -7,12 +7,12 @@ import play.api.libs.json.Json
   * Thank abstraction
   */
 case class Thank(
-                  uri: String,
+                  resource: Resource,
                   given: Amount = 0L
                 ) {
 
   def withParents(): List[Thank] = {
-    URIUtils.toParents(uri).map(Thank(_))
+    URIUtils.toParents(resource).map(Thank(_))
   }
 
 }

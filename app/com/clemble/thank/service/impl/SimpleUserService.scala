@@ -1,7 +1,7 @@
 package com.clemble.thank.service.impl
 
-import com.clemble.thank.model.{Amount, ResourceOwnership, User, UserId}
-import com.clemble.thank.service.{UserService}
+import com.clemble.thank.model._
+import com.clemble.thank.service.UserService
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.{Inject, Singleton}
 
@@ -10,26 +10,27 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class SimpleUserService @Inject()(repository: UserRepository, implicit val ec: ExecutionContext) extends UserService {
 
-  override def findById(id: UserId): Future[Option[User]] = {
+  override def findById(id: UserID): Future[Option[User]] = {
     repository.findById(id)
   }
 
-  override def assignOwnership(userId: UserId, resource: ResourceOwnership): Future[ResourceOwnership] = {
-    def canOwn(resource: ResourceOwnership, users: List[User]): Boolean = {
+  override def assignOwnership(userId: UserID, resource: ResourceOwnership): Future[ResourceOwnership] = {
+    def canOwn(ownership: ResourceOwnership, users: List[User]): Boolean = {
       val allOwned = users.flatMap(_.owns)
-      val oneOfAlreadyOwned = allOwned.contains(resource)
-      val alreadyFullyOwned = allOwned.exists(_.owns(resource))
+      val oneOfAlreadyOwned = allOwned.contains(ownership)
+      val alreadyFullyOwned = allOwned.exists(_.owns(ownership.resource))
       !(oneOfAlreadyOwned || alreadyFullyOwned)
     }
 
-    def toPendingBalance(resource: ResourceOwnership, relatedUsers: List[User]): Future[Amount] = {
-      val realizedUsers = relatedUsers.filter(_.owns.exists(resource.owns))
+    def toPendingBalance(ownership: ResourceOwnership, relatedUsers: List[User]): Future[Amount] = {
+      val realizedUsers = relatedUsers.filter(_.owns.map(_.resource).exists(ownership.owns))
       for {
         _ <- repository.remove(relatedUsers.map(_.id))
       } yield {
         realizedUsers.map(_.balance).sum
       }
     }
+
     for {
       relatedUsers <- repository.findRelated(resource) if (canOwn(resource, relatedUsers))
       userOpt <- repository.findById(userId) if (userOpt.isDefined && !relatedUsers.exists(_ == userOpt.get))
@@ -41,7 +42,7 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
     }
   }
 
-  override def findResourceOwner(uri: String): Future[User] = {
+  override def findResourceOwner(uri: Resource): Future[User] = {
     def createOwnerIfMissing(userOpt: Option[User]): Future[User] = {
       userOpt match {
         case Some(id) => Future.successful(id)
@@ -49,16 +50,16 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
       }
     }
 
-    def chooseOwner(uri: String): Future[Option[User]] = {
+    def chooseOwner(uri: Resource): Future[Option[User]] = {
       val ownerships = ResourceOwnership.toPossibleOwnerships(uri)
       for {
         owners <- repository.findOwners(ownerships)
       } yield {
         val resToOwner = owners.
           flatMap(owner => {
-            owner.owns.filter(ownerships.contains).map(res => res.uri -> owner)
+            owner.owns.filter(ownerships.contains).map(res => res.resource -> owner)
           }).
-          sortBy({ case (uri, _) => -uri.length })
+          sortBy({ case (resource, _) => - resource.uri.length })
 
         resToOwner.headOption.map({ case (_, owner) => owner })
       }
@@ -72,7 +73,7 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
     }
   }
 
-  override def updateBalance(user: UserId, change: Amount): Future[Boolean] = {
+  override def updateBalance(user: UserID, change: Amount): Future[Boolean] = {
     repository.changeBalance(user, change)
   }
 

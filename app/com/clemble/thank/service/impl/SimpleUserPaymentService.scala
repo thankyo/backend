@@ -11,36 +11,34 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class SimpleUserPaymentService @Inject()(userService: UserService, repository: PaymentRepository, implicit val ec: ExecutionContext) extends UserPaymentService {
 
-  override def payments(user: UserId): Source[Payment, _] = {
+  override def payments(user: UserID): Source[Payment, _] = {
     repository.findByUser(user)
   }
 
-  override def operation(giverId: UserId, url: URI, amount: Amount): Future[List[Payment]] = {
+  override def operation(giverId: UserID, url: Resource, amount: Amount): Future[List[Payment]] = {
     for {
-      giverOpt <- userService.findById(giverId) if (giverOpt.isDefined)
-      giver = giverOpt.get
       owner <- userService.findResourceOwner(url)
-      ownerDebitOp <- debit(owner, amount)
-      giverCreditOp <- credit(giver, amount)
+      ownerDebitOp <- debit(owner.id, url, amount)
+      giverCreditOp <- credit(giverId,url,  amount)
     } yield {
       List(ownerDebitOp, giverCreditOp)
     }
   }
 
-  override def debit(user: User, amount: Amount): Future[Payment] = {
-    val debitOperation = Payment.debit(user, amount)
+  private def debit(user: UserID, uri: Resource, amount: Amount): Future[Payment] = {
+    val debitOperation = Payment.debit(user, uri, amount)
     for {
-      _ <- userService.updateBalance(user.id, amount)
+      _ <- userService.updateBalance(user, amount)
       payment <- repository.save(debitOperation)
     } yield {
       payment
     }
   }
 
-  override def credit(user: User, amount: Amount): Future[Payment] = {
-    val creditOperation = Payment.credit(user, amount)
+  private def credit(user: UserID, uri: Resource, amount: Amount): Future[Payment] = {
+    val creditOperation = Payment.credit(user, uri, amount)
     for {
-      _ <- userService.updateBalance(user.id, -amount)
+      _ <- userService.updateBalance(user, -amount)
       payment <- repository.save(creditOperation)
     } yield {
       payment

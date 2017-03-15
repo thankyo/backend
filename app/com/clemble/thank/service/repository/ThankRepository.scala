@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository
 
-import com.clemble.thank.model.Thank
+import com.clemble.thank.model.{Resource, Thank}
 
 import scala.concurrent.Future
 
@@ -22,13 +22,13 @@ trait ThankRepository {
     *
     * @return existing or creates new [[Thank]]
     */
-  def findByURI(uri: String): Future[Option[Thank]]
+  def findByResource(uri: Resource): Future[Option[Thank]]
 
   /**
     * Increases number of thanks given
     *
     * @return true, if update passed
     */
-  def increase(url: String): Future[Boolean]
+  def increase(url: Resource): Future[Boolean]
 
 }

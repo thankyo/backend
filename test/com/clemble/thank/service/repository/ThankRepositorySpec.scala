@@ -15,7 +15,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   val repository = application.injector.instanceOf[ThankRepository]
 
   def findAll(allUrls: Seq[String]): Future[Seq[Thank]] = {
-    val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(allUrls.map(uri => repository.findByURI(uri)))
+    val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(allUrls.map(uri => repository.findByResource(uri)))
     searchQuery.map(_.flatten)
   }
 
@@ -23,11 +23,11 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
     "create all parents" in {
       val thank = ThankGenerator.generate()
-      val urlParents = URIUtils.toParents(thank.uri)
+      val urlParents = URIUtils.toParents(thank.resource)
 
       val allCreatedUri = for {
         _ <- repository.save(thank)
-        search <- findAll(urlParents).map(_.map(_.uri))
+        search <- findAll(urlParents).map(_.map(_.resource))
       } yield {
         search
       }
@@ -45,7 +45,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
     "increase all parents" in {
       val thank = ThankGenerator.generate()
-      val urlParents = URIUtils.toParents(thank.uri)
+      val urlParents = URIUtils.toParents(thank.resource)
 
       val fAllThanks = for {
         _ <- repository.save(thank)

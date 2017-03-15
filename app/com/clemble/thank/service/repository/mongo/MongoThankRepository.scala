@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository.mongo
 
-import com.clemble.thank.model.Thank
+import com.clemble.thank.model.{Resource, Thank}
 import com.clemble.thank.service.repository.ThankRepository
 import com.clemble.thank.util.URIUtils
 import com.google.inject.name.Named
@@ -20,21 +20,21 @@ case class MongoThankRepository @Inject()(
 
   override def save(thank: Thank): Future[Boolean] = {
     val withParents = thank.withParents().map(t => {
-      Json.toJson(t).as[JsObject] + ("_id" -> JsString(t.uri))
+      Json.toJson(t).as[JsObject]
     })
     val fInsert = collection.bulkInsert(withParents.toStream, false, api.commands.WriteConcern.Acknowledged)
     MongoSafeUtils.safe(fInsert.map(_ => true))
   }
 
-  override def findByURI(uri: String): Future[Option[Thank]] = {
-    val fSearchResult = collection.find(Json.obj("_id" -> uri)).one[Thank]
+  override def findByResource(resource: Resource): Future[Option[Thank]] = {
+    val fSearchResult = collection.find(Json.obj("resource" -> resource)).one[Thank]
     MongoSafeUtils.safe(fSearchResult)
   }
 
-  override def increase(uri: String): Future[Boolean] = {
+  override def increase(resource: Resource): Future[Boolean] = {
     val query = Json.obj("_id" ->
       Json.obj("$in" ->
-        JsArray(URIUtils.toParents(uri).map(JsString(_))
+        JsArray(URIUtils.toParents(resource).map(Json.toJson(_))
         )
       )
     )

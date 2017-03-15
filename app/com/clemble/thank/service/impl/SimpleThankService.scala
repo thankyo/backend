@@ -1,6 +1,6 @@
 package com.clemble.thank.service.impl
 
-import com.clemble.thank.model.{Thank, URI, UserId}
+import com.clemble.thank.model.{Thank, Resource, UserID}
 import com.clemble.thank.service.repository.{ThankRepository}
 import com.clemble.thank.service.{ThankService, UserPaymentService}
 import com.clemble.thank.util.URIUtils
@@ -11,26 +11,25 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class SimpleThankService @Inject()(paymentService: UserPaymentService, repository: ThankRepository, implicit val ec: ExecutionContext) extends ThankService {
 
-  override def getOrCreate(uri: URI): Future[Thank] = {
+  override def getOrCreate(resource: Resource): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
       thankOpt match {
         case Some(thank) => Future.successful(thank)
         case None => repository.
-          save(Thank(uri)).
-          flatMap(_ => repository.findByURI(uri).map(_.get))
+          save(Thank(resource)).
+          flatMap(_ => repository.findByResource(resource).map(_.get))
       }
     }
 
-    repository.findByURI(uri).flatMap(createIfMissing)
+    repository.findByResource(resource).flatMap(createIfMissing)
   }
 
-  override def thank(user: UserId, uri: URI): Future[Thank] = {
-    val normUri: URI = URIUtils.normalize(uri)
+  override def thank(user: UserID, resource: Resource): Future[Thank] = {
     for {
-      _ <- getOrCreate(normUri) // Ensure Thank exists
-      _ <- paymentService.operation(user, uri, 1)
-      _ <- repository.increase(normUri)
-      updated <- repository.findByURI(normUri).map(_.get)
+      _ <- getOrCreate(resource) // Ensure Thank exists
+      _ <- paymentService.operation(user, resource, 1)
+      _ <- repository.increase(resource)
+      updated <- repository.findByResource(resource).map(_.get)
     } yield {
       updated
     }

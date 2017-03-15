@@ -1,6 +1,6 @@
 package com.clemble.thank.controller
 
-import com.clemble.thank.model.UserId
+import com.clemble.thank.model.UserID
 import com.clemble.thank.service.UserService
 import com.clemble.thank.util.AuthEnv
 import com.google.inject.{Inject, Singleton}
@@ -16,7 +16,7 @@ case class UserController @Inject()(
                                      implicit val ec: ExecutionContext
                                    ) extends Controller {
 
-  def get(id: UserId) = silhouette.SecuredAction.async(implicit req => {
+  def get(id: UserID) = silhouette.SecuredAction.async(implicit req => {
     val realId = AuthUtils.whoAmI(id)
     val fUserOpt = userService.findById(realId)
     ControllerSafeUtils.okOrNotFound(fUserOpt)

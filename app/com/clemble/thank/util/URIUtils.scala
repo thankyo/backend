@@ -1,17 +1,20 @@
 package com.clemble.thank.util
 
-import com.clemble.thank.model.URI
+import com.clemble.thank.model.{FacebookSource, HTTPSource, Resource, ResourceSource}
 import com.mohiva.play.silhouette.api.LoginInfo
 
 import scala.annotation.tailrec
 
 object URIUtils {
 
-  def toUri(profile: LoginInfo): String = {
-    profile.providerID + "//" + profile.providerKey
+  def toUri(profile: LoginInfo): Resource = {
+    profile.providerID match {
+      case "facebook" => Resource(FacebookSource, profile.providerKey)
+      case "test" => Resource(HTTPSource, profile.providerKey)
+    }
   }
 
-  def toParents(uriStr: URI): List[String] = {
+  private def toHttpParents(uri: String): List[String] = {
     def toURI(uri: List[String]): String = {
       uri.mkString("/")
     }
@@ -22,16 +25,35 @@ object URIUtils {
       else toParents(uri.tail, toURI(uri.reverse) :: agg)
     }
 
-    val normUri = normalize(uriStr).split("\\/").toList
+    val normUri = normalize(uri).uri.split("\\/").toList
     toParents(normUri.reverse, List.empty[String]).reverse
   }
 
-  def normalize(uri: String): String = {
-    def removeHttpPrefix(uri: String): String = {
+  def toParents(uri: Resource): List[Resource] = {
+    uri.source match {
+      case FacebookSource => List(uri)
+      case HTTPSource => toHttpParents(uri.uri).map(Resource(HTTPSource, _))
+    }
+  }
+
+  def normalize(resource: Resource): Resource = {
+    resource
+  }
+
+  def normalize(uriStr: String): Resource = {
+    def toSource(uri: String): ResourceSource = uri match {
+      case facebookResource if (facebookResource.startsWith("facebook/")) => FacebookSource
+      case httpResource if (httpResource.startsWith("http/") || httpResource.startsWith("https/")) => HTTPSource
+      case _ => HTTPSource
+    }
+
+    def removeSourcePrefix(uri: String): String = {
       if (uri.startsWith("http/")) {
         uri.substring(5)
       } else if (uri.startsWith("https/")) {
         uri.substring(6)
+      } else if (uri.startsWith("facebook/")) {
+        uri.substring(9)
       } else {
         uri
       }
@@ -48,9 +70,10 @@ object URIUtils {
         uri
     }
 
-    removePrefix(
-      removeHttpPrefix(removeMultipleSlashes(uri))
-    )
+    val source = toSource(uriStr)
+    val uri = removePrefix(removeSourcePrefix(removeMultipleSlashes(uriStr)))
+
+    Resource(source, uri)
   }
 
 }

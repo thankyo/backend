@@ -9,7 +9,7 @@ import play.api.libs.json.Json
 import reactivemongo.bson.BSONObjectID
 
 trait UserProfile {
-  val id: UserId
+  val id: UserID
   val firstName: Option[String]
   val lastName: Option[String]
   val thumbnail: Option[String]
@@ -26,7 +26,7 @@ trait UserProfile {
   *    - receives thanks from owned urls
   */
 case class User(
-                 id: UserId,
+                 id: UserID,
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
                  owns: Set[ResourceOwnership] = Set.empty,
@@ -73,6 +73,10 @@ case class User(
 
 }
 
+trait UserAware {
+  val user: UserID
+}
+
 object User {
 
   val DEFAULT_AMOUNT = 0L
@@ -93,7 +97,7 @@ object User {
     User(BSONObjectID.generate().stringify).link(profile)
   }
 
-  def empty(uri: String) = {
+  def empty(uri: Resource) = {
     User(
       id = BSONObjectID.generate().stringify,
       owns = Set(ResourceOwnership.unrealized(uri))

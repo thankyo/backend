@@ -7,12 +7,8 @@ import scala.concurrent.Future
 
 trait UserPaymentService {
 
-  def payments(user: UserId): Source[Payment, _]
+  def payments(user: UserID): Source[Payment, _]
 
-  def operation(giver: UserId, url: URI, amount: Amount): Future[List[Payment]]
-
-  def debit(user: User, amount: Amount): Future[Payment]
-
-  def credit(user: User, amount: Amount): Future[Payment]
+  def operation(giver: UserID, url: Resource, amount: Amount): Future[List[Payment]]
 
 }

@@ -31,7 +31,7 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(() => user, fUpdate)
   }
 
-  override def findById(id: UserId): Future[Option[User]] = {
+  override def findById(id: UserID): Future[Option[User]] = {
     val query = Json.obj("_id" -> id)
     val fUser = collection.find(query).one[User]
     MongoSafeUtils.safe(fUser)
@@ -43,18 +43,18 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(fUser)
   }
 
-  override def changeBalance(id: UserId, diff: Amount): Future[Boolean] = {
+  override def changeBalance(id: UserID, diff: Amount): Future[Boolean] = {
     val query = Json.obj("_id" -> id)
     val change = Json.obj("$inc" -> Json.obj("balance" -> diff))
     MongoSafeUtils.safe(() => true, collection.update(query, change))
   }
 
   override def findRelated(uri: ResourceOwnership): Future[List[User]] = {
-    val query = Json.obj("owns.uri" -> Json.obj("$regex" -> s"${uri.uri}.*"))
+    val query = Json.obj("owns.uri" -> Json.obj("$regex" -> s"${uri.resource}.*"))
     doFind(query)
   }
 
-  override def remove(users: Seq[UserId]): Future[Boolean] = {
+  override def remove(users: Seq[UserID]): Future[Boolean] = {
     val query = Json.obj("_id" -> Json.obj("$in" -> JsArray(users.map(JsString))))
     val fRemove = collection.remove(query).map(_.ok)
     MongoSafeUtils.safe(fRemove)

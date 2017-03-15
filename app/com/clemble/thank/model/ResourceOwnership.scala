@@ -4,41 +4,58 @@ import com.clemble.thank.util.URIUtils
 import play.api.libs.json._
 
 sealed trait ResourceOwnership {
-  val uri: URI
-  def owns(resource: ResourceOwnership): Boolean
+  val resource: Resource
+  def owns(subject: Resource): Boolean
   def normalize(): ResourceOwnership
 }
 
-case class FullResourceOwnership(uri: URI) extends ResourceOwnership {
-  override def owns(resource: ResourceOwnership): Boolean = resource.uri.startsWith(uri)
-  override def normalize(): FullResourceOwnership = FullResourceOwnership(URIUtils.normalize(uri))
+case class FullResourceOwnership(resource: Resource) extends ResourceOwnership {
+  override def owns(subject: Resource): Boolean = {
+    val sameSource = subject.source == resource.source
+    val subUri = resource.source match {
+      case HTTPSource => subject.uri.startsWith(resource.uri)
+      case _ => resource.uri == subject.uri
+    }
+    sameSource && subUri
+  }
+  override def normalize(): FullResourceOwnership = FullResourceOwnership(URIUtils.normalize(resource))
 }
 
-case class PartialResourceOwnership(uri: URI) extends ResourceOwnership {
-  override def owns(resource: ResourceOwnership): Boolean = resource.uri == uri
-  override def normalize(): PartialResourceOwnership = PartialResourceOwnership(URIUtils.normalize(uri))
+case class PartialResourceOwnership(resource: Resource) extends ResourceOwnership {
+  override def owns(subject: Resource): Boolean = {
+    val sameSource = subject.source == resource.source
+    val sameUri = subject.uri == resource.uri
+    sameSource && sameUri
+  }
+  override def normalize(): PartialResourceOwnership = {
+    PartialResourceOwnership(URIUtils.normalize(resource))
+  }
 }
 
-case class UnrealizedResourceOwnership(uri: URI) extends ResourceOwnership {
-  override def owns(resource: ResourceOwnership): Boolean = resource.uri == uri
-  override def normalize(): UnrealizedResourceOwnership = UnrealizedResourceOwnership(URIUtils.normalize(uri))
+case class UnrealizedResourceOwnership(resource: Resource) extends ResourceOwnership {
+  override def owns(subject: Resource): Boolean = {
+    val sameSource = subject.source == resource.source
+    val sameUri = subject.uri == resource.uri
+    sameSource && sameUri
+  }
+  override def normalize(): UnrealizedResourceOwnership = UnrealizedResourceOwnership(URIUtils.normalize(resource))
 }
 
 object ResourceOwnership {
 
-  def full(uri: URI): ResourceOwnership = FullResourceOwnership(uri)
+  def full(uri: Resource): ResourceOwnership = FullResourceOwnership(uri)
 
-  def partial(uri: URI): ResourceOwnership = PartialResourceOwnership(uri)
+  def partial(uri: Resource): ResourceOwnership = PartialResourceOwnership(uri)
 
-  def unrealized(uri: URI): ResourceOwnership = UnrealizedResourceOwnership(uri)
+  def unrealized(uri: Resource): ResourceOwnership = UnrealizedResourceOwnership(uri)
 
-  def toPossibleOwnerships(uriStr: URI): List[ResourceOwnership] = {
+  def toPossibleOwnerships(resource: Resource): List[ResourceOwnership] = {
     val fullAndUnrealized = URIUtils.
-      toParents(uriStr).
-      flatMap(uri => {
-        List(ResourceOwnership.full(uri), ResourceOwnership.unrealized(uri))
+      toParents(resource).
+      flatMap(subResource => {
+        List(ResourceOwnership.full(subResource), ResourceOwnership.unrealized(subResource))
       })
-    ResourceOwnership.partial(uriStr) :: fullAndUnrealized
+    ResourceOwnership.partial(resource) :: fullAndUnrealized
   }
 
   implicit val jsonFormat = new Format[ResourceOwnership] {
@@ -48,8 +65,8 @@ object ResourceOwnership {
     val UNREALIZED = JsString("unrealized")
 
     override def reads(json: JsValue): JsResult[ResourceOwnership] = {
-      val uriOpt = (json \ "uri").asOpt[String]
-      uriOpt.flatMap(uri => {
+      val resourceOpt = (json \ "resource").asOpt[Resource]
+      resourceOpt.flatMap(uri => {
         (json \ "type") match {
           case JsDefined(FULL) => Some(FullResourceOwnership(uri))
           case JsDefined(PARTIAL) => Some(PartialResourceOwnership(uri))
@@ -72,7 +89,7 @@ object ResourceOwnership {
       JsObject(
         Seq(
           "type" -> typeJson,
-          "uri" -> JsString(o.uri)
+          "resource" -> Resource.jsonFormat.writes(o.resource)
         )
       )
     }

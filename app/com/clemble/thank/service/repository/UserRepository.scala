@@ -14,7 +14,7 @@ trait UserRepository extends IdentityService[UserIdentity] {
   /**
     * Find [[User]] by ID
     */
-  def findById(id: UserId): Future[Option[User]]
+  def findById(id: UserID): Future[Option[User]]
 
   /**
     * Find owner of provided uri
@@ -47,13 +47,13 @@ trait UserRepository extends IdentityService[UserIdentity] {
     * @param users
     * @return
     */
-  def remove(users: Seq[UserId]): Future[Boolean]
+  def remove(users: Seq[UserID]): Future[Boolean]
 
   /**
     * Change user balance
     *
     * @return
     */
-  def changeBalance(id: UserId, diff: Amount): Future[Boolean]
+  def changeBalance(id: UserID, diff: Amount): Future[Boolean]
 
 }

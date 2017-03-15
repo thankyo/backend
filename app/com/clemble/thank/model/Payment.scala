@@ -34,13 +34,13 @@ object PaymentOperation {
 }
 
 case class Payment(
-                    id: PaymentId,
-                    user: UserId,
+                    id: PaymentID,
+                    user: UserID,
                     amount: Amount,
-                    bankDetails: BankDetails,
+                    uri: Resource,
                     operation: PaymentOperation,
                     createdDate: DateTime
-                  )
+                  ) extends UserAware
 
 object Payment {
 
@@ -49,23 +49,23 @@ object Payment {
     */
   implicit val jsonFormat = Json.format[Payment]
 
-  def debit(user: User, amount: Amount): Payment = {
+  def debit(user: UserID, uri: Resource, amount: Amount): Payment = {
     Payment(
       BSONObjectID.generate().stringify,
-      user.id,
+      user,
       amount,
-      user.bankDetails,
+      uri,
       Debit,
       DateTime.now()
     )
   }
 
-  def credit(user: User, amount: Amount): Payment = {
+  def credit(user: UserID, uri: Resource, amount: Amount): Payment = {
     Payment(
       BSONObjectID.generate().stringify,
-      user.id,
+      user,
       amount,
-      user.bankDetails,
+      uri,
       Credit,
       DateTime.now()
     )

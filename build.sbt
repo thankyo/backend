@@ -34,6 +34,9 @@ coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*"""
 javaOptions in Universal ++= Seq(
   "-Dpidfile.path=/dev/null"
 )
+
+javaOptions in Test ++= Seq("-Dconfig.resource=application.test.conf")
+
 version in Docker := "latest"
 maintainer in Docker := "antono@clemble.com"
 dockerBaseImage := "java:8u111-jre"

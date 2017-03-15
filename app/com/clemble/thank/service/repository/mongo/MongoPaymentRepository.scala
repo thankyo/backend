@@ -1,7 +1,7 @@
 package com.clemble.thank.service.repository.mongo
 
 import akka.stream.Materializer
-import com.clemble.thank.model.{Payment, UserId}
+import com.clemble.thank.model.{Payment, UserID}
 import com.clemble.thank.service.repository.PaymentRepository
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
@@ -20,7 +20,7 @@ case class MongoPaymentRepository @Inject()(
                                              implicit val m: Materializer,
                                              implicit val ec: ExecutionContext) extends PaymentRepository {
 
-  override def findByUser(user: UserId): Source[Payment, _] = {
+  override def findByUser(user: UserID): Source[Payment, _] = {
     collection.find(Json.obj("user" -> user)).cursor[Payment](ReadPreference.nearest).documentSource()
   }
 

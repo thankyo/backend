@@ -2,7 +2,7 @@ package com.clemble.thank.controller
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
-import com.clemble.thank.model.{Payment, ResourceOwnership, User, UserId}
+import com.clemble.thank.model.{Payment, ResourceOwnership, User, UserID}
 import com.clemble.thank.test.util.{CommonSocialProfileGenerator, ThankSpecification, UserGenerator}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.libs.json.Json
@@ -41,7 +41,7 @@ trait ControllerSpec extends ThankSpecification {
     getUser("me").get
   }
 
-  def getUser(id: UserId)(implicit authHeader: Seq[(String, String)]): Option[User] = {
+  def getUser(id: UserID)(implicit authHeader: Seq[(String, String)]): Option[User] = {
     val readReq = FakeRequest(GET, s"/api/v1/user/${id}").withHeaders(authHeader:_*)
     val resp = await(route(application, readReq).get)
     resp.header.status match {

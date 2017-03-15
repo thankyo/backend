@@ -18,14 +18,14 @@ case class MongoThankRepository @Inject()(
                                            implicit val ec: ExecutionContext
                                          ) extends ThankRepository {
 
-  collection.indexesManager.
-    ensure(Index(
+  MongoSafeUtils.ensureIndexes(
+    collection,
+    Index(
       key = Seq("resource.type" -> IndexType.Ascending, "resource.uri" -> IndexType.Ascending),
       name = Some("recourse_is_unique"),
       unique = true
-    )).
-    filter(_ == true).
-    onFailure({ case _ => System.exit(1) })
+    )
+  )
 
   override def save(thank: Thank): Future[Boolean] = {
     val withParents = thank.withParents().map(t => {

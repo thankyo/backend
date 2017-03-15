@@ -12,11 +12,29 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.modules.reactivemongo.json._
+import reactivemongo.api.indexes.{Index, IndexType}
 
 case class MongoUserRepository @Inject()(
                                           @Named("user") collection: JSONCollection,
                                           implicit val ec: ExecutionContext
                                         ) extends UserRepository {
+
+  MongoSafeUtils.ensureIndexes(
+    collection,
+    Index(
+      key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
+      name = Some("user_profiles")
+    ),
+    Index(
+      key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
+      name = Some("user_resources")
+    ),
+    Index(
+      key = Seq("owns.resource.uri" -> IndexType.Ascending),
+      name = Some("user_owns")
+    )
+  )
+
 
   override def save(user: User): Future[User] = {
     val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
@@ -50,7 +68,7 @@ case class MongoUserRepository @Inject()(
   }
 
   override def findRelated(uri: ResourceOwnership): Future[List[User]] = {
-    val query = Json.obj("owns.uri" -> Json.obj("$regex" -> s"${uri.resource}.*"))
+    val query = Json.obj("owns.resource.uri" -> Json.obj("$regex" -> s"${uri.resource}.*"))
     doFind(query)
   }
 

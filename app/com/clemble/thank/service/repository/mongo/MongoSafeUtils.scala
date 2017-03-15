@@ -2,7 +2,9 @@ package com.clemble.thank.service.repository.mongo
 
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
 import reactivemongo.api.commands.{WriteError, WriteResult}
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.core.errors.DatabaseException
+import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,6 +48,14 @@ object MongoSafeUtils {
         val exception = toException(dbExc)
         Future.failed(exception)
     })
+  }
+
+  def ensureIndexes(collection: JSONCollection, indexes: Index*)(implicit ec: ExecutionContext) = {
+    for {
+      index <- indexes
+    } yield {
+      collection.indexesManager.ensure(index).filter(_ == true).onFailure({ case _ => System.exit(1) })
+    }
   }
 
 }

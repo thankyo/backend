@@ -1,8 +1,8 @@
 package com.clemble.thank.controller
 
-import com.clemble.thank.model.{Credit, Debit}
+import com.clemble.thank.model.{Credit, Debit, HttpResource}
 import com.clemble.thank.model.ResourceOwnership._
-import com.clemble.thank.util.URIUtilsSpec
+import com.clemble.thank.util.{ResourceSpec}
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
@@ -20,9 +20,9 @@ class ThankControllerSpec extends ControllerSpec {
 
       val giver = createUser()
       val owner = createUser()
-      addOwnership(full(masterUrl))(owner) shouldNotEqual None
+      addOwnership(full(HttpResource(masterUrl)))(owner) shouldNotEqual None
 
-      val uriVariations = URIUtilsSpec.generateVariations(masterUrl)
+      val uriVariations = ResourceSpec.generateVariations(masterUrl)
       val thanks = for {
         uri <- uriVariations
       } yield {
@@ -40,7 +40,7 @@ class ThankControllerSpec extends ControllerSpec {
 
       val giver = createUser()
       val owner = createUser()
-      addOwnership(full(masterUrl))(owner) shouldNotEqual None
+      addOwnership(full(HttpResource(masterUrl)))(owner) shouldNotEqual None
 
       val req = FakeRequest(PUT, s"/api/v1/thank/${masterUrl}").withHeaders(giver:_*)
       await(route(application, req).get)

@@ -3,7 +3,6 @@ package com.clemble.thank.service.impl
 import com.clemble.thank.model.{Thank, Resource, UserID}
 import com.clemble.thank.service.repository.{ThankRepository}
 import com.clemble.thank.service.{ThankService, UserPaymentService}
-import com.clemble.thank.util.URIUtils
 import com.google.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}

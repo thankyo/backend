@@ -1,6 +1,5 @@
 package com.clemble.thank.model
 
-import com.clemble.thank.util.URIUtils
 import play.api.libs.json.Json
 
 /**
@@ -12,7 +11,7 @@ case class Thank(
                 ) {
 
   def withParents(): List[Thank] = {
-    URIUtils.toParents(resource).map(Thank(_))
+    resource.parents().map(Thank(_))
   }
 
 }

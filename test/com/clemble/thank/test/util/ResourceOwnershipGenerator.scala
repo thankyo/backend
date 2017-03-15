@@ -8,11 +8,11 @@ object ResourceOwnershipGenerator extends Generator[ResourceOwnership] {
 
   override def generate(): ResourceOwnership = {
     if (nextInt(0, 2) == 0) {
-      ResourceOwnership.full(s"http/example.com/some/${randomNumeric(10)}")
+      ResourceOwnership.full(ResourceGenerator.generate())
     } else if (nextInt(0, 1) == 0) {
-      ResourceOwnership.partial(s"http/example.com/some/${randomNumeric(10)}")
+      ResourceOwnership.partial(ResourceGenerator.generate())
     } else {
-      ResourceOwnership.unrealized(s"http/example.com/some/${randomNumeric(10)}")
+      ResourceOwnership.unrealized(ResourceGenerator.generate())
     }
   }
 

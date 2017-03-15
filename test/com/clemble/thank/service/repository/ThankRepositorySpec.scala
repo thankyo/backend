@@ -1,8 +1,7 @@
 package com.clemble.thank.service.repository
 
-import com.clemble.thank.model.Thank
+import com.clemble.thank.model.{Resource, Thank}
 import com.clemble.thank.test.util.ThankGenerator
-import com.clemble.thank.util.URIUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -14,8 +13,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
   val repository = application.injector.instanceOf[ThankRepository]
 
-  def findAll(allUrls: Seq[String]): Future[Seq[Thank]] = {
-    val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(allUrls.map(uri => repository.findByResource(uri)))
+  def findAll(resources: Seq[Resource]): Future[Seq[Thank]] = {
+    val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(resources.map(uri => repository.findByResource(uri)))
     searchQuery.map(_.flatten)
   }
 
@@ -23,7 +22,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
     "create all parents" in {
       val thank = ThankGenerator.generate()
-      val urlParents = URIUtils.toParents(thank.resource)
+      val urlParents = thank.resource.parents()
 
       val allCreatedUri = for {
         _ <- repository.save(thank)
@@ -39,13 +38,13 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
   "INCREASE" should {
 
-    def increaseAll(urls: List[String]): Future[Boolean] = {
-      Future.sequence(urls.map(repository.increase(_))).map(_.forall(_ == true))
+    def increaseAll(resources: List[Resource]): Future[Boolean] = {
+      Future.sequence(resources.map(repository.increase(_))).map(_.forall(_ == true))
     }
 
     "increase all parents" in {
       val thank = ThankGenerator.generate()
-      val urlParents = URIUtils.toParents(thank.resource)
+      val urlParents = thank.resource.parents()
 
       val fAllThanks = for {
         _ <- repository.save(thank)

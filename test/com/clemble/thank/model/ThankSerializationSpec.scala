@@ -14,11 +14,11 @@ class ThankSerializationSpec extends SerializationSpec[Thank] {
   "with parents" should {
 
     "return all" in {
-      val thank = Thank("example.com/some/what")
+      val thank = Thank(HttpResource("example.com/some/what"))
       val expected = List(
-        Thank("example.com/some/what"),
-        Thank("example.com/some"),
-        Thank("example.com")
+        Thank(HttpResource("example.com/some/what")),
+        Thank(HttpResource("example.com/some")),
+        Thank(HttpResource("example.com"))
       )
       thank.withParents() shouldEqual expected
     }

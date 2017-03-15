@@ -2,7 +2,6 @@ package com.clemble.thank.service.repository.mongo
 
 import com.clemble.thank.model.{Resource, Thank}
 import com.clemble.thank.service.repository.ThankRepository
-import com.clemble.thank.util.URIUtils
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.{JsArray, JsObject, JsString, Json}
@@ -34,7 +33,7 @@ case class MongoThankRepository @Inject()(
   override def increase(resource: Resource): Future[Boolean] = {
     val query = Json.obj("_id" ->
       Json.obj("$in" ->
-        JsArray(URIUtils.toParents(resource).map(Json.toJson(_))
+        JsArray(resource.parents().map(Json.toJson(_))
         )
       )
     )

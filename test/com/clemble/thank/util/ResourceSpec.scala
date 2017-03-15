@@ -1,33 +1,34 @@
 package com.clemble.thank.util
 
+import com.clemble.thank.model.{HttpResource, Resource}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class URIUtilsSpec extends Specification {
+class ResourceSpec extends Specification {
 
   "generate all parent URL's" in {
-    val parts = URIUtils.toParents("http/example.com/some/what")
+    val parts = Resource.from("http/example.com/some/what").parents()
     parts must beEqualTo(List(
-      "example.com/some/what",
-      "example.com/some",
-      "example.com"
+      HttpResource("example.com/some/what"),
+      HttpResource("example.com/some"),
+      HttpResource("example.com")
     ))
   }
 
   "normalize" in {
-    val uri = "example.com/some/what"
+    val resource = HttpResource("example.com/some/what")
     for {
-      variation <- URIUtilsSpec.generateVariations(uri)
+      variation <- ResourceSpec.generateVariations(resource.uri)
     } yield {
-      URIUtils.normalize(variation) shouldEqual uri
+      Resource.from(variation) shouldEqual resource
     }
   }
 
 }
 
-object URIUtilsSpec {
+object ResourceSpec {
 
   def generateVariations(masterURI: String): List[String] = {
     List(

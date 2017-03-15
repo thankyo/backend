@@ -1,7 +1,6 @@
 package com.clemble.thank.model
 
 import com.clemble.thank.model.User.ExtendedBasicProfile
-import com.clemble.thank.util.URIUtils
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, SocialProfile}
 import org.joda.time.DateTime
@@ -86,9 +85,9 @@ object User {
 
   implicit val jsonFormat = Json.format[User]
 
-  implicit class ExtendedBasicProfile(basicProfile: LoginInfo) {
+  implicit class ExtendedBasicProfile(loginInfo: LoginInfo) {
     def toResource(): ResourceOwnership = {
-      val uri = URIUtils.toUri(basicProfile)
+      val uri = Resource.from(loginInfo)
       ResourceOwnership.full(uri)
     }
   }

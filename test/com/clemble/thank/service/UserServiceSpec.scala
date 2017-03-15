@@ -1,7 +1,7 @@
 package com.clemble.thank.service
 
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
-import com.clemble.thank.model.{ResourceOwnership, User}
+import com.clemble.thank.model.{HttpResource, ResourceOwnership, User}
 import com.clemble.thank.service.repository.UserRepository
 import com.clemble.thank.test.util.UserGenerator
 import org.apache.commons.lang3.RandomStringUtils._
@@ -48,7 +48,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   "UPDATE OWNER BALANCE single hierarchy" should {
     "UPDATE with FULL control" in {
-      val url = s"example.com/some/${randomNumeric(10)}"
+      val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
 
       val user = createUserWithOwnership(ResourceOwnership.full(url))
 
@@ -57,7 +57,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "UNREALIZED url control" in {
-      val url = s"example.com/some/${randomNumeric(10)}"
+      val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
 
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
 
@@ -66,7 +66,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "IGNORE with PARTIAL control" in {
-      val url = s"example.com/some/${randomNumeric(10)}"
+      val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
 
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
 
@@ -77,8 +77,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   "OWNER BALANCE with FULL parent" in {
     "FULL url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.full(url))
@@ -89,8 +89,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "UNREALIZED url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
@@ -101,8 +101,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "IGNORE with PARTIAL url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
@@ -116,8 +116,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
   "OWNER BALANCE with UNREALIZED parent" in {
 
     "FULL url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.full(url))
@@ -128,8 +128,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "UNREALIZED url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
@@ -140,8 +140,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "PARTIAL url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.partial(url))
@@ -154,8 +154,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   "OWNER BALANCE with PARTIAL parent" in {
     "FULL url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.full(url))
@@ -166,8 +166,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "UNREALIZED url control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
@@ -178,8 +178,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     }
 
     "IGNORE with PARTIAL control" in {
-      val parentUrl = s"example.com/some/${randomNumeric(10)}"
-      val url = s"${parentUrl}/${randomNumeric(10)}"
+      val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
+      val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
       val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
       val user = createUserWithOwnership(ResourceOwnership.partial(url))

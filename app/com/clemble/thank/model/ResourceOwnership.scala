@@ -1,44 +1,28 @@
 package com.clemble.thank.model
 
-import com.clemble.thank.util.URIUtils
 import play.api.libs.json._
 
 sealed trait ResourceOwnership {
   val resource: Resource
   def owns(subject: Resource): Boolean
-  def normalize(): ResourceOwnership
 }
 
 case class FullResourceOwnership(resource: Resource) extends ResourceOwnership {
   override def owns(subject: Resource): Boolean = {
-    val sameSource = subject.source == resource.source
-    val subUri = resource.source match {
-      case HTTPSource => subject.uri.startsWith(resource.uri)
-      case _ => resource.uri == subject.uri
-    }
-    sameSource && subUri
+    subject == resource || subject.parents().contains(resource)
   }
-  override def normalize(): FullResourceOwnership = FullResourceOwnership(URIUtils.normalize(resource))
 }
 
 case class PartialResourceOwnership(resource: Resource) extends ResourceOwnership {
   override def owns(subject: Resource): Boolean = {
-    val sameSource = subject.source == resource.source
-    val sameUri = subject.uri == resource.uri
-    sameSource && sameUri
-  }
-  override def normalize(): PartialResourceOwnership = {
-    PartialResourceOwnership(URIUtils.normalize(resource))
+    subject == resource
   }
 }
 
 case class UnrealizedResourceOwnership(resource: Resource) extends ResourceOwnership {
   override def owns(subject: Resource): Boolean = {
-    val sameSource = subject.source == resource.source
-    val sameUri = subject.uri == resource.uri
-    sameSource && sameUri
+    subject == resource
   }
-  override def normalize(): UnrealizedResourceOwnership = UnrealizedResourceOwnership(URIUtils.normalize(resource))
 }
 
 object ResourceOwnership {
@@ -50,8 +34,8 @@ object ResourceOwnership {
   def unrealized(uri: Resource): ResourceOwnership = UnrealizedResourceOwnership(uri)
 
   def toPossibleOwnerships(resource: Resource): List[ResourceOwnership] = {
-    val fullAndUnrealized = URIUtils.
-      toParents(resource).
+    val fullAndUnrealized = resource.
+      parents().
       flatMap(subResource => {
         List(ResourceOwnership.full(subResource), ResourceOwnership.unrealized(subResource))
       })

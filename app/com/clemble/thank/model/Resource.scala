@@ -78,7 +78,9 @@ object Resource {
       uri match {
         case fbRes if (fbRes.startsWith("facebook/")) => uri.substring(9) -> FacebookResource.apply
         case httpRes if (httpRes.startsWith("http/")) => uri.substring(5) -> HttpResource.apply
+        case httpRes if (httpRes.startsWith("http:/")) => uri.substring(6) -> HttpResource.apply
         case httpsRes if (httpsRes.startsWith("https/")) => uri.substring(6) -> HttpResource.apply
+        case httpsRes if (httpsRes.startsWith("https:/")) => uri.substring(7) -> HttpResource.apply
         case _ => uri -> HttpResource.apply
       }
     }

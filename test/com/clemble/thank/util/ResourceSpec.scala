@@ -38,7 +38,13 @@ object ResourceSpec {
       s"http/////$masterURI",
       s"https/////$masterURI",
       s"http/$masterURI",
-      s"https/$masterURI"
+      s"https/$masterURI",
+      s"http://$masterURI",
+      s"https://$masterURI",
+      s"http://///$masterURI",
+      s"https://///$masterURI",
+      s"http:/$masterURI",
+      s"https:/$masterURI"
     )
   }
 

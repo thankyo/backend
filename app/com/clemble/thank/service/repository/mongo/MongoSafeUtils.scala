@@ -54,7 +54,7 @@ object MongoSafeUtils {
     for {
       index <- indexes
     } yield {
-      collection.indexesManager.ensure(index).filter(_ == true).onFailure({ case _ => System.exit(1) })
+      collection.indexesManager.ensure(index).onFailure({ case t => t.printStackTrace(System.err) })
     }
   }
 

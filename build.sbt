@@ -24,6 +24,8 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
   "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
 
+  "com.braintreepayments.gateway" % "braintree-java" % "2.71.0",
+
   specs2 % Test
 )
 

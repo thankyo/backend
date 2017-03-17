@@ -1,5 +1,6 @@
 package com.clemble.thank.model
 
+import com.braintreegateway.{Transaction => BraintreeTransaction}
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
@@ -22,6 +23,10 @@ object PayPalBankDetails {
 }
 
 object BankDetails {
+
+  def from(transaction: BraintreeTransaction) = {
+    PayPalBankDetails(transaction.getCustomer.getEmail)
+  }
 
   /**
     * JSON format for [[BankDetails]]

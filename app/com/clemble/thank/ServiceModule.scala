@@ -48,11 +48,11 @@ class ServiceModule extends AbstractModule {
   }
 
   @Provides
-  @Named("payment")
-  def paymentMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+  @Named("thankTransactions")
+  def thankTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.
-      map(_.collection[JSONCollection]("payment", FailoverStrategy.default))(ec)
+      map(_.collection[JSONCollection]("thankTransaction", FailoverStrategy.default))(ec)
     Await.result(fCollection, 1 minute)
   }
 

@@ -2,13 +2,13 @@ package com.clemble.thank.service.impl
 
 import com.clemble.thank.model.{Thank, Resource, UserID}
 import com.clemble.thank.service.repository.{ThankRepository}
-import com.clemble.thank.service.{ThankService, UserPaymentService}
+import com.clemble.thank.service.{ThankService, ThankTransactionService}
 import com.google.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class SimpleThankService @Inject()(paymentService: UserPaymentService, repository: ThankRepository, implicit val ec: ExecutionContext) extends ThankService {
+case class SimpleThankService @Inject()(paymentService: ThankTransactionService, repository: ThankRepository, implicit val ec: ExecutionContext) extends ThankService {
 
   override def getOrCreate(resource: Resource): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
@@ -26,7 +26,7 @@ case class SimpleThankService @Inject()(paymentService: UserPaymentService, repo
   override def thank(user: UserID, resource: Resource): Future[Thank] = {
     for {
       _ <- getOrCreate(resource) // Ensure Thank exists
-      _ <- paymentService.operation(user, resource, 1)
+      _ <- paymentService.create(user, resource, 1)
       _ <- repository.increase(resource)
       updated <- repository.findByResource(resource).map(_.get)
     } yield {

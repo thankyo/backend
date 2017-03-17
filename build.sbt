@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
 
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
-  "com.iheart" %% "ficus" % "1.2.6",
+  "com.iheart" %% "ficus" % "1.4.0",
 
   "com.mohiva" %% "play-silhouette" % "4.0.0",
   "com.mohiva" %% "play-silhouette-password-bcrypt" % "4.0.0",

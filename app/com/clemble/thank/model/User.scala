@@ -34,8 +34,9 @@ case class User(
                  dateOfBirth: Option[DateTime] = None,
                  balance: Amount = 0L,
                  bankDetails: BankDetails = EmptyBankDetails,
-                 profiles: Set[LoginInfo] = Set.empty
-               ) extends Identity with UserProfile {
+                 profiles: Set[LoginInfo] = Set.empty,
+                 created: DateTime = DateTime.now()
+               ) extends Identity with UserProfile with CreatedAware {
 
   def assignOwnership(pendingBalance: Amount, resource: ResourceOwnership): User = {
     copy(balance = balance + pendingBalance, owns = owns + resource)

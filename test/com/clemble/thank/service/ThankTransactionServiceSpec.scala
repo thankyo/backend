@@ -1,7 +1,7 @@
 package com.clemble.thank.service
 
 import akka.stream.scaladsl.Sink
-import com.clemble.thank.model.{FacebookResource, HttpResource, Payment, ResourceOwnership}
+import com.clemble.thank.model.{FacebookResource, HttpResource, ThankTransaction}
 import com.clemble.thank.service.repository.UserRepository
 import com.clemble.thank.test.util.UserGenerator
 import org.apache.commons.lang3.RandomStringUtils
@@ -10,9 +10,9 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
+class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
-  val paymentService = application.injector.instanceOf[UserPaymentService]
+  val thankTransService = application.injector.instanceOf[ThankTransactionService]
   val userRepo = application.injector.instanceOf[UserRepository]
 
   "PAYMENT" should {
@@ -21,7 +21,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = UserGenerator.generate().copy(balance = 100)
 
       val savedUser = await(userRepo.save(user))
-      await(paymentService.operation(user.id, HttpResource("example.com"), 100))
+      await(thankTransService.create(user.id, HttpResource("example.com"), 100))
       val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 100
@@ -33,7 +33,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = UserGenerator.generate().copy(balance = 100)
 
       val savedUser = await(userRepo.save(user))
-      await(paymentService.operation(user.id, url, 10))
+      await(thankTransService.create(user.id, url, 10))
       val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 100
@@ -44,9 +44,9 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val user = UserGenerator.generate()
 
       await(userRepo.save(user))
-      val A = await(paymentService.operation(user.id, FacebookResource(RandomStringUtils.randomNumeric(100)), 100))
-      val B = await(paymentService.operation(user.id, FacebookResource(RandomStringUtils.randomNumeric(100)), 10))
-      val payments = await(paymentService.payments(user.id).runWith(Sink.seq[Payment]))
+      val A = await(thankTransService.create(user.id, FacebookResource(RandomStringUtils.randomNumeric(100)), 100))
+      val B = await(thankTransService.create(user.id, FacebookResource(RandomStringUtils.randomNumeric(100)), 10))
+      val payments = await(thankTransService.list(user.id).runWith(Sink.seq[ThankTransaction]))
 
       val expected = (A ++ B).filter(_.user == user.id)
       payments must containAllOf(expected)

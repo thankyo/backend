@@ -5,7 +5,7 @@ GET         /auth/authenticate/:provider     @com.clemble.thank.social.auth.Soci
 GET         /user/:id                        @com.clemble.thank.controller.UserController.get(id)
 
 POST        /ownership/me                    @com.clemble.thank.controller.ResourceOwnershipController.assignOwnership()
-GET         /transaction/user/me             @com.clemble.thank.controller.UserPaymentController.myPayments()
+GET         /transaction/user/me             @com.clemble.thank.controller.ThankTransactionController.listMyTransactions()
 
 GET         /thank/*url                      @com.clemble.thank.controller.ThankController.get(url: com.clemble.thank.model.Resource)
 PUT         /thank/*url                      @com.clemble.thank.controller.ThankController.thank(url: com.clemble.thank.model.Resource)

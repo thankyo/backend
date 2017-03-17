@@ -1,9 +1,9 @@
 package com.clemble.thank
 
 import com.clemble.thank.service._
-import com.clemble.thank.service.impl.{SimpleThankService, SimpleUserPaymentService, SimpleUserService}
+import com.clemble.thank.service.impl.{SimpleThankService, SimpleThankTransactionService, SimpleUserService}
 import com.clemble.thank.service.repository._
-import com.clemble.thank.service.repository.mongo.{MongoPaymentRepository, MongoThankRepository, MongoUserRepository}
+import com.clemble.thank.service.repository.mongo.{MongoThankTransactionRepository, MongoThankRepository, MongoUserRepository}
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -25,8 +25,8 @@ class ServiceModule extends AbstractModule {
     bind(classOf[ThankService]).to(classOf[SimpleThankService])
     bind(classOf[ThankRepository]).to(classOf[MongoThankRepository])
 
-    bind(classOf[UserPaymentService]).to(classOf[SimpleUserPaymentService])
-    bind(classOf[PaymentRepository]).to(classOf[MongoPaymentRepository])
+    bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService])
+    bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
   }
 
   @Provides

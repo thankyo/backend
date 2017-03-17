@@ -1,14 +1,14 @@
 package com.clemble.thank.service.repository
 
 import akka.stream.scaladsl.Source
-import com.clemble.thank.model.{Payment, UserID}
+import com.clemble.thank.model.{ThankTransaction, UserID}
 
 import scala.concurrent.Future
 
 /**
-  * [[Payment]] repository
+  * [[ThankTransaction]] repository
   */
-trait PaymentRepository {
+trait ThankTransactionRepository {
 
   /**
     * Find all payments done by the customer
@@ -16,7 +16,7 @@ trait PaymentRepository {
     * @param user user identifier
     * @return all payments done by the user
     */
-  def findByUser(user: UserID): Source[Payment, _]
+  def findByUser(user: UserID): Source[ThankTransaction, _]
 
   /**
     * Saves payment for future reference
@@ -24,6 +24,6 @@ trait PaymentRepository {
     * @param payment payment to save
     * @return saved Payment presentation
     */
-  def save(payment: Payment): Future[Payment]
+  def save(payment: ThankTransaction): Future[ThankTransaction]
 
 }

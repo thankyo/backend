@@ -2,7 +2,7 @@ package com.clemble.thank.model
 
 import play.api.libs.json._
 
-sealed trait ResourceOwnership {
+sealed trait ResourceOwnership extends ResourceAware {
   val resource: Resource
   def owns(subject: Resource): Boolean
 }

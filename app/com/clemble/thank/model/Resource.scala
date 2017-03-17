@@ -13,6 +13,10 @@ sealed trait Resource {
   def parents(): List[Resource]
 }
 
+trait ResourceAware {
+  val resource: Resource
+}
+
 case class HttpResource(uri: String) extends Resource {
   override def stringify(): String = s"http/${uri}"
   override def parents(): List[Resource] = {

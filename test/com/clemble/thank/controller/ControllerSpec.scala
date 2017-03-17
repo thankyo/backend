@@ -1,8 +1,7 @@
 package com.clemble.thank.controller
 
-import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
-import com.clemble.thank.model.{Payment, ResourceOwnership, User, UserID}
+import com.clemble.thank.model._
 import com.clemble.thank.test.util.{CommonSocialProfileGenerator, ThankSpecification, UserGenerator}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.libs.json.Json
@@ -50,13 +49,13 @@ trait ControllerSpec extends ThankSpecification {
     }
   }
 
-  def getMyPayments()(implicit authHeaders: Seq[(String, String)]): Seq[Payment] = {
+  def getMyPayments()(implicit authHeaders: Seq[(String, String)]): Seq[ThankTransaction] = {
     val req = FakeRequest(GET, s"/api/v1/transaction/user/me").withHeaders(authHeaders:_*)
     val fRes = route(application, req).get
 
     val res = await(fRes)
-    val respSource = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[Payment])
-    val payments = await(respSource.runWith(Sink.seq[Payment]))
+    val respSource = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[ThankTransaction])
+    val payments = await(respSource.runWith(Sink.seq[ThankTransaction]))
     payments
   }
 

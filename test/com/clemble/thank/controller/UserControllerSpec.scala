@@ -16,7 +16,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
       val userAuth = createUser(socialProfile)
 
       val savedUser = getMyUser()(userAuth)
-      val expectedUser = (User from socialProfile).copy(id = savedUser.id)
+      val expectedUser = (User from socialProfile).copy(id = savedUser.id, created = savedUser.created)
       savedUser must beEqualTo(expectedUser)
     }
 

@@ -11,7 +11,7 @@ case class ThankTransaction(
                              amount: Amount,
                              resource: Resource,
                              operation: PaymentOperation,
-                             createdDate: DateTime
+                             created: DateTime
                   ) extends Transaction with ResourceAware
 
 object ThankTransaction {

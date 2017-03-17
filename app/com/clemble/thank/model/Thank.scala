@@ -1,5 +1,6 @@
 package com.clemble.thank.model
 
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.Json
 
 /**
@@ -7,11 +8,17 @@ import play.api.libs.json.Json
   */
 case class Thank(
                   resource: Resource,
-                  given: Amount = 0L
-                ) {
+                  given: Amount = 0L,
+                  created: DateTime = DateTime.now(DateTimeZone.UTC)
+                ) extends CreatedAware {
 
   def withParents(): List[Thank] = {
     resource.parents().map(Thank(_))
+  }
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case Thank(resource, given, _) => resource == this.resource && given == this.given
+    case _ => false
   }
 
 }

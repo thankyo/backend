@@ -1,8 +1,12 @@
 package com.clemble.thank.model
 
+import javax.print.attribute.standard.Destination
+
+import akka.util.ByteString
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json._
 import com.braintreegateway.{Transaction => BraintreeTransaction}
+import play.api.mvc.Results
 import reactivemongo.bson.BSONObjectID
 
 sealed trait PaymentStatus
@@ -42,7 +46,7 @@ case class PaymentTransaction(
                                source: BankDetails,
                                destination: BankDetails,
                                status: PaymentStatus,
-                               created: DateTime = DateTime.now(DateTimeZone.UTC)
+                               created: DateTime = DateTime.now()
                              ) extends Transaction
 
 object PaymentTransaction {
@@ -58,8 +62,20 @@ object PaymentTransaction {
       money = money,
       source = source,
       destination = EmptyBankDetails,
-      status = Complete,
-      created = DateTime.now(DateTimeZone.UTC)
+      status = Complete
+    )
+  }
+
+  def credit(user: UserID, thanks: Amount, money: Money, destination: BankDetails): PaymentTransaction = {
+    PaymentTransaction(
+      id = BSONObjectID.generate().stringify,
+      operation = Credit,
+      user = user,
+      thanks = thanks,
+      money = money,
+      source = EmptyBankDetails,
+      destination = destination,
+      status = Complete
     )
   }
 

@@ -27,14 +27,14 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
       merchantAccountId(money.currency.getCurrencyCode).
       paymentMethodNonce(paymentNonce).
       orderId(BSONObjectID.generate().stringify).
-      descriptor().
-      name("Grateful integration").
+      descriptor().name("CLMBLTD*Gratefull").
       done()
   }
 
   private def createSaleTransaction(paymentNonce: String, money: Money): Transaction = {
     val request = createRequest(paymentNonce, money)
     val saleResult = gateway.transaction().sale(request)
+
     if (!saleResult.isSuccess())
       throw new IllegalArgumentException("Failed to process transaction")
     saleResult.getTarget()

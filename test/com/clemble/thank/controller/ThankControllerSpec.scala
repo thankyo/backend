@@ -1,8 +1,7 @@
 package com.clemble.thank.controller
 
-import com.clemble.thank.model.{Credit, Debit, HttpResource}
+import com.clemble.thank.model.{Credit, Debit, HttpResource, ResourceSpec}
 import com.clemble.thank.model.ResourceOwnership._
-import com.clemble.thank.util.{ResourceSpec}
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

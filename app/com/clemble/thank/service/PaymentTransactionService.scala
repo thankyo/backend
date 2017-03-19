@@ -30,9 +30,9 @@ case class SimplePaymentTransactionService @Inject() (
     val transaction = PaymentTransaction.debit(user, thanks, amount, bankDetails)
     for {
       userUpdate <- userService.updateBalance(user, thanks) if(userUpdate)
-      transaction <- transactionRepository.save(transaction)
+      savedTransaction <- transactionRepository.save(transaction)
     } yield {
-      transaction
+      savedTransaction
     }
   }
 

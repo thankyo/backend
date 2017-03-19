@@ -3,9 +3,10 @@ package com.clemble.thank
 import com.clemble.thank.service._
 import com.clemble.thank.service.impl.{SimpleThankService, SimpleThankTransactionService, SimpleUserService}
 import com.clemble.thank.service.repository._
-import com.clemble.thank.service.repository.mongo.{MongoThankTransactionRepository, MongoThankRepository, MongoUserRepository}
+import com.clemble.thank.service.repository.mongo.{MongoThankRepository, MongoThankTransactionRepository, MongoUserRepository}
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
+import org.joda.time.{DateTime, DateTimeZone}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
 import reactivemongo.play.json.collection.JSONCollection
@@ -19,6 +20,8 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class ServiceModule extends AbstractModule {
 
   override def configure(): Unit = {
+    DateTimeZone.setDefault(DateTimeZone.UTC)
+
     bind(classOf[UserService]).to(classOf[SimpleUserService])
     bind(classOf[UserRepository]).to(classOf[MongoUserRepository])
 

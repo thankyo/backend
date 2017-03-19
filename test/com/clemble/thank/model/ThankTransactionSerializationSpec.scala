@@ -6,7 +6,7 @@ import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Format
 
 @RunWith(classOf[JUnitRunner])
-class PaymentSerializationSpec extends SerializationSpec[ThankTransaction] {
+class ThankTransactionSerializationSpec extends SerializationSpec[ThankTransaction] {
 
   override val generator: Generator[ThankTransaction] = ThankTransactionGenerator
   override val jsonFormat: Format[ThankTransaction] = ThankTransaction.jsonFormat

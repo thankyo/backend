@@ -1,6 +1,5 @@
 package com.clemble.thank.model
 
-import net.sf.ehcache.transaction.TransactionAwareAttributeExtractor
 import org.joda.time.DateTime
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
@@ -11,7 +10,7 @@ case class ThankTransaction(
                              amount: Amount,
                              resource: Resource,
                              operation: PaymentOperation,
-                             created: DateTime
+                             created: DateTime = DateTime.now()
                   ) extends Transaction with ResourceAware
 
 object ThankTransaction {
@@ -27,8 +26,7 @@ object ThankTransaction {
       user,
       amount,
       uri,
-      Debit,
-      DateTime.now()
+      Debit
     )
   }
 
@@ -38,8 +36,7 @@ object ThankTransaction {
       user,
       amount,
       uri,
-      Credit,
-      DateTime.now()
+      Credit
     )
   }
 

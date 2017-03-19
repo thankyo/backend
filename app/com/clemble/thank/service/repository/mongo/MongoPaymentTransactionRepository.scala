@@ -1,17 +1,13 @@
 package com.clemble.thank.service.repository.mongo
 
 import akka.stream.Materializer
-import com.clemble.thank.model.{PaymentTransaction, ThankTransaction, UserID}
-import com.clemble.thank.service.repository.{PaymentTransactionRepository, ThankTransactionRepository}
+import com.clemble.thank.model.{PaymentTransaction}
+import com.clemble.thank.service.repository.{PaymentTransactionRepository}
 import com.google.inject.name.Named
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{Inject}
 import play.api.libs.json.{JsObject, JsString, Json}
-import reactivemongo.api.ReadPreference
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
-import akka.stream.scaladsl.Source
-import reactivemongo.akkastream.cursorProducer
-import reactivemongo.api.indexes.{Index, IndexType}
 
 import scala.concurrent.{ExecutionContext, Future}
 

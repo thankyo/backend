@@ -3,7 +3,7 @@ package com.clemble.thank.model
 import com.clemble.thank.model.User.ExtendedBasicProfile
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, SocialProfile}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeUtils, DateTimeZone}
 import play.api.libs.json.Json
 import reactivemongo.bson.BSONObjectID
 

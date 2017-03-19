@@ -15,9 +15,9 @@ case class ThankTransactionController @Inject()(
                                                  implicit val ec: ExecutionContext
 ) extends Controller {
 
-  def listMyTransactions() = silhouette.SecuredAction(implicit req => {
-    val payments = transactionService.list(req.identity.id)
-    Ok.chunked(payments)
+  def listMy() = silhouette.SecuredAction(implicit req => {
+    val thanks = transactionService.list(req.identity.id)
+    Ok.chunked(thanks)
   })
 
 }

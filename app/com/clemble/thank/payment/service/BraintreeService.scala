@@ -45,7 +45,7 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
   override def processNonce(userID: UserID, paymentNonce: String, amount: Money): Future[PaymentTransaction] = {
     val saleTransaction = createSaleTransaction(paymentNonce, amount)
 
-    val bankDetails: BankDetails = BankDetails from saleTransaction.getCustomer()
+    val bankDetails: BankDetails = BankDetails from saleTransaction.getPayPalDetails
     val money = Money from saleTransaction
     paymentService.receive(userID, bankDetails, money, saleTransaction)
   }

@@ -1,13 +1,14 @@
-package com.clemble.thank.controller
+package com.clemble.thank.payment.controller
 
 import java.util.Currency
 
-import com.clemble.thank.model.{Money, PaymentTransaction}
-import com.clemble.thank.service.BraintreeService
+import com.clemble.thank.controller.ControllerSafeUtils
+import com.clemble.thank.payment.model.Money
+import com.clemble.thank.payment.service.BraintreeService
 import com.clemble.thank.util.AuthEnv
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.libs.json.{JsObject, JsString}
+import play.api.libs.json.JsObject
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext

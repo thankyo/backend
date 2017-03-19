@@ -2,6 +2,7 @@ package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.error.RepositoryException
 import com.clemble.thank.model._
+import com.clemble.thank.payment.model.BankDetails
 import com.mohiva.play.silhouette.api.services.IdentityService
 
 import scala.concurrent.Future
@@ -43,11 +44,13 @@ trait UserRepository extends IdentityService[UserIdentity] {
 
   /**
     * Remove users
-    *
-    * @param users
-    * @return
     */
   def remove(users: Seq[UserID]): Future[Boolean]
+
+  /**
+    * Adds bank details to provided user
+    */
+  def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean]
 
   /**
     * Change user balance

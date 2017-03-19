@@ -1,8 +1,9 @@
 package com.clemble.thank.model
 
+import com.clemble.thank.payment.model.{Credit, Debit, PaymentOperation, Transaction}
+import com.clemble.thank.util.IDGenerator
 import org.joda.time.DateTime
 import play.api.libs.json._
-import reactivemongo.bson.BSONObjectID
 
 case class ThankTransaction(
                              id: PaymentID,
@@ -22,7 +23,7 @@ object ThankTransaction {
 
   def debit(user: UserID, uri: Resource, amount: Amount): ThankTransaction = {
     ThankTransaction(
-      BSONObjectID.generate().stringify,
+      IDGenerator.generate(),
       user,
       amount,
       uri,
@@ -32,7 +33,7 @@ object ThankTransaction {
 
   def credit(user: UserID, uri: Resource, amount: Amount): ThankTransaction = {
     ThankTransaction(
-      BSONObjectID.generate().stringify,
+      IDGenerator.generate(),
       user,
       amount,
       uri,

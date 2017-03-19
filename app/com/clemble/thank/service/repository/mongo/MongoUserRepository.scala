@@ -1,6 +1,7 @@
 package com.clemble.thank.service.repository.mongo
 
 import com.clemble.thank.model._
+import com.clemble.thank.payment.model.BankDetails
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -27,11 +28,17 @@ case class MongoUserRepository @Inject()(
     ),
     Index(
       key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
-      name = Some("user_resources")
+      name = Some("user_resources"),
+      unique = true
     ),
     Index(
       key = Seq("owns.resource.uri" -> IndexType.Ascending),
       name = Some("user_owns")
+    ),
+    Index(
+      key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),
+      name = Some("user_bank_details"),
+      unique = true
     )
   )
 
@@ -59,6 +66,13 @@ case class MongoUserRepository @Inject()(
     val query = Json.obj("profiles.providerID" -> loginInfo.providerID, "profiles.providerKey" -> loginInfo.providerKey)
     val fUser = collection.find(query).one[User].map(_.map(_.toIdentity()))
     MongoSafeUtils.safe(fUser)
+  }
+
+  override def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean] = {
+    val query = Json.obj("_id" -> user)
+    val change = Json.obj("$set" -> bankDetails)
+    val update = collection.update(query, change).map(res => res.ok && res.n == 1)
+    MongoSafeUtils.safe(update)
   }
 
   override def changeBalance(id: UserID, diff: Amount): Future[Boolean] = {

@@ -2,7 +2,8 @@ package com.clemble.thank.service
 
 import java.util.Currency
 
-import com.clemble.thank.model.{Amount, Money}
+import com.clemble.thank.model.Amount
+import com.clemble.thank.payment.model.Money
 
 trait ExchangeService {
 

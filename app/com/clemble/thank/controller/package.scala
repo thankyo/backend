@@ -1,6 +1,7 @@
 package com.clemble.thank
 
 import com.clemble.thank.model._
+import com.clemble.thank.payment.model.PaymentTransaction
 
 package object controller {
 

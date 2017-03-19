@@ -1,7 +1,9 @@
-package com.clemble.thank.service
+package com.clemble.thank.payment.service
 
 import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
-import com.clemble.thank.model.{BankDetails, Money, PaymentTransaction, UserID}
+import com.clemble.thank.model.UserID
+import com.clemble.thank.payment.model.{BankDetails, Money, PaymentTransaction}
+import com.clemble.thank.util.IDGenerator
 import com.google.inject.Inject
 import reactivemongo.bson.BSONObjectID
 
@@ -21,18 +23,18 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
     Future.successful(gateway.clientToken().generate())
   }
 
-  private def createRequest(paymentNonce: String, money: Money): TransactionRequest = {
+  private def createSaleRequest(paymentNonce: String, money: Money): TransactionRequest = {
     new TransactionRequest().
       amount(money.amount.bigDecimal).
       merchantAccountId(money.currency.getCurrencyCode).
       paymentMethodNonce(paymentNonce).
-      orderId(BSONObjectID.generate().stringify).
+      orderId(IDGenerator.generate()).
       descriptor().name("CLMBLTD*Gratefull").
       done()
   }
 
   private def createSaleTransaction(paymentNonce: String, money: Money): Transaction = {
-    val request = createRequest(paymentNonce, money)
+    val request = createSaleRequest(paymentNonce, money)
     val saleResult = gateway.transaction().sale(request)
 
     if (!saleResult.isSuccess())
@@ -41,11 +43,11 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
   }
 
   override def processNonce(userID: UserID, paymentNonce: String, amount: Money): Future[PaymentTransaction] = {
-    val transaction = createSaleTransaction(paymentNonce, amount)
+    val saleTransaction = createSaleTransaction(paymentNonce, amount)
 
-    val bankDetails: BankDetails = BankDetails from transaction
-    val money = Money from transaction
-    paymentService.receive(userID, bankDetails, money)
+    val bankDetails: BankDetails = BankDetails from saleTransaction.getCustomer()
+    val money = Money from saleTransaction
+    paymentService.receive(userID, bankDetails, money, saleTransaction)
   }
 
 }

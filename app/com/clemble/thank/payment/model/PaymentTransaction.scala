@@ -1,13 +1,10 @@
-package com.clemble.thank.model
+package com.clemble.thank.payment.model
 
-import javax.print.attribute.standard.Destination
-
-import akka.util.ByteString
-import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json._
 import com.braintreegateway.{Transaction => BraintreeTransaction}
-import play.api.mvc.Results
-import reactivemongo.bson.BSONObjectID
+import com.clemble.thank.model._
+import com.clemble.thank.util.IDGenerator
+import org.joda.time.DateTime
+import play.api.libs.json._
 
 sealed trait PaymentStatus
 case object Pending extends PaymentStatus
@@ -53,27 +50,41 @@ object PaymentTransaction {
 
   implicit val jsonFormat = Json.format[PaymentTransaction]
 
+  def from(user: UserID, thanks: Amount, transaction: BraintreeTransaction): PaymentTransaction = {
+    PaymentTransaction(
+      id = transaction.getOrderId,
+      operation = Debit,
+      user = user,
+      money = Money from transaction,
+      thanks = thanks,
+      source = BankDetails.from(transaction.getCustomer),
+      destination = BankDetails.empty,
+      status = Complete,
+      created = new DateTime(transaction.getCreatedAt)
+    )
+  }
+
   def debit(user: UserID, thanks: Amount, money: Money, source: BankDetails): PaymentTransaction = {
     PaymentTransaction(
-      id = BSONObjectID.generate().stringify,
+      id = IDGenerator.generate(),
       operation = Debit,
       user = user,
       thanks = thanks,
       money = money,
       source = source,
-      destination = EmptyBankDetails,
+      destination = BankDetails.empty,
       status = Complete
     )
   }
 
   def credit(user: UserID, thanks: Amount, money: Money, destination: BankDetails): PaymentTransaction = {
     PaymentTransaction(
-      id = BSONObjectID.generate().stringify,
+      id = IDGenerator.generate(),
       operation = Credit,
       user = user,
       thanks = thanks,
       money = money,
-      source = EmptyBankDetails,
+      source = BankDetails.empty,
       destination = destination,
       status = Complete
     )

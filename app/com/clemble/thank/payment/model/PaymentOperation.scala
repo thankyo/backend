@@ -1,4 +1,4 @@
-package com.clemble.thank.model
+package com.clemble.thank.payment.model
 
 import play.api.libs.json._
 

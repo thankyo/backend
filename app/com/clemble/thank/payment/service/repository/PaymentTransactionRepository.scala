@@ -1,6 +1,7 @@
-package com.clemble.thank.service.repository
+package com.clemble.thank.payment.service.repository
 
-import com.clemble.thank.model.{PaymentTransaction}
+import com.clemble.thank.payment.model.PaymentTransaction
+import com.clemble.thank.service.repository.UserAwareRepository
 
 import scala.concurrent.Future
 

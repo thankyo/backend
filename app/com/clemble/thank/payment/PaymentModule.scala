@@ -1,11 +1,12 @@
-package com.clemble.thank
+package com.clemble.thank.payment
 
 import java.util.Currency
 
 import com.braintreegateway.BraintreeGateway
 import com.clemble.thank.model.Amount
-import com.clemble.thank.service.repository.PaymentTransactionRepository
-import com.clemble.thank.service.repository.mongo.MongoPaymentTransactionRepository
+import com.clemble.thank.payment.service.repository.PaymentTransactionRepository
+import com.clemble.thank.payment.service.repository.mongo.MongoPaymentTransactionRepository
+import com.clemble.thank.payment.service.{BraintreeService, PaymentTransactionService, SimpleBraintreeService, SimplePaymentTransactionService}
 import com.clemble.thank.service._
 import com.google.inject.Provides
 import com.google.inject.name.Named

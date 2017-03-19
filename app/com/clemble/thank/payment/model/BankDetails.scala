@@ -1,6 +1,7 @@
-package com.clemble.thank.model
+package com.clemble.thank.payment.model
 
-import com.braintreegateway.{Transaction => BraintreeTransaction}
+import com.braintreegateway.{Customer, Transaction => BraintreeTransaction}
+import com.clemble.thank.model.Email
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
@@ -8,9 +9,7 @@ import play.api.libs.json._
   * Bank details abstraction
   */
 sealed trait BankDetails
-
 case object EmptyBankDetails extends BankDetails
-
 case class PayPalBankDetails(email: Email) extends BankDetails
 
 object PayPalBankDetails {
@@ -24,8 +23,12 @@ object PayPalBankDetails {
 
 object BankDetails {
 
-  def from(transaction: BraintreeTransaction) = {
-    PayPalBankDetails(transaction.getCustomer.getEmail)
+  val empty: BankDetails = EmptyBankDetails
+
+  def payPal(email: String): BankDetails = PayPalBankDetails(email)
+
+  def from(customer: Customer) = {
+    PayPalBankDetails(customer.getEmail)
   }
 
   /**

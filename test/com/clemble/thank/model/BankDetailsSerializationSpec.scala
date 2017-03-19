@@ -1,5 +1,6 @@
 package com.clemble.thank.model
 
+import com.clemble.thank.payment.model.BankDetails
 import com.clemble.thank.test.util.{BankDetailsGenerator, Generator}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

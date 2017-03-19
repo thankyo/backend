@@ -3,6 +3,7 @@ package com.clemble.thank.test.util
 import java.util.Currency
 
 import com.clemble.thank.model._
+import com.clemble.thank.payment.model.{Money, PaymentTransaction}
 
 import scala.util.Random
 

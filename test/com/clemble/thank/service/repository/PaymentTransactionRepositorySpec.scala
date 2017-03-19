@@ -1,6 +1,7 @@
 package com.clemble.thank.service.repository
 
-import com.clemble.thank.test.util.{PaymentTransactionGenerator}
+import com.clemble.thank.payment.service.repository.PaymentTransactionRepository
+import com.clemble.thank.test.util.PaymentTransactionGenerator
 
 
 class PaymentTransactionRepositorySpec extends RepositorySpec {

@@ -1,16 +1,16 @@
-package com.clemble.thank.service
-
-import java.util.Currency
+package com.clemble.thank.payment.service
 
 import com.clemble.thank.model._
-import com.clemble.thank.service.repository.PaymentTransactionRepository
+import com.clemble.thank.payment.model.{BankDetails, Money, PaymentTransaction}
+import com.clemble.thank.payment.service.repository.PaymentTransactionRepository
+import com.clemble.thank.service.{ExchangeService, UserService}
 import com.google.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait PaymentTransactionService {
 
-  def receive(user: UserID, bankDetails: BankDetails, amount: Money): Future[PaymentTransaction]
+  def receive[T](user: UserID, bankDetails: BankDetails, amount: Money, externalTransaction: T): Future[PaymentTransaction]
 
   def withdraw(user: UserID, bankDetails: BankDetails, amount: Money): Future[PaymentTransaction]
 
@@ -25,7 +25,7 @@ case class SimplePaymentTransactionService @Inject() (
                                             implicit val ec: ExecutionContext
                                           ) extends PaymentTransactionService {
 
-  override def receive(user: UserID, bankDetails: BankDetails, amount: Money): Future[PaymentTransaction] = {
+  override def receive[T](user: UserID, bankDetails: BankDetails, amount: Money, extTransaction: T): Future[PaymentTransaction] = {
     val thanks = exchangeService.toThanks(amount)
     val transaction = PaymentTransaction.debit(user, thanks, amount, bankDetails)
     for {

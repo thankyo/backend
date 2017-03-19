@@ -1,6 +1,6 @@
 package com.clemble.thank.test.util
 
-import com.clemble.thank.model.{Credit, Debit, PaymentOperation}
+import com.clemble.thank.payment.model.{Credit, Debit, PaymentOperation}
 import org.apache.commons.lang3.RandomUtils._
 
 object PaymentOperationGenerator extends Generator[PaymentOperation] {

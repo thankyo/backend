@@ -26,6 +26,8 @@ libraryDependencies ++= Seq(
 
   "com.braintreepayments.gateway" % "braintree-java" % "2.71.0",
 
+  "org.joda" % "joda-money" % "0.12",
+
   specs2 % Test
 )
 

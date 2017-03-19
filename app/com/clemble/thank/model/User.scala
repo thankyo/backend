@@ -1,11 +1,12 @@
 package com.clemble.thank.model
 
 import com.clemble.thank.model.User.ExtendedBasicProfile
+import com.clemble.thank.payment.model.BankDetails
+import com.clemble.thank.util.IDGenerator
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, SocialProfile}
-import org.joda.time.{DateTime, DateTimeUtils, DateTimeZone}
+import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile}
+import org.joda.time.{DateTime}
 import play.api.libs.json.Json
-import reactivemongo.bson.BSONObjectID
 
 trait UserProfile {
   val id: UserID
@@ -33,7 +34,7 @@ case class User(
                  thumbnail: Option[String] = None,
                  dateOfBirth: Option[DateTime] = None,
                  balance: Amount = 0L,
-                 bankDetails: BankDetails = EmptyBankDetails,
+                 bankDetails: BankDetails = BankDetails.empty,
                  profiles: Set[LoginInfo] = Set.empty,
                  created: DateTime = DateTime.now()
                ) extends Identity with UserProfile with CreatedAware {
@@ -94,12 +95,12 @@ object User {
   }
 
   def from(profile: CommonSocialProfile): User = {
-    User(BSONObjectID.generate().stringify).link(profile)
+    User(IDGenerator.generate()).link(profile)
   }
 
   def empty(uri: Resource) = {
     User(
-      id = BSONObjectID.generate().stringify,
+      id = IDGenerator.generate(),
       owns = Set(ResourceOwnership.unrealized(uri))
     )
   }

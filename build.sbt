@@ -1,4 +1,4 @@
-name := "thanks-backend"
+name := "thank-backend"
 
 version := "1.0-SNAPSHOT"
 
@@ -28,8 +28,8 @@ libraryDependencies ++= Seq(
 
   "org.joda" % "joda-money" % "0.12",
 
-  "com.atlassian.jwt" % "jwt-core" % "1.6.1",
-  "com.atlassian.jwt" % "jwt-api" % "1.6.1",
+  "com.atlassian.jwt" % "jwt-core" % "1.5.8",
+  "com.atlassian.jwt" % "jwt-api" % "1.5.8",
 
   specs2 % Test
 )

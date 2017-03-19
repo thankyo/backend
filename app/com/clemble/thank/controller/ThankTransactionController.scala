@@ -17,7 +17,7 @@ case class ThankTransactionController @Inject()(
 
   def listMyTransactions() = silhouette.SecuredAction(implicit req => {
     val payments = transactionService.list(req.identity.id)
-    ControllerSafeUtils.ok(payments)
+    Ok.chunked(payments)
   })
 
 }

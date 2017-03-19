@@ -17,7 +17,7 @@ case class UserController @Inject()(
                                    ) extends Controller {
 
   def get(id: UserID) = silhouette.SecuredAction.async(implicit req => {
-    val realId = AuthUtils.whoAmI(id)
+    val realId = req.identity.id
     val fUserOpt = userService.findById(realId)
     ControllerSafeUtils.okOrNotFound(fUserOpt)
   })

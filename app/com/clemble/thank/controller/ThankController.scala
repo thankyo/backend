@@ -17,13 +17,13 @@ case class ThankController @Inject()(
 
   def get(resource: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     val fThank = service.getOrCreate(resource)
-    ControllerSafeUtils.ok(fThank)(ec, thankWriteable)
+    fThank.map(Ok(_))
   })
 
   def thank(resource: Resource) = silhouette.SecuredAction.async(implicit req => {
     val giver = req.identity
     val fThank = service.thank(giver.id, resource)
-    ControllerSafeUtils.ok(fThank)(ec, thankWriteable)
+    fThank.map(Ok(_))
   })
 
 }

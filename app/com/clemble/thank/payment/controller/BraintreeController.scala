@@ -20,13 +20,13 @@ class BraintreeController @Inject()(
                                 ) extends Controller {
 
   def generateToken() = silhouette.SecuredAction.async(implicit req => {
-    val token = braintreeService.generateToken().map(t => s""""${t}"""")
-    ControllerSafeUtils.ok(token)
+    val tokenResp = braintreeService.generateToken().map(t => Ok(s""""${t}""""))
+    tokenResp
   })
 
   def processNonce() = silhouette.SecuredAction.async(parse.json[JsObject])(implicit req => {
     val transaction = braintreeService.processNonce(req.identity.id, (req.body \ "nonce").as[String], Money(10, Currency.getInstance("USD")))
-    ControllerSafeUtils.ok(transaction)
+    transaction.map(Ok(_))
   })
 
 }

@@ -28,6 +28,9 @@ libraryDependencies ++= Seq(
 
   "org.joda" % "joda-money" % "0.12",
 
+  "com.atlassian.jwt" % "jwt-core" % "1.6.1",
+  "com.atlassian.jwt" % "jwt-api" % "1.6.1",
+
   specs2 % Test
 )
 

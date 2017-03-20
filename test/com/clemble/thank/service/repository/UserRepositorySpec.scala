@@ -2,7 +2,9 @@ package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.User
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
+import com.clemble.thank.payment.model.BankDetails
 import com.clemble.thank.test.util.UserGenerator
+import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -42,6 +44,16 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
           case t: Throwable => Failure(t)
         })
       fSecondRes must await(beEqualTo(Failure(new RepositoryException(RepositoryError.duplicateKey()))))
+    }
+
+    "throw Exception on same account used more then once creation" in {
+      val A = UserGenerator.generate().copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
+      val B = UserGenerator.generate().copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
+
+      await(userRepo.save(A))
+      await(userRepo.save(B))
+
+      await(userRepo.setBankDetails(A.id, B.bankDetails)) must beEqualTo(true)
     }
 
   }

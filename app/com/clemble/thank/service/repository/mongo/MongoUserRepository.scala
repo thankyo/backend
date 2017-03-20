@@ -14,6 +14,7 @@ import reactivemongo.play.json.collection.JSONCollection
 import scala.concurrent.{ExecutionContext, Future}
 import play.modules.reactivemongo.json._
 import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson.{BSONDocument, BSONString}
 
 case class MongoUserRepository @Inject()(
                                           @Named("user") collection: JSONCollection,
@@ -27,18 +28,14 @@ case class MongoUserRepository @Inject()(
       name = Some("user_profiles")
     ),
     Index(
-      key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
-      name = Some("user_resources"),
-      unique = true
-    ),
-    Index(
       key = Seq("owns.resource.uri" -> IndexType.Ascending),
       name = Some("user_owns")
     ),
     Index(
       key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),
       name = Some("user_bank_details"),
-      unique = true
+      unique = true,
+      partialFilter = Some(BSONDocument("bankDetails.type" -> BSONString("payPal")))
     )
   )
 

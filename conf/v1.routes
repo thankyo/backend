@@ -13,5 +13,5 @@ PUT         /thank/*url                      @com.clemble.thank.controller.Thank
 GET         /payment/braintree/token         @com.clemble.thank.payment.controller.BraintreeController.generateToken()
 POST        /payment/braintree/nonce         @com.clemble.thank.payment.controller.BraintreeController.processNonce()
 
-POST        /payment/transaction/user/me     @com.clemble.thank.payment.controller.PaymentTransactionController.listMy()
+GET         /payment/transaction/user/me     @com.clemble.thank.payment.controller.PaymentTransactionController.listMy()
 

@@ -20,6 +20,8 @@ class ThankControllerSpec extends ControllerSpec {
 
       val giver = createUser()
       val owner = createUser()
+      val ownerBalanceBefore = getMyUser()(owner).balance
+
       addOwnership(full(HttpResource(masterUrl)))(owner) shouldNotEqual None
 
       val uriVariations = ResourceSpec.generateVariations(masterUrl)
@@ -32,7 +34,7 @@ class ThankControllerSpec extends ControllerSpec {
       val updateReq = await(Future.sequence(thanks)).map(_.header.status)
       updateReq.forall(_ == OK) should beEqualTo(true)
 
-      getMyUser()(owner).balance shouldEqual uriVariations.length
+      getMyUser()(owner).balance shouldEqual ownerBalanceBefore + uriVariations.length
     }
 
     "create transaction" in {

@@ -14,7 +14,7 @@ object UserGenerator extends Generator[User] {
       firstName = Some(random(10)),
       lastName = Some(random(10)),
       owns = Set.empty,
-      balance = 0L,
+      balance = 200L,
       bankDetails = BankDetailsGenerator.generate(),
       thumbnail = Some(random(12)),
       dateOfBirth = Some(new DateTime(nextLong(0, Long.MaxValue))),

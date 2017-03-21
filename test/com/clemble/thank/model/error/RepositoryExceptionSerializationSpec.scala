@@ -10,6 +10,6 @@ import play.api.libs.json.Format
 class RepositoryExceptionSerializationSpec extends SerializationSpec[RepositoryException] {
 
   override val generator: Generator[RepositoryException] = RepositoryExceptionGenerator
-  override val jsonFormat: Format[RepositoryException] = RepositoryException.jsonFormat
+  override val jsonFormat: Format[RepositoryException] = ThankException.repoExcJsonFormat
 
 }

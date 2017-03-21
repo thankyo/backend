@@ -1,7 +1,7 @@
 package com.clemble.thank.service.repository
 
 import com.clemble.thank.model.User
-import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
+import com.clemble.thank.model.error.{RepositoryError, RepositoryException, UserException}
 import com.clemble.thank.payment.model.BankDetails
 import com.clemble.thank.test.util.UserGenerator
 import org.apache.commons.lang3.RandomStringUtils
@@ -10,7 +10,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
@@ -60,7 +60,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   "CHANGE balance" should {
 
-    "increase when possitive" in {
+    "increase when positive" in {
       val user = UserGenerator.generate()
 
       val matchResult = for {
@@ -68,11 +68,23 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
         _ <- userRepo.changeBalance(user.id, 10)
         updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
-        savedUser.balance shouldEqual 0
-        updatedUser.balance shouldEqual 10
+        savedUser.balance shouldEqual user.balance
+        updatedUser.balance shouldEqual user.balance + 10
       }
 
       matchResult.await
+    }
+
+    "exception when no funds" in {
+      val user = UserGenerator.generate()
+
+      await(userRepo.save(user))
+
+      val credit = - (user.balance + 1)
+      val change = userRepo.changeBalance(user.id, credit)
+
+      val changeRes = Try(await(change))
+      changeRes must beEqualTo(Failure(UserException.notEnoughFunds()))
     }
 
     "decrease when negative" in {
@@ -83,8 +95,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
         _ <- userRepo.changeBalance(user.id, -10)
         updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
-        savedUser.balance shouldEqual 0
-        updatedUser.balance shouldEqual -10
+        savedUser.balance shouldEqual user.balance
+        updatedUser.balance shouldEqual user.balance -10
       }
 
       matchResult.await

@@ -1,12 +1,13 @@
 package com.clemble.thank.service.repository.mongo
 
 import com.clemble.thank.model._
+import com.clemble.thank.model.error.UserException
 import com.clemble.thank.payment.model.BankDetails
 import com.clemble.thank.service.repository.UserRepository
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.mohiva.play.silhouette.api.LoginInfo
-import play.api.libs.json.{JsArray, JsObject, JsString, Json}
+import play.api.libs.json._
 import reactivemongo.api.Cursor.ContOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.play.json.collection.JSONCollection
@@ -73,9 +74,22 @@ case class MongoUserRepository @Inject()(
   }
 
   override def changeBalance(id: UserID, diff: Amount): Future[Boolean] = {
-    val query = Json.obj("_id" -> id)
+    val query = if (diff > 0) { // debit query
+      Json.obj("_id" -> id)
+    } else { // credit query
+      Json.obj("_id" -> id, "balance" -> Json.obj("$gte" -> -diff))
+    }
     val change = Json.obj("$inc" -> Json.obj("balance" -> diff))
-    MongoSafeUtils.safe(() => true, collection.update(query, change))
+    val update = collection.
+      update(query, change).
+      map(res => {
+        if (res.ok && res.n != 1) {
+          throw UserException.notEnoughFunds()
+        } else {
+          res.ok
+        }
+      })
+    MongoSafeUtils.safe(update)
   }
 
   override def findRelated(uri: ResourceOwnership): Future[List[User]] = {

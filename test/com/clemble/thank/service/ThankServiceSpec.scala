@@ -30,7 +30,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
     "Increment for the owner" in {
       val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
-      val owner = UserGenerator.generate(ResourceOwnership.full(url))
+      val owner = UserGenerator.generate().assignOwnership(0, ResourceOwnership.full(url))
       val giver = UserGenerator.generate()
 
       await(userRepo.save(giver))

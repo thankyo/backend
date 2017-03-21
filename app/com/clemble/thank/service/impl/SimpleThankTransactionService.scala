@@ -18,8 +18,8 @@ case class SimpleThankTransactionService @Inject()(userService: UserService, rep
   override def create(giverId: UserID, url: Resource, amount: Amount): Future[List[ThankTransaction]] = {
     for {
       owner <- userService.findResourceOwner(url)
-      ownerDebitOp <- debit(owner.id, url, amount)
       giverCreditOp <- credit(giverId,url,  amount)
+      ownerDebitOp <- debit(owner.id, url, amount)
     } yield {
       List(ownerDebitOp, giverCreditOp)
     }

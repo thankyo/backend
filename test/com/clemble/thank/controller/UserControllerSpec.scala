@@ -13,7 +13,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
     "Support single create" in {
       val socialProfile = CommonSocialProfileGenerator.generate()
-      val userAuth = createUser(socialProfile)
+      val userAuth = createUser(socialProfile, 0)
 
       val savedUser = getMyUser()(userAuth)
       val expectedUser = (User from socialProfile).copy(id = savedUser.id, created = savedUser.created)
@@ -22,10 +22,10 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
     "Return same user on the same authentication" in {
       val socialProfile = CommonSocialProfileGenerator.generate()
-      val firstAuth = createUser(socialProfile)
+      val firstAuth = createUser(socialProfile, 0)
       val firstUser = getMyUser()(firstAuth)
 
-      val secondAuth = createUser(socialProfile)
+      val secondAuth = createUser(socialProfile, 0)
       val secondUser = getMyUser()(firstAuth)
 
       firstAuth shouldNotEqual secondAuth

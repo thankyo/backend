@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository.mongo
 
-import com.clemble.thank.model.error.{RepositoryError, RepositoryException}
+import com.clemble.thank.model.error.{RepositoryError, RepositoryException, ThankException}
 import reactivemongo.api.commands.{WriteError, WriteResult}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.core.errors.DatabaseException
@@ -47,6 +47,8 @@ object MongoSafeUtils {
       case dbExc: DatabaseException =>
         val exception = toException(dbExc)
         Future.failed(exception)
+      case thExc: ThankException =>
+        Future.failed(thExc)
     })
   }
 

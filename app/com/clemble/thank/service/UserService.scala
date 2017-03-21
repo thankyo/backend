@@ -1,6 +1,7 @@
 package com.clemble.thank.service
 
 import com.clemble.thank.model._
+import com.clemble.thank.model.error.UserException
 import com.clemble.thank.payment.model.BankDetails
 
 import scala.concurrent.Future
@@ -15,6 +16,14 @@ trait UserService {
 
   def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean]
 
+  /**
+    * Updates user balance
+    *
+    * @param user user identifier
+    * @param change amount of change
+    * @return true if enough funds were available
+    */
+  @throws[UserException]
   def updateBalance(user: UserID, change: Amount): Future[Boolean]
 
 }

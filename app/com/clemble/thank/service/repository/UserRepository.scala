@@ -1,6 +1,6 @@
 package com.clemble.thank.service.repository
 
-import com.clemble.thank.model.error.RepositoryException
+import com.clemble.thank.model.error.{RepositoryException, UserException}
 import com.clemble.thank.model._
 import com.clemble.thank.payment.model.BankDetails
 import com.mohiva.play.silhouette.api.services.IdentityService
@@ -54,9 +54,8 @@ trait UserRepository extends IdentityService[UserIdentity] {
 
   /**
     * Change user balance
-    *
-    * @return
     */
+  @throws[UserException]
   def changeBalance(id: UserID, diff: Amount): Future[Boolean]
 
 }

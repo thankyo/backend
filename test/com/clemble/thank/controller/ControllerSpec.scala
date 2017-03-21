@@ -7,6 +7,7 @@ import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import com.clemble.thank.model.User.socialProfileJsonFormat
+import com.clemble.thank.service.repository.UserRepository
 
 import scala.concurrent.ExecutionContext
 
@@ -14,7 +15,9 @@ trait ControllerSpec extends ThankSpecification {
 
   implicit val ec = application.injector.instanceOf[ExecutionContext]
 
-  def createUser(socialProfile: CommonSocialProfile = CommonSocialProfileGenerator.generate()): Seq[(String, String)] = {
+  val userRep = application.injector.instanceOf[UserRepository]
+
+  def createUser(socialProfile: CommonSocialProfile = CommonSocialProfileGenerator.generate(), balance: Amount = 200): Seq[(String, String)] = {
     val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").withJsonBody(Json.toJson(socialProfile))
     val fRes = route(application, req).get
 
@@ -22,7 +25,12 @@ trait ControllerSpec extends ThankSpecification {
     res.header.status must beEqualTo(200)
 
     val bodyStr = await(res.body.consumeData).utf8String
-    Seq("X-Auth-Token" -> bodyStr)
+    val resp = Seq("X-Auth-Token" -> bodyStr)
+
+    // TODO REMOVE this is a hack not to implement fake payments
+    userRep.changeBalance(getMyUser()(resp).id, balance)
+
+    resp
   }
 
   def addOwnership(own: ResourceOwnership)(implicit authHeader: Seq[(String, String)]): Option[ResourceOwnership] = {

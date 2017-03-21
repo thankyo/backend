@@ -5,17 +5,20 @@ import com.clemble.thank.model.{HttpResource, ResourceOwnership, User}
 import com.clemble.thank.service.repository.UserRepository
 import com.clemble.thank.test.util.UserGenerator
 import org.apache.commons.lang3.RandomStringUtils._
+import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
+import org.specs2.runner.JUnitRunner
 
 import scala.util.{Failure, Success}
 
+@RunWith(classOf[JUnitRunner])
 class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   val service = application.injector.instanceOf[UserService]
   val repo = application.injector.instanceOf[UserRepository]
   val paymentService = application.injector.instanceOf[ThankTransactionService]
 
-  val giver = UserGenerator.generate()
+  val giver = UserGenerator.generate().copy(balance = Int.MaxValue)
   await(repo.save(giver))
 
   "CREATE" should {
@@ -38,9 +41,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
   }
 
   def createUserWithOwnership(owns: ResourceOwnership): User = {
-    val user = UserGenerator.generate(
-      owns
-    )
+    val user = UserGenerator.
+      generate().
+      assignOwnership(0, owns).
+      copy(balance = 0)
     val savedUser = await(repo.save(user))
     await(repo.findById(user.id)).get.balance shouldEqual 0
     savedUser

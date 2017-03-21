@@ -17,20 +17,4 @@ object ControllerSafeUtils extends Results {
     ByteString(json.toString())
   }, Some(ContentTypes.JSON))
 
-  def okOrNotFound[T](f: Future[Option[T]])(implicit ec: ExecutionContext, writeable: Writeable[T]): Future[Result] = {
-    val jsonResult = f.map(_ match {
-      case Some(t) => Ok(t)
-      case None => NotFound
-    })
-    safe(jsonResult)
-  }
-
-  def safe(f: Future[Result])(implicit ec: ExecutionContext): Future[Result] = {
-    f.recover({
-      case re: ThankException =>
-        BadRequest(re)
-      case t: Throwable =>
-        InternalServerError(t.getMessage)
-    })
-  }
 }

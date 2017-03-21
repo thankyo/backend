@@ -2,7 +2,7 @@
 POST        /auth/authenticate/test          @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider = "test")
 GET         /auth/authenticate/:provider     @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider)
 
-GET         /user/:id                        @com.clemble.thank.controller.UserController.get(id)
+GET         /user/me                         @com.clemble.thank.controller.UserController.getMy()
 
 POST        /ownership/me                    @com.clemble.thank.controller.ResourceOwnershipController.assignOwnership()
 GET         /transaction/user/me             @com.clemble.thank.controller.ThankTransactionController.listMy()

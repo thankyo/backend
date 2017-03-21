@@ -1,12 +1,11 @@
 package com.clemble.thank.controller
 
-import play.api.http.{DefaultHttpErrorHandler, HttpErrorConfig, HttpErrorHandler}
+import play.api.http.{DefaultHttpErrorHandler}
 import play.api.mvc._
 
 import scala.concurrent._
 import javax.inject.Singleton
 
-import com.clemble.thank.controller.ControllerSafeUtils.thankExceptionWriteable
 import play.api.mvc.Results._
 import com.clemble.thank.model.error.ThankException
 import com.google.inject.{Inject, Provider}

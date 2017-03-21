@@ -15,10 +15,10 @@ package object controller {
   }, Some(ContentTypes.JSON))
 
   implicit val thankExceptionWriteable = jsonToWriteable[ThankException]
-  implicit val paymentTransactionWriteable = ControllerSafeUtils.jsonToWriteable[PaymentTransaction]
-  implicit val thankTransactionWriteable = ControllerSafeUtils.jsonToWriteable[ThankTransaction]
-  implicit val resourceOwnershipWriteable = ControllerSafeUtils.jsonToWriteable[ResourceOwnership]
-  implicit val userWriteable = ControllerSafeUtils.jsonToWriteable[User]
-  implicit val thankWriteable = ControllerSafeUtils.jsonToWriteable[Thank]
+  implicit val paymentTransactionWriteable = jsonToWriteable[PaymentTransaction]
+  implicit val thankTransactionWriteable = jsonToWriteable[ThankTransaction]
+  implicit val resourceOwnershipWriteable = jsonToWriteable[ResourceOwnership]
+  implicit val userWriteable = jsonToWriteable[User]
+  implicit val thankWriteable = jsonToWriteable[Thank]
 
 }

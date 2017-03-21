@@ -2,7 +2,6 @@ package com.clemble.thank.payment.controller
 
 import java.util.Currency
 
-import com.clemble.thank.controller.ControllerSafeUtils
 import com.clemble.thank.payment.model.Money
 import com.clemble.thank.payment.service.BraintreeService
 import com.clemble.thank.util.AuthEnv

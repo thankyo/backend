@@ -39,7 +39,7 @@ class SocialAuthController @Inject() (
     * @param provider The ID of the provider to authenticate against.
     * @return The result to display.
     */
-  def authenticate(provider: String) = Action.async { implicit request =>
+  def authenticate(provider: String) = Action.async{ implicit req => {
     def createOrUpdateUser(profile: CommonSocialProfile): Future[UserIdentity] = {
       for {
         existingUserOpt <- userRepo.retrieve(profile.loginInfo)
@@ -73,7 +73,7 @@ class SocialAuthController @Inject() (
             user <- createOrUpdateUser(profile)
             result <- createAuthResult(profile, authInfo)
           } yield {
-            silhouette.env.eventBus.publish(LoginEvent(user, request))
+            silhouette.env.eventBus.publish(LoginEvent(user, req))
             result
           }
         }
@@ -85,5 +85,6 @@ class SocialAuthController @Inject() (
         logger.error("Unexpected provider error", e)
         Redirect("/join")
     }
-  }
+  }}
+
 }

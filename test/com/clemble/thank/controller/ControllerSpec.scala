@@ -34,7 +34,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def addOwnership(own: ResourceOwnership)(implicit authHeader: Seq[(String, String)]): Option[ResourceOwnership] = {
-    val req = FakeRequest(POST, "/api/v1/ownership/me").withJsonBody(Json.toJson(own)).withHeaders(authHeader:_*)
+    val req = FakeRequest(POST, "/api/v1/ownership/my").withJsonBody(Json.toJson(own)).withHeaders(authHeader:_*)
     val fRes = route(application, req).get
 
     val res = await(fRes)
@@ -45,7 +45,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def getMyUser()(implicit authHeader: Seq[(String, String)]): User = {
-    getUser("me").get
+    getUser("my").get
   }
 
   def getUser(id: UserID)(implicit authHeader: Seq[(String, String)]): Option[User] = {
@@ -58,7 +58,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def getMyPayments()(implicit authHeaders: Seq[(String, String)]): Seq[ThankTransaction] = {
-    val req = FakeRequest(GET, s"/api/v1/transaction/user/me").withHeaders(authHeaders:_*)
+    val req = FakeRequest(GET, s"/api/v1/transaction/user/my").withHeaders(authHeaders:_*)
     val fRes = route(application, req).get
 
     val res = await(fRes)

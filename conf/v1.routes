@@ -2,10 +2,10 @@
 POST        /auth/authenticate/test          @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider = "test")
 GET         /auth/authenticate/:provider     @com.clemble.thank.social.auth.SocialAuthController.authenticate(provider)
 
-GET         /user/me                         @com.clemble.thank.controller.UserController.getMy()
+GET         /user/my                         @com.clemble.thank.controller.UserController.getMy()
 
-POST        /ownership/me                    @com.clemble.thank.controller.ResourceOwnershipController.assignOwnership()
-GET         /transaction/user/me             @com.clemble.thank.controller.ThankTransactionController.listMy()
+POST        /ownership/my                    @com.clemble.thank.controller.ResourceOwnershipController.assignOwnership()
+GET         /transaction/user/my             @com.clemble.thank.controller.ThankTransactionController.listMy()
 
 GET         /thank/*url                      @com.clemble.thank.controller.ThankController.get(url: com.clemble.thank.model.Resource)
 PUT         /thank/*url                      @com.clemble.thank.controller.ThankController.thank(url: com.clemble.thank.model.Resource)
@@ -13,5 +13,5 @@ PUT         /thank/*url                      @com.clemble.thank.controller.Thank
 GET         /payment/braintree/token         @com.clemble.thank.payment.controller.BraintreeController.generateToken()
 POST        /payment/braintree/nonce         @com.clemble.thank.payment.controller.BraintreeController.processNonce()
 
-GET         /payment/transaction/user/me     @com.clemble.thank.payment.controller.PaymentTransactionController.listMy()
+GET         /payment/transaction/user/my     @com.clemble.thank.payment.controller.PaymentTransactionController.listMy()
 

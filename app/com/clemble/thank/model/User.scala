@@ -32,8 +32,10 @@ case class User(
                  owns: Set[ResourceOwnership] = Set.empty,
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
+                 bio: String = User.DEFAULT_BIO,
                  dateOfBirth: Option[DateTime] = None,
                  balance: Amount = 0L,
+                 total: Amount = 0L,
                  bankDetails: BankDetails = BankDetails.empty,
                  profiles: Set[LoginInfo] = Set.empty,
                  created: DateTime = DateTime.now()
@@ -44,7 +46,10 @@ case class User(
   }
 
   def increase(thanks: Int): User = {
-    copy(balance = balance + thanks)
+    copy(
+      balance = balance + thanks,
+      total = total + thanks
+    )
   }
 
   def decrease(): User = {
@@ -80,6 +85,7 @@ trait UserAware {
 
 object User {
 
+  val DEFAULT_BIO = "Mysterious Hero ;)"
   val DEFAULT_AMOUNT = 0L
   val DEFAULT_DATE_OF_BIRTH = new DateTime(0)
 

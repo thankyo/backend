@@ -1,5 +1,6 @@
 package com.clemble.thank.service.repository.mongo
 
+import akka.stream.Materializer
 import com.clemble.thank.model._
 import com.clemble.thank.model.error.UserException
 import com.clemble.thank.payment.model.BankDetails
@@ -8,38 +9,25 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json._
+import reactivemongo.play.json._
 import reactivemongo.api.Cursor.ContOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.akkastream.cursorProducer
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.modules.reactivemongo.json._
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONString}
 
+
 case class MongoUserRepository @Inject()(
                                           @Named("user") collection: JSONCollection,
+                                          implicit val m: Materializer,
                                           implicit val ec: ExecutionContext
                                         ) extends UserRepository {
 
-  MongoSafeUtils.ensureIndexes(
-    collection,
-    Index(
-      key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
-      name = Some("user_profiles")
-    ),
-    Index(
-      key = Seq("owns.resource.uri" -> IndexType.Ascending),
-      name = Some("user_owns")
-    ),
-    Index(
-      key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),
-      name = Some("user_bank_details"),
-      unique = true,
-      partialFilter = Some(BSONDocument("bankDetails.type" -> BSONString("payPal")))
-    )
-  )
-
+  MongoUserRepository.ensureIndexes(collection)
+  MongoUserRepository.ensureUpToDate(collection)
 
   override def save(user: User): Future[User] = {
     val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
@@ -114,6 +102,52 @@ case class MongoUserRepository @Inject()(
       cursor[User](ReadPreference.nearest).
       collect[List](Int.MaxValue, ContOnError[List[User]]())
     MongoSafeUtils.safe(users)
+  }
+
+}
+
+object MongoUserRepository {
+
+  def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
+    MongoSafeUtils.ensureIndexes(
+      collection,
+      Index(
+        key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
+        name = Some("user_profiles")
+      ),
+      Index(
+        key = Seq("owns.resource.uri" -> IndexType.Ascending),
+        name = Some("user_owns")
+      ),
+      Index(
+        key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),
+        name = Some("user_bank_details"),
+        unique = true,
+        partialFilter = Some(BSONDocument("bankDetails.type" -> BSONString("payPal")))
+      )
+    )
+  }
+
+  def ensureUpToDate(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    addTotalField(collection)
+    addBioField(collection)
+  }
+
+  def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    val selector = Json.obj("total" -> Json.obj("$exists" -> false))
+    val update = (user: JsObject) => {
+      val id = (user \ "_id").as[String]
+      val balance = (user \ "balance").as[Amount]
+      collection.update(Json.obj("_id" -> id), Json.obj("$set" -> Json.obj("total" -> balance)))
+    }
+    MongoSafeUtils.ensureUpdate(collection, selector, update)
+  }
+
+  def addBioField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    val selector = Json.obj("bio" -> Json.obj("$exists" -> false))
+    val update = Json.obj("$set" -> Json.obj("bio" -> User.DEFAULT_BIO))
+    val fupdate = collection.update(selector, update, upsert = false, multi = true)
+    fupdate.foreach(res => if (!res.ok) System.exit(2));
   }
 
 }

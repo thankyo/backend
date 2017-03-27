@@ -1,10 +1,16 @@
 package com.clemble.thank.service.repository.mongo
 
+import akka.stream.Materializer
+import play.api.libs.json._
+import reactivemongo.play.json._
 import com.clemble.thank.model.error.{RepositoryError, RepositoryException, ThankException}
+import play.api.libs.json.{JsObject, Json}
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.{WriteError, WriteResult}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.core.errors.DatabaseException
 import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.akkastream.cursorProducer
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,12 +58,18 @@ object MongoSafeUtils {
     })
   }
 
-  def ensureIndexes(collection: JSONCollection, indexes: Index*)(implicit ec: ExecutionContext) = {
+  def ensureIndexes(collection: JSONCollection, indexes: Index*)(implicit ec: ExecutionContext): Unit = {
     for {
       index <- indexes
-    } yield {
+    } {
       collection.indexesManager.ensure(index).onFailure({ case t => t.printStackTrace(System.err) })
     }
+  }
+
+  def ensureUpdate(collection: JSONCollection, selector: JsObject, update: (JsObject) => Future[WriteResult]) (implicit ec: ExecutionContext, m: Materializer): Unit = {
+    val source = collection.find(selector).cursor[JsObject](ReadPreference.nearest).documentSource()
+    val updateEach = source.runFoldAsync(true)((agg, jsObj) => update(jsObj).map(res => agg && res.ok && res.n == 1))
+    updateEach.foreach(success => if(!success) System.exit(1))
   }
 
 }

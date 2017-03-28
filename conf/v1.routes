@@ -10,6 +10,8 @@ GET         /transaction/user/my             @com.clemble.thank.controller.Thank
 GET         /thank/*url                      @com.clemble.thank.controller.ThankController.get(url: com.clemble.thank.model.Resource)
 PUT         /thank/*url                      @com.clemble.thank.controller.ThankController.thank(url: com.clemble.thank.model.Resource)
 
+POST        /payment/transaction/withdraw    @com.clemble.thank.payment.controller.WithdrawController.withdraw()
+
 GET         /payment/braintree/token         @com.clemble.thank.payment.controller.BraintreeController.generateToken()
 POST        /payment/braintree/nonce         @com.clemble.thank.payment.controller.BraintreeController.processNonce()
 

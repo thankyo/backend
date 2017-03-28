@@ -9,6 +9,12 @@ trait ExchangeService {
 
   def toAmount(currency: Currency): Amount
 
+  def toAmount(amount: Amount, currency: Currency): Money = {
+    val perCurUnit = toAmount(currency)
+    val amountMoney = amount / perCurUnit
+    Money(amountMoney, currency)
+  }
+
   def toThanks(money: Money): Amount = {
     (money.amount * toAmount(money.currency)).toLongExact
   }

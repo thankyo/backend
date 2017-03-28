@@ -6,7 +6,7 @@ import com.braintreegateway.BraintreeGateway
 import com.clemble.thank.model.Amount
 import com.clemble.thank.payment.service.repository.PaymentTransactionRepository
 import com.clemble.thank.payment.service.repository.mongo.MongoPaymentTransactionRepository
-import com.clemble.thank.payment.service.{BraintreeService, PaymentTransactionService, SimpleBraintreeService, SimplePaymentTransactionService}
+import com.clemble.thank.payment.service._
 import com.clemble.thank.service._
 import com.google.inject.Provides
 import com.google.inject.name.Named
@@ -28,6 +28,7 @@ class PaymentModule extends ScalaModule {
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](Currency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
     bind[PaymentTransactionService].to[SimplePaymentTransactionService]
+    bind[WithdrawService].to[EmptyWithdrawService]
   }
 
   @Provides

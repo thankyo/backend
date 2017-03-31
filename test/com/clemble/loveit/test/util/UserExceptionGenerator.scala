@@ -1,6 +1,6 @@
 package com.clemble.loveit.test.util
 
-import com.clemble.loveit.model.error.UserException
+import com.clemble.loveit.common.error.UserException
 
 object UserExceptionGenerator extends Generator[UserException]{
 

@@ -1,4 +1,4 @@
-package com.clemble.loveit.service
+package com.clemble.loveit.payment.service
 
 import java.util.Currency
 

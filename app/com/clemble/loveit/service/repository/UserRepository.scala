@@ -1,6 +1,6 @@
 package com.clemble.loveit.service.repository
 
-import com.clemble.loveit.model.error.{RepositoryException, UserException}
+import com.clemble.loveit.common.error.{RepositoryException, UserException}
 import com.clemble.loveit.model._
 import com.clemble.loveit.payment.model.BankDetails
 import com.mohiva.play.silhouette.api.services.IdentityService

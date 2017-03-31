@@ -1,7 +1,7 @@
 package com.clemble.loveit.service.repository
 
 import com.clemble.loveit.model.User
-import com.clemble.loveit.model.error.{RepositoryError, RepositoryException, UserException}
+import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, UserException}
 import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.test.util.UserGenerator
 import org.apache.commons.lang3.RandomStringUtils

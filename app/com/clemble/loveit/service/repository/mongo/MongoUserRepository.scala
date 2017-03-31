@@ -2,7 +2,7 @@ package com.clemble.loveit.service.repository.mongo
 
 import akka.stream.Materializer
 import com.clemble.loveit.model._
-import com.clemble.loveit.model.error.UserException
+import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.service.repository.UserRepository
 import com.google.inject.Inject

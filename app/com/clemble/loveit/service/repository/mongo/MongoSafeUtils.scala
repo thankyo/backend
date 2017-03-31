@@ -3,7 +3,7 @@ package com.clemble.loveit.service.repository.mongo
 import akka.stream.Materializer
 import play.api.libs.json._
 import reactivemongo.play.json._
-import com.clemble.loveit.model.error.{RepositoryError, RepositoryException, ThankException}
+import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, ThankException}
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.{WriteError, WriteResult}

@@ -7,7 +7,7 @@ import scala.concurrent._
 import javax.inject.Singleton
 
 import play.api.mvc.Results._
-import com.clemble.loveit.model.error.ThankException
+import com.clemble.loveit.common.error.ThankException
 import com.google.inject.{Inject, Provider}
 import play.api.{Configuration, Environment, OptionalSourceMapper}
 import play.api.routing.Router

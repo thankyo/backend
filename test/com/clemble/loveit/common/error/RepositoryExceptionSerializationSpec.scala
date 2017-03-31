@@ -1,4 +1,4 @@
-package com.clemble.loveit.model.error
+package com.clemble.loveit.common.error
 
 import com.clemble.loveit.model.SerializationSpec
 import com.clemble.loveit.test.util.{Generator, RepositoryExceptionGenerator}

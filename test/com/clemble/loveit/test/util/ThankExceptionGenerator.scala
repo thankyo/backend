@@ -1,6 +1,6 @@
 package com.clemble.loveit.test.util
 
-import com.clemble.loveit.model.error.ThankException
+import com.clemble.loveit.common.error.ThankException
 
 import scala.util.Random
 

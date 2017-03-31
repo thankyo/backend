@@ -2,7 +2,7 @@ package com.clemble.loveit
 
 import akka.util.ByteString
 import com.clemble.loveit.model._
-import com.clemble.loveit.model.error.ThankException
+import com.clemble.loveit.common.error.ThankException
 import com.clemble.loveit.payment.model.PaymentTransaction
 import play.api.http.{ContentTypes, Writeable}
 import play.api.libs.json.Format

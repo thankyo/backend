@@ -1,6 +1,6 @@
 package com.clemble.loveit.service
 
-import com.clemble.loveit.model.error.{RepositoryError, RepositoryException}
+import com.clemble.loveit.common.error.{RepositoryError, RepositoryException}
 import com.clemble.loveit.model.{HttpResource, ResourceOwnership, User}
 import com.clemble.loveit.service.repository.UserRepository
 import com.clemble.loveit.test.util.UserGenerator

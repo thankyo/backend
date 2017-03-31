@@ -1,7 +1,7 @@
 package com.clemble.loveit.service
 
 import com.clemble.loveit.model._
-import com.clemble.loveit.model.error.UserException
+import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.payment.model.BankDetails
 
 import scala.concurrent.Future

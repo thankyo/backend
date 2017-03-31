@@ -1,4 +1,4 @@
-package com.clemble.loveit.model.error
+package com.clemble.loveit.common.error
 
 import play.api.libs.json._
 

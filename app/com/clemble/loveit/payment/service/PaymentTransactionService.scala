@@ -6,7 +6,7 @@ import akka.stream.scaladsl.Source
 import com.clemble.loveit.model._
 import com.clemble.loveit.payment.model.{BankDetails, Money, PaymentTransaction}
 import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
-import com.clemble.loveit.service.{ExchangeService, UserService}
+import com.clemble.loveit.service.UserService
 import com.google.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}

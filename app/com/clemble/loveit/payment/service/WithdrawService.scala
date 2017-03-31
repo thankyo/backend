@@ -11,5 +11,5 @@ trait WithdrawService {
 }
 
 class EmptyWithdrawService extends WithdrawService {
-  override def withdraw(money: Money, account: BankDetails): Future[Boolean] = Future.successful(true)
+  override def withdraw(money: Money, account: BankDetails): Future[Boolean] = Future.successful(false)
 }

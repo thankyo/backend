@@ -1,6 +1,6 @@
-package com.clemble.loveit.model
+package com.clemble.loveit.payment.model
 
-import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.model.SerializationSpec
 import com.clemble.loveit.test.util.{BankDetailsGenerator, Generator}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

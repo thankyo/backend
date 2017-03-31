@@ -22,5 +22,7 @@ trait ExchangeService {
 }
 
 case class InMemoryExchangeService(currencyToAmount: Map[Currency, Amount]) extends ExchangeService {
-  override def toAmount(currency: Currency): Amount = currencyToAmount(currency)
+  override def toAmount(currency: Currency): Amount = {
+    currencyToAmount(currency)
+  }
 }

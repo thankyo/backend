@@ -1,6 +1,6 @@
-package com.clemble.loveit.model
+package com.clemble.loveit.payment.model
 
-import com.clemble.loveit.payment.model.PaymentTransaction
+import com.clemble.loveit.model.SerializationSpec
 import com.clemble.loveit.test.util.{Generator, PaymentTransactionGenerator}
 import play.api.libs.json.Format
 

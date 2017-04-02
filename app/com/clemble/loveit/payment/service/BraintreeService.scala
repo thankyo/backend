@@ -5,7 +5,6 @@ import com.clemble.loveit.model.UserID
 import com.clemble.loveit.payment.model.{BankDetails, BraintreeRequest, Money, PaymentTransaction}
 import com.clemble.loveit.util.IDGenerator
 import com.google.inject.Inject
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.Future
 

@@ -53,7 +53,17 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       await(userRepo.save(A))
       await(userRepo.save(B))
 
-      await(userRepo.setBankDetails(A.id, B.bankDetails)) must beEqualTo(true)
+      await(userRepo.setBankDetails(A.id, B.bankDetails)) must throwA[RepositoryException]
+    }
+
+    "set BankDetails" in {
+      val A = UserGenerator.generate()
+      val bankDetails = BankDetails.payPal(RandomStringUtils.random(10))
+
+      await(userRepo.save(A))
+      await(userRepo.setBankDetails(A.id, bankDetails))
+
+      await(userRepo.findById(A.id)).get.bankDetails must beEqualTo(bankDetails)
     }
 
   }

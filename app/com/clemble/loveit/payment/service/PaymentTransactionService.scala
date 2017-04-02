@@ -47,6 +47,7 @@ case class SimplePaymentTransactionService @Inject() (
 
   override def receive(transaction: PaymentTransaction): Future[PaymentTransaction] = {
     for {
+      _ <- userService.setBankDetails(transaction.user, transaction.source)
       userUpdate <- userService.updateBalance(transaction.user, transaction.thanks) if(userUpdate)
       savedTransaction <- repo.save(transaction)
     } yield {

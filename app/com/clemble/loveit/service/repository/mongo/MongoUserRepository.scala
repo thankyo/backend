@@ -56,7 +56,7 @@ case class MongoUserRepository @Inject()(
 
   override def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean] = {
     val query = Json.obj("_id" -> user)
-    val change = Json.obj("$set" -> bankDetails)
+    val change = Json.obj("$set" -> Json.obj("bankDetails" -> bankDetails))
     val update = collection.update(query, change).map(res => res.ok && res.n == 1)
     MongoSafeUtils.safe(update)
   }

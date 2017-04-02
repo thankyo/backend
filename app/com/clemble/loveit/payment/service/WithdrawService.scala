@@ -9,6 +9,7 @@ import com.paypal.api.payments.{Payout, PayoutItem, PayoutSenderBatchHeader}
 import com.paypal.base.rest.APIContext
 
 import scala.concurrent.Future
+import scala.util.Try
 
 trait WithdrawService[T <: BankDetails] {
 
@@ -32,18 +33,20 @@ case class PayPalWithdrawService(context: APIContext) extends WithdrawService[Pa
   override def withdraw(money: Money, account: PayPalBankDetails): Future[Boolean] = {
     val senderHeader = new PayoutSenderBatchHeader().
       setSenderBatchId(IDGenerator.generate()).
-      setRecipientType("EMAIL")
+      setRecipientType("EMAIL").
+      setEmailSubject("LoveIt Payout <3")
     val payoutItem = toPayoutItem(money, account)
     val payout = new Payout(senderHeader, Lists.newArrayList(payoutItem))
-    val result = payout.create(context, new util.HashMap[String, String]())
-    Future.successful(true)
+    val result = Try(payout.create(context, new util.HashMap[String, String]()))
+    Future.successful(result.isSuccess)
   }
 
   private def toPayoutItem(money: Money, account: PayPalBankDetails): PayoutItem = {
     new PayoutItem().
       setReceiver(account.email).
       setRecipientType("EMAIL").
-      setAmount(money.toPayPalCurrency())
+      setAmount(money.toPayPalCurrency()).
+      setNote("LoveIt Payout <3")
   }
 
 }

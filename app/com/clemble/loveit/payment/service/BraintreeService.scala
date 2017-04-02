@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.service
 
 import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
 import com.clemble.loveit.model.UserID
-import com.clemble.loveit.payment.model.{BankDetails, Money, PaymentTransaction}
+import com.clemble.loveit.payment.model.{BankDetails, BraintreeRequest, Money, PaymentTransaction}
 import com.clemble.loveit.util.IDGenerator
 import com.google.inject.Inject
 import reactivemongo.bson.BSONObjectID
@@ -12,6 +12,10 @@ import scala.concurrent.Future
 trait BraintreeService {
 
   def generateToken(): Future[String]
+
+  def process(user: UserID, req: BraintreeRequest): Future[PaymentTransaction] = {
+    processNonce(user, req.nonce, req.money)
+  }
 
   def processNonce(userID: UserID, nonce: String, money: Money): Future[PaymentTransaction]
 

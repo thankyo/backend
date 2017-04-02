@@ -8,7 +8,7 @@ import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
 import com.clemble.loveit.payment.service.repository.mongo.MongoPaymentTransactionRepository
 import com.clemble.loveit.payment.service._
-import com.clemble.loveit.service._
+import com.clemble.loveit.util.LoveItCurrency
 import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.paypal.base.rest.APIContext
@@ -27,17 +27,17 @@ class PaymentModule extends ScalaModule {
     bind[PaymentTransactionRepository].to[MongoPaymentTransactionRepository]
     bind[BraintreeService].to[SimpleBraintreeService]
 
-    val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](Currency.getInstance("USD") -> 10L)
+    val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
     bind[PaymentTransactionService].to[SimplePaymentTransactionService]
   }
 
   @Provides
   def apiContext(configuration: Configuration): APIContext = {
-    val clientId = configuration.getString("payment.payPal.rest.clientId")
-    val clientSecret = configuration.getString("payment.payPal.rest.clientSecret")
-    val mode = configuration.getString("payment.payPal.rest.mode")
-    new APIContext(clientId.get, clientSecret.get, mode.get)
+    val clientId = configuration.getString("payment.payPal.rest.clientId").get
+    val clientSecret = configuration.getString("payment.payPal.rest.clientSecret").get
+    val mode = configuration.getString("payment.payPal.rest.mode").get
+    new APIContext(clientId, clientSecret, mode)
   }
 
   @Provides

@@ -2,12 +2,11 @@ package com.clemble.loveit.payment.controller
 
 import java.util.Currency
 
-import com.clemble.loveit.payment.model.Money
+import com.clemble.loveit.payment.model.{BraintreeRequest, Money}
 import com.clemble.loveit.payment.service.BraintreeService
-import com.clemble.loveit.util.AuthEnv
+import com.clemble.loveit.util.{AuthEnv, LoveItCurrency}
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.libs.json.JsObject
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
@@ -23,8 +22,9 @@ class BraintreeController @Inject()(
     tokenResp
   })
 
-  def processNonce() = silhouette.SecuredAction.async(parse.json[JsObject])(implicit req => {
-    val transaction = braintreeService.processNonce(req.identity.id, (req.body \ "nonce").as[String], Money(10, Currency.getInstance("USD")))
+  def processNonce() = silhouette.SecuredAction.async(parse.json[BraintreeRequest])(implicit req => {
+    val user = req.identity.id
+    val transaction = braintreeService.process(user, req.body)
     transaction.map(Ok(_))
   })
 

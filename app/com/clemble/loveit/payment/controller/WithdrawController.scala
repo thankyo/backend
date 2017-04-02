@@ -4,7 +4,7 @@ import java.util.Currency
 
 import com.clemble.loveit.payment.service.PaymentTransactionService
 import com.clemble.loveit.service.UserService
-import com.clemble.loveit.util.AuthEnv
+import com.clemble.loveit.util.{AuthEnv, LoveItCurrency}
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.JsObject
@@ -22,7 +22,7 @@ class WithdrawController @Inject()(
   def withdraw() = silhouette.SecuredAction.async(parse.json[JsObject])(req => {
     for {
       bankDetails <- userService.findById(req.identity.id).map(_.get.bankDetails)
-      transaction <- service.withdraw(req.identity.id, bankDetails, (req.body \ "amount").as[Int], Currency.getInstance("USD"))
+      transaction <- service.withdraw(req.identity.id, bankDetails, (req.body \ "amount").as[Int], LoveItCurrency.getInstance("USD"))
     } yield {
       Ok(transaction)
     }

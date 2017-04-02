@@ -64,9 +64,9 @@ object PaymentTransaction {
     )
   }
 
-  def debit(user: UserID, thanks: Amount, money: Money, source: BankDetails): PaymentTransaction = {
+  def debit(id: String, user: UserID, thanks: Amount, money: Money, source: BankDetails): PaymentTransaction = {
     PaymentTransaction(
-      id = IDGenerator.generate(),
+      id = id,
       operation = Debit,
       user = user,
       thanks = thanks,

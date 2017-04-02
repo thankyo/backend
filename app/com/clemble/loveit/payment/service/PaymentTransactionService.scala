@@ -21,7 +21,7 @@ trait PaymentTransactionService {
   /**
     * Receive money from external resource
     */
-  def receive[T](user: UserID, bankDetails: BankDetails, money: Money, externalTransaction: T): Future[PaymentTransaction]
+  def receive(transaction: PaymentTransaction): Future[PaymentTransaction]
 
   /**
     * Withdraw money to external system
@@ -45,11 +45,9 @@ case class SimplePaymentTransactionService @Inject() (
     repo.findByUser(user)
   }
 
-  override def receive[T](user: UserID, bankDetails: BankDetails, money: Money, extTransaction: T): Future[PaymentTransaction] = {
-    val thanks = exchangeService.toThanks(money)
-    val transaction = PaymentTransaction.debit(user, thanks, money, bankDetails)
+  override def receive(transaction: PaymentTransaction): Future[PaymentTransaction] = {
     for {
-      userUpdate <- userService.updateBalance(user, thanks) if(userUpdate)
+      userUpdate <- userService.updateBalance(transaction.user, transaction.thanks) if(userUpdate)
       savedTransaction <- repo.save(transaction)
     } yield {
       savedTransaction

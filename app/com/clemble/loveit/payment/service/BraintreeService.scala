@@ -17,7 +17,7 @@ trait BraintreeService {
 
 }
 
-case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentService: PaymentTransactionService) extends BraintreeService {
+case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentService: PaymentTransactionService, exchangeService: ExchangeService) extends BraintreeService {
 
   override def generateToken(): Future[String] = {
     Future.successful(gateway.clientToken().generate())
@@ -25,10 +25,10 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
 
   private def createSaleRequest(paymentNonce: String, money: Money): TransactionRequest = {
     new TransactionRequest().
+      orderId(IDGenerator.generate()).
       amount(money.amount.bigDecimal).
       merchantAccountId(money.currency.getCurrencyCode).
       paymentMethodNonce(paymentNonce).
-      orderId(IDGenerator.generate()).
       descriptor().name("CLMBLTD*Gratefull").
       done()
   }
@@ -42,12 +42,16 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
     saleResult.getTarget()
   }
 
-  override def processNonce(userID: UserID, paymentNonce: String, amount: Money): Future[PaymentTransaction] = {
+  override def processNonce(user: UserID, paymentNonce: String, amount: Money): Future[PaymentTransaction] = {
     val saleTransaction = createSaleTransaction(paymentNonce, amount)
 
-    val bankDetails: BankDetails = BankDetails from saleTransaction.getPayPalDetails
+    val bankDetails = BankDetails from saleTransaction.getPayPalDetails
     val money = Money from saleTransaction
-    paymentService.receive(userID, bankDetails, money, saleTransaction)
+
+    val thanks = exchangeService.toThanks(money)
+    val transaction = PaymentTransaction.debit(saleTransaction.getOrderId, user, thanks, money, bankDetails)
+
+    paymentService.receive(transaction)
   }
 
 }

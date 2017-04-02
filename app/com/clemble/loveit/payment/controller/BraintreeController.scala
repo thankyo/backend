@@ -1,10 +1,8 @@
 package com.clemble.loveit.payment.controller
 
-import java.util.Currency
-
-import com.clemble.loveit.payment.model.{BraintreeRequest, Money}
+import com.clemble.loveit.payment.model.{BraintreeRequest}
 import com.clemble.loveit.payment.service.BraintreeService
-import com.clemble.loveit.util.{AuthEnv, LoveItCurrency}
+import com.clemble.loveit.common.util.{AuthEnv}
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller

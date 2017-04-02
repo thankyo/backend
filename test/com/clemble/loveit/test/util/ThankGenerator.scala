@@ -1,6 +1,6 @@
 package com.clemble.loveit.test.util
 
-import com.clemble.loveit.model.Thank
+import com.clemble.loveit.thank.model.Thank
 import org.apache.commons.lang3.RandomStringUtils._
 import org.apache.commons.lang3.RandomUtils._
 

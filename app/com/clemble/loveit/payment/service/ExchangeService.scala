@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.service
 
 import java.util.Currency
 
-import com.clemble.loveit.model.Amount
+import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.Money
 
 trait ExchangeService {

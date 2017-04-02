@@ -1,6 +1,7 @@
 package com.clemble.loveit.test.util
 
-import com.clemble.loveit.model.{ThankTransaction, User}
+import com.clemble.loveit.user.model.User
+import com.clemble.loveit.payment.model.ThankTransaction
 import org.apache.commons.lang3.RandomUtils._
 
 object ThankTransactionGenerator extends Generator[ThankTransaction] {

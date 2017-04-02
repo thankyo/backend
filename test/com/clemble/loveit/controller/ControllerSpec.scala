@@ -1,13 +1,16 @@
 package com.clemble.loveit.controller
 
 import akka.stream.scaladsl.Sink
-import com.clemble.loveit.model._
+import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.user.model._
 import com.clemble.loveit.test.util.{CommonSocialProfileGenerator, ThankSpecification, UserGenerator}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import com.clemble.loveit.model.User.socialProfileJsonFormat
-import com.clemble.loveit.service.repository.UserRepository
+import com.clemble.loveit.user.model.User.socialProfileJsonFormat
+import com.clemble.loveit.payment.model.ThankTransaction
+import com.clemble.loveit.user.service.repository.UserRepository
+import com.clemble.loveit.thank.model.ResourceOwnership
 
 import scala.concurrent.ExecutionContext
 

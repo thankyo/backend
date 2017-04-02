@@ -1,6 +1,6 @@
 package com.clemble.loveit.controller
 
-import com.clemble.loveit.model.User
+import com.clemble.loveit.user.model.User
 import com.clemble.loveit.test.util.{CommonSocialProfileGenerator}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv

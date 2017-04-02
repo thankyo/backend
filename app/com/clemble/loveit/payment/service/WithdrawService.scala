@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.service
 import java.util
 
 import com.clemble.loveit.payment.model.{BankDetails, EmptyBankDetails, Money, PayPalBankDetails}
-import com.clemble.loveit.util.IDGenerator
+import com.clemble.loveit.common.util.IDGenerator
 import com.google.common.collect.Lists
 import com.paypal.api.payments.{Payout, PayoutItem, PayoutSenderBatchHeader}
 import com.paypal.base.rest.APIContext

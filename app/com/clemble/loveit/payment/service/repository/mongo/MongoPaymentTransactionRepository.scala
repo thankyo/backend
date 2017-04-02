@@ -1,9 +1,9 @@
 package com.clemble.loveit.payment.service.repository.mongo
 
 import akka.stream.Materializer
+import com.clemble.loveit.common.mongo.{MongoSafeUtils, MongoUserAwareRepository}
 import com.clemble.loveit.payment.model.PaymentTransaction
 import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
-import com.clemble.loveit.service.repository.mongo.{MongoSafeUtils, MongoUserAwareRepository}
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import play.api.libs.json.{JsObject, JsString, Json}

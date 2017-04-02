@@ -1,7 +1,7 @@
 package com.clemble.loveit.payment.controller
 
 import com.clemble.loveit.payment.service.PaymentTransactionService
-import com.clemble.loveit.util.AuthEnv
+import com.clemble.loveit.common.util.AuthEnv
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller

@@ -1,8 +1,9 @@
 package com.clemble.loveit.payment.model
 
 import com.braintreegateway.{Transaction => BraintreeTransaction}
-import com.clemble.loveit.model._
-import com.clemble.loveit.util.IDGenerator
+import com.clemble.loveit.common.model.{Amount, PaymentID, UserID}
+import com.clemble.loveit.user.model._
+import com.clemble.loveit.common.util.IDGenerator
 import org.joda.time.DateTime
 import play.api.libs.json._
 

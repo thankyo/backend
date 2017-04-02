@@ -1,6 +1,6 @@
 package com.clemble.loveit.test.util
 
-import com.clemble.loveit.model._
+import com.clemble.loveit.common.model.{FacebookResource, HttpResource, Resource}
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomStringUtils.randomAlphabetic
 import org.apache.commons.lang3.RandomUtils.nextInt

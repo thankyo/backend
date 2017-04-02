@@ -1,6 +1,7 @@
 package com.clemble.loveit.test.util
 
-import com.clemble.loveit.model.{ResourceOwnership, User}
+import com.clemble.loveit.user.model.User
+import com.clemble.loveit.thank.model.ResourceOwnership
 import com.mohiva.play.silhouette.api.LoginInfo
 import org.apache.commons.lang3.RandomStringUtils.random
 import org.apache.commons.lang3.RandomUtils.nextLong

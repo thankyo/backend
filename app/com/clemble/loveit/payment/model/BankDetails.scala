@@ -1,7 +1,7 @@
 package com.clemble.loveit.payment.model
 
-import com.braintreegateway.{Customer, PayPalDetails, Transaction => BraintreeTransaction}
-import com.clemble.loveit.model.Email
+import com.braintreegateway.{Customer, PayPalDetails}
+import com.clemble.loveit.common.model.Email
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 

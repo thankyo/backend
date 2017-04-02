@@ -1,8 +1,9 @@
 package com.clemble.loveit.controller
 
-import com.clemble.loveit.model.{HttpResource, ResourceSpec}
-import com.clemble.loveit.model.ResourceOwnership._
+import com.clemble.loveit.common.model.HttpResource
+import com.clemble.loveit.thank.model.ResourceOwnership._
 import com.clemble.loveit.payment.model.{Credit, Debit}
+import com.clemble.loveit.user.model.ResourceSpec
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

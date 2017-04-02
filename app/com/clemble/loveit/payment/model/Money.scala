@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.model
 import java.util.Currency
 
 import com.braintreegateway.{Transaction => BraintreeTransaction}
-import com.clemble.loveit.util.LoveItCurrency
+import com.clemble.loveit.common.util.LoveItCurrency
 import com.paypal.api.payments
 import play.api.libs.json._
 

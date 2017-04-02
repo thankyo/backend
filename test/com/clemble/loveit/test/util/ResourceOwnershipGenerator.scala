@@ -1,6 +1,6 @@
 package com.clemble.loveit.test.util
 
-import com.clemble.loveit.model.ResourceOwnership
+import com.clemble.loveit.thank.model.ResourceOwnership
 import org.apache.commons.lang3.RandomStringUtils.randomNumeric
 import org.apache.commons.lang3.RandomUtils._
 

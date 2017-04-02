@@ -3,12 +3,12 @@ package com.clemble.loveit.payment
 import java.util.Currency
 
 import com.braintreegateway.BraintreeGateway
-import com.clemble.loveit.model.Amount
+import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.BankDetails
-import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
-import com.clemble.loveit.payment.service.repository.mongo.MongoPaymentTransactionRepository
+import com.clemble.loveit.payment.service.repository.{PaymentTransactionRepository, ThankTransactionRepository}
+import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentTransactionRepository, MongoThankTransactionRepository}
 import com.clemble.loveit.payment.service._
-import com.clemble.loveit.util.LoveItCurrency
+import com.clemble.loveit.common.util.LoveItCurrency
 import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.paypal.base.rest.APIContext
@@ -30,6 +30,9 @@ class PaymentModule extends ScalaModule {
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
     bind[PaymentTransactionService].to[SimplePaymentTransactionService]
+
+    bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService])
+    bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
   }
 
   @Provides
@@ -57,6 +60,15 @@ class PaymentModule extends ScalaModule {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.
       map(_.collection[JSONCollection]("paymentTransaction", FailoverStrategy.default))(ec)
+    Await.result(fCollection, 1 minute)
+  }
+
+  @Provides
+  @Named("thankTransactions")
+  def thankTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    val fCollection: Future[JSONCollection] = mongoApi.
+      database.
+      map(_.collection[JSONCollection]("thankTransaction", FailoverStrategy.default))(ec)
     Await.result(fCollection, 1 minute)
   }
 

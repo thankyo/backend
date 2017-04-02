@@ -3,10 +3,10 @@ package com.clemble.loveit.payment.service
 import java.util.Currency
 
 import akka.stream.scaladsl.Source
-import com.clemble.loveit.model._
-import com.clemble.loveit.payment.model.{BankDetails, Money, PaymentTransaction}
+import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.payment.model.{BankDetails, PaymentTransaction}
 import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
-import com.clemble.loveit.service.UserService
+import com.clemble.loveit.user.service.UserService
 import com.google.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}

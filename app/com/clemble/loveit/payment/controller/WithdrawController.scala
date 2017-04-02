@@ -3,8 +3,8 @@ package com.clemble.loveit.payment.controller
 import java.util.Currency
 
 import com.clemble.loveit.payment.service.PaymentTransactionService
-import com.clemble.loveit.service.UserService
-import com.clemble.loveit.util.{AuthEnv, LoveItCurrency}
+import com.clemble.loveit.user.service.UserService
+import com.clemble.loveit.common.util.{AuthEnv, LoveItCurrency}
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.JsObject

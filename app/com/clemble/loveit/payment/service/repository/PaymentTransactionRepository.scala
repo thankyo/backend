@@ -1,7 +1,7 @@
 package com.clemble.loveit.payment.service.repository
 
 import com.clemble.loveit.payment.model.PaymentTransaction
-import com.clemble.loveit.service.repository.UserAwareRepository
+import com.clemble.loveit.user.service.repository.UserAwareRepository
 
 import scala.concurrent.Future
 

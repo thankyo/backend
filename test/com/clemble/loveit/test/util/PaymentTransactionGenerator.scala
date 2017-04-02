@@ -3,7 +3,7 @@ package com.clemble.loveit.test.util
 import java.util.Currency
 
 import com.clemble.loveit.payment.model.{Money, PaymentTransaction}
-import com.clemble.loveit.util.{IDGenerator, LoveItCurrency}
+import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 
 import scala.util.Random
 

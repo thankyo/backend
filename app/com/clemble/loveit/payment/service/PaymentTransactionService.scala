@@ -18,8 +18,14 @@ trait PaymentTransactionService {
     */
   def list(user: UserID): Source[PaymentTransaction, _]
 
+  /**
+    * Receive money from external resource
+    */
   def receive[T](user: UserID, bankDetails: BankDetails, money: Money, externalTransaction: T): Future[PaymentTransaction]
 
+  /**
+    * Withdraw money to external system
+    */
   def withdraw(user: UserID, bankDetails: BankDetails, amount: Amount, currency: Currency): Future[PaymentTransaction]
 
 }
@@ -29,7 +35,7 @@ trait PaymentTransactionService {
 case class SimplePaymentTransactionService @Inject() (
                                                        userService: UserService,
                                                        exchangeService: ExchangeService,
-                                                       withdrawService: WithdrawService,
+                                                       withdrawService: WithdrawService[BankDetails],
                                                        repo: PaymentTransactionRepository,
                                                        implicit val ec: ExecutionContext
                                           ) extends PaymentTransactionService {

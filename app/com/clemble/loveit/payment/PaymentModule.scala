@@ -4,12 +4,14 @@ import java.util.Currency
 
 import com.braintreegateway.BraintreeGateway
 import com.clemble.loveit.model.Amount
+import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
 import com.clemble.loveit.payment.service.repository.mongo.MongoPaymentTransactionRepository
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.service._
 import com.google.inject.Provides
 import com.google.inject.name.Named
+import com.paypal.base.rest.APIContext
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -28,7 +30,19 @@ class PaymentModule extends ScalaModule {
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](Currency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
     bind[PaymentTransactionService].to[SimplePaymentTransactionService]
-    bind[WithdrawService].to[EmptyWithdrawService]
+  }
+
+  @Provides
+  def apiContext(configuration: Configuration): APIContext = {
+    val clientId = configuration.getString("payment.payPal.rest.clientId")
+    val clientSecret = configuration.getString("payment.payPal.rest.clientSecret")
+    val mode = configuration.getString("payment.payPal.rest.mode")
+    new APIContext(clientId.get, clientSecret.get, mode.get)
+  }
+
+  @Provides
+  def withdrawService(context: APIContext): WithdrawService[BankDetails] = {
+    WithdrawServiceFacade(PayPalWithdrawService(context))
   }
 
   @Provides

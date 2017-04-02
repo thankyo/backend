@@ -47,7 +47,7 @@ object BankDetails {
 
     override def reads(json: JsValue): JsResult[BankDetails] = (json \ "type") match {
       case JsDefined(PAY_PAL) => PayPalBankDetails.jsonFormat.reads(json)
-      case JsDefined(EMPTY) => JsSuccess(EmptyBankDetails)
+      case JsDefined(EMPTY) => JsSuccess(empty)
       case unknown => JsError(__ \ "type", ValidationError(s"Invalid BankDetails value ${unknown}"))
     }
 

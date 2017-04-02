@@ -3,12 +3,19 @@ package com.clemble.loveit.payment.model
 import java.util.Currency
 
 import com.braintreegateway.{Transaction => BraintreeTransaction}
+import com.paypal.api.payments
 import play.api.libs.json._
 
 case class Money(
                   amount: BigDecimal,
                   currency: Currency
-                )
+                ) {
+
+  def toPayPalCurrency(): payments.Currency = {
+    new payments.Currency(currency.getCurrencyCode, amount.toString())
+  }
+
+}
 
 object Money {
 

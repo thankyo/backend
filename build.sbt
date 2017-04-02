@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
   "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
 
+  "com.paypal.sdk" % "rest-api-sdk" % "1.13.1",
   "com.braintreepayments.gateway" % "braintree-java" % "2.71.0",
 
   "org.joda" % "joda-money" % "0.12",

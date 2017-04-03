@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.model
 import com.braintreegateway.{Transaction => BraintreeTransaction}
 import com.clemble.loveit.common.model.{Amount, PaymentID, UserID}
 import com.clemble.loveit.user.model._
-import com.clemble.loveit.common.util.IDGenerator
+import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import org.joda.time.DateTime
 import play.api.libs.json._
 
@@ -50,6 +50,7 @@ case class PaymentTransaction(
 object PaymentTransaction {
 
   implicit val jsonFormat = Json.format[PaymentTransaction]
+  implicit val paymentTransactionWriteable = WriteableUtils.jsonToWriteable[PaymentTransaction]
 
   def from(user: UserID, thanks: Amount, transaction: BraintreeTransaction): PaymentTransaction = {
     PaymentTransaction(

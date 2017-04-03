@@ -1,6 +1,7 @@
 package com.clemble.loveit.thank.model
 
 import com.clemble.loveit.common.model.{Resource, ResourceAware}
+import com.clemble.loveit.common.util.WriteableUtils
 import play.api.libs.json._
 
 sealed trait ResourceOwnership extends ResourceAware {
@@ -80,5 +81,7 @@ object ResourceOwnership {
     }
 
   }
+
+  implicit val httpWriteable = WriteableUtils.jsonToWriteable[ResourceOwnership]
 
 }

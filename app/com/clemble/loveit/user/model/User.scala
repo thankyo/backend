@@ -4,7 +4,7 @@ import com.clemble.loveit.common.model._
 import com.clemble.loveit.user.model.User.ExtendedBasicProfile
 import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.thank.model.ResourceOwnership
-import com.clemble.loveit.common.util.IDGenerator
+import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.joda.time.DateTime
@@ -92,8 +92,9 @@ object User {
   val DEFAULT_DATE_OF_BIRTH = new DateTime(0)
 
   implicit val socialProfileJsonFormat = Json.format[CommonSocialProfile]
-
   implicit val jsonFormat = Json.format[User]
+
+  implicit val userWriteable = WriteableUtils.jsonToWriteable[User]
 
   implicit class ExtendedBasicProfile(loginInfo: LoginInfo) {
     def toResource(): ResourceOwnership = {

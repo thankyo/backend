@@ -1,5 +1,6 @@
 package com.clemble.loveit.common.error
 
+import com.clemble.loveit.common.util.WriteableUtils
 import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException
@@ -47,5 +48,7 @@ object ThankException {
     }
 
   }
+
+  implicit val thankExceptionWriteable = WriteableUtils.jsonToWriteable[ThankException]
 
 }

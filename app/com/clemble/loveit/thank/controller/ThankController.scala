@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.controller
 
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.thank.service.ThankService
-import com.clemble.loveit.common.util.AuthEnv
+import com.clemble.loveit.common.util.{AuthEnv}
 import com.google.inject.Inject
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller

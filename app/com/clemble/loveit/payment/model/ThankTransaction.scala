@@ -1,7 +1,7 @@
 package com.clemble.loveit.payment.model
 
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.util.IDGenerator
+import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import org.joda.time.DateTime
 import play.api.libs.json._
 
@@ -20,6 +20,8 @@ object ThankTransaction {
     * JSON format for [[ThankTransaction]]
     */
   implicit val jsonFormat = Json.format[ThankTransaction]
+
+  implicit val thankTransactionWriteable = WriteableUtils.jsonToWriteable[ThankTransaction]
 
   def debit(user: UserID, uri: Resource, amount: Amount): ThankTransaction = {
     ThankTransaction(

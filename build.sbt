@@ -12,6 +12,8 @@ val reactiveMongoVer = "0.12.1"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
 
+lazy val common = project
+
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % reactiveMongoVer,
   "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVer,

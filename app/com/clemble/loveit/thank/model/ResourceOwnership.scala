@@ -84,4 +84,6 @@ object ResourceOwnership {
 
   implicit val httpWriteable = WriteableUtils.jsonToWriteable[ResourceOwnership]
 
+  implicit val listHttpWriteable = WriteableUtils.jsonToWriteable[Set[ResourceOwnership]]
+
 }

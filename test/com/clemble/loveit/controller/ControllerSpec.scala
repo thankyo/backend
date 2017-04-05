@@ -37,7 +37,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def addOwnership(own: ResourceOwnership)(implicit authHeader: Seq[(String, String)]): Option[ResourceOwnership] = {
-    val req = FakeRequest(POST, "/api/v1/ownership/my").withJsonBody(Json.toJson(own)).withHeaders(authHeader:_*)
+    val req = FakeRequest(POST, "/api/v1/thank/ownership/my").withJsonBody(Json.toJson(own)).withHeaders(authHeader:_*)
     val fRes = route(application, req).get
 
     val res = await(fRes)

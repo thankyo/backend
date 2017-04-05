@@ -12,10 +12,16 @@ sealed trait Resource {
   def stringify(): String
   def parents(): List[Resource]
 }
-
-case class FacebookResource(uri: String) extends Resource {
-  override def stringify(): String = s"facebook/${uri}"
+// Make provider enum or extend types
+case class SocialResource(provider: String, uri: String) extends Resource {
+  override def stringify(): String = s"${provider}/${uri}"
   override def parents(): List[Resource] = List(this)
+}
+
+object SocialResource {
+
+  def apply(provider: String): String => Resource = (uri) => SocialResource(provider, uri)
+
 }
 
 case class HttpResource(uri: String) extends Resource {
@@ -39,21 +45,26 @@ object Resource {
 
   implicit val jsonFormat = new Format[Resource] {
     val HTTP_JSON = JsString("http")
-    val FACEBOOK_JSON = JsString("facebook")
+    val SOCIAL_JSON = JsString("social")
 
     override def reads(json: JsValue): JsResult[Resource] = {
       val uriOpt = (json \ "uri").asOpt[String]
       (json \ "type", uriOpt) match {
-        case (JsDefined(HTTP_JSON), Some(uri)) => JsSuccess(Resource from (s"http/${uri}"))
-        case (JsDefined(FACEBOOK_JSON), Some(uri)) => JsSuccess(Resource from (s"facebook/${uri}"))
+        case (JsDefined(HTTP_JSON), Some(uri)) => JsSuccess(HttpResource(uri))
+        case (JsDefined(SOCIAL_JSON), Some(uri)) =>
+          (json \ "provider") match {
+            case(JsDefined(JsString(provider))) => JsSuccess(SocialResource(provider, uri))
+            case _ => JsError(__ \ "provider", ValidationError(s"Provider missing ${json}"))
+          }
         case _ => JsError(__ \ "type", ValidationError(s"Invalid Resource value ${json}"))
       }
     }
 
     override def writes(o: Resource): JsValue = o match {
-      case FacebookResource(uri) => JsObject(
+      case SocialResource(provider, uri) => JsObject(
         Seq(
-          "type" -> FACEBOOK_JSON,
+          "type" -> SOCIAL_JSON,
+          "provider" -> JsString(provider),
           "uri" -> JsString(uri)
         )
       )
@@ -66,21 +77,19 @@ object Resource {
     }
   }
 
-  def from(loginInfo: LoginInfo) = {
-    loginInfo.providerID match {
-      case "facebook" => FacebookResource(loginInfo.providerKey)
-      case "test"     => FacebookResource(loginInfo.providerKey)
-    }
+  def from(loginInfo: LoginInfo): Resource = {
+    SocialResource(loginInfo.providerID, loginInfo.providerKey)
   }
 
   def from(uriStr: String): Resource = {
     def toUriAndConstructor(uri: String): (String, Function[String, Resource]) = {
       uri match {
-        case fbRes if (fbRes.startsWith("facebook/")) => uri.substring(9) -> FacebookResource.apply
         case httpRes if (httpRes.startsWith("http/")) => uri.substring(5) -> HttpResource.apply
         case httpRes if (httpRes.startsWith("http:/")) => uri.substring(6) -> HttpResource.apply
         case httpsRes if (httpsRes.startsWith("https/")) => uri.substring(6) -> HttpResource.apply
         case httpsRes if (httpsRes.startsWith("https:/")) => uri.substring(7) -> HttpResource.apply
+        case fbRes if (fbRes.startsWith("facebook/")) => uri.substring(9) -> SocialResource("facebook")
+        case testRes if (testRes.startsWith("test/")) => uri.substring(5) -> SocialResource("test")
         case _ => uri -> HttpResource.apply
       }
     }

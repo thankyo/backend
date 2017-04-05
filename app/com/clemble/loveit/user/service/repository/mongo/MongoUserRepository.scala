@@ -120,12 +120,13 @@ object MongoUserRepository {
         name = Some("user_profiles")
       ),
       Index(
-        key = Seq("owns.resource.uri" -> IndexType.Ascending),
-        name = Some("user_owns")
+        key = Seq("owns.resource.uri" -> IndexType.Ascending, "owns.resource.type" -> IndexType.Ascending),
+        name = Some("user_owns_unique"),
+        unique = true
       ),
       Index(
         key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),
-        name = Some("user_bank_details"),
+        name = Some("user_bank_details_unique"),
         unique = true,
         partialFilter = Some(BSONDocument("bankDetails.type" -> BSONString("payPal")))
       )
@@ -150,8 +151,8 @@ object MongoUserRepository {
   def addBioField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("bio" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("bio" -> User.DEFAULT_BIO))
-    val fupdate = collection.update(selector, update, upsert = false, multi = true)
-    fupdate.foreach(res => if (!res.ok) System.exit(2));
+    val fUpdate = collection.update(selector, update, upsert = false, multi = true)
+    fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }
 
 }

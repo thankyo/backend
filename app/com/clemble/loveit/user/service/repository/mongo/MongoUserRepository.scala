@@ -122,7 +122,8 @@ object MongoUserRepository {
       Index(
         key = Seq("owns.resource.uri" -> IndexType.Ascending, "owns.resource.type" -> IndexType.Ascending),
         name = Some("user_owns_unique"),
-        unique = true
+        unique = true,
+        sparse = true
       ),
       Index(
         key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),

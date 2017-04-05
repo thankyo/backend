@@ -3,12 +3,13 @@ package com.clemble.loveit.thank.controller
 import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.thank.model.ResourceOwnership
 import com.clemble.loveit.common.util.AuthEnv
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class ResourceOwnershipController @Inject()(
                                              userService: UserService,
                                              silhouette: Silhouette[AuthEnv],

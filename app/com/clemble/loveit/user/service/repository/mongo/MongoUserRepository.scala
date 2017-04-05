@@ -8,7 +8,7 @@ import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.clemble.loveit.thank.model.ResourceOwnership
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.google.inject.name.Named
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json._
@@ -23,6 +23,7 @@ import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONString}
 
 
+@Singleton
 case class MongoUserRepository @Inject()(
                                           @Named("user") collection: JSONCollection,
                                           implicit val m: Materializer,

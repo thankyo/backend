@@ -4,7 +4,7 @@ import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.{BankDetails, BraintreeRequest, Money, PaymentTransaction}
 import com.clemble.loveit.common.util.IDGenerator
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 
 import scala.concurrent.Future
 
@@ -20,6 +20,7 @@ trait BraintreeService {
 
 }
 
+@Singleton
 case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentService: PaymentTransactionService, exchangeService: ExchangeService) extends BraintreeService {
 
   override def generateToken(): Future[String] = {

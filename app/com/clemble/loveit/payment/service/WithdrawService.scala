@@ -5,6 +5,7 @@ import java.util
 import com.clemble.loveit.payment.model.{BankDetails, EmptyBankDetails, Money, PayPalBankDetails}
 import com.clemble.loveit.common.util.IDGenerator
 import com.google.common.collect.Lists
+import com.google.inject.Singleton
 import com.paypal.api.payments.{Payout, PayoutItem, PayoutSenderBatchHeader}
 import com.paypal.base.rest.APIContext
 
@@ -17,6 +18,7 @@ trait WithdrawService[T <: BankDetails] {
 
 }
 
+@Singleton
 case class WithdrawServiceFacade(payPalWS: WithdrawService[PayPalBankDetails]) extends WithdrawService[BankDetails] {
 
   override def withdraw(money: Money, account: BankDetails): Future[Boolean] = {
@@ -28,6 +30,7 @@ case class WithdrawServiceFacade(payPalWS: WithdrawService[PayPalBankDetails]) e
 
 }
 
+@Singleton
 case class PayPalWithdrawService(context: APIContext) extends WithdrawService[PayPalBankDetails] {
 
   override def withdraw(money: Money, account: PayPalBankDetails): Future[Boolean] = {

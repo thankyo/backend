@@ -4,7 +4,7 @@ import com.clemble.loveit.user.service._
 import com.clemble.loveit.user.service.repository._
 import com.clemble.loveit.user.service.repository.mongo.MongoUserRepository
 import com.google.inject.name.Named
-import com.google.inject.{AbstractModule, Provides}
+import com.google.inject.{AbstractModule, Provides, Singleton}
 import org.joda.time.DateTimeZone
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
@@ -27,6 +27,7 @@ class UserModule extends AbstractModule {
 
   @Provides
   @Named("user")
+  @Singleton
   def userMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.

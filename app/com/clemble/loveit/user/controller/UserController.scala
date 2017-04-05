@@ -8,9 +8,6 @@ import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
-/**
-  * Created by mavarazy on 4/2/17.
-  */
 @Singleton
 case class UserController @Inject()(
                                      userService: UserService,

@@ -9,7 +9,7 @@ import com.clemble.loveit.payment.service.repository.{PaymentTransactionReposito
 import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentTransactionRepository, MongoThankTransactionRepository}
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
-import com.google.inject.Provides
+import com.google.inject.{Provides, Singleton}
 import com.google.inject.name.Named
 import com.paypal.base.rest.APIContext
 import net.codingwell.scalaguice.ScalaModule
@@ -36,6 +36,7 @@ class PaymentModule extends ScalaModule {
   }
 
   @Provides
+  @Singleton
   def apiContext(configuration: Configuration): APIContext = {
     val clientId = configuration.getString("payment.payPal.rest.clientId").get
     val clientSecret = configuration.getString("payment.payPal.rest.clientSecret").get
@@ -44,17 +45,20 @@ class PaymentModule extends ScalaModule {
   }
 
   @Provides
+  @Singleton
   def withdrawService(context: APIContext): WithdrawService[BankDetails] = {
     WithdrawServiceFacade(PayPalWithdrawService(context))
   }
 
   @Provides
+  @Singleton
   def braintreeGateway(configuration: Configuration): BraintreeGateway = {
     val tokeOpt = configuration.getString("payment.braintree.token")
     new BraintreeGateway(tokeOpt.get)
   }
 
   @Provides
+  @Singleton
   @Named("paymentTransactions")
   def paymentTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.
@@ -64,6 +68,7 @@ class PaymentModule extends ScalaModule {
   }
 
   @Provides
+  @Singleton
   @Named("thankTransactions")
   def thankTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.

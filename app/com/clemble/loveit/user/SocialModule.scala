@@ -2,17 +2,17 @@ package com.clemble.loveit.user
 
 import com.clemble.loveit.common.util.{AuthEnv, TestSocialProvider}
 import com.clemble.loveit.user.service.repository.UserRepository
-import com.google.inject.{AbstractModule, Provides}
-import com.mohiva.play.silhouette.api.crypto.{CookieSigner, Crypter, CrypterAuthenticatorEncoder}
+import com.google.inject.{AbstractModule, Provides, Singleton}
+import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AuthenticatorService
 import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
-import com.mohiva.play.silhouette.crypto.{JcaCookieSigner, JcaCookieSignerSettings, JcaCrypter, JcaCrypterSettings}
+import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import com.mohiva.play.silhouette.impl
 import com.mohiva.play.silhouette.impl.authenticators.{JWTAuthenticator, JWTAuthenticatorService, JWTAuthenticatorSettings}
 import com.mohiva.play.silhouette.impl.providers.oauth2.FacebookProvider
-import com.mohiva.play.silhouette.impl.providers.oauth2.state.{CookieStateProvider, CookieStateSettings}
+import com.mohiva.play.silhouette.impl.providers.oauth2.state.DummyStateProvider
 import com.mohiva.play.silhouette.impl.providers.{OAuth2Settings, OAuth2StateProvider, SocialProviderRegistry}
 import com.mohiva.play.silhouette.impl.util.SecureRandomIDGenerator
 import com.mohiva.play.silhouette.persistence.daos.InMemoryAuthInfoDAO
@@ -25,6 +25,7 @@ import play.api.libs.ws.WSClient
 import play.api.{Configuration, Mode}
 
 import scala.concurrent.ExecutionContext
+import net.ceedubs.ficus.readers.EnumerationReader._
 
 class SocialModule extends AbstractModule with ScalaModule {
 
@@ -34,16 +35,19 @@ class SocialModule extends AbstractModule with ScalaModule {
   }
 
   @Provides
+  @Singleton
   def authInfoRepository(ec: ExecutionContext): AuthInfoRepository = {
     new DelegableAuthInfoRepository(new InMemoryAuthInfoDAO[impl.providers.OAuth2Info]())(ec)
   }
 
   @Provides
+  @Singleton
   def httpLayer(client: WSClient, ec: ExecutionContext): HTTPLayer = {
     new PlayHTTPLayer(client)(ec)
   }
 
   @Provides
+  @Singleton
   def environment(
                    userService: UserRepository,
                    authenticatorService: AuthenticatorService[JWTAuthenticator],
@@ -58,6 +62,7 @@ class SocialModule extends AbstractModule with ScalaModule {
   }
 
   @Provides
+  @Singleton
   def facebookProvider(
                         httpLayer: HTTPLayer,
                         stateProvider: OAuth2StateProvider,
@@ -68,6 +73,7 @@ class SocialModule extends AbstractModule with ScalaModule {
   }
 
   @Provides
+  @Singleton
   def testProvider(
                     httpLayer: HTTPLayer,
                     stateProvider: OAuth2StateProvider,
@@ -83,23 +89,27 @@ class SocialModule extends AbstractModule with ScalaModule {
   }
 
   @Provides
+  @Singleton
   def socialProviderRegistry(env: api.Environment, fp: FacebookProvider, tp: TestSocialProvider): SocialProviderRegistry = {
     val providers = if (env.mode == Mode.Prod) Seq(fp) else Seq(fp, tp)
     SocialProviderRegistry(providers)
   }
 
   @Provides
+  @Singleton
   def idGenerator(ec: ExecutionContext): IDGenerator = {
     new SecureRandomIDGenerator()(ec)
   }
 
   @Provides
+  @Singleton
   def crypter(configuration: Configuration): Crypter = {
     val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.jwt.authenticator.crypter")
     new JcaCrypter(config)
   }
 
   @Provides
+  @Singleton
   def provideAuthenticatorService(
                                    crypter: Crypter,
                                    idGenerator: IDGenerator,
@@ -107,27 +117,16 @@ class SocialModule extends AbstractModule with ScalaModule {
                                    clock: Clock,
                                    ec: ExecutionContext): AuthenticatorService[JWTAuthenticator] = {
 
-    val config = JWTAuthenticatorSettings(sharedSecret = "changeme")
+    val config = configuration.underlying.as[JWTAuthenticatorSettings]("silhouette.jwt.authenticator.jwt")
     val encoder = new CrypterAuthenticatorEncoder(crypter)
 
     new JWTAuthenticatorService(config, None, encoder, idGenerator, clock)(ec)
   }
 
   @Provides
-  def cookieSigner(configuration: Configuration): CookieSigner = {
-    val config = configuration.underlying.as[JcaCookieSignerSettings]("silhouette.oauth2StateProvider.cookie.signer")
-
-    new JcaCookieSigner(config)
-  }
-
-  @Provides
-  def oAuth2StateProvider(
-                           idGenerator: IDGenerator,
-                           cookieSigner: CookieSigner,
-                           configuration: Configuration,
-                           clock: Clock): OAuth2StateProvider = {
-    val settings = configuration.underlying.as[CookieStateSettings]("silhouette.oauth2StateProvider")
-    new CookieStateProvider(settings, idGenerator, cookieSigner, clock)
+  @Singleton
+  def oAuth2StateProvider(): OAuth2StateProvider = {
+    new DummyStateProvider()
   }
 
 }

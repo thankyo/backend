@@ -4,6 +4,7 @@ import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.Money
+import com.google.inject.Singleton
 
 trait ExchangeService {
 
@@ -21,6 +22,7 @@ trait ExchangeService {
 
 }
 
+@Singleton
 case class InMemoryExchangeService(currencyToAmount: Map[Currency, Amount]) extends ExchangeService {
   override def toAmount(currency: Currency): Amount = {
     currencyToAmount(currency)

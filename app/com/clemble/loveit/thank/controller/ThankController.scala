@@ -2,13 +2,14 @@ package com.clemble.loveit.thank.controller
 
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.thank.service.ThankService
-import com.clemble.loveit.common.util.{AuthEnv}
-import com.google.inject.Inject
+import com.clemble.loveit.common.util.AuthEnv
+import com.google.inject.{Inject, Singleton}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
+@Singleton
 case class ThankController @Inject()(
                                       service: ThankService,
                                       silhouette: Silhouette[AuthEnv],

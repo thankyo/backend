@@ -43,9 +43,17 @@ case class HttpResource(uri: String) extends Resource {
 
 object Resource {
 
+  private val HTTP_JSON = JsString("http")
+  private val SOCIAL_JSON = JsString("social")
+
+  def toJsonTypeFlag(o: Resource): JsValue = {
+    o match {
+      case _: HttpResource => HTTP_JSON
+      case _: SocialResource => SOCIAL_JSON
+    }
+  }
+
   implicit val jsonFormat = new Format[Resource] {
-    val HTTP_JSON = JsString("http")
-    val SOCIAL_JSON = JsString("social")
 
     override def reads(json: JsValue): JsResult[Resource] = {
       val uriOpt = (json \ "uri").asOpt[String]
@@ -63,14 +71,14 @@ object Resource {
     override def writes(o: Resource): JsValue = o match {
       case SocialResource(provider, uri) => JsObject(
         Seq(
-          "type" -> SOCIAL_JSON,
+          "type" -> toJsonTypeFlag(o),
           "provider" -> JsString(provider),
           "uri" -> JsString(uri)
         )
       )
       case HttpResource(uri) => JsObject(
         Seq(
-          "type" -> HTTP_JSON,
+          "type" -> toJsonTypeFlag(o),
           "uri" -> JsString(uri)
         )
       )

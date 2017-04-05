@@ -1,6 +1,7 @@
 package com.clemble.loveit.common.error
 
 import com.clemble.loveit.common.util.WriteableUtils
+import com.clemble.loveit.user.model.User
 import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException
@@ -13,6 +14,8 @@ case class UserException(code: String, message: String) extends ThankException
 
 object UserException {
   def notEnoughFunds() = new UserException("NOT_ENOUGH_FUNDS", "Not enough funds")
+  def resourceAlreadyOwned(user: User) = new UserException("RESOURCE_ALREADY_OWNED", s"Resource already owned by ${user.firstName} ${user.lastName}")
+  def resourceOwnershipImpossible() = new UserException("RESOURCE_OWNERSHIP_IMPOSIBLE", s"Resource can't be owned")
 }
 
 case class PaymentException(code: String, message: String) extends ThankException {

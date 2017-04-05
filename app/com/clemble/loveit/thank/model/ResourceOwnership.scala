@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.model
 
 import com.clemble.loveit.common.model.{Resource, ResourceAware}
 import com.clemble.loveit.common.util.WriteableUtils
-import play.api.libs.json._
+import play.api.libs.json.{JsValue, _}
 
 sealed trait ResourceOwnership extends ResourceAware {
   val resource: Resource
@@ -44,11 +44,20 @@ object ResourceOwnership {
     ResourceOwnership.partial(resource) :: fullAndUnrealized
   }
 
+  private val FULL = JsString("full")
+  private val PARTIAL = JsString("partial")
+  private val UNREALIZED = JsString("unrealized")
+
+  def toJsonTypeFlag(o: ResourceOwnership): JsValue = {
+    o match {
+      case _: FullResourceOwnership => FULL
+      case _: PartialResourceOwnership => PARTIAL
+      case _: UnrealizedResourceOwnership => UNREALIZED
+    }
+  }
+
   implicit val jsonFormat = new Format[ResourceOwnership] {
 
-    val FULL = JsString("full")
-    val PARTIAL = JsString("partial")
-    val UNREALIZED = JsString("unrealized")
 
     override def reads(json: JsValue): JsResult[ResourceOwnership] = {
       val resourceOpt = (json \ "resource").asOpt[Resource]
@@ -67,14 +76,9 @@ object ResourceOwnership {
     }
 
     override def writes(o: ResourceOwnership): JsValue = {
-      val typeJson = o match {
-        case _: FullResourceOwnership => FULL
-        case _: PartialResourceOwnership => PARTIAL
-        case _: UnrealizedResourceOwnership => UNREALIZED
-      }
       JsObject(
         Seq(
-          "type" -> typeJson,
+          "type" -> toJsonTypeFlag(o),
           "resource" -> Resource.jsonFormat.writes(o.resource)
         )
       )

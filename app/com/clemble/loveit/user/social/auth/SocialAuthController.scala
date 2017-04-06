@@ -12,6 +12,7 @@ import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc.{Action, Controller, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -54,11 +55,12 @@ class SocialAuthController @Inject() (
       }
     }
 
-    def createAuthResult(profile: CommonSocialProfile, authInfo: AuthInfo): Future[Result] = {
+    def createAuthResult(user: UserIdentity, profile: CommonSocialProfile, authInfo: AuthInfo): Future[Result] = {
       for {
         _ <- authInfoRepository.save(profile.loginInfo, authInfo)
         authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
-        value <- silhouette.env.authenticatorService.init(authenticator)
+        authenticatorWithClaim = authenticator.copy(customClaims = Some(Json.obj("user" -> user.id)))
+        value <- silhouette.env.authenticatorService.init(authenticatorWithClaim)
         result <- silhouette.env.authenticatorService.embed(value, Ok(value))
       } yield {
         result
@@ -73,7 +75,7 @@ class SocialAuthController @Inject() (
           case Right(authInfo) => for {
             profile <- p.retrieveProfile(authInfo)
             user <- createOrUpdateUser(profile)
-            result <- createAuthResult(profile, authInfo)
+            result <- createAuthResult(user, profile, authInfo)
           } yield {
             silhouette.env.eventBus.publish(LoginEvent(user, req))
             result

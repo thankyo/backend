@@ -15,6 +15,6 @@ case class UserIdentity(
 
 object UserIdentity {
 
-  implicit val format = Json.format[UserIdentity]
+  implicit val jsonFormat = Json.format[UserIdentity]
 
 }

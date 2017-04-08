@@ -1,9 +1,9 @@
-package com.clemble.loveit.user.service.repository
+package com.clemble.loveit.thank.service.repository
 
+import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.test.util.ThankGenerator
 import com.clemble.loveit.thank.model.Thank
-import com.clemble.loveit.thank.service.repository.ThankRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner

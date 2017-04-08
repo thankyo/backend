@@ -1,5 +1,6 @@
 package com.clemble.loveit.user.model
 
+import com.clemble.loveit.common.SerializationSpec
 import com.clemble.loveit.test.util.{Generator, UserGenerator}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

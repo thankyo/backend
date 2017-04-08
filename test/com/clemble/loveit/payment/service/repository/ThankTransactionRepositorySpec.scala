@@ -1,8 +1,8 @@
-package com.clemble.loveit.user.service.repository
+package com.clemble.loveit.payment.service.repository
 
 import akka.stream.scaladsl.Sink
+import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.payment.service.repository.ThankTransactionRepository
 import com.clemble.loveit.test.util.{ThankTransactionGenerator, UserGenerator}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv

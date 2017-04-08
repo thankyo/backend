@@ -1,8 +1,7 @@
-package com.clemble.loveit.user.service.repository
+package com.clemble.loveit.payment.service.repository
 
-import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
+import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.test.util.PaymentTransactionGenerator
-
 
 class PaymentTransactionRepositorySpec extends RepositorySpec {
 

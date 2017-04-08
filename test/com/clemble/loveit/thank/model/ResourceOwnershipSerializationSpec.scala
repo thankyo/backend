@@ -1,5 +1,6 @@
-package com.clemble.loveit.user.model
+package com.clemble.loveit.thank.model
 
+import com.clemble.loveit.common.SerializationSpec
 import com.clemble.loveit.test.util.{Generator, ResourceOwnershipGenerator}
 import com.clemble.loveit.thank.model.ResourceOwnership
 import org.junit.runner.RunWith

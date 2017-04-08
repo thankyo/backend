@@ -1,10 +1,10 @@
-package com.clemble.loveit.user.service
+package com.clemble.loveit.thank.service
 
+import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.HttpResource
-import com.clemble.loveit.user.service.repository.UserRepository
 import com.clemble.loveit.test.util.UserGenerator
 import com.clemble.loveit.thank.model.ResourceOwnership
-import com.clemble.loveit.thank.service.ThankService
+import com.clemble.loveit.user.service.repository.UserRepository
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv

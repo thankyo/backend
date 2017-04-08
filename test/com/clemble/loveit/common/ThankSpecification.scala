@@ -1,4 +1,4 @@
-package com.clemble.loveit.test.util
+package com.clemble.loveit.common
 
 import akka.stream.Materializer
 import play.api.Mode

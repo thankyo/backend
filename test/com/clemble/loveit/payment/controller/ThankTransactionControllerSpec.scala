@@ -1,7 +1,7 @@
-package com.clemble.loveit.thank.controller
+package com.clemble.loveit.payment.controller
 
 import akka.stream.scaladsl.Sink
-import com.clemble.loveit.controller.ControllerSpec
+import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.payment.model.ThankTransaction
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

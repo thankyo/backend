@@ -1,11 +1,11 @@
-package com.clemble.loveit.user.service
+package com.clemble.loveit.payment.service
 
 import akka.stream.scaladsl.Sink
-import com.clemble.loveit.common.model.{SocialResource, HttpResource}
+import com.clemble.loveit.common.ServiceSpec
+import com.clemble.loveit.common.model.{HttpResource, SocialResource}
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.payment.service.ThankTransactionService
-import com.clemble.loveit.user.service.repository.UserRepository
 import com.clemble.loveit.test.util.UserGenerator
+import com.clemble.loveit.user.service.repository.UserRepository
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv

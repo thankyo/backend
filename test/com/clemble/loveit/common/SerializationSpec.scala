@@ -1,4 +1,4 @@
-package com.clemble.loveit.user.model
+package com.clemble.loveit.common
 
 import com.clemble.loveit.test.util.Generator
 import org.specs2.mutable.Specification

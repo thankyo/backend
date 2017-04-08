@@ -1,10 +1,10 @@
 package com.clemble.loveit.thank.controller
 
 import akka.stream.scaladsl.Sink
+import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.error.ThankException
-import com.clemble.loveit.common.model.{Resource}
-import com.clemble.loveit.controller.ControllerSpec
-import com.clemble.loveit.test.util.{CommonSocialProfileGenerator}
+import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.test.util.CommonSocialProfileGenerator
 import com.clemble.loveit.thank.model.ResourceOwnership
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith

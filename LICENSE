@@ -1,7 +1,3 @@
-License
--------
-Written in 2016 by Lightbend <info@lightbend.com>
-
-To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
-
-You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+You will give your end users proper notice about the implementations and features of Google Analytics you use
+(e.g. notice about what data you will collect via Google Analytics, and whether this data can be connected to other data you have about the end user).
+You will either get consent from your end users, or provide them with the opportunity to opt-out from the implementations and features you use.

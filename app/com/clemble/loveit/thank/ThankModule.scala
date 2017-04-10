@@ -2,9 +2,12 @@ package com.clemble.loveit.thank
 
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import com.clemble.loveit.thank.service.repository.mongo.MongoThankRepository
-import com.clemble.loveit.thank.service.{ResourceOwnershipService, SimpleResourceOwnershipService, SimpleThankService, ThankService}
-import com.google.inject.{AbstractModule, Provides}
+import com.clemble.loveit.thank.service._
+import com.google.inject.{AbstractModule, Provides, Singleton}
 import com.google.inject.name.Named
+import play.api.Mode
+import play.api.{Configuration, Environment}
+import play.api.libs.ws.WSClient
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
 import reactivemongo.play.json.collection.JSONCollection
@@ -22,6 +25,16 @@ class ThankModule extends AbstractModule {
   }
 
   @Provides
+  @Singleton
+  def ga(ws: WSClient, ec: ExecutionContext, env: Environment): AnalyticsService = {
+    if (env.mode == Mode.Test)
+      StubAnalyticsService
+    else
+      GoogleAnalyticsService("UA-96949345-1", ws, ec)
+  }
+
+  @Provides
+  @Singleton
   @Named("thank")
   def thankMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.

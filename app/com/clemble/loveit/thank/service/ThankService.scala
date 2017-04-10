@@ -17,7 +17,12 @@ trait ThankService {
 }
 
 @Singleton
-case class SimpleThankService @Inject()(paymentService: ThankTransactionService, repository: ThankRepository, implicit val ec: ExecutionContext) extends ThankService {
+case class SimpleThankService @Inject()(
+                                         paymentService: ThankTransactionService,
+                                         analyticsService: AnalyticsService,
+                                         repository: ThankRepository,
+                                         implicit val ec: ExecutionContext
+) extends ThankService {
 
   override def getOrCreate(resource: Resource): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
@@ -39,6 +44,7 @@ case class SimpleThankService @Inject()(paymentService: ThankTransactionService,
       _ <- repository.increase(resource)
       updated <- repository.findByResource(resource).map(_.get)
     } yield {
+      analyticsService.thank(user, resource)
       updated
     }
   }

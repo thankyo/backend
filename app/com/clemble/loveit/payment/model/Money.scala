@@ -10,13 +10,7 @@ import play.api.libs.json._
 case class Money(
                   amount: BigDecimal,
                   currency: Currency
-                ) {
-
-  def toPayPalCurrency(): payments.Currency = {
-    new payments.Currency(currency.getCurrencyCode, amount.toString())
-  }
-
-}
+                )
 
 object Money {
 

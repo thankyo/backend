@@ -31,8 +31,6 @@ libraryDependencies ++= Seq(
   "com.paypal.sdk" % "rest-api-sdk" % "1.13.1",
   "com.braintreepayments.gateway" % "braintree-java" % "2.71.0",
 
-  "org.joda" % "joda-money" % "0.12",
-
   "com.atlassian.jwt" % "jwt-core" % "1.5.8",
   "com.atlassian.jwt" % "jwt-api" % "1.5.8",
 

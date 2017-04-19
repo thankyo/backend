@@ -6,6 +6,7 @@ import com.clemble.loveit.payment.model.{BankDetails, EmptyBankDetails, Money, P
 import com.clemble.loveit.common.util.IDGenerator
 import com.google.common.collect.Lists
 import com.google.inject.Singleton
+import com.paypal.api.payments
 import com.paypal.api.payments.{Payout, PayoutItem, PayoutSenderBatchHeader}
 import com.paypal.base.rest.APIContext
 
@@ -48,8 +49,13 @@ case class PayPalWithdrawService(context: APIContext) extends WithdrawService[Pa
     new PayoutItem().
       setReceiver(account.email).
       setRecipientType("EMAIL").
-      setAmount(money.toPayPalCurrency()).
+      setAmount(toPayPalCurrency(money)).
       setNote("LoveIt Payout <3")
+  }
+
+  private def toPayPalCurrency(money: Money) = {
+    import money._
+    new payments.Currency(currency.getCurrencyCode, amount.toString())
   }
 
 }

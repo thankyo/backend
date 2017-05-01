@@ -18,7 +18,14 @@ case class ThankController @Inject()(
 
   def get(resource: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     val fThank = service.getOrCreate(resource)
-    fThank.map(Ok(_))
+    for {
+      thank <- fThank
+    } yield {
+      render {
+        case Accepts.Html() => Ok(com.clemble.loveit.thank.controller.html.get(thank))
+        case Accepts.Json() => Ok(thank)
+      }
+    }
   })
 
   def thank(resource: Resource) = silhouette.SecuredAction.async(implicit req => {

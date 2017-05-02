@@ -10,12 +10,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PaymentService {
 
-  def receive(user: UserID, req: PaymentRequest): Future[PaymentTransaction]
-
   /**
     * Receive money from external resource
     */
-  def receive(transaction: PaymentTransaction): Future[PaymentTransaction]
+  def receive(user: UserID, req: PaymentRequest): Future[PaymentTransaction]
 
   /**
     * Withdraw money to external system
@@ -29,19 +27,21 @@ case class SimplePaymentService @Inject()(
                                            thankBalanceService: ThankBalanceService,
                                            bankDetailsService: BankDetailsService,
                                            exchangeService: ExchangeService,
+                                           processingService: PaymentProcessingService[PaymentRequest],
                                            withdrawService: WithdrawService[BankDetails],
                                            repo: PaymentTransactionRepository,
                                            implicit val ec: ExecutionContext
                                          ) extends PaymentService {
 
 
-  override def receive(user: UserID, req: PaymentRequest): Future[PaymentTransaction] = ???
-
-  override def receive(transaction: PaymentTransaction): Future[PaymentTransaction] = {
+  override def receive(user: UserID, req: PaymentRequest): Future[PaymentTransaction] = {
     for {
-      _ <- bankDetailsService.set(transaction.user, transaction.source)
-      userUpdate <- thankBalanceService.update(transaction.user, transaction.thanks) if (userUpdate)
-      savedTransaction <- repo.save(transaction)
+      (id, bankDetails, money) <- processingService.process(req)
+      thanks = exchangeService.toThanks(money)
+      _ <- bankDetailsService.set(user, bankDetails)
+      userUpdate <- thankBalanceService.update(user, thanks) if (userUpdate)
+      debitTransaction = PaymentTransaction.debit(id, user, thanks, money, bankDetails)
+      savedTransaction <- repo.save(debitTransaction)
     } yield {
       savedTransaction
     }
@@ -52,9 +52,10 @@ case class SimplePaymentService @Inject()(
     for {
       bankDetailsOpt <- bankDetailsService.get(user) if (bankDetailsOpt.isDefined)
       bankDetails = bankDetailsOpt.get
-      withdraw <- withdrawService.withdraw(money, bankDetails) if (withdraw)
+      (id, withdraw) <- withdrawService.withdraw(money, bankDetails) if (withdraw)
       userUpdate <- thankBalanceService.update(user, -amount) if (userUpdate)
-      savedTransaction <- repo.save(PaymentTransaction.credit(user, amount, money, bankDetails))
+      creditTransaction = PaymentTransaction.credit(id, user, amount, money, bankDetails)
+      savedTransaction <- repo.save(creditTransaction)
     } yield {
       savedTransaction
     }

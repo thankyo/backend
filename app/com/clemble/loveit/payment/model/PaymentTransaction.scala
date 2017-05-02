@@ -79,9 +79,9 @@ object PaymentTransaction {
     )
   }
 
-  def credit(user: UserID, thanks: Amount, money: Money, destination: BankDetails): PaymentTransaction = {
+  def credit(id: String, user: UserID, thanks: Amount, money: Money, destination: BankDetails): PaymentTransaction = {
     PaymentTransaction(
-      id = IDGenerator.generate(),
+      id = id,
       operation = Credit,
       user = user,
       thanks = thanks,

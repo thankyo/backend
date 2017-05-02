@@ -1,22 +1,39 @@
 package com.clemble.loveit.payment.service
 
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{PaymentRequest, PaymentTransaction}
+import javax.inject.{Inject, Singleton}
+
+import com.clemble.loveit.payment.model._
 
 import scala.concurrent.Future
 
 /**
   * Payment processing service abstraction
   */
-trait PaymentProcessingService {
+trait PaymentProcessingService[T <: PaymentRequest] {
 
   /**
     * Process payment request by the user
     *
-    * @param user user identifier
     * @param req update request
     * @return created transaction
     */
-  def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction]
+  def process(req: T): Future[(String, BankDetails, Money)]
 
 }
+
+@Singleton
+case class PaymentProcessingServiceFacade @Inject() (
+                                  payPalService: PaymentProcessingService[BraintreePaymentRequest],
+                                  stripeService: PaymentProcessingService[StripePaymentRequest]
+                                ) extends PaymentProcessingService[PaymentRequest] {
+
+  def process(req: PaymentRequest): Future[(String, BankDetails, Money)] = {
+    req match {
+      case ppbd : BraintreePaymentRequest => payPalService.process(ppbd)
+      case stripe: StripePaymentRequest => stripeService.process(stripe)
+    }
+  }
+
+}
+
+

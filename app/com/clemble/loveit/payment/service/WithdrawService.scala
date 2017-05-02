@@ -15,7 +15,7 @@ import scala.util.Try
 
 trait WithdrawService[T <: BankDetails] {
 
-  def withdraw(money: Money, account: T): Future[Boolean]
+  def withdraw(money: Money, account: T): Future[(String, Boolean)]
 
 }
 
@@ -25,34 +25,35 @@ case class WithdrawServiceFacade(
                                   stripeWS: WithdrawService[StripeBankDetails]
                                 ) extends WithdrawService[BankDetails] {
 
-  override def withdraw(money: Money, account: BankDetails): Future[Boolean] = {
+  override def withdraw(money: Money, account: BankDetails): Future[(String, Boolean)] = {
     account match {
       case ppbd : PayPalBankDetails => payPalWS.withdraw(money, ppbd)
       case stripe: StripeBankDetails => stripeWS.withdraw(money, stripe)
-      case EmptyBankDetails => Future.successful(false)
+      case EmptyBankDetails => Future.successful("" -> false)
     }
   }
 
 }
 
 object StripeWithdrawalService extends WithdrawService[StripeBankDetails] {
-  override def withdraw(money: Money, account: StripeBankDetails): Future[Boolean] = {
-    Future.successful(false)
+  override def withdraw(money: Money, account: StripeBankDetails): Future[(String, Boolean)] = {
+    Future.successful(IDGenerator.generate() -> false)
   }
 }
 
 @Singleton
 case class PayPalWithdrawService(context: APIContext) extends WithdrawService[PayPalBankDetails] {
 
-  override def withdraw(money: Money, account: PayPalBankDetails): Future[Boolean] = {
+  override def withdraw(money: Money, account: PayPalBankDetails): Future[(String, Boolean)] = {
+    val id = IDGenerator.generate()
     val senderHeader = new PayoutSenderBatchHeader().
-      setSenderBatchId(IDGenerator.generate()).
+      setSenderBatchId(id).
       setRecipientType("EMAIL").
       setEmailSubject("LoveIt Payout <3")
     val payoutItem = toPayoutItem(money, account)
     val payout = new Payout(senderHeader, Lists.newArrayList(payoutItem))
     val result = Try(payout.create(context, new util.HashMap[String, String]()))
-    Future.successful(result.isSuccess)
+    Future.successful(id -> result.isSuccess)
   }
 
   private def toPayoutItem(money: Money, account: PayPalBankDetails): PayoutItem = {

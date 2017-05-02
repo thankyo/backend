@@ -1,21 +1,21 @@
 package com.clemble.loveit.payment.service
 
-import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest, Money, PaymentTransaction}
-import com.clemble.loveit.common.util.IDGenerator
 import javax.inject.{Inject, Singleton}
+
+import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
+import com.clemble.loveit.common.util.IDGenerator
+import com.clemble.loveit.payment.model._
 
 import scala.concurrent.Future
 
-trait BraintreeProcessingService extends PaymentProcessingService {
+trait BraintreeProcessingService extends PaymentProcessingService[BraintreePaymentRequest] {
 
   def generateToken(): Future[String]
 
 }
 
 @Singleton
-case class SimpleBraintreeProcessingService @Inject()(gateway: BraintreeGateway, paymentService: PaymentService, exchangeService: ExchangeService) extends BraintreeProcessingService {
+case class SimpleBraintreeProcessingService @Inject()(gateway: BraintreeGateway) extends BraintreeProcessingService {
 
   override def generateToken(): Future[String] = {
     Future.successful(gateway.clientToken().generate())
@@ -31,7 +31,7 @@ case class SimpleBraintreeProcessingService @Inject()(gateway: BraintreeGateway,
       done()
   }
 
-  private def createSaleTransaction(req: PaymentRequest): Transaction = {
+  private def createSaleTransaction(req: BraintreePaymentRequest): Transaction = {
     val request = createSaleRequest(req.nonce, req.money)
     val saleResult = gateway.transaction().sale(request)
 
@@ -40,16 +40,13 @@ case class SimpleBraintreeProcessingService @Inject()(gateway: BraintreeGateway,
     saleResult.getTarget()
   }
 
-  override def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction] = {
+  override def process(req: BraintreePaymentRequest): Future[(String, BankDetails, Money)] = {
     val saleTransaction = createSaleTransaction(req)
 
     val bankDetails = BankDetails from saleTransaction.getPayPalDetails
     val money = Money from saleTransaction
 
-    val thanks = exchangeService.toThanks(money)
-    val transaction = PaymentTransaction.debit(saleTransaction.getOrderId, user, thanks, money, bankDetails)
-
-    paymentService.receive(transaction)
+    Future.successful((saleTransaction.getId, bankDetails, money))
   }
 
 }

@@ -11,21 +11,14 @@ import scala.concurrent.Future
 /**
   * Stipe processing service
   */
-trait StripeProcessingService extends PaymentProcessingService {
-
-  def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction]
-
-}
+trait StripeProcessingService extends PaymentProcessingService[StripePaymentRequest]
 
 import com.stripe.model.Charge
 import com.stripe.model.Customer
 
 @Singleton
 case class JavaClientStripeProcessingService @Inject()(
-                                               apiKey: String,
-                                               bankDetailsService: BankDetailsService,
-                                               exchangeService: ExchangeService,
-                                               transactionService: PaymentService
+                                               apiKey: String
                                              ) extends StripeProcessingService {
 
   def charge(bankDetails: StripeBankDetails, amount: Money): Charge = {
@@ -43,13 +36,11 @@ case class JavaClientStripeProcessingService @Inject()(
     Customer.create(customerParams)
   }
 
-  override def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction] = {
+  override def process(req: StripePaymentRequest): Future[(String, BankDetails, Money)] = {
     val customer = createCustomer(req.nonce)
     val stripeBD = BankDetails.stripe(customer.getId())
     val stripeCharge = charge(stripeBD, req.money)
-    val thanks = exchangeService.toThanks(req.money)
-    val transaction = PaymentTransaction.debit(stripeCharge.getId, user, thanks, req.money, stripeBD)
-    transactionService.receive(transaction)
+    Future.successful((stripeCharge.getId, stripeBD, req.money))
   }
 
 }

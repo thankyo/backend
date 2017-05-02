@@ -4,7 +4,7 @@ import java.util.Currency
 
 import com.braintreegateway.BraintreeGateway
 import com.clemble.loveit.common.model.Amount
-import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest}
 import com.clemble.loveit.payment.service.repository.{PaymentTransactionRepository, ThankTransactionRepository}
 import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentTransactionRepository, MongoThankTransactionRepository}
 import com.clemble.loveit.payment.service._
@@ -41,13 +41,12 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def stripeService(configuration: Configuration,
-                    bankDetailsService: BankDetailsService,
-                    exchangeService: ExchangeService,
-                    transactionService: PaymentService
-                   ): StripeProcessingService = {
+  def processingService(braintreeService: BraintreeProcessingService, configuration: Configuration): PaymentProcessingService[PaymentRequest] = {
     val apiKey = configuration.getString("payment.stripe.apiKey").get
-    new JavaClientStripeProcessingService(apiKey, bankDetailsService, exchangeService, transactionService)
+    val stripeProcessing = new JavaClientStripeProcessingService(apiKey)
+    PaymentProcessingServiceFacade(
+      braintreeService, stripeProcessing
+    )
   }
 
   @Provides

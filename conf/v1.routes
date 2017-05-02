@@ -1,6 +1,6 @@
 # Test Endpoint for creating users, this won't work in production
 GET         /auth/authenticate/:provider     @com.clemble.loveit.user.social.auth.SocialAuthController.authenticate(provider)
-POST        /auth/authenticate/test          @com.clemble.loveit.user.social.auth.SocialAuthController.authenticate(provider = "test")
+POST        /auth/authenticate/test          @com.clemble.loveit.user.social.auth.SocialAuthController.authenticate(`provider` = "test")
 
 GET         /user/my                         @com.clemble.loveit.user.controller.UserController.getMy()
 
@@ -13,10 +13,10 @@ PUT         /thank/*url                      @com.clemble.loveit.thank.controlle
 
 GET         /transaction/user/my             @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
 
-POST        /payment/transaction/withdraw    @com.clemble.loveit.payment.controller.WithdrawController.withdraw()
-
 GET         /payment/braintree/token         @com.clemble.loveit.payment.controller.BraintreeController.generateToken()
-POST        /payment/braintree/nonce         @com.clemble.loveit.payment.controller.BraintreeController.process()
+
+POST        /payment/transaction/withdraw    @com.clemble.loveit.payment.controller.PaymentController.withdraw()
+POST        /payment/braintree/nonce         @com.clemble.loveit.payment.controller.PaymentController.process()
 
 GET         /payment/transaction/user/my     @com.clemble.loveit.payment.controller.PaymentTransactionController.listMy()
 

@@ -27,6 +27,8 @@ class PaymentModule extends ScalaModule {
     bind[PaymentTransactionRepository].to[MongoPaymentTransactionRepository]
     bind[BraintreeService].to[SimpleBraintreeService]
 
+    bind[BankDetailsService].to[UserBankDetailsService].asEagerSingleton()
+
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
     bind[PaymentTransactionService].to[SimplePaymentTransactionService]

@@ -16,7 +16,7 @@ GET         /transaction/user/my             @com.clemble.loveit.payment.control
 POST        /payment/transaction/withdraw    @com.clemble.loveit.payment.controller.WithdrawController.withdraw()
 
 GET         /payment/braintree/token         @com.clemble.loveit.payment.controller.BraintreeController.generateToken()
-POST        /payment/braintree/nonce         @com.clemble.loveit.payment.controller.BraintreeController.processNonce()
+POST        /payment/braintree/nonce         @com.clemble.loveit.payment.controller.BraintreeController.process()
 
 GET         /payment/transaction/user/my     @com.clemble.loveit.payment.controller.PaymentTransactionController.listMy()
 

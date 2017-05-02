@@ -1,6 +1,6 @@
 package com.clemble.loveit.payment.controller
 
-import com.clemble.loveit.payment.model.BraintreeRequest
+import com.clemble.loveit.payment.model.PaymentRequest
 import com.clemble.loveit.payment.service.BraintreeService
 import com.clemble.loveit.common.util.AuthEnv
 import com.google.inject.{Inject, Singleton}
@@ -21,9 +21,9 @@ class BraintreeController @Inject()(
     tokenResp
   })
 
-  def processNonce() = silhouette.SecuredAction.async(parse.json[BraintreeRequest])(implicit req => {
+  def process() = silhouette.SecuredAction.async(parse.json[PaymentRequest])(implicit req => {
     val user = req.identity.id
-    val transaction = braintreeService.processNonce(user, req.body)
+    val transaction = braintreeService.process(user, req.body)
     transaction.map(Ok(_))
   })
 

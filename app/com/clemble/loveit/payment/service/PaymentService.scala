@@ -6,10 +6,16 @@ import com.clemble.loveit.payment.model.{PaymentRequest, PaymentTransaction}
 import scala.concurrent.Future
 
 /**
-  * Stipe processing service
+  * Payment processing service abstraction
   */
-trait StripeService extends PaymentService {
+trait PaymentService {
 
+  /**
+    *
+    * @param user
+    * @param req
+    * @return
+    */
   def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction]
 
 }

@@ -2,17 +2,15 @@ package com.clemble.loveit.payment.service
 
 import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{BankDetails, BraintreeRequest, Money, PaymentTransaction}
+import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest, Money, PaymentTransaction}
 import com.clemble.loveit.common.util.IDGenerator
 import com.google.inject.{Inject, Singleton}
 
 import scala.concurrent.Future
 
-trait BraintreeService {
+trait BraintreeService extends PaymentService {
 
   def generateToken(): Future[String]
-
-  def processNonce(user: UserID, req: BraintreeRequest): Future[PaymentTransaction]
 
 }
 
@@ -33,7 +31,7 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
       done()
   }
 
-  private def createSaleTransaction(req: BraintreeRequest): Transaction = {
+  private def createSaleTransaction(req: PaymentRequest): Transaction = {
     val request = createSaleRequest(req.nonce, req.money)
     val saleResult = gateway.transaction().sale(request)
 
@@ -42,7 +40,7 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
     saleResult.getTarget()
   }
 
-  override def processNonce(user: UserID, req: BraintreeRequest): Future[PaymentTransaction] = {
+  override def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction] = {
     val saleTransaction = createSaleTransaction(req)
 
     val bankDetails = BankDetails from saleTransaction.getPayPalDetails

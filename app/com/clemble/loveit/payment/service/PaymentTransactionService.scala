@@ -26,13 +26,14 @@ trait PaymentTransactionService {
   /**
     * Withdraw money to external system
     */
-  def withdraw(user: UserID, bankDetails: BankDetails, amount: Amount, currency: Currency): Future[PaymentTransaction]
+  def withdraw(user: UserID, amount: Amount, currency: Currency): Future[PaymentTransaction]
 
 }
 
 @Singleton
 case class SimplePaymentTransactionService @Inject() (
                                                        userService: UserService,
+                                                       bankDetailsService: BankDetailsService,
                                                        exchangeService: ExchangeService,
                                                        withdrawService: WithdrawService[BankDetails],
                                                        repo: PaymentTransactionRepository,
@@ -46,7 +47,7 @@ case class SimplePaymentTransactionService @Inject() (
 
   override def receive(transaction: PaymentTransaction): Future[PaymentTransaction] = {
     for {
-      _ <- userService.setBankDetails(transaction.user, transaction.source)
+      _ <- bankDetailsService.set(transaction.user, transaction.source)
       userUpdate <- userService.updateBalance(transaction.user, transaction.thanks) if(userUpdate)
       savedTransaction <- repo.save(transaction)
     } yield {
@@ -54,13 +55,14 @@ case class SimplePaymentTransactionService @Inject() (
     }
   }
 
-  override def withdraw(user: UserID, bankDetails: BankDetails, amount: Amount, currency: Currency): Future[PaymentTransaction] = {
+  override def withdraw(user: UserID, amount: Amount, currency: Currency): Future[PaymentTransaction] = {
     val money = exchangeService.toAmount(amount, currency)
-    val transaction = PaymentTransaction.credit(user, amount, money, bankDetails)
     for {
+      bankDetailsOpt <- bankDetailsService.get(user) if (bankDetailsOpt.isDefined)
+      bankDetails = bankDetailsOpt.get
       withdraw <- withdrawService.withdraw(money, bankDetails) if (withdraw)
       userUpdate <- userService.updateBalance(user, - amount) if (userUpdate)
-      savedTransaction <- repo.save(transaction)
+      savedTransaction <- repo.save(PaymentTransaction.credit(user, amount, money, bankDetails))
     } yield {
       savedTransaction
     }

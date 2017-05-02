@@ -14,19 +14,16 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class WithdrawController @Inject()(
-                                    userService: UserService,
                                     service: PaymentTransactionService,
                                     silhouette: Silhouette[AuthEnv],
                                     implicit val ec: ExecutionContext
                                   )extends Controller {
 
   def withdraw() = silhouette.SecuredAction.async(parse.json[JsObject])(req => {
-    for {
-      bankDetails <- userService.findById(req.identity.id).map(_.get.bankDetails)
-      transaction <- service.withdraw(req.identity.id, bankDetails, (req.body \ "amount").as[Int], LoveItCurrency.getInstance("USD"))
-    } yield {
-      Ok(transaction)
-    }
+    val amount = (req.body \ "amount").as[Int]
+    val currency = LoveItCurrency.getInstance("USD")
+    val fTransaction = service.withdraw(req.identity.id, amount, currency)
+    fTransaction.map(Ok(_))
   })
 
 

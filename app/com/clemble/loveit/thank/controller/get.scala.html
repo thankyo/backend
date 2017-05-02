@@ -3,7 +3,36 @@
 <!DOCTYPE html>
 <html>
     <body>
-        <span id="SPAN_1">Loved by @thank.given</span>
+        <span id="SPAN_1" onclick="tip()">@thank.given</span>
+        <script>
+            function tip() {
+                function singIn() {
+                    window.location = "https://loveit.tips"
+                }
+                function doTip(token) {
+                    var url = "/api/v1/thank/@thank.resource.uri";
+                    var req = new Request(url, {
+                        method: "PUT",
+                        headers: {
+                            'X-Auth-Token': token
+                        }
+                    });
+                    fetch(req).
+                        then(function(res) { return res.json() }).
+                        then(function(json) {
+                            document.getElementById("SPAN_1").innerHTML = json.given;
+                        })
+                }
+
+                var token = localStorage.getItem("token");
+                if (token === undefined || token === null) {
+                    singIn()
+                } else {
+                    doTip(token)
+                }
+            }
+        </script>
+
     </body>
     <style>
             #SPAN_1 {

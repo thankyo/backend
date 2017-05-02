@@ -36,6 +36,8 @@ class PaymentModule extends ScalaModule {
 
     bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService])
     bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
+
+    bind(classOf[StripeService]).toI
   }
 
   @Provides

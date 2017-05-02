@@ -23,7 +23,7 @@ object BankDetails {
 
   def payPal(email: String): BankDetails = PayPalBankDetails(email)
 
-  def stripe(customer: String): BankDetails = StripeBankDetails(customer)
+  def stripe(customer: String): StripeBankDetails = StripeBankDetails(customer)
 
   def from(customer: Customer) = {
     payPal(customer.getEmail)

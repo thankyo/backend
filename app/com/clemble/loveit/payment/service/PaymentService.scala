@@ -11,10 +11,11 @@ import scala.concurrent.Future
 trait PaymentService {
 
   /**
+    * Process payment request by the user
     *
-    * @param user
-    * @param req
-    * @return
+    * @param user user identifier
+    * @param req update request
+    * @return created transaction
     */
   def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction]
 

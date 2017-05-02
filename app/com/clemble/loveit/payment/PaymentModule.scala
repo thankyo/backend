@@ -47,7 +47,7 @@ class PaymentModule extends ScalaModule {
   @Provides
   @Singleton
   def withdrawService(context: APIContext): WithdrawService[BankDetails] = {
-    WithdrawServiceFacade(PayPalWithdrawService(context))
+    WithdrawServiceFacade(PayPalWithdrawService(context), StripeWithdrawalService)
   }
 
   @Provides

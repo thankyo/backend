@@ -13,14 +13,8 @@ case object EmptyBankDetails extends BankDetails
 case class PayPalBankDetails(email: Email) extends BankDetails {
   require(email != null)
 }
-
-object PayPalBankDetails {
-
-  /**
-    * JSON format for [[PayPalBankDetails]]
-    */
-  implicit val jsonFormat = Json.format[PayPalBankDetails]
-
+case class StripeBankDetails(customer: String) extends BankDetails {
+  require(customer != null)
 }
 
 object BankDetails {
@@ -28,6 +22,8 @@ object BankDetails {
   val empty: BankDetails = EmptyBankDetails
 
   def payPal(email: String): BankDetails = PayPalBankDetails(email)
+
+  def stripe(customer: String): BankDetails = StripeBankDetails(customer)
 
   def from(customer: Customer) = {
     payPal(customer.getEmail)
@@ -38,22 +34,34 @@ object BankDetails {
   }
 
   /**
+    * JSON format for [[PayPalBankDetails]]
+    */
+  val payPalJsonFormat = Json.format[PayPalBankDetails]
+  /**
+    * JSON format for [[StripeBankDetails]]
+    */
+  val stripeJsonFormat = Json.format[StripeBankDetails]
+
+  /**
     * JSON format for [[BankDetails]]
     */
   implicit val jsonFormat = new Format[BankDetails] {
 
-    val PAY_PAL = JsString("payPal")
-    val EMPTY = JsString("empty")
+    val PAY_PAL_TAG = JsString("payPal")
+    val STRIPE_TAG = JsString("stripe")
+    val EMPTY_TAG = JsString("empty")
 
     override def reads(json: JsValue): JsResult[BankDetails] = (json \ "type") match {
-      case JsDefined(PAY_PAL) => PayPalBankDetails.jsonFormat.reads(json)
-      case JsDefined(EMPTY) => JsSuccess(empty)
+      case JsDefined(PAY_PAL_TAG) => payPalJsonFormat.reads(json)
+      case JsDefined(STRIPE_TAG) => stripeJsonFormat.reads(json)
+      case JsDefined(EMPTY_TAG) => JsSuccess(empty)
       case unknown => JsError(__ \ "type", ValidationError(s"Invalid BankDetails value ${unknown}"))
     }
 
     override def writes(o: BankDetails): JsValue = o match {
-      case pp: PayPalBankDetails => PayPalBankDetails.jsonFormat.writes(pp) + ("type" -> PAY_PAL)
-      case EmptyBankDetails => JsObject(Seq("type" -> EMPTY))
+      case pp: PayPalBankDetails => payPalJsonFormat.writes(pp) + ("type" -> PAY_PAL_TAG)
+      case s: StripeBankDetails => stripeJsonFormat.writes(s) + ("type" -> STRIPE_TAG)
+      case EmptyBankDetails => JsObject(Seq("type" -> EMPTY_TAG))
     }
   }
 

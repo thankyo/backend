@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.service
 
 import java.util
 
-import com.clemble.loveit.payment.model.{BankDetails, EmptyBankDetails, Money, PayPalBankDetails}
+import com.clemble.loveit.payment.model._
 import com.clemble.loveit.common.util.IDGenerator
 import com.google.common.collect.Lists
 import com.google.inject.Singleton
@@ -20,15 +20,25 @@ trait WithdrawService[T <: BankDetails] {
 }
 
 @Singleton
-case class WithdrawServiceFacade(payPalWS: WithdrawService[PayPalBankDetails]) extends WithdrawService[BankDetails] {
+case class WithdrawServiceFacade(
+                                  payPalWS: WithdrawService[PayPalBankDetails],
+                                  stripeWS: WithdrawService[StripeBankDetails]
+                                ) extends WithdrawService[BankDetails] {
 
   override def withdraw(money: Money, account: BankDetails): Future[Boolean] = {
     account match {
       case ppbd : PayPalBankDetails => payPalWS.withdraw(money, ppbd)
+      case stripe: StripeBankDetails => stripeWS.withdraw(money, stripe)
       case EmptyBankDetails => Future.successful(false)
     }
   }
 
+}
+
+object StripeWithdrawalService extends WithdrawService[StripeBankDetails] {
+  override def withdraw(money: Money, account: StripeBankDetails): Future[Boolean] = {
+    Future.successful(false)
+  }
 }
 
 @Singleton

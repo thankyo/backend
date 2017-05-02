@@ -23,7 +23,7 @@ class BraintreeController @Inject()(
 
   def processNonce() = silhouette.SecuredAction.async(parse.json[BraintreeRequest])(implicit req => {
     val user = req.identity.id
-    val transaction = braintreeService.process(user, req.body)
+    val transaction = braintreeService.processNonce(user, req.body)
     transaction.map(Ok(_))
   })
 

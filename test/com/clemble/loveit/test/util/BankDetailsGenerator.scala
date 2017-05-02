@@ -9,8 +9,10 @@ object BankDetailsGenerator extends Generator[BankDetails] {
   override def generate(): BankDetails = {
     if (nextInt(0, 1) == 0)
       BankDetails.payPal(randomNumeric(10))
-    else
+    else if (nextInt(0, 1) == 0)
       BankDetails.empty
+    else
+      BankDetails.stripe(randomNumeric(10))
   }
 
 }

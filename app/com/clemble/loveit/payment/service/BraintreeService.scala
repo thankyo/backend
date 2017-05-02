@@ -12,11 +12,7 @@ trait BraintreeService {
 
   def generateToken(): Future[String]
 
-  def process(user: UserID, req: BraintreeRequest): Future[PaymentTransaction] = {
-    processNonce(user, req.nonce, req.money)
-  }
-
-  def processNonce(userID: UserID, nonce: String, money: Money): Future[PaymentTransaction]
+  def processNonce(user: UserID, req: BraintreeRequest): Future[PaymentTransaction]
 
 }
 
@@ -37,8 +33,8 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
       done()
   }
 
-  private def createSaleTransaction(paymentNonce: String, money: Money): Transaction = {
-    val request = createSaleRequest(paymentNonce, money)
+  private def createSaleTransaction(req: BraintreeRequest): Transaction = {
+    val request = createSaleRequest(req.nonce, req.money)
     val saleResult = gateway.transaction().sale(request)
 
     if (!saleResult.isSuccess())
@@ -46,8 +42,8 @@ case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentSe
     saleResult.getTarget()
   }
 
-  override def processNonce(user: UserID, paymentNonce: String, amount: Money): Future[PaymentTransaction] = {
-    val saleTransaction = createSaleTransaction(paymentNonce, amount)
+  override def processNonce(user: UserID, req: BraintreeRequest): Future[PaymentTransaction] = {
+    val saleTransaction = createSaleTransaction(req)
 
     val bankDetails = BankDetails from saleTransaction.getPayPalDetails
     val money = Money from saleTransaction

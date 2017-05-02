@@ -4,6 +4,7 @@ import java.util.Currency
 
 object LoveItCurrency {
 
+  //TODO this is to be removed in future releases
   val DEFAULT = Currency.getInstance("USD")
 
   def getOrDefault(currencyOpt: Option[String]): Currency = {

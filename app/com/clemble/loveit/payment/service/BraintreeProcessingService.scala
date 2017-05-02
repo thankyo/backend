@@ -8,14 +8,14 @@ import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.Future
 
-trait BraintreeService extends PaymentService {
+trait BraintreeProcessingService extends PaymentProcessingService {
 
   def generateToken(): Future[String]
 
 }
 
 @Singleton
-case class SimpleBraintreeService @Inject()(gateway: BraintreeGateway, paymentService: PaymentTransactionService, exchangeService: ExchangeService) extends BraintreeService {
+case class SimpleBraintreeProcessingService @Inject()(gateway: BraintreeGateway, paymentService: PaymentService, exchangeService: ExchangeService) extends BraintreeProcessingService {
 
   override def generateToken(): Future[String] = {
     Future.successful(gateway.clientToken().generate())

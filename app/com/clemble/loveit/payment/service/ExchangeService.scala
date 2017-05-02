@@ -6,9 +6,13 @@ import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.Money
 import javax.inject.Singleton
 
+import com.clemble.loveit.common.util.LoveItCurrency
+
 trait ExchangeService {
 
   def toAmount(currency: Currency): Amount
+
+  def toAmount(amount: Amount): Money = toAmount(amount, LoveItCurrency.DEFAULT)
 
   def toAmount(amount: Amount, currency: Currency): Money = {
     val perCurUnit = toAmount(currency)

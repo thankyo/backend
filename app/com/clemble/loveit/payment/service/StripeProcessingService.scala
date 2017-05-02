@@ -11,7 +11,7 @@ import scala.concurrent.Future
 /**
   * Stipe processing service
   */
-trait StripeService extends PaymentService {
+trait StripeProcessingService extends PaymentProcessingService {
 
   def process(user: UserID, req: PaymentRequest): Future[PaymentTransaction]
 
@@ -21,12 +21,12 @@ import com.stripe.model.Charge
 import com.stripe.model.Customer
 
 @Singleton
-case class JavaClientStripeService @Inject() (
+case class JavaClientStripeProcessingService @Inject()(
                                                apiKey: String,
                                                bankDetailsService: BankDetailsService,
                                                exchangeService: ExchangeService,
-                                               transactionService: PaymentTransactionService
-                                             ) extends StripeService {
+                                               transactionService: PaymentService
+                                             ) extends StripeProcessingService {
 
   def charge(bankDetails: StripeBankDetails, amount: Money): Charge = {
     val chargeParams = Maps.newHashMap[String, Object]()

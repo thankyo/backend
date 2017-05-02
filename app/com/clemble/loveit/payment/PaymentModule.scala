@@ -26,13 +26,14 @@ class PaymentModule extends ScalaModule {
 
   override def configure() = {
     bind[PaymentTransactionRepository].to[MongoPaymentTransactionRepository]
-    bind[BraintreeService].to[SimpleBraintreeService]
+    bind[BraintreeProcessingService].to[SimpleBraintreeProcessingService]
 
     bind[BankDetailsService].to[UserBankDetailsService].asEagerSingleton()
+    bind[ThankBalanceService].to[UserThankBalanceService].asEagerSingleton()
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
-    bind[PaymentTransactionService].to[SimplePaymentTransactionService]
+    bind[PaymentService].to[SimplePaymentService]
 
     bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService])
     bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
@@ -43,10 +44,10 @@ class PaymentModule extends ScalaModule {
   def stripeService(configuration: Configuration,
                     bankDetailsService: BankDetailsService,
                     exchangeService: ExchangeService,
-                    transactionService: PaymentTransactionService
-                   ): StripeService = {
+                    transactionService: PaymentService
+                   ): StripeProcessingService = {
     val apiKey = configuration.getString("payment.stripe.apiKey").get
-    new JavaClientStripeService(apiKey, bankDetailsService, exchangeService, transactionService)
+    new JavaClientStripeProcessingService(apiKey, bankDetailsService, exchangeService, transactionService)
   }
 
   @Provides

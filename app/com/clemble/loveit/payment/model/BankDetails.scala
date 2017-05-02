@@ -25,22 +25,18 @@ object BankDetails {
 
   def stripe(customer: String): StripeBankDetails = StripeBankDetails(customer)
 
-  def from(customer: Customer) = {
-    payPal(customer.getEmail)
-  }
+  def from(customer: Customer) = payPal(customer.getEmail)
 
-  def from(payPalDetails: PayPalDetails) = {
-    payPal(payPalDetails.getPayerEmail())
-  }
+  def from(payPalDetails: PayPalDetails) = payPal(payPalDetails.getPayerEmail())
 
   /**
     * JSON format for [[PayPalBankDetails]]
     */
-  val payPalJsonFormat = Json.format[PayPalBankDetails]
+  private val payPalJsonFormat = Json.format[PayPalBankDetails]
   /**
     * JSON format for [[StripeBankDetails]]
     */
-  val stripeJsonFormat = Json.format[StripeBankDetails]
+  private val stripeJsonFormat = Json.format[StripeBankDetails]
 
   /**
     * JSON format for [[BankDetails]]

@@ -36,8 +36,17 @@ class PaymentModule extends ScalaModule {
 
     bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService])
     bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
+  }
 
-    bind(classOf[StripeService]).toI
+  @Provides
+  @Singleton
+  def stripeService(configuration: Configuration,
+                    bankDetailsService: BankDetailsService,
+                    exchangeService: ExchangeService,
+                    transactionService: PaymentTransactionService
+                   ): StripeService = {
+    val apiKey = configuration.getString("payment.stripe.apiKey").get
+    new JavaClientStripeService(apiKey, bankDetailsService, exchangeService, transactionService)
   }
 
   @Provides

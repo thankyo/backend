@@ -4,8 +4,7 @@ import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
-import com.google.inject.name.Named
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton, Named}
 import play.api.libs.json.{JsArray, JsObject, Json}
 import play.modules.reactivemongo.json._
 import reactivemongo.api

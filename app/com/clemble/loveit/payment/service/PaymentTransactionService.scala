@@ -7,7 +7,7 @@ import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.payment.model.{BankDetails, PaymentTransaction}
 import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
 import com.clemble.loveit.user.service.UserService
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 

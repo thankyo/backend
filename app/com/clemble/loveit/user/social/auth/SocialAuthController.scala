@@ -6,7 +6,7 @@ import javax.inject.Inject
 import com.clemble.loveit.user.model.{User, UserIdentity}
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.clemble.loveit.common.util.AuthEnv
-import com.google.inject.Singleton
+import javax.inject.Singleton
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository

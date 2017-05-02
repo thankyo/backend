@@ -4,7 +4,7 @@ import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.service.ThankTransactionService
 import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 

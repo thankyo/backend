@@ -3,8 +3,11 @@ package com.clemble.loveit.user
 import com.clemble.loveit.user.service._
 import com.clemble.loveit.user.service.repository._
 import com.clemble.loveit.user.service.repository.mongo.MongoUserRepository
-import com.google.inject.name.Named
-import com.google.inject.{AbstractModule, Provides, Singleton}
+import javax.inject.Named
+import javax.inject.{Singleton}
+
+import com.google.inject.Provides
+import net.codingwell.scalaguice.ScalaModule
 import org.joda.time.DateTimeZone
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
@@ -16,7 +19,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 /**
   * Module with all service dependencies
   */
-class UserModule extends AbstractModule {
+class UserModule extends ScalaModule {
 
   override def configure(): Unit = {
     DateTimeZone.setDefault(DateTimeZone.UTC)

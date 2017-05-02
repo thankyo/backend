@@ -9,8 +9,9 @@ import com.clemble.loveit.payment.service.repository.{PaymentTransactionReposito
 import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentTransactionRepository, MongoThankTransactionRepository}
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
-import com.google.inject.{Provides, Singleton}
-import com.google.inject.name.Named
+import javax.inject.{Named, Singleton}
+
+import com.google.inject.Provides
 import com.paypal.base.rest.APIContext
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration

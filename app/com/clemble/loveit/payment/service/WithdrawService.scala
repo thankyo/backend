@@ -5,7 +5,7 @@ import java.util
 import com.clemble.loveit.payment.model._
 import com.clemble.loveit.common.util.IDGenerator
 import com.google.common.collect.Lists
-import com.google.inject.Singleton
+import javax.inject.Singleton
 import com.paypal.api.payments
 import com.paypal.api.payments.{Payout, PayoutItem, PayoutSenderBatchHeader}
 import com.paypal.base.rest.APIContext

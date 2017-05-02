@@ -4,7 +4,7 @@ import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest, Money, PaymentTransaction}
 import com.clemble.loveit.common.util.IDGenerator
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.Future
 

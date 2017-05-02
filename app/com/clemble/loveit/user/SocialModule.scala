@@ -2,7 +2,9 @@ package com.clemble.loveit.user
 
 import com.clemble.loveit.common.util.{AuthEnv, TestSocialProvider}
 import com.clemble.loveit.user.service.repository.UserRepository
-import com.google.inject.{AbstractModule, Provides, Singleton}
+import javax.inject.Singleton
+
+import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AuthenticatorService
@@ -27,7 +29,7 @@ import play.api.{Configuration, Mode}
 import scala.concurrent.ExecutionContext
 import net.ceedubs.ficus.readers.EnumerationReader._
 
-class SocialModule extends AbstractModule with ScalaModule {
+class SocialModule extends ScalaModule {
 
   override def configure(): Unit = {
     bind[Clock].toInstance(Clock())

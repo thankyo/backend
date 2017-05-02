@@ -3,8 +3,10 @@ package com.clemble.loveit.thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import com.clemble.loveit.thank.service.repository.mongo.MongoThankRepository
 import com.clemble.loveit.thank.service._
-import com.google.inject.{AbstractModule, Provides, Singleton}
-import com.google.inject.name.Named
+import com.google.inject.Provides
+import javax.inject.{Named, Singleton}
+
+import net.codingwell.scalaguice.ScalaModule
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
 import reactivemongo.play.json.collection.JSONCollection
@@ -12,7 +14,7 @@ import reactivemongo.play.json.collection.JSONCollection
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class ThankModule extends AbstractModule {
+class ThankModule extends ScalaModule {
 
   override def configure(): Unit = {
     bind(classOf[ThankService]).to(classOf[SimpleThankService])

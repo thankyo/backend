@@ -1,9 +1,7 @@
 package com.clemble.loveit.common.controller
 
-import javax.inject.Singleton
-
 import com.clemble.loveit.common.error.ThankException
-import com.google.inject.{Inject, Provider}
+import javax.inject.{Singleton, Inject, Provider}
 import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc._

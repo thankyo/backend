@@ -4,7 +4,7 @@ import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.Money
-import com.google.inject.Singleton
+import javax.inject.Singleton
 
 trait ExchangeService {
 

@@ -5,7 +5,7 @@ import java.util.Currency
 import com.clemble.loveit.payment.service.PaymentTransactionService
 import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.common.util.{AuthEnv, LoveItCurrency}
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.JsObject
 import play.api.mvc.Controller

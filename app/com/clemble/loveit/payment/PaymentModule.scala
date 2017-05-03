@@ -13,6 +13,7 @@ import javax.inject.{Named, Singleton}
 
 import com.google.inject.Provides
 import com.paypal.base.rest.APIContext
+import com.stripe.Stripe
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -42,10 +43,9 @@ class PaymentModule extends ScalaModule {
   @Provides
   @Singleton
   def processingService(braintreeService: BraintreeProcessingService, configuration: Configuration): PaymentProcessingService[PaymentRequest] = {
-    val apiKey = configuration.getString("payment.stripe.apiKey").get
-    val stripeProcessing = new JavaClientStripeProcessingService(apiKey)
+    Stripe.apiKey = configuration.getString("payment.stripe.apiKey").get
     PaymentProcessingServiceFacade(
-      braintreeService, stripeProcessing
+      braintreeService, JavaClientStripeProcessingService
     )
   }
 

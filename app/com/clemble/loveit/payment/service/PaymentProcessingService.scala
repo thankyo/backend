@@ -1,5 +1,6 @@
 package com.clemble.loveit.payment.service
 
+import java.math.MathContext
 import javax.inject.{Inject, Singleton}
 
 import com.braintreegateway.{BraintreeGateway, Transaction, TransactionRequest}
@@ -63,7 +64,7 @@ case class SimpleBraintreeProcessingService @Inject()(gateway: BraintreeGateway)
   }
 
   private def createSaleTransaction(req: BraintreePaymentRequest): Transaction = {
-    val request = createSaleRequest(req.nonce, req.money)
+    val request = createSaleRequest(req.nonce, req.charge)
     val saleResult = gateway.transaction().sale(request)
 
     if (!saleResult.isSuccess())
@@ -91,13 +92,12 @@ import com.stripe.model.Charge
 import com.stripe.model.Customer
 
 @Singleton
-case class JavaClientStripeProcessingService @Inject()(
-                                                        apiKey: String
-                                                      ) extends StripeProcessingService {
+case object JavaClientStripeProcessingService extends StripeProcessingService {
 
   def charge(bankDetails: StripeBankDetails, amount: Money): Charge = {
     val chargeParams = Maps.newHashMap[String, Object]()
-    chargeParams.put("amount", amount.amount)
+    val stripeAmount = (amount.amount * 100).toInt
+    chargeParams.put("amount", stripeAmount.toString)
     chargeParams.put("currency", amount.currency.getCurrencyCode.toLowerCase())
     chargeParams.put("customer", bankDetails.customer)
     Charge.create(chargeParams)
@@ -105,16 +105,15 @@ case class JavaClientStripeProcessingService @Inject()(
 
   def createCustomer(token: String): Customer = {
     val customerParams = Maps.newHashMap[String, Object]()
-    customerParams.put("email", "paying.user@example.com")
     customerParams.put("source", token)
     Customer.create(customerParams)
   }
 
   override def process(req: StripePaymentRequest): Future[(String, BankDetails, Money)] = {
-    val customer = createCustomer(req.nonce)
+    val customer = createCustomer(req.token)
     val stripeBD = BankDetails.stripe(customer.getId())
-    val stripeCharge = charge(stripeBD, req.money)
-    Future.successful((stripeCharge.getId, stripeBD, req.money))
+    val stripeCharge = charge(stripeBD, req.charge)
+    Future.successful((stripeCharge.getId, stripeBD, req.charge))
   }
 
 }

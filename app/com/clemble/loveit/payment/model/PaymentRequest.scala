@@ -4,12 +4,11 @@ import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
 sealed trait PaymentRequest {
-  val nonce: String
-  val money: Money
+  val charge: Money
 }
 
-case class BraintreePaymentRequest(`type`: String, nonce: String, money: Money, details: Option[JsObject]) extends PaymentRequest
-case class StripePaymentRequest(nonce: String, money: Money) extends PaymentRequest
+case class BraintreePaymentRequest(nonce: String, charge: Money, details: Option[JsObject]) extends PaymentRequest
+case class StripePaymentRequest(token: String, charge: Money, details: JsObject) extends PaymentRequest
 
 object PaymentRequest {
 

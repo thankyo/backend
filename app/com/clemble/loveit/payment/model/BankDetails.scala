@@ -21,13 +21,13 @@ object BankDetails {
 
   val empty: BankDetails = EmptyBankDetails
 
-  def payPal(email: String): BankDetails = PayPalBankDetails(email)
+  def payPal(email: String): PayPalBankDetails = PayPalBankDetails(email)
 
   def stripe(customer: String): StripeBankDetails = StripeBankDetails(customer)
 
-  def from(customer: Customer) = payPal(customer.getEmail)
+  def from(customer: Customer): PayPalBankDetails = payPal(customer.getEmail)
 
-  def from(payPalDetails: PayPalDetails) = payPal(payPalDetails.getPayerEmail())
+  def from(payPalDetails: PayPalDetails): PayPalBankDetails = payPal(payPalDetails.getPayerEmail())
 
   /**
     * JSON format for [[PayPalBankDetails]]

@@ -8,7 +8,7 @@ import com.clemble.loveit.payment.service.repository.PaymentTransactionRepositor
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait PaymentService {
+sealed trait PaymentService {
 
   /**
     * Receive money from external resource

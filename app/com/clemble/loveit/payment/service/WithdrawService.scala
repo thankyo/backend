@@ -13,7 +13,7 @@ import com.paypal.base.rest.APIContext
 import scala.concurrent.Future
 import scala.util.Try
 
-trait WithdrawService[T <: BankDetails] {
+sealed trait WithdrawService[T <: BankDetails] {
 
   def withdraw(money: Money, account: T): Future[(String, Boolean)]
 

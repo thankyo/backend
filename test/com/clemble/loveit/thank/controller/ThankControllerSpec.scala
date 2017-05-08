@@ -18,7 +18,7 @@ class ThankControllerSpec extends ControllerSpec {
   "UPDATE" should {
 
     "support different format types for FULL" in {
-      val masterUrl = s"${randomNumeric(10)}.com/${randomNumeric(10)}/${randomNumeric(10)}"
+      val masterUrl = s"${randomNumeric(20)}.com/${randomNumeric(10)}/${randomNumeric(10)}"
 
       val giver = createUser()
       val owner = createUser()
@@ -48,6 +48,8 @@ class ThankControllerSpec extends ControllerSpec {
 
       val req = FakeRequest(PUT, s"/api/v1/thank/${masterUrl}").withHeaders(giver:_*)
       await(route(application, req).get)
+
+      eventually(getMyPayments()(owner).size shouldEqual 1)
 
       val giverTransactions = getMyPayments()(giver)
       val ownerTransactions = getMyPayments()(owner)

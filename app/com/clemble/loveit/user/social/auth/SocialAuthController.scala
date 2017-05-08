@@ -36,6 +36,18 @@ class SocialAuthController @Inject() (
                                        implicit val ec: ExecutionContext
 ) extends Controller with I18nSupport with Logger {
 
+  def createOrUpdateUser(profile: CommonSocialProfile): Future[UserIdentity] = {
+    for {
+      existingUserOpt <- userRepo.retrieve(profile.loginInfo)
+      user <- existingUserOpt.
+        map(identity => Future.successful(identity)).
+        getOrElse(userRepo.save(User from profile).map(_.toIdentity()))
+    } yield {
+      logger.debug(s"${if (existingUserOpt.isDefined) "NEW user created" else "Using existing user"}")
+      user
+    }
+  }
+
   /**
     * Authenticates a user against a social provider.
     *
@@ -43,17 +55,6 @@ class SocialAuthController @Inject() (
     * @return The result to display.
     */
   def authenticate(provider: String) = Action.async{ implicit req => {
-    def createOrUpdateUser(profile: CommonSocialProfile): Future[UserIdentity] = {
-      for {
-        existingUserOpt <- userRepo.retrieve(profile.loginInfo)
-        user <- existingUserOpt.
-          map(identity => Future.successful(identity)).
-          getOrElse(userRepo.save(User from profile).map(_.toIdentity()))
-      } yield {
-        logger.debug(s"${if (existingUserOpt.isDefined) "NEW user created" else "Using existing user"}")
-        user
-      }
-    }
 
     def createAuthResult(user: UserIdentity, profile: CommonSocialProfile, authInfo: AuthInfo): Future[Result] = {
       for {

@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.thank.model.{OwnershipVerificationRequest, Pending, ResourceOwnership}
-import play.api.libs.Crypto
+import com.mohiva.play.silhouette.api.crypto.Crypter
 
 trait OwnershipVerificationGenerator {
 
@@ -13,10 +13,10 @@ trait OwnershipVerificationGenerator {
 }
 
 @Singleton
-case class CryptOwnershipVerificationGenerator @Inject()(encrypt: Crypto) extends OwnershipVerificationGenerator {
+case class CryptOwnershipVerificationGenerator @Inject()(crypter: Crypter) extends OwnershipVerificationGenerator {
 
   override def generate(user: UserID, ownership: ResourceOwnership): OwnershipVerificationRequest = {
-    val verificationCode = Crypto.encryptAES(s"${user}@${ownership.resource.uri}")
+    val verificationCode = crypter.encrypt(s"${user}@${ownership.resource.uri}")
     OwnershipVerificationRequest(
       status = Pending,
       resource = ownership.resource,

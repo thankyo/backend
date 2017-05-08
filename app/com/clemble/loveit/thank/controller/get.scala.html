@@ -10,7 +10,7 @@
                     window.location = "https://loveit.tips"
                 }
                 function doTip(token) {
-                    var url = "/api/v1/thank/@thank.resource.uri";
+                    var url = "/api/v1/thank/http/@thank.resource.uri";
                     var req = new Request(url, {
                         method: "PUT",
                         headers: {

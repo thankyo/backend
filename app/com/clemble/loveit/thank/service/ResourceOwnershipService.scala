@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import akka.stream.scaladsl.Source
+
 import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.thank.model.ResourceOwnership
@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ResourceOwnershipService {
 
-  def listMy(user: UserID): Source[ResourceOwnership, _]
+  def listMy(user: UserID): Future[Set[ResourceOwnership]]
 
   def findResourceOwner(uri: Resource): Future[User]
 
@@ -25,9 +25,8 @@ trait ResourceOwnershipService {
 @Singleton
 case class SimpleResourceOwnershipService @Inject() (repository: UserRepository, implicit val ec: ExecutionContext) extends ResourceOwnershipService {
 
-  override def listMy(user: UserID): Source[ResourceOwnership, _] = {
-    val ownedResources = repository.findById(user).map(_.map(_.owns).getOrElse(Set.empty))
-    Source.fromFuture(ownedResources).mapConcat(identity)
+  override def listMy(user: UserID): Future[Set[ResourceOwnership]] = {
+    repository.findById(user).map(_.map(_.owns).getOrElse(Set.empty))
   }
 
   override def assign(userId: UserID, ownership: ResourceOwnership): Future[ResourceOwnership] = {
@@ -55,7 +54,11 @@ case class SimpleResourceOwnershipService @Inject() (repository: UserRepository,
     } yield {
       if (ownerOpt.isDefined)
         throw UserException.resourceAlreadyOwned(ownerOpt.get)
-      if (!canOwn(relatedUsers) || userOpt.isEmpty || relatedUsers.exists(_ == userOpt.get))
+      if (userOpt.isEmpty)
+        throw UserException.userMissing(userId)
+      if (relatedUsers.exists(_ == userOpt.get))
+        throw UserException.userMissing(userId)
+      if (!canOwn(relatedUsers))
         throw UserException.resourceOwnershipImpossible()
       repository.update(userOpt.get.assignOwnership(pendingBalance, ownership))
       ownership

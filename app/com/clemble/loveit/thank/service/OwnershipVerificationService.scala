@@ -35,7 +35,7 @@ case class WSMetaTagReader @Inject() (wsClient: WSClient, implicit val ec: Execu
 
   def read(res: HttpResource): Future[Option[String]] = {
     for {
-      resp <- wsClient.url(res.uri).execute()
+      resp <- wsClient.url(s"http://${res.uri}").execute()
     } yield {
       MetaTagReader.findInHtml(resp.body)
     }

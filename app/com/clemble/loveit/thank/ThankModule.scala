@@ -21,6 +21,12 @@ class ThankModule extends ScalaModule {
     bind(classOf[ThankRepository]).to(classOf[MongoThankRepository])
 
     bind(classOf[ResourceOwnershipService]).to(classOf[SimpleResourceOwnershipService])
+
+  }
+
+  def ownershipVerification(): Unit = {
+    bind(classOf[MetaTagReader]).to(classOf[WSMetaTagReader])
+    bind(classOf[OwnershipVerificationService]).to(classOf[HttpOwnershipVerificationService])
   }
 
   @Provides

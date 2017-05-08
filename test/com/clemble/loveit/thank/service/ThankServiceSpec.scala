@@ -13,8 +13,8 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
-  val thankService = application.injector.instanceOf[ThankService]
-  val userRepo = application.injector.instanceOf[UserRepository]
+  val thankService = dependency[ThankService]
+  val userRepo = dependency[UserRepository]
 
   "Thank " should {
 

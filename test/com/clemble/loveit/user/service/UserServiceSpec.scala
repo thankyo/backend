@@ -18,9 +18,9 @@ import scala.util.{Failure, Success}
 @RunWith(classOf[JUnitRunner])
 class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
-  val service = application.injector.instanceOf[UserService]
-  val repo = application.injector.instanceOf[UserRepository]
-  val paymentService = application.injector.instanceOf[ThankTransactionService]
+  val service = dependency[UserService]
+  val repo = dependency[UserRepository]
+  val paymentService = dependency[ThankTransactionService]
 
   val giver = UserGenerator.generate().copy(balance = Int.MaxValue)
   await(repo.save(giver))

@@ -11,8 +11,8 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class OwnershipVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  lazy val userRepo = instanceOf[UserRepository]
-  lazy val ownershipRepo = instanceOf[OwnershipVerificationRepository]
+  lazy val userRepo = dependency[UserRepository]
+  lazy val ownershipRepo = dependency[OwnershipVerificationRepository]
 
   "SAVES" in {
     val user = await(userRepo.save(UserGenerator.generate()))

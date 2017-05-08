@@ -13,7 +13,7 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val repository = application.injector.instanceOf[ThankRepository]
+  val repository = dependency[ThankRepository]
 
   def findAll(resources: Seq[Resource]): Future[Seq[Thank]] = {
     val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(resources.map(uri => repository.findByResource(uri)))

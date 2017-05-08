@@ -14,8 +14,8 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
-  val thankTransService = application.injector.instanceOf[ThankTransactionService]
-  val userRepo = application.injector.instanceOf[UserRepository]
+  val thankTransService = dependency[ThankTransactionService]
+  val userRepo = dependency[UserRepository]
 
   "PAYMENT" should {
 

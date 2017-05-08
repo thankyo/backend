@@ -8,8 +8,8 @@ import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 
 trait ServiceSpec extends ThankSpecification {
 
-  lazy val authController = application.injector.instanceOf[SocialAuthController]
-  lazy val userRep = application.injector.instanceOf[UserRepository]
+  lazy val authController = dependency[SocialAuthController]
+  lazy val userRep = dependency[UserRepository]
 
   def createUser(socialProfile: CommonSocialProfile = CommonSocialProfileGenerator.generate(), balance: Amount = 200): Seq[(String, String)] = {
     val userIdentity = await(authController.createOrUpdateUser(socialProfile))

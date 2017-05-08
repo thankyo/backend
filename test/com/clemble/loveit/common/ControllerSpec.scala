@@ -17,10 +17,10 @@ import scala.concurrent.ExecutionContext
 
 trait ControllerSpec extends ThankSpecification {
 
-  implicit val ec = application.injector.instanceOf[ExecutionContext]
+  implicit val ec = dependency[ExecutionContext]
 
-  val userRep = application.injector.instanceOf[UserRepository]
-  val ownershipService = application.injector.instanceOf[ResourceOwnershipService]
+  val userRep = dependency[UserRepository]
+  val ownershipService = dependency[ResourceOwnershipService]
 
   def createUser(socialProfile: CommonSocialProfile = CommonSocialProfileGenerator.generate(), balance: Amount = 200): Seq[(String, String)] = {
     val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").withJsonBody(Json.toJson(socialProfile))

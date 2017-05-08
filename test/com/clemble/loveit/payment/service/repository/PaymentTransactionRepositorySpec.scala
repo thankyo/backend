@@ -5,7 +5,7 @@ import com.clemble.loveit.test.util.PaymentTransactionGenerator
 
 class PaymentTransactionRepositorySpec extends RepositorySpec {
 
-  val repository = application.injector.instanceOf[PaymentTransactionRepository]
+  val repository = dependency[PaymentTransactionRepository]
 
   "CREATE" should {
 

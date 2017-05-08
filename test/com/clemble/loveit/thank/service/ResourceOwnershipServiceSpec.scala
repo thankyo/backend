@@ -9,7 +9,7 @@ import org.apache.commons.lang3.RandomStringUtils
 
 class ResourceOwnershipServiceSpec extends ServiceSpec {
 
-  lazy val service = application.injector.instanceOf[ResourceOwnershipService]
+  lazy val service = dependency[ResourceOwnershipService]
 
   def listResources(userAuth: Seq[(String, String)]): Set[ResourceOwnership] = {
     await(service.listMy(userAuth.head._2))

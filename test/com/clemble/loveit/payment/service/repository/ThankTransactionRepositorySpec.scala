@@ -13,7 +13,7 @@ import scala.collection.immutable.Seq
 @RunWith(classOf[JUnitRunner])
 class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends RepositorySpec {
 
-  val repo = application.injector.instanceOf[ThankTransactionRepository]
+  val repo = dependency[ThankTransactionRepository]
 
   "CREATE" should {
 

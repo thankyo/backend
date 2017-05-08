@@ -16,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val userRepo = application.injector.instanceOf[UserRepository]
+  val userRepo = dependency[UserRepository]
 
   "CREATE" should {
 

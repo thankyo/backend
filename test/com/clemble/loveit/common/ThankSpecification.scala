@@ -10,11 +10,12 @@ import scala.reflect.ClassTag
 trait ThankSpecification extends PlaySpecification {
 
   implicit lazy val application = ThankSpecification.application
-  implicit lazy val materializer = application.injector.instanceOf[Materializer]
 
-  def instanceOf[T: ClassTag]: T = {
+  def dependency[T: ClassTag]: T = {
     application.injector.instanceOf[T]
   }
+
+  implicit lazy val materializer = dependency[Materializer]
 
 }
 

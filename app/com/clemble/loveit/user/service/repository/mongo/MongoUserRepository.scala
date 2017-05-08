@@ -35,14 +35,14 @@ case class MongoUserRepository @Inject()(
   override def save(user: User): Future[User] = {
     val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
     val fInsert = collection.insert(userJson)
-    MongoSafeUtils.safe(() => user, fInsert)
+    MongoSafeUtils.safe(user, fInsert)
   }
 
   override def update(user: User): Future[User] = {
     val selector = Json.obj("_id" -> JsString(user.id))
     val update = Json.toJson(user).as[JsObject]
     val fUpdate = collection.update(selector, update)
-    MongoSafeUtils.safe(() => user, fUpdate)
+    MongoSafeUtils.safe(user, fUpdate)
   }
 
   override def findById(id: UserID): Future[Option[User]] = {
@@ -136,6 +136,7 @@ object MongoUserRepository {
   def ensureUpToDate(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     addTotalField(collection)
     addBioField(collection)
+    addOwnRequests(collection)
   }
 
   def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
@@ -151,6 +152,13 @@ object MongoUserRepository {
   def addBioField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("bio" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("bio" -> User.DEFAULT_BIO))
+    val fUpdate = collection.update(selector, update, upsert = false, multi = true)
+    fUpdate.foreach(res => if (!res.ok) System.exit(2));
+  }
+
+  def addOwnRequests(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    val selector = Json.obj("ownRequests" -> Json.obj("$exists" -> false))
+    val update = Json.obj("$set" -> Json.obj("ownRequests" -> JsArray()))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
     fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }

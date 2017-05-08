@@ -1,6 +1,8 @@
 package com.clemble.loveit.thank.model
 
 import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.util.WriteableUtils
+import com.clemble.loveit.user.model.User
 import play.api.libs.json._
 
 /**
@@ -54,7 +56,7 @@ case class OwnershipVerificationRequest(
                                          resource: Resource,
                                          ownershipType: OwnershipType,
                                          requester: UserID,
-                                         verificationCode: Option[String]
+                                         verificationCode: String
                            ) {
 
   def toOwnership() = ResourceOwnership(resource, ownershipType)
@@ -64,5 +66,6 @@ case class OwnershipVerificationRequest(
 object OwnershipVerificationRequest {
 
   implicit val jsonFormat = Json.format[OwnershipVerificationRequest]
+  implicit val httpWriteable = WriteableUtils.jsonToWriteable[OwnershipVerificationRequest]
 
 }

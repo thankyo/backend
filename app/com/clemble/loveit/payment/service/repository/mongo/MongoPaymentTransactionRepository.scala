@@ -22,7 +22,7 @@ case class MongoPaymentTransactionRepository @Inject() (
 
   override def save(tr: PaymentTransaction): Future[PaymentTransaction] = {
     val json = Json.toJson(tr).as[JsObject] + ("_id" -> JsString(tr.id))
-    MongoSafeUtils.safe(() => tr, collection.insert(json))
+    MongoSafeUtils.safe(tr, collection.insert(json))
   }
 
 

@@ -5,6 +5,7 @@ import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.test.util.CommonSocialProfileGenerator
 import com.clemble.loveit.thank.model.ResourceOwnership
+import com.clemble.loveit.thank.service.ResourceOwnershipService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -19,6 +20,7 @@ trait ControllerSpec extends ThankSpecification {
   implicit val ec = application.injector.instanceOf[ExecutionContext]
 
   val userRep = application.injector.instanceOf[UserRepository]
+  val ownershipService = application.injector.instanceOf[ResourceOwnershipService]
 
   def createUser(socialProfile: CommonSocialProfile = CommonSocialProfileGenerator.generate(), balance: Amount = 200): Seq[(String, String)] = {
     val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").withJsonBody(Json.toJson(socialProfile))
@@ -36,15 +38,8 @@ trait ControllerSpec extends ThankSpecification {
     resp
   }
 
-  def addOwnership(own: ResourceOwnership)(implicit authHeader: Seq[(String, String)]): Option[ResourceOwnership] = {
-    val req = FakeRequest(POST, "/api/v1/thank/ownership/my").withJsonBody(Json.toJson(own)).withHeaders(authHeader:_*)
-    val fRes = route(application, req).get
-
-    val res = await(fRes)
-    res.header.status match {
-      case NOT_FOUND => None
-      case CREATED => Json.parse(await(res.body.consumeData).utf8String).asOpt[ResourceOwnership]
-    }
+  def addOwnership(user: UserID, own: ResourceOwnership)(implicit authHeader: Seq[(String, String)]): Option[ResourceOwnership] = {
+    Some(await(ownershipService.assign(user, own)))
   }
 
   def getMyUser()(implicit authHeader: Seq[(String, String)]): User = {

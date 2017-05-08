@@ -24,13 +24,13 @@ class ThankControllerSpec extends ControllerSpec {
       val owner = createUser()
       val ownerBalanceBefore = getMyUser()(owner).balance
 
-      addOwnership(full(HttpResource(masterUrl)))(owner) shouldNotEqual None
+      addOwnership(getMyUser()(owner).id, full(HttpResource(masterUrl)))(owner) shouldNotEqual None
 
       val uriVariations = ResourceSpec.generateVariations(masterUrl)
       val thanks = for {
         uri <- uriVariations
       } yield {
-        val req = FakeRequest(PUT, s"/api/v1/thank/${uri}").withHeaders(giver:_*)
+        val req = FakeRequest(PUT, s"/api/v1/thank/http/${uri}").withHeaders(giver:_*)
         route(application, req).get
       }
       val updateReq = await(Future.sequence(thanks)).map(_.header.status)
@@ -44,12 +44,10 @@ class ThankControllerSpec extends ControllerSpec {
 
       val giver = createUser()
       val owner = createUser()
-      addOwnership(full(HttpResource(masterUrl)))(owner) shouldNotEqual None
+      addOwnership(getMyUser()(owner).id, full(HttpResource(masterUrl)))(owner) shouldNotEqual None
 
-      val req = FakeRequest(PUT, s"/api/v1/thank/${masterUrl}").withHeaders(giver:_*)
+      val req = FakeRequest(PUT, s"/api/v1/thank/http/${masterUrl}").withHeaders(giver:_*)
       await(route(application, req).get)
-
-      eventually(getMyPayments()(owner).size shouldEqual 1)
 
       val giverTransactions = getMyPayments()(giver)
       val ownerTransactions = getMyPayments()(owner)

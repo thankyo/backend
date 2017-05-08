@@ -26,7 +26,7 @@ case class MongoOwnershipVerificationRepository @Inject()(@Named("user") collect
 
   override def update(req: OwnershipVerificationRequest, status: OwnershipVerificationRequestStatus): Future[Boolean] = {
     val selector = Json.obj("_id" -> req.requester, "ownRequests.resource" -> req.resource)
-    val updateStatus = Json.obj("$set" -> Json.obj("ownRequests.status" -> status))
+    val updateStatus = Json.obj("$set" -> Json.obj("ownRequests.$.status" -> status))
     MongoSafeUtils.safe(collection.update(selector, updateStatus).map(res => res.ok && res.n == 1))
   }
 

@@ -17,7 +17,7 @@ class ResourceOwnershipController @Inject()(
                                            ) extends Controller {
 
   def listMyOwnership() = silhouette.SecuredAction.async(implicit req => {
-    val fOwned = service.listMy(req.identity.id)
+    val fOwned = service.list(req.identity.id)
     fOwned.map(Ok(_))
   })
 

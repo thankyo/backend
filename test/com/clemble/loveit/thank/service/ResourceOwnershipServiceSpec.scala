@@ -12,7 +12,7 @@ class ResourceOwnershipServiceSpec extends ServiceSpec {
   lazy val service = dependency[ResourceOwnershipService]
 
   def listResources(userAuth: Seq[(String, String)]): Set[ResourceOwnership] = {
-    await(service.listMy(userAuth.head._2))
+    await(service.list(userAuth.head._2))
   }
 
   def assignOwnership(userAuth: Seq[(String, String)], resource: ResourceOwnership): ResourceOwnership = {

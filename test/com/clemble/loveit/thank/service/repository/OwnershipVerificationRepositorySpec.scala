@@ -18,7 +18,7 @@ class OwnershipVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends
     val user = await(userRepo.save(UserGenerator.generate()))
     val ownership = await(ownershipRepo.save(OwnershipVerificationGenerator.generate().copy(requester = user.id)))
     ownership shouldNotEqual None
-    await(userRepo.findById(user.id)).map(_.ownRequests) shouldEqual Some(Set(ownership))
+    await(ownershipRepo.list(user.id)) shouldEqual Set(ownership)
   }
 
   "UPDATE STATUS" in {
@@ -29,7 +29,7 @@ class OwnershipVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends
     updated shouldEqual true
 
     val expected = ownership.copy(status = Verified)
-    await(userRepo.findById(user.id)).map(_.ownRequests) shouldEqual Some(Set(expected))
+    await(ownershipRepo.list(user.id)) shouldEqual Set(expected)
   }
 
 

@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ResourceOwnershipService {
 
-  def listMy(user: UserID): Future[Set[ResourceOwnership]]
+  def list(user: UserID): Future[Set[ResourceOwnership]]
 
   def findResourceOwner(uri: Resource): Future[User]
 
@@ -25,7 +25,7 @@ trait ResourceOwnershipService {
 @Singleton
 case class SimpleResourceOwnershipService @Inject() (repository: UserRepository, implicit val ec: ExecutionContext) extends ResourceOwnershipService {
 
-  override def listMy(user: UserID): Future[Set[ResourceOwnership]] = {
+  override def list(user: UserID): Future[Set[ResourceOwnership]] = {
     repository.findById(user).map(_.map(_.owns).getOrElse(Set.empty))
   }
 

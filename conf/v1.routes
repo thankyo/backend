@@ -6,7 +6,9 @@ GET         /user/my                         @com.clemble.loveit.user.controller
 
 
 GET         /thank/ownership/my              @com.clemble.loveit.thank.controller.ResourceOwnershipController.listMyOwnership()
-POST        /thank/ownership/my              @com.clemble.loveit.thank.controller.OwnershipVerificationController.verifyOwnership()
+
+GET         /thank/verification/my           @com.clemble.loveit.thank.controller.OwnershipVerificationController.listMy()
+POST        /thank/verification/my           @com.clemble.loveit.thank.controller.OwnershipVerificationController.verifyOwnership()
 
 GET         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.thank(url: com.clemble.loveit.common.model.Resource)

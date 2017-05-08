@@ -67,5 +67,6 @@ object OwnershipVerificationRequest {
 
   implicit val jsonFormat = Json.format[OwnershipVerificationRequest]
   implicit val httpWriteable = WriteableUtils.jsonToWriteable[OwnershipVerificationRequest]
+  implicit val listHttpWriteable = WriteableUtils.jsonToWriteable[Set[OwnershipVerificationRequest]]
 
 }

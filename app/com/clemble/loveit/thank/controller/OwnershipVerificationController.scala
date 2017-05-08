@@ -17,6 +17,10 @@ case class OwnershipVerificationController @Inject()(
                                                       implicit val ec: ExecutionContext
                                                     ) extends Controller {
 
+  def listMy = silhouette.SecuredAction.async(implicit req => {
+    val fOwned = service.list(req.identity.id)
+    fOwned.map(Ok(_))
+  })
 
   def verifyOwnership() = silhouette.SecuredAction.async(parse.json[ResourceOwnership])(implicit req => {
     val verificationReq = generator.generate(req.identity.id, req.body)

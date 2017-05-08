@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.model.{HttpResource, SocialResource}
+import com.clemble.loveit.common.model.{HttpResource, SocialResource, UserID}
 import com.clemble.loveit.thank.model.{NonVerified, OwnershipVerificationRequest, Verified}
 import com.clemble.loveit.thank.service.repository.OwnershipVerificationRepository
 import play.api.libs.ws.WSClient
@@ -13,6 +13,9 @@ import scala.concurrent.{ExecutionContext, Future}
   * Ownership verification service
   */
 trait OwnershipVerificationService {
+
+  def list(requester: UserID): Future[Set[OwnershipVerificationRequest]]
+
   def verify(ownershipRequest: OwnershipVerificationRequest): Future[OwnershipVerificationRequest]
 }
 
@@ -45,6 +48,10 @@ case class WSMetaTagReader @Inject() (wsClient: WSClient, implicit val ec: Execu
 
 @Singleton
 case class HttpOwnershipVerificationService @Inject()(tagReader: MetaTagReader, repo: OwnershipVerificationRepository, resOwnService: ResourceOwnershipService, implicit val ec: ExecutionContext) extends OwnershipVerificationService {
+
+  override def list(requester: UserID): Future[Set[OwnershipVerificationRequest]] = {
+    repo.list(requester)
+  }
 
   override def verify(req: OwnershipVerificationRequest): Future[OwnershipVerificationRequest] = {
     req.resource match {

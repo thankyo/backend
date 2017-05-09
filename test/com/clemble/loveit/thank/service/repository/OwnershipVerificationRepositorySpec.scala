@@ -14,6 +14,13 @@ class OwnershipVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends
   lazy val userRepo = dependency[UserRepository]
   lazy val ownershipRepo = dependency[OwnershipVerificationRepository]
 
+  "GETS" in {
+    val user = await(userRepo.save(UserGenerator.generate()))
+    val ownership = await(ownershipRepo.save(OwnershipVerificationGenerator.generate().copy(requester = user.id)))
+    val read = await(ownershipRepo.get(user.id, ownership.id))
+    Some(ownership) shouldEqual read
+  }
+
   "SAVES" in {
     val user = await(userRepo.save(UserGenerator.generate()))
     val ownership = await(ownershipRepo.save(OwnershipVerificationGenerator.generate().copy(requester = user.id)))
@@ -30,6 +37,14 @@ class OwnershipVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends
 
     val expected = ownership.copy(status = Verified)
     await(ownershipRepo.list(user.id)) shouldEqual Set(expected)
+  }
+
+  "REMOVES" in {
+    val user = await(userRepo.save(UserGenerator.generate()))
+    val ownership = await(ownershipRepo.save(OwnershipVerificationGenerator.generate().copy(requester = user.id)))
+    val removed = await(ownershipRepo.delete(user.id, ownership.id))
+    removed shouldEqual true
+    await(ownershipRepo.list(user.id)) shouldEqual Set.empty
   }
 
 

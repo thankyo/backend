@@ -6,6 +6,7 @@ import com.clemble.loveit.thank.service._
 import com.google.inject.Provides
 import javax.inject.{Named, Singleton}
 
+import com.clemble.loveit.common.model.Resource
 import net.codingwell.scalaguice.ScalaModule
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
@@ -29,7 +30,13 @@ class ThankModule extends ScalaModule {
     bind(classOf[OwnershipVerificationGenerator]).to(classOf[CryptOwnershipVerificationGenerator])
     bind(classOf[OwnershipVerificationRepository]).to(classOf[MongoOwnershipVerificationRepository])
     bind(classOf[MetaTagReader]).to(classOf[WSMetaTagReader])
-    bind(classOf[OwnershipVerificationService]).to(classOf[HttpOwnershipVerificationService])
+    bind(classOf[OwnershipVerificationService]).to(classOf[SimpleOwnershipVerificationService])
+  }
+
+  @Provides
+  @Singleton
+  def resourceVerificationService(httpVerification: HttpOwnershipVerificationService): ResourceVerificationService[Resource] = {
+    ResourceVerificationFacade(httpVerification)
   }
 
   @Provides

@@ -32,7 +32,7 @@ case class User(
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
                  owns: Set[ResourceOwnership] = Set.empty,
-                 ownRequests: Set[OwnershipVerificationRequest] = Set.empty,
+                 ownRequests: Set[OwnershipVerificationRequest[Resource]] = Set.empty,
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
                  bio: String = User.DEFAULT_BIO,

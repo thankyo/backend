@@ -2,13 +2,13 @@ package com.clemble.loveit.thank.model
 
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
-import com.clemble.loveit.user.model.User
 import play.api.libs.json._
 
 /**
   * States of resource ownership verification process
   */
 sealed trait OwnershipVerificationRequestStatus
+
 case object Pending extends OwnershipVerificationRequestStatus
 case object Running extends OwnershipVerificationRequestStatus
 case object Verified extends OwnershipVerificationRequestStatus
@@ -51,13 +51,14 @@ object OwnershipVerificationRequestStatus {
   * @param resource      resource in question
   * @param ownershipType type of ownership
   */
-case class OwnershipVerificationRequest(
+case class OwnershipVerificationRequest[T <: Resource](
+                                         id: VerificationID,
                                          status: OwnershipVerificationRequestStatus,
-                                         resource: Resource,
+                                         resource: T,
                                          ownershipType: OwnershipType,
                                          requester: UserID,
                                          verificationCode: String
-                           ) {
+                                       ) {
 
   def toOwnership() = ResourceOwnership(resource, ownershipType)
 
@@ -65,8 +66,8 @@ case class OwnershipVerificationRequest(
 
 object OwnershipVerificationRequest {
 
-  implicit val jsonFormat = Json.format[OwnershipVerificationRequest]
-  implicit val httpWriteable = WriteableUtils.jsonToWriteable[OwnershipVerificationRequest]
-  implicit val listHttpWriteable = WriteableUtils.jsonToWriteable[Set[OwnershipVerificationRequest]]
+  implicit val jsonFormat = Json.format[OwnershipVerificationRequest[Resource]]
+  implicit val httpWriteable = WriteableUtils.jsonToWriteable[OwnershipVerificationRequest[Resource]]
+  implicit val listHttpWriteable = WriteableUtils.jsonToWriteable[Set[OwnershipVerificationRequest[Resource]]]
 
 }

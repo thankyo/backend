@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.thank.model._
-import com.clemble.loveit.thank.service.repository.OwnershipVerificationRepository
+import com.clemble.loveit.thank.service.repository.ROVerificationRepository
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -12,17 +12,17 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * Ownership verification service
   */
-trait OwnershipVerificationService {
+trait ROVerificationService {
 
-  def get(requester: UserID, req: VerificationID): Future[Option[OwnershipVerificationRequest[Resource]]]
+  def get(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]]
 
-  def list(requester: UserID): Future[Set[OwnershipVerificationRequest[Resource]]]
+  def list(requester: UserID): Future[Set[ROVerificationRequest[Resource]]]
 
-  def create(requester: UserID, ownership: ResourceOwnership): Future[OwnershipVerificationRequest[Resource]]
+  def create(requester: UserID, ownership: ResourceOwnership): Future[ROVerificationRequest[Resource]]
 
   def remove(requester: UserID, req: VerificationID): Future[Boolean]
 
-  def verify(requester: UserID, req: VerificationID): Future[Option[OwnershipVerificationRequest[Resource]]]
+  def verify(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]]
 
 }
 
@@ -54,9 +54,9 @@ case class WSMetaTagReader @Inject()(wsClient: WSClient, implicit val ec: Execut
 }
 
 @Singleton
-case class SimpleOwnershipVerificationService @Inject()(generator: OwnershipVerificationGenerator, repo: OwnershipVerificationRepository, resOwnService: ResourceOwnershipService, verificationService: ResourceVerificationService[Resource], implicit val ec: ExecutionContext) extends OwnershipVerificationService {
+case class SimpleROVerificationService @Inject()(generator: ROVerificationGenerator, repo: ROVerificationRepository, resOwnService: ResourceOwnershipService, verificationService: ROVerificationConfirmationService[Resource], implicit val ec: ExecutionContext) extends ROVerificationService {
 
-  override def create(requester: UserID, ownership: ResourceOwnership): Future[OwnershipVerificationRequest[Resource]] = {
+  override def create(requester: UserID, ownership: ResourceOwnership): Future[ROVerificationRequest[Resource]] = {
     val req = generator.generate(requester, ownership)
     repo.save(req)
   }
@@ -65,16 +65,16 @@ case class SimpleOwnershipVerificationService @Inject()(generator: OwnershipVeri
     repo.delete(requester, req)
   }
 
-  override def list(requester: UserID): Future[Set[OwnershipVerificationRequest[Resource]]] = {
+  override def list(requester: UserID): Future[Set[ROVerificationRequest[Resource]]] = {
     repo.list(requester)
   }
 
-  override def get(requester: UserID, req: VerificationID): Future[Option[OwnershipVerificationRequest[Resource]]] = {
+  override def get(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]] = {
     repo.get(requester, req)
   }
 
-  private def doVerify(req: OwnershipVerificationRequest[Resource]): Future[OwnershipVerificationRequest[Resource]] = {
-    def assignOwnershipIfVerified(status: OwnershipVerificationRequestStatus): Unit = {
+  private def doVerify(req: ROVerificationRequest[Resource]): Future[ROVerificationRequest[Resource]] = {
+    def assignOwnershipIfVerified(status: ROVerificationRequestStatus): Unit = {
       status match {
         case Verified =>
           for {
@@ -97,7 +97,7 @@ case class SimpleOwnershipVerificationService @Inject()(generator: OwnershipVeri
     }
   }
 
-  override def verify(requester: UserID, req: VerificationID): Future[Option[OwnershipVerificationRequest[Resource]]] = {
+  override def verify(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]] = {
     get(requester, req).flatMap(_ match {
       case Some(req) => doVerify(req).map(Some(_))
       case None => Future.successful(None)
@@ -106,14 +106,14 @@ case class SimpleOwnershipVerificationService @Inject()(generator: OwnershipVeri
 
 }
 
-trait ResourceVerificationService[T <: Resource] {
+trait ROVerificationConfirmationService[T <: Resource] {
 
-  def verify(resource: T, verificationCode: String): Future[OwnershipVerificationRequestStatus]
+  def verify(resource: T, verificationCode: String): Future[ROVerificationRequestStatus]
 
 }
 
-case class ResourceVerificationFacade(httpVerification: ResourceVerificationService[HttpResource]) extends ResourceVerificationService[Resource] {
-  override def verify(resource: Resource, verificationCode: String): Future[OwnershipVerificationRequestStatus] = {
+case class ROVerificationConfirmationFacade(httpVerification: ROVerificationConfirmationService[HttpResource]) extends ROVerificationConfirmationService[Resource] {
+  override def verify(resource: Resource, verificationCode: String): Future[ROVerificationRequestStatus] = {
     resource match {
       case httpRes: HttpResource => httpVerification.verify(httpRes, verificationCode)
       case _ => Future.successful(NonVerified)
@@ -122,9 +122,9 @@ case class ResourceVerificationFacade(httpVerification: ResourceVerificationServ
 }
 
 @Singleton
-case class HttpOwnershipVerificationService @Inject()(tagReader: MetaTagReader, implicit val ec: ExecutionContext) extends ResourceVerificationService[HttpResource] {
+case class HttpROVerificationConfirmationService @Inject()(tagReader: MetaTagReader, implicit val ec: ExecutionContext) extends ROVerificationConfirmationService[HttpResource] {
 
-  override def verify(res: HttpResource, verificationCode: String): Future[OwnershipVerificationRequestStatus] = {
+  override def verify(res: HttpResource, verificationCode: String): Future[ROVerificationRequestStatus] = {
     for {
       tagOpt <- tagReader.read(res)
     } yield {

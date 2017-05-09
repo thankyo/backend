@@ -3,7 +3,7 @@ package com.clemble.loveit.user.model
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.user.model.User.ExtendedBasicProfile
 import com.clemble.loveit.payment.model.BankDetails
-import com.clemble.loveit.thank.model.{OwnershipVerificationRequest, ResourceOwnership}
+import com.clemble.loveit.thank.model.{ROVerificationRequest, ResourceOwnership}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
@@ -32,7 +32,7 @@ case class User(
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
                  owns: Set[ResourceOwnership] = Set.empty,
-                 ownRequests: Set[OwnershipVerificationRequest[Resource]] = Set.empty,
+                 ownRequests: Set[ROVerificationRequest[Resource]] = Set.empty,
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
                  bio: String = User.DEFAULT_BIO,

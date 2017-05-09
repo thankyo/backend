@@ -4,17 +4,17 @@ import javax.inject.Inject
 
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.model.{ResourceOwnership, VerificationID}
-import com.clemble.loveit.thank.service.OwnershipVerificationService
+import com.clemble.loveit.thank.service.ROVerificationService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
-case class OwnershipVerificationController @Inject()(
-                                                      service: OwnershipVerificationService,
-                                                      silhouette: Silhouette[AuthEnv],
-                                                      implicit val ec: ExecutionContext
+case class ROVerificationController @Inject()(
+                                               service: ROVerificationService,
+                                               silhouette: Silhouette[AuthEnv],
+                                               implicit val ec: ExecutionContext
                                                     ) extends Controller {
 
   def getMy(verID: VerificationID) = silhouette.SecuredAction.async(implicit req => {

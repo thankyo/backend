@@ -7,13 +7,14 @@ import com.clemble.loveit.user.model.{User, UserIdentity}
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.Singleton
+
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.mvc.{Action, Controller, Result}
+import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,13 +37,18 @@ class SocialAuthController @Inject() (
                                        implicit val ec: ExecutionContext
 ) extends Controller with I18nSupport with Logger {
 
-  def createOrUpdateUser(profile: CommonSocialProfile): Future[UserIdentity] = {
+  def createOrUpdateUser(profile: CommonSocialProfile)(implicit header: RequestHeader): Future[UserIdentity] = {
     for {
       existingUserOpt <- userRepo.retrieve(profile.loginInfo)
       user <- existingUserOpt.
         map(identity => Future.successful(identity)).
         getOrElse(userRepo.save(User from profile).map(_.toIdentity()))
     } yield {
+      if (existingUserOpt.isEmpty) {
+        silhouette.env.eventBus.publish(SignUpEvent(user, header))
+      } else {
+        silhouette.env.eventBus.publish(LoginEvent(user, header))
+      }
       logger.debug(s"${if (existingUserOpt.isDefined) "NEW user created" else "Using existing user"}")
       user
     }

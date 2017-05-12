@@ -4,12 +4,15 @@ import com.clemble.loveit.common.util.{AuthEnv, TestSocialProvider}
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.Singleton
 
+import akka.actor.{ActorSystem, Props}
+import com.clemble.loveit.user.model.UserIdentity
+import com.clemble.loveit.user.service.{SubscriptionManager, SubscriptionOnSignUpManager, UserService}
 import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AuthenticatorService
 import com.mohiva.play.silhouette.api.util._
-import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
+import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import com.mohiva.play.silhouette.impl
 import com.mohiva.play.silhouette.impl.authenticators.{JWTAuthenticator, JWTAuthenticatorService, JWTAuthenticatorSettings}
@@ -51,12 +54,19 @@ class SocialModule extends ScalaModule {
   @Provides
   @Singleton
   def environment(
-                   userService: UserRepository,
+                   system: ActorSystem,
+                   userService: UserService,
+                   subscriptionManager: SubscriptionManager,
+                   userRepo: UserRepository,
                    authenticatorService: AuthenticatorService[JWTAuthenticator],
                    eventBus: EventBus,
                    ec: ExecutionContext): Environment[AuthEnv] = {
+
+    val signUpSubscription = system.actorOf(Props(SubscriptionOnSignUpManager(userService, subscriptionManager)))
+    eventBus.subscribe(signUpSubscription, classOf[SignUpEvent[UserIdentity]])
+
     Environment[AuthEnv](
-      userService,
+      userRepo,
       authenticatorService,
       Seq(),
       eventBus

@@ -31,6 +31,7 @@ case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, im
     val uri = s"https://api.mailgun.net/v3/lists/${list}@mailgun.loveit.tips/members/${email}"
     ws.
       url(uri).
+      withAuth("api", apiKey, BASIC).
       delete().
       map(_ => true).
       recover({ case _ => true })
@@ -64,22 +65,26 @@ case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, im
     })
   }
 
+  private val USERS_LIST = "users"
+  private val CREATORS_LIST = "creatorleads"
+  private val CONTRIBUTOR_LIST = "contributorleads"
+
   override def signedUpUser(user: User): Future[Boolean] = {
     asMailgunEmailForm(user) match {
       case Some(emailForm) =>
-        subscribe("users", emailForm)
-        remove("creatorLeads", user.email.get)
-        remove("contributorLeads", user.email.get)
+        subscribe(USERS_LIST, emailForm)
+        remove(CREATORS_LIST, user.email.get)
+        remove(CONTRIBUTOR_LIST, user.email.get)
       case None =>
         Future.successful(true)
     }
   }
 
   override def subscribeCreator(email: String): Future[Boolean] = {
-    subscribe("creatorLeads", Map("address" -> Seq(email)))
+    subscribe(CREATORS_LIST, Map("address" -> Seq(email)))
   }
 
   override def subscribeContributor(email: String): Future[Boolean] = {
-    subscribe("contributorLeads", Map("address" -> Seq(email)))
+    subscribe(CONTRIBUTOR_LIST, Map("address" -> Seq(email)))
   }
 }

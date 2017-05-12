@@ -1,19 +1,16 @@
-package com.clemble.loveit.user.social.auth
+package com.clemble.loveit.user.controller
 
+import javax.inject.{Inject, Singleton}
 
-import javax.inject.Inject
-
+import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.model.{User, UserIdentity}
 import com.clemble.loveit.user.service.repository.UserRepository
-import com.clemble.loveit.common.util.AuthEnv
-import javax.inject.Singleton
-
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.Json
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}

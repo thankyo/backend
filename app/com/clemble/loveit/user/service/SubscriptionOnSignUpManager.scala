@@ -10,7 +10,7 @@ case class SubscriptionOnSignUpManager(userService: UserService, subscriptionMan
     case SignUpEvent(UserIdentity(id, _, _, _, _), _) =>
       userService.findById(id).map(_ match {
         case Some(user) =>
-          subscriptionManager.signedUp(user)
+          subscriptionManager.signedUpUser(user)
         case None =>
       })(context.dispatcher)
   }

@@ -1,8 +1,11 @@
 # Test Endpoint for creating users, this won't work in production
-GET         /auth/authenticate/:provider     @com.clemble.loveit.user.social.auth.SocialAuthController.authenticate(provider)
-POST        /auth/authenticate/test          @com.clemble.loveit.user.social.auth.SocialAuthController.authenticate(`provider` = "test")
+GET         /auth/authenticate/:provider     @com.clemble.loveit.user.controller.SocialAuthController.authenticate(provider)
+POST        /auth/authenticate/test          @com.clemble.loveit.user.controller.SocialAuthController.authenticate(`provider` = "test")
 
 GET         /user/my                         @com.clemble.loveit.user.controller.UserController.getMy()
+
+POST        /subscribe/creator               @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
+POST        /subscribe/contributor           @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
 
 
 GET         /thank/ownership/my              @com.clemble.loveit.thank.controller.ResourceOwnershipController.listMyOwnership()

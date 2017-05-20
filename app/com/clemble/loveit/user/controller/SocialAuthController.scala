@@ -60,10 +60,16 @@ class SocialAuthController @Inject() (
   def authenticate(provider: String) = Action.async{ implicit req => {
 
     def createAuthResult(user: UserIdentity, profile: CommonSocialProfile, authInfo: AuthInfo): Future[Result] = {
+      val userDetails = Some(
+        Json.obj("user" -> user.id,
+          "firstName" -> user.firstName,
+          "lastName" -> user.lastName,
+          "thumbnail" -> user.thumbnail)
+      )
       for {
         _ <- authInfoRepository.save(profile.loginInfo, authInfo)
         authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
-        authenticatorWithClaim = authenticator.copy(customClaims = Some(Json.obj("user" -> user.id)))
+        authenticatorWithClaim = authenticator.copy(customClaims = userDetails)
         value <- silhouette.env.authenticatorService.init(authenticatorWithClaim)
         result <- silhouette.env.authenticatorService.embed(value, Ok(value))
       } yield {

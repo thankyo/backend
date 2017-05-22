@@ -10,7 +10,7 @@ import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -60,12 +60,7 @@ class SocialAuthController @Inject() (
   def authenticate(provider: String) = Action.async{ implicit req => {
 
     def createAuthResult(user: UserIdentity, profile: CommonSocialProfile, authInfo: AuthInfo): Future[Result] = {
-      val userDetails = Some(
-        Json.obj("user" -> user.id,
-          "firstName" -> user.firstName,
-          "lastName" -> user.lastName,
-          "thumbnail" -> user.thumbnail)
-      )
+      val userDetails = Some(Json.toJson(user).as[JsObject])
       for {
         _ <- authInfoRepository.save(profile.loginInfo, authInfo)
         authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)

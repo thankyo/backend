@@ -6,7 +6,7 @@ import play.api.libs.json.{Format, JsValue, Json}
 
 import scala.util.Try
 
-trait SerializationSpec[T] extends Specification {
+trait SerializationSpec[T] extends ThankSpecification {
 
   val generator: Generator[T]
   val jsonFormat: Format[T]

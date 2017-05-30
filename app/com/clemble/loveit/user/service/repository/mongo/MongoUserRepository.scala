@@ -3,12 +3,13 @@ package com.clemble.loveit.user.service.repository.mongo
 import akka.stream.Materializer
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.common.error.UserException
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
+import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.model.{BankDetails, PaymentUser}
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.clemble.loveit.thank.model.ResourceOwnership
-import javax.inject.{Inject, Singleton, Named}
+import javax.inject.{Inject, Named, Singleton}
+
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json._
 import reactivemongo.play.json._
@@ -137,6 +138,7 @@ object MongoUserRepository {
     addTotalField(collection)
     addBioField(collection)
     addOwnRequests(collection)
+    addMonthlyLimit(collection)
   }
 
   def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
@@ -159,6 +161,13 @@ object MongoUserRepository {
   def addOwnRequests(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("ownRequests" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("ownRequests" -> JsArray()))
+    val fUpdate = collection.update(selector, update, upsert = false, multi = true)
+    fUpdate.foreach(res => if (!res.ok) System.exit(2));
+  }
+
+  def addMonthlyLimit(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    val selector = Json.obj("monthlyLimit" -> Json.obj("$exists" -> false))
+    val update = Json.obj("$set" -> Json.obj("monthlyLimit" -> PaymentUser.DEFAULT_LIMIT))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
     fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }

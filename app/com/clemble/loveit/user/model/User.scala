@@ -2,7 +2,7 @@ package com.clemble.loveit.user.model
 
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.user.model.User.ExtendedBasicProfile
-import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.model.{BankDetails, Money, PaymentUser}
 import com.clemble.loveit.thank.model.{ROVerificationRequest, ResourceOwnership}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
@@ -40,9 +40,10 @@ case class User(
                  balance: Amount = 0L,
                  total: Amount = 0L,
                  bankDetails: BankDetails = BankDetails.empty,
+                 monthlyLimit: Money = PaymentUser.DEFAULT_LIMIT,
                  profiles: Set[LoginInfo] = Set.empty,
                  created: DateTime = DateTime.now()
-               ) extends Identity with UserProfile with CreatedAware {
+               ) extends Identity with UserProfile with CreatedAware with PaymentUser {
 
   def assignOwnership(pendingBalance: Amount, resource: ResourceOwnership): User = {
     copy(balance = balance + pendingBalance, owns = owns + resource)

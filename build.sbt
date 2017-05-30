@@ -6,9 +6,9 @@ lazy val root = (project in file(".")).
   enablePlugins(PlayScala).
   enablePlugins(DockerPlugin)
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 
-val reactiveMongoVer = "0.12.1"
+val reactiveMongoVer = "0.12.3"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
 
@@ -29,9 +29,9 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
 
   "com.paypal.sdk" % "rest-api-sdk" % "1.13.1",
-  "com.braintreepayments.gateway" % "braintree-java" % "2.71.0",
+  "com.braintreepayments.gateway" % "braintree-java" % "2.72.0",
 
-  "com.stripe" % "stripe-java" % "4.6.0",
+  "com.stripe" % "stripe-java" % "4.9.0",
 
   "com.atlassian.jwt" % "jwt-core" % "1.5.8",
   "com.atlassian.jwt" % "jwt-api" % "1.5.8",

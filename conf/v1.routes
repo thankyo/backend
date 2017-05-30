@@ -1,6 +1,6 @@
 # Test Endpoint for creating users, this won't work in production
-GET         /auth/authenticate/:provider     @com.clemble.loveit.user.controller.SocialAuthController.authenticate(provider)
 POST        /auth/authenticate/test          @com.clemble.loveit.user.controller.SocialAuthController.authenticate(`provider` = "test")
+GET         /auth/authenticate/:provider     @com.clemble.loveit.user.controller.SocialAuthController.authenticate(provider)
 
 GET         /user/my                         @com.clemble.loveit.user.controller.UserController.getMy()
 

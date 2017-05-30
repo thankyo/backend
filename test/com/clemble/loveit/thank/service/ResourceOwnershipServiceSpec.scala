@@ -6,8 +6,9 @@ import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.test.util.CommonSocialProfileGenerator
 import com.clemble.loveit.thank.model.ResourceOwnership
 import org.apache.commons.lang3.RandomStringUtils
+import org.specs2.concurrent.ExecutionEnv
 
-class ResourceOwnershipServiceSpec extends ServiceSpec {
+class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   lazy val service = dependency[ResourceOwnershipService]
 
@@ -28,11 +29,11 @@ class ResourceOwnershipServiceSpec extends ServiceSpec {
       val resource = ResourceOwnership.partial(Resource from s"http://${RandomStringUtils.random(10)}.com")
       assignOwnership(userAuth, resource)
 
-      val userResources = listResources(userAuth)
-      userResources shouldEqual List(
+      val expectedResources = List(
         ResourceOwnership.full(Resource from social.loginInfo),
         resource
       )
+      eventually(listResources(userAuth) shouldEqual expectedResources)
     }
 
     "assign full ownership" in {
@@ -42,11 +43,11 @@ class ResourceOwnershipServiceSpec extends ServiceSpec {
       val resource = ResourceOwnership.full(Resource from s"http://${RandomStringUtils.random(10)}.com")
       assignOwnership(userAuth, resource)
 
-      val userResources = listResources(userAuth)
-      userResources shouldEqual List(
+      val expectedResources = List(
         ResourceOwnership.full(Resource from social.loginInfo),
         resource
       )
+      eventually(listResources(userAuth) shouldEqual expectedResources)
     }
 
     "prohibit assigning same resource" in {

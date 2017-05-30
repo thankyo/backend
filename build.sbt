@@ -33,8 +33,8 @@ libraryDependencies ++= Seq(
 
   "com.stripe" % "stripe-java" % "4.9.0",
 
-  "com.atlassian.jwt" % "jwt-core" % "1.5.8",
-  "com.atlassian.jwt" % "jwt-api" % "1.5.8",
+  "com.atlassian.jwt" % "jwt-core" % "1.6.2",
+  "com.atlassian.jwt" % "jwt-api" % "1.6.2",
 
   specs2 % Test
 )

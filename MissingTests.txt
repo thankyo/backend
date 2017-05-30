@@ -1,2 +1,3 @@
 1. Assign Full/Partial ownership, when resource already has balance
 2. Assigning already occupied resource error
+3. Resource Ownership verification process

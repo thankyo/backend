@@ -47,18 +47,6 @@ case class MongoThankRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(query, update, multi = false))
   }
 
-  override def decrease(user: String, resource: Resource): Future[Boolean] = {
-    val query = Json.obj(
-      "resource" -> resource,
-      "givers" -> Json.obj("$eq" -> user)
-    )
-    val change = Json.obj(
-      "$inc" -> Json.obj("given" -> -1),
-      "$pull" -> Json.obj("givers" -> user)
-    )
-    MongoSafeUtils.safeSingleUpdate(collection.update(query, change, multi = false))
-  }
-
 }
 
 object MongoThankRepository {

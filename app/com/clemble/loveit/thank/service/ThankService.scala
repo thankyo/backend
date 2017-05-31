@@ -18,7 +18,7 @@ trait ThankService {
 
 @Singleton
 case class SimpleThankService @Inject()(
-                                         paymentService: ThankTransactionService,
+                                         transactionService: ThankTransactionService,
                                          repository: ThankRepository,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
@@ -38,12 +38,9 @@ case class SimpleThankService @Inject()(
 
   override def thank(user: UserID, resource: Resource): Future[Thank] = {
     for {
-      thank <- getOrCreate(resource) // Ensure Thank exists
-      _ <- paymentService.create(user, resource, 1)
-      _ <- if (thank.thankedBy(user))
-        repository.increase(user, resource)
-      else
-        repository.decrease(user, resource)
+      _ <- getOrCreate(resource) // Ensure Thank exists
+      increased <- repository.increase(user, resource) if (increased)
+      _ <- transactionService.create(user, resource)
       updated <- repository.findByResource(resource).map(_.get)
     } yield {
       updated

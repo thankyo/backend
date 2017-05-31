@@ -72,43 +72,4 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
   }
 
-  "DECREASE" should {
-
-    "decrease only the node" in {
-      val thank = ThankGenerator.generate()
-
-      await(repository.save(thank))
-      await(repository.increase("some", thank.resource)) shouldEqual true
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
-
-      await(repository.decrease("some", thank.resource)) shouldEqual true
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 0
-    }
-
-    "decrease only once" in {
-      val thank = ThankGenerator.generate()
-
-      await(repository.save(thank))
-      await(repository.increase("some", thank.resource)) shouldEqual true
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
-
-      await(repository.decrease("some", thank.resource)) shouldEqual true
-      await(repository.decrease("some", thank.resource)) shouldEqual false
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 0
-    }
-
-    "decrease ignore on unknown" in {
-      val thank = ThankGenerator.generate()
-
-      await(repository.save(thank))
-      await(repository.increase("some", thank.resource)) shouldEqual true
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
-
-      await(repository.decrease("some1", thank.resource)) shouldEqual false
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
-    }
-
-
-  }
-
 }

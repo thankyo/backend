@@ -11,6 +11,7 @@ import org.specs2.runner.JUnitRunner
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
+import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 class ThankControllerSpec extends ControllerSpec {
@@ -31,12 +32,12 @@ class ThankControllerSpec extends ControllerSpec {
         uri <- uriVariations
       } yield {
         val req = FakeRequest(PUT, s"/api/v1/thank/http/${uri}").withHeaders(giver:_*)
-        route(application, req).get
+        route(application, req).get.map(_.header.status).recoverWith({ case t => Future.successful(500) })
       }
-      val updateReq = await(Future.sequence(thanks)).map(_.header.status)
-      updateReq.forall(_ == OK) should beEqualTo(true)
+      val updateReq = await(Future.sequence(thanks))
+      updateReq.filter(_ == OK).size shouldEqual 1
 
-      getMyUser()(owner).balance shouldEqual ownerBalanceBefore + uriVariations.length
+      getMyUser()(owner).balance shouldEqual ownerBalanceBefore + 1
     }
 
     "create transaction" in {

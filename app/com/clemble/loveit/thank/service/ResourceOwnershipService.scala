@@ -3,10 +3,12 @@ package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
-import com.clemble.loveit.thank.model.ResourceOwnership
+import com.clemble.loveit.thank.model.{ResourceOwnership, Thank}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Singleton}
+
+import com.clemble.loveit.thank.service.repository.ThankRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,10 +25,10 @@ trait ResourceOwnershipService {
 }
 
 @Singleton
-case class SimpleResourceOwnershipService @Inject() (repository: UserRepository, implicit val ec: ExecutionContext) extends ResourceOwnershipService {
+case class SimpleResourceOwnershipService @Inject() (userRepo: UserRepository, thankRepo: ThankRepository, implicit val ec: ExecutionContext) extends ResourceOwnershipService {
 
   override def list(user: UserID): Future[Set[ResourceOwnership]] = {
-    repository.findById(user).map(_.map(_.owns).getOrElse(Set.empty))
+    userRepo.findById(user).map(_.map(_.owns).getOrElse(Set.empty))
   }
 
   override def assign(userId: UserID, ownership: ResourceOwnership): Future[ResourceOwnership] = {
@@ -40,7 +42,7 @@ case class SimpleResourceOwnershipService @Inject() (repository: UserRepository,
     def toPendingBalance(relatedUsers: List[User]): Future[Amount] = {
       val realizedUsers = relatedUsers.filter(_.owns.map(_.resource).exists(ownership.owns))
       for {
-        _ <- repository.remove(relatedUsers.map(_.id))
+        _ <- userRepo.remove(relatedUsers.map(_.id))
       } yield {
         realizedUsers.map(_.balance).sum
       }
@@ -48,19 +50,20 @@ case class SimpleResourceOwnershipService @Inject() (repository: UserRepository,
 
     for {
       ownerOpt <- chooseOwner(ownership.resource)
-      relatedUsers <- repository.findRelated(ownership)
+      relatedUsers <- userRepo.findRelated(ownership)
       pendingBalance <- toPendingBalance(relatedUsers)
-      userOpt <- repository.findById(userId)
+      userOpt <- userRepo.findById(userId)
     } yield {
       if (ownerOpt.isDefined)
-        throw UserException.resourceAlreadyOwned(ownerOpt.get)
+      throw UserException.resourceAlreadyOwned(ownerOpt.get)
       if (userOpt.isEmpty)
-        throw UserException.userMissing(userId)
+      throw UserException.userMissing(userId)
       if (relatedUsers.exists(_ == userOpt.get))
-        throw UserException.userMissing(userId)
+      throw UserException.userMissing(userId)
       if (!canOwn(relatedUsers))
-        throw UserException.resourceOwnershipImpossible()
-      repository.update(userOpt.get.assignOwnership(pendingBalance, ownership))
+      throw UserException.resourceOwnershipImpossible()
+      thankRepo.save(Thank(ownership.resource, userOpt.get.id))
+      userRepo.update(userOpt.get.assignOwnership(pendingBalance, ownership))
       ownership
     }
   }
@@ -68,7 +71,7 @@ case class SimpleResourceOwnershipService @Inject() (repository: UserRepository,
   private def chooseOwner(uri: Resource): Future[Option[User]] = {
     val ownerships = ResourceOwnership.toPossibleOwnerships(uri)
     for {
-      owners <- repository.findOwners(ownerships)
+      owners <- userRepo.findOwners(ownerships)
     } yield {
       val resToOwner = owners.
         flatMap(owner => {
@@ -84,7 +87,7 @@ case class SimpleResourceOwnershipService @Inject() (repository: UserRepository,
     def createOwnerIfMissing(userOpt: Option[User]): Future[User] = {
       userOpt match {
         case Some(id) => Future.successful(id)
-        case None => repository.save(User.empty(uri))
+        case None => userRepo.save(User.empty(uri))
       }
     }
 
@@ -98,7 +101,7 @@ case class SimpleResourceOwnershipService @Inject() (repository: UserRepository,
 
   // TODO this is duplication need to be unified and used only once
   override def updateBalance(user: UserID, change: Amount): Future[Boolean] = {
-    repository.changeBalance(user, change)
+    userRepo.changeBalance(user, change)
   }
 
 }

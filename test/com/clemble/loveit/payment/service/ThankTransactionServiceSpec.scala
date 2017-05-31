@@ -21,25 +21,25 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
 
     "Debit increases User balance" in {
       val user = UserGenerator.generate().copy(balance = 100)
-
       val savedUser = await(userRepo.save(user))
+
       await(thankTransService.create(user.id, HttpResource("example.com")))
       val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 100
-      readUser.balance shouldEqual 0
+      readUser.balance shouldEqual 99
     }
 
     "Credit decrease User balance" in {
       val url = HttpResource(s"${RandomStringUtils.randomNumeric(100)}.com")
       val user = UserGenerator.generate().copy(balance = 100)
-
       val savedUser = await(userRepo.save(user))
+
       await(thankTransService.create(user.id, url))
       val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 100
-      readUser.balance shouldEqual 90
+      readUser.balance shouldEqual 99
     }
 
     "list all transactions" in {

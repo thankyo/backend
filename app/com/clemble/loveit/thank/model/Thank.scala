@@ -19,7 +19,10 @@ case class Thank(
   def thankedBy(user: UserID) = givers.contains(user)
 
   override def equals(obj: scala.Any): Boolean = obj match {
-    case Thank(resource, given, _, _ ,_) => resource == this.resource && given == this.given
+    case t : Thank =>
+      t.resource == this.resource &&
+      t.given == this.given &&
+      t.owner == this.owner
     case _ => false
   }
 

@@ -19,35 +19,40 @@ trait ThankService {
 @Singleton
 case class SimpleThankService @Inject()(
                                          transactionService: ThankTransactionService,
-                                         repository: ThankRepository,
+                                         repo: ThankRepository,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
 
   override def getOrCreate(resource: Resource): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
-      resource.parent() match {
-        case Some(parent) =>
-          for {
-            parentThank <- repository.findByResource(parent).flatMap(createIfMissing)
-            _ <- repository.save(Thank(resource, parentThank.owner))
-            retrieved <- repository.findByResource(resource).map(_.get)
-          } yield {
-            retrieved
+      thankOpt match {
+        case Some(thank) => Future.successful(thank)
+        case None =>
+          resource.parent() match {
+            case Some(parRes) =>
+              for {
+                owner <- getOrCreate(parRes).map(_.owner)
+                thank = Thank(resource, owner)
+                createdNew <- repo.save(thank)
+                created <- if(createdNew) Future.successful(thank) else repo.findByResource(resource).map(_.get)
+              } yield {
+                created
+              }
+            case None => // TODO define proper error handling here
+              throw new IllegalArgumentException()
           }
-        case None => // TODO define proper error handling here
-          throw new IllegalArgumentException()
       }
     }
 
-    repository.findByResource(resource).flatMap(createIfMissing)
+    repo.findByResource(resource).flatMap(createIfMissing)
   }
 
   override def thank(user: UserID, resource: Resource): Future[Thank] = {
     for {
       _ <- getOrCreate(resource) // Ensure Thank exists
-      increased <- repository.increase(user, resource) if (increased)
+      increased <- repo.increase(user, resource) if (increased)
       _ <- transactionService.create(user, resource)
-      updated <- repository.findByResource(resource).map(_.get)
+      updated <- repo.findByResource(resource).map(_.get)
     } yield {
       updated
     }

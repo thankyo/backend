@@ -10,7 +10,7 @@ class ResourceSpec extends Specification {
 
   "generate parent" in {
     val parts = Resource.from("http/example.com/some/what").parent()
-    parts must beEqualTo(HttpResource("example.com/some/what"))
+    parts shouldEqual Some(HttpResource("example.com/some"))
   }
 
   "generate all parent URL's" in {

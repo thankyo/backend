@@ -15,7 +15,7 @@ trait ThankSpecification extends PlaySpecification {
     application.injector.instanceOf[T]
   }
 
-  implicit lazy val materializer = dependency[Materializer]
+  implicit lazy val materializer: Materializer = dependency[Materializer]
 
 }
 

@@ -23,11 +23,7 @@ case class MongoThankRepository @Inject()(
   MongoThankRepository.ensureMeta(collection)
 
   override def save(thank: Thank): Future[Boolean] = {
-    val withParents = thank.withParents().map(t => {
-      Json.toJson(t).as[JsObject]
-    })
-    val fInsert = collection.bulkInsert(withParents.toStream, false, api.commands.WriteConcern.Acknowledged)
-    MongoSafeUtils.safe(fInsert.map(_ => true))
+    MongoSafeUtils.safeSingleUpdate(collection.insert(thank))
   }
 
   override def findByResource(resource: Resource): Future[Option[Thank]] = {

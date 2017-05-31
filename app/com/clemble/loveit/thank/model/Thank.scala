@@ -10,23 +10,11 @@ import play.api.libs.json.Json
   */
 case class Thank(
                   resource: Resource,
+                  owner: UserID,
                   given: Amount = 0L,
-                  owner: Option[UserID] = None,
                   givers: Set[UserID] = Set.empty,
                   created: DateTime = DateTime.now(DateTimeZone.UTC)
                 ) extends CreatedAware {
-
-  def withParents(): List[Thank] = {
-    resource.parents().map(Thank(_))
-  }
-
-  def setOwner(user: UserID): Thank = {
-    this.copy(owner = Some(user))
-  }
-
-  def inc(): Thank = {
-    this.copy(given = given + 1)
-  }
 
   def thankedBy(user: UserID) = givers.contains(user)
 

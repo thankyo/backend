@@ -10,11 +10,13 @@ import scala.annotation.tailrec
 sealed trait Resource {
   val uri: String
   def stringify(): String
+  def parent(): Option[Resource]
   def parents(): List[Resource]
 }
 // Make provider enum or extend types
 case class SocialResource(provider: String, uri: String) extends Resource {
   override def stringify(): String = s"${provider}/${uri}"
+  override def parent(): Option[Resource] = None
   override def parents(): List[Resource] = List(this)
 }
 
@@ -26,6 +28,13 @@ object SocialResource {
 
 case class HttpResource(uri: String) extends Resource {
   override def stringify(): String = s"http/${uri}"
+  override def parent(): Option[Resource] = {
+    val parentIndex = uri.lastIndexOf("/")
+    if (parentIndex > 0)
+      Some(HttpResource(uri.substring(0, parentIndex)))
+    else
+      None
+  }
   override def parents(): List[Resource] = {
     @tailrec
     def toParents(uri: List[String], agg: List[String]): List[String] = {

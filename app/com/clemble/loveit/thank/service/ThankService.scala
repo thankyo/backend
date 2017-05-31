@@ -25,11 +25,17 @@ case class SimpleThankService @Inject()(
 
   override def getOrCreate(resource: Resource): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {
-      thankOpt match {
-        case Some(thank) => Future.successful(thank)
-        case None => repository.
-          save(Thank(resource)).
-          flatMap(_ => repository.findByResource(resource).map(_.get))
+      resource.parent() match {
+        case Some(parent) =>
+          for {
+            parentThank <- repository.findByResource(parent).flatMap(createIfMissing)
+            _ <- repository.save(Thank(resource, parentThank.owner))
+            retrieved <- repository.findByResource(resource).map(_.get)
+          } yield {
+            retrieved
+          }
+        case None => // TODO define proper error handling here
+          throw new IllegalArgumentException()
       }
     }
 

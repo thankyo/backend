@@ -11,6 +11,8 @@ import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
+import scala.util.Try
+
 @RunWith(classOf[JUnitRunner])
 class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
@@ -63,14 +65,14 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
     "Double thank neutralizes effect" in {
       val (url, owner, giver) = createScene()
 
-      // Double thank neutralized each other
+      // Double thank has no effect
       thank(giver.id, url)
-      thank(giver.id, url)
-      getBalance(url) shouldEqual 0
+      Try{ thank(giver.id, url) }
+      getBalance(url) shouldEqual 1
 
       // Balance did not change
-      getBalance(owner.id) shouldEqual owner.balance
-      getBalance(giver.id) shouldEqual giver.balance
+      getBalance(owner.id) shouldEqual owner.balance + 1
+      getBalance(giver.id) shouldEqual giver.balance - 1
     }
 
   }

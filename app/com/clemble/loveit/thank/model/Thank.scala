@@ -12,6 +12,7 @@ case class Thank(
                   resource: Resource,
                   given: Amount = 0L,
                   owner: Option[UserID] = None,
+                  givers: Set[UserID] = Set.empty,
                   created: DateTime = DateTime.now(DateTimeZone.UTC)
                 ) extends CreatedAware {
 
@@ -27,8 +28,10 @@ case class Thank(
     this.copy(given = given + 1)
   }
 
+  def thankedBy(user: UserID) = givers.contains(user)
+
   override def equals(obj: scala.Any): Boolean = obj match {
-    case Thank(resource, given, _ ,_) => resource == this.resource && given == this.given
+    case Thank(resource, given, _, _ ,_) => resource == this.resource && given == this.given
     case _ => false
   }
 

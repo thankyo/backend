@@ -41,10 +41,10 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   "INCREASE" should {
 
     def increaseAll(resources: List[Resource]): Future[Boolean] = {
-      Future.sequence(resources.map(repository.increase(_))).map(_.forall(_ == true))
+      Future.sequence(resources.map(repository.increase("some", _))).map(_.forall(_ == true))
     }
 
-    "increase all parents" in {
+    "increase only the nodes" in {
       val thank = ThankGenerator.generate()
       val urlParents = thank.resource.parents()
 
@@ -56,9 +56,58 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
         allThanks
       }
 
-      val expectedThanks = urlParents.reverse.zipWithIndex.map(_._2 + 1)
+      val expectedThanks = urlParents.reverse.zipWithIndex.map(_ => 1)
       fAllThanks must await(beEqualTo(expectedThanks))
     }
+
+    "increase only once for the user" in {
+      val thank = ThankGenerator.generate()
+
+      await(repository.save(thank))
+      await(repository.increase("some", thank.resource)) shouldEqual true
+      await(repository.increase("some", thank.resource)) shouldEqual false
+
+      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
+    }
+
+  }
+
+  "DECREASE" should {
+
+    "decrease only the node" in {
+      val thank = ThankGenerator.generate()
+
+      await(repository.save(thank))
+      await(repository.increase("some", thank.resource)) shouldEqual true
+      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
+
+      await(repository.decrease("some", thank.resource)) shouldEqual true
+      await(repository.findByResource(thank.resource)).get.given shouldEqual 0
+    }
+
+    "decrease only once" in {
+      val thank = ThankGenerator.generate()
+
+      await(repository.save(thank))
+      await(repository.increase("some", thank.resource)) shouldEqual true
+      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
+
+      await(repository.decrease("some", thank.resource)) shouldEqual true
+      await(repository.decrease("some", thank.resource)) shouldEqual false
+      await(repository.findByResource(thank.resource)).get.given shouldEqual 0
+    }
+
+    "decrease ignore on unknown" in {
+      val thank = ThankGenerator.generate()
+
+      await(repository.save(thank))
+      await(repository.increase("some", thank.resource)) shouldEqual true
+      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
+
+      await(repository.decrease("some1", thank.resource)) shouldEqual false
+      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
+    }
+
 
   }
 

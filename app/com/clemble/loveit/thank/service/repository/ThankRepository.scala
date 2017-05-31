@@ -30,6 +30,12 @@ trait ThankRepository {
     *
     * @return true, if update passed
     */
-  def increase(url: Resource): Future[Boolean]
+  def increase(user: String, url: Resource): Future[Boolean]
+
+  /**
+    * Decrease number of thanks given
+    * @return true, if update passed
+    */
+  def decrease(user: String, url: Resource): Future[Boolean]
 
 }

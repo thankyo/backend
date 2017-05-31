@@ -57,6 +57,18 @@ object MongoSafeUtils {
     })
   }
 
+  def safeSingleUpdate[T <: WriteResult](fTask: Future[T])(implicit ec: ExecutionContext): Future[Boolean] = {
+    fTask.
+      map(res => res.ok && res.n == 1).
+      recoverWith({
+        case dbExc: DatabaseException =>
+          val exception = toException(dbExc)
+          Future.failed(exception)
+        case thExc: ThankException =>
+          Future.failed(thExc)
+      })
+  }
+
   def ensureIndexes(collection: JSONCollection, indexes: Index*)(implicit ec: ExecutionContext): Unit = {
     for {
       index <- indexes

@@ -1,10 +1,11 @@
 package com.clemble.loveit.thank.service.repository.mongo
 
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
-import javax.inject.{Inject, Singleton, Named}
+import javax.inject.{Inject, Named, Singleton}
+
 import play.api.libs.json.{JsArray, JsObject, Json}
 import play.modules.reactivemongo.json._
 import reactivemongo.api
@@ -19,14 +20,7 @@ case class MongoThankRepository @Inject()(
                                            implicit val ec: ExecutionContext
                                          ) extends ThankRepository {
 
-  MongoSafeUtils.ensureIndexes(
-    collection,
-    Index(
-      key = Seq("resource.type" -> IndexType.Ascending, "resource.uri" -> IndexType.Ascending),
-      name = Some("recourse_is_unique"),
-      unique = true
-    )
-  )
+  MongoThankRepository.ensureMeta(collection)
 
   override def save(thank: Thank): Future[Boolean] = {
     val withParents = thank.withParents().map(t => {
@@ -41,20 +35,55 @@ case class MongoThankRepository @Inject()(
     MongoSafeUtils.safe(fSearchResult)
   }
 
-  override def increase(resource: Resource): Future[Boolean] = {
-    val query = Json.obj("resource" ->
-      Json.obj("$in" ->
-        JsArray(resource.parents().map(Json.toJson(_))
-        )
+  override def increase(user: UserID, resource: Resource): Future[Boolean] = {
+    val query = Json.obj(
+      "resource" -> resource,
+      "givers" -> Json.obj("$ne" -> user)
+    )
+    val update = Json.obj(
+      "$inc" -> Json.obj("given" -> 1),
+      "$addToSet" -> Json.obj("givers" -> user)
+    )
+    MongoSafeUtils.safeSingleUpdate(collection.update(query, update, multi = false))
+  }
+
+  override def decrease(user: String, resource: Resource): Future[Boolean] = {
+    val query = Json.obj(
+      "resource" -> resource,
+      "givers" -> Json.obj("$eq" -> user)
+    )
+    val change = Json.obj(
+      "$inc" -> Json.obj("given" -> -1),
+      "$pull" -> Json.obj("givers" -> user)
+    )
+    MongoSafeUtils.safeSingleUpdate(collection.update(query, change, multi = false))
+  }
+
+}
+
+object MongoThankRepository {
+
+  def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext) = {
+    ensureIndexes(collection)
+    addGivers(collection)
+  }
+
+  private def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext) = {
+    MongoSafeUtils.ensureIndexes(
+      collection,
+      Index(
+        key = Seq("resource.type" -> IndexType.Ascending, "resource.uri" -> IndexType.Ascending),
+        name = Some("recourse_is_unique"),
+        unique = true
       )
     )
-    val increase = Json.obj("$inc" -> Json.obj("given" -> 1))
-    val fIncrease = collection.update(
-      query,
-      increase,
-      multi = true
-    )
-    MongoSafeUtils.safe(fIncrease.map(_ => true))
+  }
+
+  private def addGivers(collection: JSONCollection)(implicit ec: ExecutionContext) = {
+    val selector = Json.obj("givers" -> Json.obj("$exists" -> false))
+    val update = Json.obj("$set" -> Json.obj("givers" -> JsArray()))
+    val fUpdate = collection.update(selector, update, upsert = false, multi = true)
+    fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }
 
 }

@@ -30,8 +30,7 @@ case class MongoUserRepository @Inject()(
                                           implicit val ec: ExecutionContext
                                         ) extends UserRepository {
 
-  MongoUserRepository.ensureIndexes(collection)
-  MongoUserRepository.ensureUpToDate(collection)
+  MongoUserRepository.ensureMeta(collection)
 
   override def save(user: User): Future[User] = {
     val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
@@ -112,7 +111,12 @@ case class MongoUserRepository @Inject()(
 
 object MongoUserRepository {
 
-  def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
+  def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    ensureIndexes(collection)
+    ensureUpToDate(collection)
+  }
+
+  private def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
@@ -134,14 +138,14 @@ object MongoUserRepository {
     )
   }
 
-  def ensureUpToDate(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+  private def ensureUpToDate(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     addTotalField(collection)
     addBioField(collection)
     addOwnRequests(collection)
     addMonthlyLimit(collection)
   }
 
-  def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+  private def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("total" -> Json.obj("$exists" -> false))
     val update = (user: JsObject) => {
       val id = (user \ "_id").as[String]
@@ -151,21 +155,21 @@ object MongoUserRepository {
     MongoSafeUtils.ensureUpdate(collection, selector, update)
   }
 
-  def addBioField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+  private def addBioField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("bio" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("bio" -> User.DEFAULT_BIO))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
     fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }
 
-  def addOwnRequests(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+  private def addOwnRequests(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("ownRequests" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("ownRequests" -> JsArray()))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
     fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }
 
-  def addMonthlyLimit(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+  private def addMonthlyLimit(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("monthlyLimit" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("monthlyLimit" -> PaymentUser.DEFAULT_LIMIT))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)

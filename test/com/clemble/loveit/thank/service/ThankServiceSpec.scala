@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
 import com.clemble.loveit.test.util.UserGenerator
-import com.clemble.loveit.thank.model.{ResourceOwnership, Thank}
+import com.clemble.loveit.thank.model.{Thank}
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -24,7 +24,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
   def createScene():(Resource, User, User) = {
     val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
     // TODO flow must be changed here to use ResourceOwnersip verification
-    val owner = await(userRepo.save(UserGenerator.generate().assignOwnership(0, ResourceOwnership.full(url))))
+    val owner = await(userRepo.save(UserGenerator.generate().assignOwnership(url)))
     await(thankRepo.save(Thank(url, owner.id)))
     val giver = await(userRepo.save(UserGenerator.generate()))
 

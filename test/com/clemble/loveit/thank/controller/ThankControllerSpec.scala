@@ -3,7 +3,6 @@ package com.clemble.loveit.thank.controller
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.HttpResource
 import com.clemble.loveit.payment.model.{Credit, Debit}
-import com.clemble.loveit.thank.model.ResourceOwnership._
 import com.clemble.loveit.user.model.ResourceSpec
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
@@ -11,7 +10,6 @@ import org.specs2.runner.JUnitRunner
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
-import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 class ThankControllerSpec extends ControllerSpec {
@@ -25,7 +23,7 @@ class ThankControllerSpec extends ControllerSpec {
       val owner = createUser()
       val ownerBalanceBefore = getMyUser()(owner).balance
 
-      addOwnership(getMyUser()(owner).id, full(HttpResource(masterUrl)))(owner) shouldNotEqual None
+      addOwnership(getMyUser()(owner).id, HttpResource(masterUrl))(owner) shouldNotEqual None
 
       val uriVariations = ResourceSpec.generateVariations(masterUrl)
       val thanks = for {
@@ -45,7 +43,7 @@ class ThankControllerSpec extends ControllerSpec {
 
       val giver = createUser()
       val owner = createUser()
-      addOwnership(getMyUser()(owner).id, full(HttpResource(masterUrl)))(owner) shouldNotEqual None
+      addOwnership(getMyUser()(owner).id, HttpResource(masterUrl))(owner) shouldNotEqual None
 
       val req = FakeRequest(PUT, s"/api/v1/thank/http/${masterUrl}").withHeaders(giver:_*)
       await(route(application, req).get)

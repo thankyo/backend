@@ -1,13 +1,11 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.test.util.Generator
-import org.junit.Ignore
 import play.api.libs.json.{Format, JsValue, Json}
 
 import scala.util.Try
 
-@Ignore
-class SerializationSpec[T](implicit jsonFormat: Format[T], generator: Generator[T]) extends ThankSpecification {
+abstract class SerializationSpec[T](implicit jsonFormat: Format[T], generator: Generator[T]) extends ThankSpecification {
 
   "JSON" should {
     val value: T = someRandom[T]

@@ -19,8 +19,8 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
 
     "save all payments for the user" in {
       val user = someRandom[User]
-      val A = someRandom[ThankTransaction]
-      val B = someRandom[ThankTransaction]
+      val A = someRandom[ThankTransaction].copy(user = user.id)
+      val B = someRandom[ThankTransaction].copy(user = user.id)
 
       val fTransactions = for {
         _ <- repo.save(A)

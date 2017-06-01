@@ -3,7 +3,6 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.{ResourceException, UserException}
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.common.util.IDGenerator
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner

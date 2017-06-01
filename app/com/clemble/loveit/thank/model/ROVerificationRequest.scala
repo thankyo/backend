@@ -15,7 +15,7 @@ case object Running extends ROVerificationRequestStatus
 
 case object Verified extends ROVerificationRequestStatus
 
-case object NonVerified extends ROVerificationRequestStatus
+case object NotVerified extends ROVerificationRequestStatus
 
 object ROVerificationRequestStatus {
 
@@ -30,7 +30,7 @@ object ROVerificationRequestStatus {
         case PENDING => JsSuccess(Pending)
         case RUNNING => JsSuccess(Running)
         case VERIFIED => JsSuccess(Verified)
-        case NON_VERIFIED => JsSuccess(NonVerified)
+        case NON_VERIFIED => JsSuccess(NotVerified)
         case _ => JsError(s"Can't read ${json} as OwnershipRequestStatus")
       }
     }
@@ -40,7 +40,7 @@ object ROVerificationRequestStatus {
         case Pending => PENDING
         case Running => RUNNING
         case Verified => VERIFIED
-        case NonVerified => NON_VERIFIED
+        case NotVerified => NON_VERIFIED
       }
     }
   }

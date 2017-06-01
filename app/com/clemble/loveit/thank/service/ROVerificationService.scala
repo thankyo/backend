@@ -88,7 +88,7 @@ case class SimpleROVerificationService @Inject()(generator: ROVerificationGenera
     }
 
     for {
-      status <- verificationService.verify(req.resource, req.verificationCode).recover({ case _ => NonVerified })
+      status <- verificationService.verify(req.resource, req.verificationCode).recover({ case _ => NotVerified })
       updated <- repo.update(req, status)
     } yield {
       assignOwnershipIfVerified(status)
@@ -116,7 +116,7 @@ case class ROVerificationConfirmationFacade(httpVerification: ROVerificationConf
   override def verify(resource: Resource, verificationCode: String): Future[ROVerificationRequestStatus] = {
     resource match {
       case httpRes: HttpResource => httpVerification.verify(httpRes, verificationCode)
-      case _ => Future.successful(NonVerified)
+      case _ => Future.successful(NotVerified)
     }
   }
 }
@@ -130,7 +130,7 @@ case class HttpROVerificationConfirmationService @Inject()(tagReader: MetaTagRea
     } yield {
       tagOpt match {
         case Some(tag) if (tag == verificationCode) => Verified
-        case _ => NonVerified
+        case _ => NotVerified
       }
     }
   }

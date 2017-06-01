@@ -18,7 +18,7 @@ trait ROVerificationService {
 
   def list(requester: UserID): Future[Set[ROVerificationRequest[Resource]]]
 
-  def create(requester: UserID, ownership: ResourceOwnership): Future[ROVerificationRequest[Resource]]
+  def create(requester: UserID, ownership: Resource): Future[ROVerificationRequest[Resource]]
 
   def remove(requester: UserID, req: VerificationID): Future[Boolean]
 
@@ -56,7 +56,7 @@ case class WSMetaTagReader @Inject()(wsClient: WSClient, implicit val ec: Execut
 @Singleton
 case class SimpleROVerificationService @Inject()(generator: ROVerificationGenerator, repo: ROVerificationRepository, resOwnService: ResourceOwnershipService, verificationService: ROVerificationConfirmationService[Resource], implicit val ec: ExecutionContext) extends ROVerificationService {
 
-  override def create(requester: UserID, ownership: ResourceOwnership): Future[ROVerificationRequest[Resource]] = {
+  override def create(requester: UserID, ownership: Resource): Future[ROVerificationRequest[Resource]] = {
     val req = generator.generate(requester, ownership)
     repo.save(req)
   }
@@ -78,7 +78,7 @@ case class SimpleROVerificationService @Inject()(generator: ROVerificationGenera
       status match {
         case Verified =>
           for {
-            _ <- resOwnService.assign(req.requester, req.toOwnership())
+            _ <- resOwnService.assign(req.requester, req.resource)
             removed <- repo.delete(req.requester, req.id)
           } yield {
             removed

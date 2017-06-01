@@ -1,7 +1,7 @@
 package com.clemble.loveit.test.util
 
+import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.user.model.User
-import com.clemble.loveit.thank.model.ResourceOwnership
 import com.mohiva.play.silhouette.api.LoginInfo
 import org.apache.commons.lang3.RandomStringUtils.random
 import org.apache.commons.lang3.RandomUtils.nextLong
@@ -24,7 +24,7 @@ object UserGenerator extends Generator[User] {
     )
   }
 
-  def generate(ownership: ResourceOwnership): User = {
+  def generate(ownership: Resource): User = {
     generate().copy(owns = Set(ownership))
   }
 

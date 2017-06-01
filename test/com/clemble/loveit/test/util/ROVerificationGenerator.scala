@@ -9,12 +9,10 @@ object ROVerificationGenerator extends Generator[ROVerificationRequest[Resource]
 
   override def generate(): ROVerificationRequest[Resource] = {
     val resource = ResourceGenerator.generate()
-    val ownershipGenerator = ResourceOwnershipGenerator.generate()
     ROVerificationRequest(
       IDGenerator.generate(),
       Pending,
       resource,
-      ownershipGenerator.ownershipType,
       RandomStringUtils.randomNumeric(10),
       RandomStringUtils.randomNumeric(10)
     )

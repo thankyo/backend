@@ -2,12 +2,11 @@ package com.clemble.loveit.user.service
 
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.{RepositoryError, RepositoryException}
-import com.clemble.loveit.common.model.HttpResource
+import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.payment.service.ThankTransactionService
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.clemble.loveit.test.util.UserGenerator
-import com.clemble.loveit.thank.model.ResourceOwnership
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -44,10 +43,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
   }
 
-  def createUserWithOwnership(owns: ResourceOwnership): User = {
+  def createUserWithOwnership(owns: Resource): User = {
     val user = UserGenerator.
       generate().
-      assignOwnership(0, owns).
+      assignOwnership(owns).
       copy(balance = 0)
     val savedUser = await(repo.save(user))
     await(repo.findById(user.id)).get.balance shouldEqual 0
@@ -58,27 +57,27 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
     "UPDATE with FULL control" in {
       val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
 
-      val user = createUserWithOwnership(ResourceOwnership.full(url))
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
     }
 
     "UNREALIZED url control" in {
       val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
 
-      val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
     }
 
     "IGNORE with PARTIAL control" in {
       val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
 
-      val user = createUserWithOwnership(ResourceOwnership.partial(url))
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
     }
   }
@@ -88,10 +87,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.full(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -100,10 +99,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -112,10 +111,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.full(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.partial(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -127,10 +126,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.full(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -139,10 +138,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -151,10 +150,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.unrealized(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.partial(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -165,10 +164,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.full(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -177,10 +176,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.unrealized(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }
@@ -189,10 +188,10 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUrl = HttpResource(s"example.com/some/${randomNumeric(10)}")
       val url = HttpResource(s"${parentUrl.uri}/${randomNumeric(10)}")
 
-      val parentUser = createUserWithOwnership(ResourceOwnership.partial(parentUrl))
-      val user = createUserWithOwnership(ResourceOwnership.partial(url))
+      val parentUser = createUserWithOwnership(parentUrl)
+      val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, url))
+      await(transactionService.create(giver.id, user.id, url))
       await(repo.findById(user.id)).get.balance shouldEqual 1
       await(repo.findById(parentUser.id)).get.balance shouldEqual 0
     }

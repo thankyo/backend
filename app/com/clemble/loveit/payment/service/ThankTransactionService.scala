@@ -13,7 +13,7 @@ trait ThankTransactionService {
 
   def list(user: UserID): Source[ThankTransaction, _]
 
-  def create(giver: UserID, url: Resource): Future[List[ThankTransaction]]
+  def create(giver: UserID, owner: UserID, url: Resource): Future[List[ThankTransaction]]
 
 }
 
@@ -24,11 +24,10 @@ case class SimpleThankTransactionService @Inject()(ownershipService: ResourceOwn
     repository.findByUser(user)
   }
 
-  override def create(giverId: UserID, url: Resource): Future[List[ThankTransaction]] = {
+  override def create(giverId: UserID, owner: UserID, url: Resource): Future[List[ThankTransaction]] = {
     for {
-      owner <- ownershipService.findResourceOwner(url)
       giverCreditOp <- credit(giverId, url,  1)
-      ownerDebitOp <- debit(owner.id, url, 1)
+      ownerDebitOp <- debit(owner, url, 1)
     } yield {
       List(ownerDebitOp, giverCreditOp)
     }

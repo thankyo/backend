@@ -1,10 +1,9 @@
 package com.clemble.loveit.user.service.repository
 
 import com.clemble.loveit.common.error.{RepositoryException, UserException}
-import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.payment.model.BankDetails
-import com.clemble.loveit.thank.model.ResourceOwnership
 import com.mohiva.play.silhouette.api.services.IdentityService
 
 import scala.concurrent.Future
@@ -22,12 +21,7 @@ trait UserRepository extends IdentityService[UserIdentity] {
   /**
     * Find owner of provided uri
     */
-  def findOwners(uris: List[ResourceOwnership]): Future[List[User]]
-
-  /**
-    * Looks for all related Resources based on the provided URL
-    */
-  def findRelated(uri: ResourceOwnership): Future[List[User]]
+  def findOwner(res: Resource): Future[Option[User]]
 
   /**
     * Create a new user in the system

@@ -23,7 +23,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val user = UserGenerator.generate().copy(balance = 100)
       val savedUser = await(userRepo.save(user))
 
-      await(thankTransService.create(user.id, HttpResource("example.com")))
+      await(thankTransService.create(user.id, "A", HttpResource("example.com")))
       val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 100
@@ -35,7 +35,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val user = UserGenerator.generate().copy(balance = 100)
       val savedUser = await(userRepo.save(user))
 
-      await(thankTransService.create(user.id, url))
+      await(thankTransService.create(user.id, "B", url))
       val readUser = await(userRepo.findById(user.id).map(_.get))
 
       savedUser.balance shouldEqual 100
@@ -46,8 +46,8 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val user = UserGenerator.generate()
 
       await(userRepo.save(user))
-      val A = await(thankTransService.create(user.id, SocialResource("facebook", RandomStringUtils.randomNumeric(100))))
-      val B = await(thankTransService.create(user.id, SocialResource("facebook", RandomStringUtils.randomNumeric(100))))
+      val A = await(thankTransService.create(user.id, "A", SocialResource("facebook", RandomStringUtils.randomNumeric(100))))
+      val B = await(thankTransService.create(user.id, "B", SocialResource("facebook", RandomStringUtils.randomNumeric(100))))
       val payments = await(thankTransService.list(user.id).runWith(Sink.seq[ThankTransaction]))
 
       val expected = (A ++ B).filter(_.user == user.id)

@@ -1,10 +1,9 @@
 package com.clemble.loveit.common
 
 import akka.stream.scaladsl.Sink
-import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.test.util.CommonSocialProfileGenerator
-import com.clemble.loveit.thank.model.ResourceOwnership
 import com.clemble.loveit.thank.service.ResourceOwnershipService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
@@ -38,7 +37,7 @@ trait ControllerSpec extends ThankSpecification {
     resp
   }
 
-  def addOwnership(user: UserID, own: ResourceOwnership)(implicit authHeader: Seq[(String, String)]): Option[ResourceOwnership] = {
+  def addOwnership(user: UserID, own: Resource)(implicit authHeader: Seq[(String, String)]): Option[Resource] = {
     Some(await(ownershipService.assign(user, own)))
   }
 

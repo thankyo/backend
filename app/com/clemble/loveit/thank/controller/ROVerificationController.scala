@@ -2,8 +2,9 @@ package com.clemble.loveit.thank.controller
 
 import javax.inject.Inject
 
+import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.model.{ResourceOwnership, VerificationID}
+import com.clemble.loveit.thank.model.VerificationID
 import com.clemble.loveit.thank.service.ROVerificationService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
@@ -43,7 +44,7 @@ case class ROVerificationController @Inject()(
     })
   })
 
-  def createMy() = silhouette.SecuredAction.async(parse.json[ResourceOwnership])(implicit req => {
+  def createMy() = silhouette.SecuredAction.async(parse.json[Resource])(implicit req => {
     val fVerification = service.create(req.identity.id, req.body)
     fVerification.map(Created(_))
   })

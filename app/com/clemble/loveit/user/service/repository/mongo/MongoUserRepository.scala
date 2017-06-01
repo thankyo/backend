@@ -3,13 +3,13 @@ package com.clemble.loveit.user.service.repository.mongo
 import akka.stream.Materializer
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.common.error.UserException
-import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.{BankDetails, PaymentUser}
 import com.clemble.loveit.user.service.repository.UserRepository
-import com.clemble.loveit.thank.model.ResourceOwnership
 import javax.inject.{Inject, Named, Singleton}
 
+import akka.stream.scaladsl.Sink
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json._
 import reactivemongo.play.json._
@@ -83,21 +83,14 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(update)
   }
 
-  override def findRelated(uri: ResourceOwnership): Future[List[User]] = {
-    val query = Json.obj("owns.resource.uri" -> Json.obj("$regex" -> s"${uri.resource}.*"))
-    doFind(query)
-  }
-
   override def remove(users: Seq[UserID]): Future[Boolean] = {
     val query = Json.obj("_id" -> Json.obj("$in" -> JsArray(users.map(JsString))))
     val fRemove = collection.remove(query).map(_.ok)
     MongoSafeUtils.safe(fRemove)
   }
 
-  override def findOwners(uris: List[ResourceOwnership]): Future[List[User]] = {
-    val query = Json.obj("owns" -> Json.obj("$in" -> JsArray(uris.map(Json.toJson(_)))))
-    doFind(query)
-  }
+  override def findOwner(res: Resource): Future[Option[User]] = ???
+
 
   private def doFind(query: JsObject): Future[List[User]] = {
     val users = collection.
@@ -143,6 +136,7 @@ object MongoUserRepository {
     addBioField(collection)
     addOwnRequests(collection)
     addMonthlyLimit(collection)
+    changeOwner(collection)
   }
 
   private def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
@@ -174,6 +168,18 @@ object MongoUserRepository {
     val update = Json.obj("$set" -> Json.obj("monthlyLimit" -> PaymentUser.DEFAULT_LIMIT))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
     fUpdate.foreach(res => if (!res.ok) System.exit(2));
+  }
+
+  private def changeOwner(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    val selector = Json.obj("owns.ownershipType" -> Json.obj("$exists" -> true))
+    val projection = Json.obj("owns" -> 1)
+    val source = collection.find(selector, projection).cursor[JsObject](ReadPreference.primary).documentSource()
+    source.runWith(Sink.foreach((json) => {
+      val id = (json \ "_id").as[String]
+      val owns = (json \ "owns").as[JsArray]
+      val resources = owns.value.map(ownership => (ownership \ "resource").as[JsObject])
+      collection.update(Json.obj("_id" -> id), Json.obj("$set" -> Json.obj("owns" -> resources)))
+    }))
   }
 
 }

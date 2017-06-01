@@ -12,7 +12,7 @@ trait ThankService {
 
   def getOrCreate(uri: Resource): Future[Thank]
 
-  def thank(user: UserID, uri: Resource): Future[Thank]
+  def thank(giver: UserID, uri: Resource): Future[Thank]
 
 }
 
@@ -47,11 +47,11 @@ case class SimpleThankService @Inject()(
     repo.findByResource(resource).flatMap(createIfMissing)
   }
 
-  override def thank(user: UserID, resource: Resource): Future[Thank] = {
+  override def thank(giver: UserID, resource: Resource): Future[Thank] = {
     for {
-      _ <- getOrCreate(resource) // Ensure Thank exists
-      increased <- repo.increase(user, resource) if (increased)
-      _ <- transactionService.create(user, resource)
+      owner <- getOrCreate(resource).map(_.owner) // Ensure Thank exists
+      increased <- repo.increase(giver, resource) if (increased)
+      _ <- transactionService.create(giver, owner, resource)
       updated <- repo.findByResource(resource).map(_.get)
     } yield {
       updated

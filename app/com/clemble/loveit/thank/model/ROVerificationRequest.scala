@@ -10,8 +10,11 @@ import play.api.libs.json._
 sealed trait ROVerificationRequestStatus
 
 case object Pending extends ROVerificationRequestStatus
+
 case object Running extends ROVerificationRequestStatus
+
 case object Verified extends ROVerificationRequestStatus
+
 case object NonVerified extends ROVerificationRequestStatus
 
 object ROVerificationRequestStatus {
@@ -47,22 +50,16 @@ object ROVerificationRequestStatus {
 /**
   * Ownership request
   *
-  * @param status        current status
-  * @param resource      resource in question
-  * @param ownershipType type of ownership
+  * @param status   current status
+  * @param resource resource in question
   */
 case class ROVerificationRequest[T <: Resource](
                                                  id: VerificationID,
                                                  status: ROVerificationRequestStatus,
                                                  resource: T,
-                                                 ownershipType: OwnershipType,
                                                  requester: UserID,
                                                  verificationCode: String
-                                       ) {
-
-  def toOwnership() = ResourceOwnership(resource, ownershipType)
-
-}
+                                               )
 
 object ROVerificationRequest {
 

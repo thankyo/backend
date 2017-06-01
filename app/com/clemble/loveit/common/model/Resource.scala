@@ -1,7 +1,9 @@
 package com.clemble.loveit.common.model
 
+import com.clemble.loveit.common.util.WriteableUtils
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.data.validation.ValidationError
+import play.api.http.Writeable
 import play.api.libs.json._
 import play.api.mvc.PathBindable
 
@@ -93,6 +95,9 @@ object Resource {
       )
     }
   }
+
+  implicit val resourceWriteable: Writeable[Resource] = WriteableUtils.jsonToWriteable[Resource]
+  implicit val setHttpWriteable = WriteableUtils.jsonToWriteable[Set[Resource]]
 
   def from(loginInfo: LoginInfo): Resource = {
     SocialResource(loginInfo.providerID, loginInfo.providerKey)

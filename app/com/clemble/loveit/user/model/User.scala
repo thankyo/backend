@@ -3,7 +3,7 @@ package com.clemble.loveit.user.model
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.user.model.User.ExtendedBasicProfile
 import com.clemble.loveit.payment.model.{BankDetails, Money, PaymentUser}
-import com.clemble.loveit.thank.model.{ROVerificationRequest, ResourceOwnership}
+import com.clemble.loveit.thank.model.{ROVerificationRequest}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
@@ -31,7 +31,7 @@ case class User(
                  id: UserID,
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
-                 owns: Set[ResourceOwnership] = Set.empty,
+                 owns: Set[Resource] = Set.empty,
                  ownRequests: Set[ROVerificationRequest[Resource]] = Set.empty,
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
@@ -45,8 +45,8 @@ case class User(
                  created: DateTime = DateTime.now()
                ) extends Identity with UserProfile with CreatedAware with PaymentUser {
 
-  def assignOwnership(pendingBalance: Amount, resource: ResourceOwnership): User = {
-    copy(balance = balance + pendingBalance, owns = owns + resource)
+  def assignOwnership(resource: Resource): User = {
+    copy(owns = owns + resource)
   }
 
   def increase(thanks: Int): User = {
@@ -99,10 +99,7 @@ object User {
   implicit val userWriteable = WriteableUtils.jsonToWriteable[User]
 
   implicit class ExtendedBasicProfile(loginInfo: LoginInfo) {
-    def toResource(): ResourceOwnership = {
-      val uri = Resource.from(loginInfo)
-      ResourceOwnership.full(uri)
-    }
+    def toResource(): Resource = Resource.from(loginInfo)
   }
 
   def from(profile: CommonSocialProfile): User = {
@@ -112,7 +109,7 @@ object User {
   def empty(uri: Resource) = {
     User(
       id = IDGenerator.generate(),
-      owns = Set(ResourceOwnership.unrealized(uri))
+      owns = Set(uri)
     )
   }
 

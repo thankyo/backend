@@ -32,4 +32,9 @@ trait ThankRepository {
     */
   def increase(user: String, url: Resource): Future[Boolean]
 
+  /**
+    * Updates current resource ownership and all it's children
+    */
+  def updateOwner(owner: String, url: Resource): Future[Boolean]
+
 }

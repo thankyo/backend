@@ -43,6 +43,16 @@ case class MongoThankRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(query, update, multi = false))
   }
 
+  override def updateOwner(owner: String, url: Resource): Future[Boolean] = {
+    findByResource(url).flatMap({
+      case Some(_) =>
+        val query = Json.obj("resource.uri" -> url.uri)
+        val update = Json.obj("$set" -> Json.obj("owner" -> owner))
+        collection.update(query, update, multi = true).map(res => res.ok && res.n > 0)
+      case None => save(Thank(url, owner))
+    })
+  }
+
 }
 
 object MongoThankRepository {

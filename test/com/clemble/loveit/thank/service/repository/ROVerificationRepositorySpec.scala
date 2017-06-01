@@ -3,9 +3,8 @@ package com.clemble.loveit.thank.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.test.util.{ROVerificationGenerator, UserGenerator}
+import com.clemble.loveit.test.util.{ROVerificationGenerator}
 import com.clemble.loveit.thank.model.{VerificationID, Verified}
-import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -13,10 +12,7 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  lazy val userRepo = dependency[UserRepository]
   lazy val verificationRepo = dependency[ROVerificationRepository]
-
-  def createUser() = await(userRepo.save(UserGenerator.generate()))
 
   def createVerification(user: UserID) = await(verificationRepo.save(ROVerificationGenerator.generate().copy(requester = user)))
 

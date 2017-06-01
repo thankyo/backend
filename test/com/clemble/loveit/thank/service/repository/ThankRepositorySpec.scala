@@ -1,38 +1,39 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.test.util.ThankGenerator
+import com.clemble.loveit.test.util.{ResourceGenerator, ThankGenerator}
 import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.ThankService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
+import org.apache.commons.lang3.RandomStringUtils._
 
 import scala.concurrent.Future
 
 @RunWith(classOf[JUnitRunner])
 class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val repository = dependency[ThankRepository]
+  val repo = dependency[ThankRepository]
   val service = dependency[ThankService]
 
   def findAll(resources: Seq[Resource]): Future[Seq[Thank]] = {
-    val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(resources.map(uri => repository.findByResource(uri)))
+    val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(resources.map(uri => repo.findByResource(uri)))
     searchQuery.map(_.flatten)
   }
 
-  def createOwner(thank: Thank) = {
+  def createParentThank(thank: Thank) = {
     val ownerResource = Thank(thank.resource.parents.last, IDGenerator.generate())
-    await(repository.save(ownerResource))
+    await(repo.save(ownerResource))
   }
 
   "CREATE" should {
 
     "create all parents" in {
       val thank = ThankGenerator.generate()
-      createOwner(thank)
+      createParentThank(thank)
 
       val urlParents = thank.resource.parents()
       val allCreatedUri = for {
@@ -50,28 +51,90 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   "INCREASE" should {
 
     def increaseAll(resources: List[Resource]): Future[Boolean] = {
-      Future.sequence(resources.map(repository.increase("some", _))).map(_.forall(_ == true))
+      Future.sequence(resources.map(repo.increase("some", _))).map(_.forall(_ == true))
     }
 
     "increase only the nodes" in {
       val thank = ThankGenerator.generate().copy(given = 0)
-      createOwner(thank)
+      createParentThank(thank)
 
-      await(repository.save(thank))
-      await(repository.increase("some", thank.resource)) shouldEqual true
+      await(repo.save(thank))
+      await(repo.increase("some", thank.resource)) shouldEqual true
 
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
+      await(repo.findByResource(thank.resource)).get.given shouldEqual 1
     }
 
     "increase only once for the user" in {
       val thank = ThankGenerator.generate().copy(given = 0)
-      createOwner(thank)
+      createParentThank(thank)
 
-      await(repository.save(thank))
-      await(repository.increase("some", thank.resource)) shouldEqual true
-      await(repository.increase("some", thank.resource)) shouldEqual false
+      await(repo.save(thank))
+      await(repo.increase("some", thank.resource)) shouldEqual true
+      await(repo.increase("some", thank.resource)) shouldEqual false
 
-      await(repository.findByResource(thank.resource)).get.given shouldEqual 1
+      await(repo.findByResource(thank.resource)).get.given shouldEqual 1
+    }
+
+  }
+
+  "UPDATE OWNER" should {
+
+    "create if missing" in {
+      val owner = IDGenerator.generate()
+      val resource = ResourceGenerator.generate()
+
+      await(repo.findByResource(resource)) shouldEqual None
+
+      await(repo.updateOwner(owner, resource)) shouldEqual true
+      await(repo.findByResource(resource)) shouldNotEqual None
+    }
+
+    "update if exists" in {
+      val resource = ResourceGenerator.generate()
+
+      val A = IDGenerator.generate()
+
+      await(repo.updateOwner(A, resource)) shouldEqual true
+      await(repo.findByResource(resource)).get.owner shouldEqual A
+
+      val B = IDGenerator.generate()
+
+      await(repo.updateOwner(B, resource)) shouldEqual true
+      await(repo.findByResource(resource)).get.owner shouldEqual B
+    }
+
+    "update children" in {
+      val A = IDGenerator.generate()
+      val B = IDGenerator.generate()
+
+      val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(2)}"
+      val parent = HttpResource(parentUri)
+      val child = HttpResource(s"${parentUri}/${randomNumeric(3)}")
+
+      await(repo.save(Thank(parent, A))) shouldEqual true
+      await(repo.save(Thank(child, A))) shouldEqual true
+
+      repo.updateOwner(B, parent)
+
+      await(repo.findByResource(parent)).get.owner shouldEqual B
+      await(repo.findByResource(child)).get.owner shouldEqual B
+    }
+
+    "don't update parent" in {
+      val original = IDGenerator.generate()
+      val B = IDGenerator.generate()
+
+      val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(2)}"
+      val parent = HttpResource(parentUri)
+      val child = HttpResource(s"${parentUri}/${randomNumeric(3)}")
+
+      await(repo.save(Thank(parent, original))) shouldEqual true
+      await(repo.save(Thank(child, original))) shouldEqual true
+
+      repo.updateOwner(B, child)
+
+      await(repo.findByResource(parent)).get.owner shouldEqual original
+      await(repo.findByResource(child)).get.owner shouldEqual B
     }
 
   }

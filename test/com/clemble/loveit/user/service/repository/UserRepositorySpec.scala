@@ -16,8 +16,6 @@ import scala.util.{Failure, Success, Try}
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val userRepo = dependency[UserRepository]
-
   "CREATE" should {
 
     "support single create" in {

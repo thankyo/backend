@@ -33,7 +33,7 @@ case class SimpleResourceOwnershipService @Inject() (userRepo: ResourceRepositor
     } yield {
       val alreadyOwned = ownerOpt.map(_ != user).getOrElse(false)
       if (alreadyOwned) throw UserException.resourceAlreadyOwned(ownerOpt.get)
-      thankRepo.save(Thank(resource, user))
+      thankRepo.updateOwner(user, resource)
       userRepo.assignOwnership(user, resource)
       resource
     }

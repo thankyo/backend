@@ -13,10 +13,7 @@ import org.apache.commons.lang3.RandomStringUtils._
 @RunWith(classOf[JUnitRunner])
 class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
 
-  lazy val userRepo = dependency[UserRepository]
   lazy val resRepo = dependency[ResourceRepository]
-
-  def createUser() = await(userRepo.save(UserGenerator.generate()))
 
   def assignOwnership(user: UserID, res: Resource) = await(resRepo.assignOwnership(user, res))
   def listOwned(user: UserID) = await(resRepo.listOwned(user))

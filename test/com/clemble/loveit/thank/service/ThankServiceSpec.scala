@@ -25,7 +25,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
     val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
     // TODO flow must be changed here to use ResourceOwnersip verification
     val owner = await(userRepo.save(UserGenerator.generate().assignOwnership(url)))
-    await(thankRepo.save(Thank(url, owner.id)))
+    await(thankRepo.updateOwner(owner.id, url))
     val giver = await(userRepo.save(UserGenerator.generate()))
 
 

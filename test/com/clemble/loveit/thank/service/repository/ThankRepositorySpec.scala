@@ -114,10 +114,27 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       await(repo.save(Thank(parent, A))) shouldEqual true
       await(repo.save(Thank(child, A))) shouldEqual true
 
-      repo.updateOwner(B, parent)
+      await(repo.updateOwner(B, parent))
 
       await(repo.findByResource(parent)).get.owner shouldEqual B
       await(repo.findByResource(child)).get.owner shouldEqual B
+    }
+
+    "update children correctly" in {
+      val A = IDGenerator.generate()
+      val B = IDGenerator.generate()
+
+      val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(2)}"
+      val parent = HttpResource(parentUri)
+      val difParent = HttpResource(s"${parentUri}${randomNumeric(3)}")
+
+      await(repo.save(Thank(parent, A))) shouldEqual true
+      await(repo.save(Thank(difParent, A))) shouldEqual true
+
+      await(repo.updateOwner(B, parent))
+
+      await(repo.findByResource(parent)).get.owner shouldEqual B
+      await(repo.findByResource(difParent)).get.owner shouldEqual A
     }
 
     "don't update parent" in {
@@ -131,7 +148,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       await(repo.save(Thank(parent, original))) shouldEqual true
       await(repo.save(Thank(child, original))) shouldEqual true
 
-      repo.updateOwner(B, child)
+      await(repo.updateOwner(B, child))
 
       await(repo.findByResource(parent)).get.owner shouldEqual original
       await(repo.findByResource(child)).get.owner shouldEqual B

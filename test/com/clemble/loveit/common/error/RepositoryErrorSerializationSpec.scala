@@ -9,7 +9,4 @@ import play.api.libs.json.Format
 @RunWith(classOf[JUnitRunner])
 class RepositoryErrorSerializationSpec extends SerializationSpec[RepositoryError] {
 
-  override val generator: Generator[RepositoryError] = RepositoryErrorGenerator
-  override val jsonFormat: Format[RepositoryError] = RepositoryError.jsonFormat
-
 }

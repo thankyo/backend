@@ -7,9 +7,4 @@ import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Format
 
 @RunWith(classOf[JUnitRunner])
-class UserSerializationSpec extends SerializationSpec[User] {
-
-  override val generator: Generator[User] = UserGenerator
-  override val jsonFormat: Format[User] = User.jsonFormat
-
-}
+class UserSerializationSpec extends SerializationSpec[User]

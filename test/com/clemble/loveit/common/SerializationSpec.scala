@@ -1,18 +1,14 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.test.util.Generator
-import org.specs2.mutable.Specification
 import play.api.libs.json.{Format, JsValue, Json}
 
 import scala.util.Try
 
-trait SerializationSpec[T] extends ThankSpecification {
-
-  val generator: Generator[T]
-  val jsonFormat: Format[T]
+class SerializationSpec[T](implicit jsonFormat: Format[T], generator: Generator[T]) extends ThankSpecification {
 
   "JSON" should {
-    val value = generator.generate()
+    val value: T = someRandom[T]
 
     "serialize" in {
       Try(Json.toJson(value)(jsonFormat)) must (beSuccessfulTry[JsValue])

@@ -8,9 +8,4 @@ import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Format
 
 @RunWith(classOf[JUnitRunner])
-class ROVerificationSerializationSpec extends SerializationSpec[ROVerification[Resource]] {
-
-  override val generator: Generator[ROVerification[Resource]] = ROVerificationGenerator
-  override val jsonFormat: Format[ROVerification[Resource]] = ROVerification.jsonFormat
-
-}
+class ROVerificationSerializationSpec extends SerializationSpec[ROVerification[Resource]]

@@ -9,7 +9,4 @@ import play.api.libs.json.Format
 @RunWith(classOf[JUnitRunner])
 class UserExceptionSerializationSpec extends SerializationSpec[UserException] {
 
-  override val generator: Generator[UserException] = UserExceptionGenerator
-  override val jsonFormat: Format[UserException] = ThankException.userExcJsonFormat
-
 }

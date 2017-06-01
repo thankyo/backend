@@ -8,9 +8,4 @@ import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Format
 
 @RunWith(classOf[JUnitRunner])
-class ResourceSerializationSpec extends SerializationSpec[Resource] {
-
-  override val generator: Generator[Resource] = ResourceGenerator
-  override val jsonFormat: Format[Resource] = Resource.jsonFormat
-
-}
+class ResourceSerializationSpec extends SerializationSpec[Resource]

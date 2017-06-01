@@ -20,9 +20,6 @@ trait ResourceOwnershipService {
 
   def assign(user: UserID, ownership: Resource):  Future[Resource]
 
-  @deprecated
-  def updateBalance(user: UserID, change: Amount): Future[Boolean]
-
 }
 
 @Singleton
@@ -33,6 +30,8 @@ case class SimpleResourceOwnershipService @Inject() (userRepo: UserRepository, t
   }
 
   override def assign(userId: UserID, resource: Resource): Future[Resource] = {
+    // TODO assign is internal operation, so it might not need to throw Exception,
+    // since verification has already been done before
     for {
       ownerOpt <- userRepo.findOwner(resource)
       userOpt <- userRepo.findById(userId)
@@ -48,12 +47,6 @@ case class SimpleResourceOwnershipService @Inject() (userRepo: UserRepository, t
 
   override def findOwner(uri: Resource): Future[Option[User]] = {
     userRepo.findOwner(uri)
-  }
-
-  // TODO this is duplication need to be unified and used only once
-  @deprecated
-  override def updateBalance(user: UserID, change: Amount): Future[Boolean] = {
-    userRepo.changeBalance(user, change)
   }
 
 }

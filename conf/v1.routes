@@ -8,7 +8,7 @@ POST        /subscribe/creator               @com.clemble.loveit.user.controller
 POST        /subscribe/contributor           @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
 
 
-GET         /thank/ownership/my              @com.clemble.loveit.thank.controller.ResourceOwnershipController.listMyOwnership()
+GET         /thank/ownership/my              @com.clemble.loveit.thank.controller.ResourceOwnershipController.listMy()
 
 POST        /thank/verification/my           @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
 

@@ -3,8 +3,7 @@ package com.clemble.loveit.payment.service
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.payment.service.repository.ThankTransactionRepository
-import com.clemble.loveit.thank.service.ResourceOwnershipService
+import com.clemble.loveit.payment.service.repository.{BalanceService, ThankTransactionRepository}
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -18,7 +17,7 @@ trait ThankTransactionService {
 }
 
 @Singleton
-case class SimpleThankTransactionService @Inject()(ownershipService: ResourceOwnershipService, repository: ThankTransactionRepository, implicit val ec: ExecutionContext) extends ThankTransactionService {
+case class SimpleThankTransactionService @Inject()(ownershipService: BalanceService, repository: ThankTransactionRepository, implicit val ec: ExecutionContext) extends ThankTransactionService {
 
   override def list(user: UserID): Source[ThankTransaction, _] = {
     repository.findByUser(user)

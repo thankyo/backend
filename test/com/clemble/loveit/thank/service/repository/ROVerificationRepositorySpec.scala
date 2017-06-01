@@ -1,7 +1,8 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.{UserID}
+import com.clemble.loveit.common.error.RepositoryException
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.test.util.{ROVerificationGenerator, UserGenerator}
 import com.clemble.loveit.thank.model.{VerificationID, Verified}
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -46,9 +47,10 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
     val req = ROVerificationGenerator.generate().copy(requester = A.id)
 
     await(verificationRepo.save(req)) shouldNotEqual None
-    await(verificationRepo.save(req.copy(requester = B.id))) shouldNotEqual None
+    await(verificationRepo.save(req.copy(requester = B.id))) should throwA[RepositoryException]
 
     await(verificationRepo.list(A.id)) shouldEqual Set(req)
+    await(verificationRepo.list(B.id)) shouldEqual Set()
   }
 
   "UPDATE STATUS" in {

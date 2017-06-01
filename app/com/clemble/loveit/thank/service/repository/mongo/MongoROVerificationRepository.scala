@@ -58,11 +58,13 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
 object MongoROVerificationRepository {
 
   def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer) = {
-    MongoSafeUtils.ensureIndexes(collection,
+    MongoSafeUtils.ensureIndexes(
+      collection,
       Index(
-        key = Seq("ownRequests.resource" -> IndexType.Ascending),
+        key = Seq("ownRequests.resource.uri" -> IndexType.Ascending, "ownRequests.resource.type" -> IndexType.Ascending),
         name = Some("verification_resource_unique"),
-        unique = true
+        unique = true,
+        sparse = true
       )
     )
   }

@@ -3,8 +3,6 @@ package com.clemble.loveit.thank.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.test.util.{ResourceGenerator, UserGenerator}
-import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -39,7 +37,7 @@ class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySp
 
     "create ownership" in {
       val user = createUser().id
-      val res = ResourceGenerator.generate()
+      val res = someRandom[Resource]
 
       assignOwnership(user, res) shouldEqual true
 
@@ -48,7 +46,7 @@ class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySp
 
     "ignore multiple assignments to the same user" in {
       val user = createUser().id
-      val res = ResourceGenerator.generate()
+      val res = someRandom[Resource]
 
       assignOwnership(user, res) shouldEqual true
       assignOwnership(user, res) shouldEqual true
@@ -59,7 +57,7 @@ class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySp
     "override ownership" in {
       val A = createUser().id
       val B = createUser().id
-      val res = ResourceGenerator.generate()
+      val res = someRandom[Resource]
 
       assignOwnership(A, res) shouldEqual true
       assignOwnership(B, res) shouldEqual true
@@ -74,7 +72,7 @@ class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySp
 
     "find exact owner" in {
       val owner = createUser().id
-      val res = ResourceGenerator.generate()
+      val res = someRandom[Resource]
 
       assignOwnership(owner, res) shouldEqual true
 

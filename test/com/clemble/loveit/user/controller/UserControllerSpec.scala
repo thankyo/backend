@@ -1,8 +1,8 @@
 package com.clemble.loveit.user.controller
 
 import com.clemble.loveit.common.ControllerSpec
-import com.clemble.loveit.test.util.CommonSocialProfileGenerator
 import com.clemble.loveit.user.model.User
+import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -13,7 +13,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
   "CREATE" should {
 
     "Support single create" in {
-      val socialProfile = CommonSocialProfileGenerator.generate()
+      val socialProfile = someRandom[CommonSocialProfile]
       val userAuth = createUser(socialProfile, 0)
 
       val savedUser = getMyUser()(userAuth)
@@ -22,7 +22,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
     }
 
     "Return same user on the same authentication" in {
-      val socialProfile = CommonSocialProfileGenerator.generate()
+      val socialProfile = someRandom[CommonSocialProfile]
       val firstAuth = createUser(socialProfile, 0)
       val firstUser = getMyUser()(firstAuth)
 

@@ -1,7 +1,6 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
-import com.clemble.loveit.test.util.CommonSocialProfileGenerator
 import com.clemble.loveit.thank.service.ResourceOwnershipService
 import com.clemble.loveit.user.controller.SocialAuthController
 import com.clemble.loveit.user.model.UserIdentity
@@ -21,7 +20,7 @@ trait ServiceSpec extends ThankSpecification {
   }
 
   // TODO remove balance it's no longer relevant
-  def createUser(socialProfile: CommonSocialProfile = CommonSocialProfileGenerator.generate(), balance: Amount = 200): Seq[(String, String)] = {
+  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile], balance: Amount = 200): Seq[(String, String)] = {
     val userIdentity = await(authController.createOrUpdateUser(socialProfile)(FakeRequest()))
     await(userRep.changeBalance(userIdentity.id, balance))
     Seq("id" -> userIdentity.id)

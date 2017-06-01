@@ -2,9 +2,9 @@ package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.test.util.{ROVerificationGenerator}
-import com.clemble.loveit.thank.model.{VerificationID, Verified}
+import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.test.util.ROVerificationGenerator
+import com.clemble.loveit.thank.model.{ROVerification, VerificationID, Verified}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -14,7 +14,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
   lazy val verificationRepo = dependency[ROVerificationRepository]
 
-  def createVerification(user: UserID) = await(verificationRepo.save(ROVerificationGenerator.generate().copy(requester = user)))
+  def createVerification(user: UserID) = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user)))
 
   def getVerification(user: UserID, verifId: VerificationID) = await(verificationRepo.get(user, verifId))
 
@@ -40,7 +40,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
   "SAVES multiple ignored" in {
     val A = createUser()
     val B = createUser()
-    val req = ROVerificationGenerator.generate().copy(requester = A.id)
+    val req = someRandom[ROVerification[Resource]].copy(requester = A.id)
 
     await(verificationRepo.save(req)) shouldNotEqual None
     await(verificationRepo.save(req.copy(requester = B.id))) should throwA[RepositoryException]
@@ -51,7 +51,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
   "UPDATE STATUS" in {
     val user = createUser()
-    val ownership = await(verificationRepo.save(ROVerificationGenerator.generate().copy(requester = user.id)))
+    val ownership = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user.id)))
     val updated = await(verificationRepo.update(ownership, Verified))
 
     updated shouldEqual true

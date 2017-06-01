@@ -6,7 +6,6 @@ import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.payment.service.ThankTransactionService
 import com.clemble.loveit.user.service.repository.UserRepository
-import com.clemble.loveit.test.util.UserGenerator
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -21,19 +20,19 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
   val repo = dependency[UserRepository]
   val transactionService = dependency[ThankTransactionService]
 
-  val giver = UserGenerator.generate().copy(balance = Int.MaxValue)
+  val giver = someRandom[User].copy(balance = Int.MaxValue)
   await(repo.save(giver))
 
   "CREATE" should {
 
     "create user" in {
-      val user = UserGenerator.generate()
+      val user = someRandom[User]
       val createAndGet = repo.save(user).flatMap(_ => repo.findById(user.id))
       createAndGet must await(beEqualTo(Some(user)))
     }
 
     "return exception on creating the same" in {
-      val user = UserGenerator.generate()
+      val user = someRandom[User]
       val createAndCreate = repo.save(user).flatMap(_ => repo.save(user)).
         map(Success(_)).
         recover({ case t: Throwable => Failure(t) })
@@ -44,8 +43,7 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
   }
 
   def createUserWithOwnership(owns: Resource): User = {
-    val user = UserGenerator.
-      generate().
+    val user = someRandom[User].
       assignOwnership(owns).
       copy(balance = 0)
     val savedUser = await(repo.save(user))

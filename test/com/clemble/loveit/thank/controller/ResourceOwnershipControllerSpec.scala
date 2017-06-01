@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.controller
 
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.test.util.CommonSocialProfileGenerator
+import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Json
@@ -23,7 +23,7 @@ class ResourceOwnershipControllerSpec extends ControllerSpec {
   "GET" should {
 
     "List on new user" in {
-      val social = CommonSocialProfileGenerator.generate()
+      val social = someRandom[CommonSocialProfile]
       val userAuth = createUser(social)
 
       val resources = listResources(userAuth)

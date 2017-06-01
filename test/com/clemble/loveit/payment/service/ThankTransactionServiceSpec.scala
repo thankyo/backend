@@ -4,7 +4,7 @@ import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.{HttpResource, SocialResource}
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.test.util.UserGenerator
+import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
@@ -20,7 +20,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
   "PAYMENT" should {
 
     "Debit increases User balance" in {
-      val user = UserGenerator.generate().copy(balance = 100)
+      val user = someRandom[User].copy(balance = 100)
       val savedUser = await(userRepo.save(user))
 
       await(thankTransService.create(user.id, "A", HttpResource("example.com")))
@@ -32,7 +32,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
 
     "Credit decrease User balance" in {
       val url = HttpResource(s"${RandomStringUtils.randomNumeric(100)}.com")
-      val user = UserGenerator.generate().copy(balance = 100)
+      val user = someRandom[User].copy(balance = 100)
       val savedUser = await(userRepo.save(user))
 
       await(thankTransService.create(user.id, "B", url))
@@ -43,7 +43,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
     }
 
     "list all transactions" in {
-      val user = UserGenerator.generate()
+      val user = someRandom[User]
 
       await(userRepo.save(user))
       val A = await(thankTransService.create(user.id, "A", SocialResource("facebook", RandomStringUtils.randomNumeric(100))))

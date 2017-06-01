@@ -3,7 +3,6 @@ package com.clemble.loveit.thank.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.test.util.{ResourceGenerator, ThankGenerator}
 import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.ThankService
 import org.junit.runner.RunWith
@@ -32,7 +31,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   "CREATE" should {
 
     "create all parents" in {
-      val thank = ThankGenerator.generate()
+      val thank = someRandom[Thank]
       createParentThank(thank)
 
       val urlParents = thank.resource.parents()
@@ -55,7 +54,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
     }
 
     "increase only the nodes" in {
-      val thank = ThankGenerator.generate().copy(given = 0)
+      val thank = someRandom[Thank].copy(given = 0)
       createParentThank(thank)
 
       await(repo.save(thank))
@@ -65,7 +64,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
     }
 
     "increase only once for the user" in {
-      val thank = ThankGenerator.generate().copy(given = 0)
+      val thank = someRandom[Thank].copy(given = 0)
       createParentThank(thank)
 
       await(repo.save(thank))
@@ -81,7 +80,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
     "create if missing" in {
       val owner = IDGenerator.generate()
-      val resource = ResourceGenerator.generate()
+      val resource = someRandom[Resource]
 
       await(repo.findByResource(resource)) shouldEqual None
 
@@ -90,7 +89,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
     }
 
     "update if exists" in {
-      val resource = ResourceGenerator.generate()
+      val resource = someRandom[Resource]
 
       val A = IDGenerator.generate()
 

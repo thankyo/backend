@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.service.repository
 import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.test.util.{ThankTransactionGenerator, UserGenerator}
+import com.clemble.loveit.user.model.User
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -18,9 +18,9 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
   "CREATE" should {
 
     "save all payments for the user" in {
-      val user = UserGenerator.generate()
-      val A = ThankTransactionGenerator.generate(user)
-      val B = ThankTransactionGenerator.generate(user)
+      val user = someRandom[User]
+      val A = someRandom[ThankTransaction]
+      val B = someRandom[ThankTransaction]
 
       val fTransactions = for {
         _ <- repo.save(A)

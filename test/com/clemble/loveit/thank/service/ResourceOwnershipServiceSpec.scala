@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.ThankException
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.test.util.CommonSocialProfileGenerator
+import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -25,7 +25,7 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
   "POST" should {
 
     "assign ownership" in {
-      val social = CommonSocialProfileGenerator.generate()
+      val social = someRandom[CommonSocialProfile]
       val userAuth = createUser(social)
 
       val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"

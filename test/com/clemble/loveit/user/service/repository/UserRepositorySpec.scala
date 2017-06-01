@@ -2,16 +2,15 @@ package com.clemble.loveit.user.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
-import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, UserException}
+import com.clemble.loveit.common.error.{RepositoryError, RepositoryException}
 import com.clemble.loveit.payment.model.BankDetails
-import com.clemble.loveit.test.util.UserGenerator
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
@@ -19,7 +18,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   "CREATE" should {
 
     "support single create" in {
-      val user = UserGenerator.generate()
+      val user = someRandom[User]
       val fCreate: Future[User] = userRepo.save(user)
       fCreate must await(beEqualTo(user))
 
@@ -28,7 +27,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "throw Exception on multiple creation" in {
-      val user = UserGenerator.generate()
+      val user = someRandom[User]
 
       val fSecondCreate: Future[User] = for {
         _ <- userRepo.save(user)
@@ -46,8 +45,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "throw Exception on same account used more then once creation" in {
-      val A = UserGenerator.generate().copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
-      val B = UserGenerator.generate().copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
+      val A = someRandom[User].copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
+      val B = someRandom[User].copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
 
       await(userRepo.save(A))
       await(userRepo.save(B))
@@ -56,7 +55,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "set BankDetails" in {
-      val A = UserGenerator.generate()
+      val A = someRandom[User]
       val bankDetails = BankDetails.payPal(RandomStringUtils.random(10))
 
       await(userRepo.save(A))
@@ -70,7 +69,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   "CHANGE balance" should {
 
     "increase when positive" in {
-      val user = UserGenerator.generate()
+      val user = someRandom[User]
 
       val matchResult = for {
         savedUser <- userRepo.save(user)
@@ -85,7 +84,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "decrease when negative" in {
-      val user = UserGenerator.generate()
+      val user = someRandom[User]
 
       val matchResult = for {
         savedUser <- userRepo.save(user)

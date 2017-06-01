@@ -86,18 +86,6 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       matchResult.await
     }
 
-    "exception when no funds" in {
-      val user = UserGenerator.generate()
-
-      await(userRepo.save(user))
-
-      val credit = - (user.balance + 1)
-      val change = userRepo.changeBalance(user.id, credit)
-
-      val changeRes = Try(await(change))
-      changeRes must beEqualTo(Failure(UserException.notEnoughFunds()))
-    }
-
     "decrease when negative" in {
       val user = UserGenerator.generate()
 

@@ -5,6 +5,7 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.PlaySpecification
 
+
 import scala.reflect.ClassTag
 
 trait ThankSpecification extends PlaySpecification {
@@ -14,6 +15,9 @@ trait ThankSpecification extends PlaySpecification {
   def dependency[T: ClassTag]: T = {
     application.injector.instanceOf[T]
   }
+
+  import com.clemble.loveit.test.util._
+  def someRandom[T](implicit generator: Generator[T]) = generator.generate()
 
   implicit lazy val materializer: Materializer = dependency[Materializer]
 

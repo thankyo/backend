@@ -19,7 +19,7 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
   }
 
   def assignOwnership(userAuth: Seq[(String, String)], resource: Resource) = {
-    await(service.assign(userAuth.head._2, resource))
+    await(service.assignOwnership(userAuth.head._2, resource))
   }
 
   "POST" should {

@@ -38,7 +38,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def addOwnership(user: UserID, own: Resource)(implicit authHeader: Seq[(String, String)]): Option[Resource] = {
-    Some(await(ownershipService.assign(user, own)))
+    Some(await(ownershipService.assignOwnership(user, own)))
   }
 
   def getMyUser()(implicit authHeader: Seq[(String, String)]): User = {

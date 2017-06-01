@@ -2,9 +2,10 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, UserException}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model._
-import com.clemble.loveit.thank.service.repository.ROVerificationRepository
+import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, ResourceRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,7 +18,7 @@ trait ROVerificationService {
 
   def list(requester: UserID): Future[Set[ROVerification[Resource]]]
 
-  def create(requester: UserID, ownership: Resource): Future[ROVerification[Resource]]
+  def create(requester: UserID, req: Resource): Future[ROVerification[Resource]]
 
   def remove(requester: UserID, req: VerificationID): Future[Boolean]
 
@@ -26,11 +27,24 @@ trait ROVerificationService {
 }
 
 @Singleton
-case class SimpleROVerificationService @Inject()(generator: ROVerificationGenerator, repo: ROVerificationRepository, resOwnService: ResourceOwnershipService, confirmationService: ROVerificationConfirmationService[Resource], implicit val ec: ExecutionContext) extends ROVerificationService {
+case class SimpleROVerificationService @Inject()(
+                                                  generator: ROVerificationGenerator,
+                                                  repo: ROVerificationRepository,
+                                                  resRepo: ResourceRepository,
+                                                  resOwnService: ResourceOwnershipService,
+                                                  confirmationService: ROVerificationConfirmationService[Resource],
+                                                  implicit val ec: ExecutionContext
+) extends ROVerificationService {
 
-  override def create(requester: UserID, ownership: Resource): Future[ROVerification[Resource]] = {
-    val req = generator.generate(requester, ownership)
-    repo.save(req)
+  override def create(requester: UserID, res: Resource): Future[ROVerification[Resource]] = {
+    val fSavedReq = for {
+      ownerOpt <- resRepo.findOwner(res)
+    } yield {
+      if (ownerOpt.isDefined)
+        throw UserException.resourceAlreadyOwned(ownerOpt.get)
+      repo.save(generator.generate(requester, res))
+    }
+    fSavedReq.flatMap(f => f)
   }
 
   override def remove(requester: UserID, req: VerificationID): Future[Boolean] = {
@@ -50,7 +64,7 @@ case class SimpleROVerificationService @Inject()(generator: ROVerificationGenera
       status match {
         case Verified =>
           for {
-            _ <- resOwnService.assign(req.requester, req.resource)
+            _ <- resOwnService.assignOwnership(req.requester, req.resource)
             removed <- repo.delete(req.requester, req.id)
           } yield {
             removed

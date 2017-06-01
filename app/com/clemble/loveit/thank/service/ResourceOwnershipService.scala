@@ -37,7 +37,8 @@ case class SimpleResourceOwnershipService @Inject() (userRepo: UserRepository, t
       ownerOpt <- userRepo.findOwner(resource)
       userOpt <- userRepo.findById(userId)
     } yield {
-      if (ownerOpt.isDefined) throw UserException.resourceAlreadyOwned(ownerOpt.get)
+      val alreadyOwned = ownerOpt.map(_.id != userId).getOrElse(false)
+      if (alreadyOwned) throw UserException.resourceAlreadyOwned(ownerOpt.get)
       if (userOpt.isEmpty) throw UserException.userMissing(userId)
       thankRepo.save(Thank(resource, userId))
       userRepo.update(userOpt.get.assignOwnership(resource))

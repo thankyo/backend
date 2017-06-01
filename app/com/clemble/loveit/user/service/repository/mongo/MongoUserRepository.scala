@@ -2,7 +2,6 @@ package com.clemble.loveit.user.service.repository.mongo
 
 import akka.stream.Materializer
 import com.clemble.loveit.user.model._
-import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.{BankDetails, PaymentUser}
@@ -65,22 +64,9 @@ case class MongoUserRepository @Inject()(
   }
 
   override def changeBalance(id: UserID, diff: Amount): Future[Boolean] = {
-    val query = if (diff > 0) { // debit query
-      Json.obj("_id" -> id)
-    } else { // credit query
-      Json.obj("_id" -> id, "balance" -> Json.obj("$gte" -> -diff))
-    }
+    val query = Json.obj("_id" -> id)
     val change = Json.obj("$inc" -> Json.obj("balance" -> diff))
-    val update = collection.
-      update(query, change).
-      map(res => {
-        if (res.ok && res.n != 1) {
-          throw UserException.notEnoughFunds()
-        } else {
-          res.ok
-        }
-      })
-    MongoSafeUtils.safe(update)
+    MongoSafeUtils.safeSingleUpdate(collection.update(query, change))
   }
 
   override def remove(users: Seq[UserID]): Future[Boolean] = {
@@ -89,7 +75,16 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(fRemove)
   }
 
-  override def findOwner(res: Resource): Future[Option[User]] = ???
+  override def findOwner(res: Resource): Future[Option[User]] = {
+    val query = Json.obj("owns" -> res)
+    collection.find(query).one[User].flatMap(_ match {
+      case Some(owner) => Future.successful(Some(owner))
+      case None => res.parent match {
+        case Some(parRes) => findOwner(parRes)
+        case None => Future.successful(None)
+      }
+    })
+  }
 
 
   private def doFind(query: JsObject): Future[List[User]] = {

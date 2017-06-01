@@ -24,21 +24,7 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
 
   "POST" should {
 
-    "assign partial ownership" in {
-      val social = CommonSocialProfileGenerator.generate()
-      val userAuth = createUser(social)
-
-      val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"
-      assignOwnership(userAuth, resource)
-
-      val expectedResources = List(
-        Resource from social.loginInfo,
-        resource
-      )
-      eventually(listResources(userAuth) shouldEqual expectedResources)
-    }
-
-    "assign full ownership" in {
+    "assign ownership" in {
       val social = CommonSocialProfileGenerator.generate()
       val userAuth = createUser(social)
 
@@ -57,11 +43,12 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
       val B = createUser()
 
       val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"
+
       assignOwnership(A, resource) mustEqual resource
       assignOwnership(B, resource) must throwA[ThankException]
     }
 
-    "prohibit assigning sub resource in case full ownership" in {
+    "prohibit assigning sub resource" in {
       val A = createUser()
       val B = createUser()
 
@@ -69,20 +56,21 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
 
       val resource = Resource from uri
       val subResource = Resource from s"$uri/${RandomStringUtils.random(10)}"
+
       assignOwnership(A, resource) mustEqual resource
       assignOwnership(B, subResource) must throwA[ThankException]
     }
 
-    "prohibit assigning sub resource in case of partial ownership" in {
+    "allow assigning of sub resource to the owner" in {
       val A = createUser()
-      val B = createUser()
 
       val uri = s"http://${RandomStringUtils.random(10)}.com/"
 
       val resource = Resource from uri
       val subResource = Resource from s"$uri/${RandomStringUtils.random(10)}"
+
       assignOwnership(A, resource) mustEqual resource
-      assignOwnership(B, subResource) mustEqual subResource
+      assignOwnership(A, subResource) mustEqual subResource
     }
 
   }

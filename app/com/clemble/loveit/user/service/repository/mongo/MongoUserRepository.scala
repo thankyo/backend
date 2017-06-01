@@ -4,7 +4,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.{BankDetails, PaymentUser}
+import com.clemble.loveit.payment.model.{BankDetails, UserPayment}
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Named, Singleton}
 
@@ -12,7 +12,6 @@ import akka.stream.scaladsl.Sink
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json._
 import reactivemongo.play.json._
-import reactivemongo.api.Cursor.ContOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.akkastream.cursorProducer
@@ -73,26 +72,6 @@ case class MongoUserRepository @Inject()(
     val query = Json.obj("_id" -> Json.obj("$in" -> JsArray(users.map(JsString))))
     val fRemove = collection.remove(query).map(_.ok)
     MongoSafeUtils.safe(fRemove)
-  }
-
-  override def findOwner(res: Resource): Future[Option[User]] = {
-    val query = Json.obj("owns" -> res)
-    collection.find(query).one[User].flatMap(_ match {
-      case Some(owner) => Future.successful(Some(owner))
-      case None => res.parent match {
-        case Some(parRes) => findOwner(parRes)
-        case None => Future.successful(None)
-      }
-    })
-  }
-
-
-  private def doFind(query: JsObject): Future[List[User]] = {
-    val users = collection.
-      find(query).
-      cursor[User](ReadPreference.nearest).
-      collect[List](Int.MaxValue, ContOnError[List[User]]())
-    MongoSafeUtils.safe(users)
   }
 
 }
@@ -160,7 +139,7 @@ object MongoUserRepository {
 
   private def addMonthlyLimit(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("monthlyLimit" -> Json.obj("$exists" -> false))
-    val update = Json.obj("$set" -> Json.obj("monthlyLimit" -> PaymentUser.DEFAULT_LIMIT))
+    val update = Json.obj("$set" -> Json.obj("monthlyLimit" -> UserPayment.DEFAULT_LIMIT))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
     fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }

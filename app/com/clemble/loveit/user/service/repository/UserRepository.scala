@@ -19,11 +19,6 @@ trait UserRepository extends IdentityService[UserIdentity] {
   def findById(id: UserID): Future[Option[User]]
 
   /**
-    * Find owner of provided uri
-    */
-  def findOwner(res: Resource): Future[Option[User]]
-
-  /**
     * Create a new user in the system
     *
     * @param user user to create

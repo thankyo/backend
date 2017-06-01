@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank
 
-import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, ThankRepository}
-import com.clemble.loveit.thank.service.repository.mongo.{MongoROVerificationRepository, MongoThankRepository}
+import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, ResourceRepository, ThankRepository}
+import com.clemble.loveit.thank.service.repository.mongo.{MongoROVerificationRepository, MongoResourceRepository, MongoThankRepository}
 import com.clemble.loveit.thank.service._
 import com.google.inject.Provides
 import javax.inject.{Named, Singleton}
@@ -21,6 +21,7 @@ class ThankModule extends ScalaModule {
     bind(classOf[ThankService]).to(classOf[SimpleThankService])
     bind(classOf[ThankRepository]).to(classOf[MongoThankRepository])
 
+    bind(classOf[ResourceRepository]).to(classOf[MongoResourceRepository]).asEagerSingleton()
     bind(classOf[ResourceOwnershipService]).to(classOf[SimpleResourceOwnershipService])
 
     ownershipVerification()

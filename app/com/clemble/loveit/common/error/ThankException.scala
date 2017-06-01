@@ -15,7 +15,7 @@ case class UserException(code: String, message: String) extends RuntimeException
 
 object UserException {
   def notEnoughFunds() = new UserException("NOT_ENOUGH_FUNDS", "Not enough funds")
-  def resourceAlreadyOwned(user: User) = new UserException("RESOURCE_ALREADY_OWNED", s"Resource already owned by ${user.firstName} ${user.lastName}")
+  def resourceAlreadyOwned(user: UserID) = new UserException("RESOURCE_ALREADY_OWNED", s"Resource already owned by ${user}")
   def resourceOwnershipImpossible() = new UserException("RESOURCE_OWNERSHIP_IMPOSSIBLE", "Resource can't be owned")
   def userMissing(userID: UserID) = new UserException("USER_MISSING", s"Can't find user ${userID}")
 }

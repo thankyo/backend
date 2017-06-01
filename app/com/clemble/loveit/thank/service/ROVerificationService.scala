@@ -26,35 +26,8 @@ trait ROVerificationService {
 
 }
 
-trait MetaTagReader {
-  def read(res: HttpResource): Future[Option[String]]
-}
-
-object MetaTagReader {
-
-  private val META_DESCRIPTION = """.*meta\s+name="loveit-site-verification"\s*content="([^"]+)"""".r
-
-  def findInHtml(html: String): Option[String] = {
-    META_DESCRIPTION.findFirstMatchIn(html).map(_.group(1))
-  }
-
-}
-
 @Singleton
-case class WSMetaTagReader @Inject()(wsClient: WSClient, implicit val ec: ExecutionContext) extends MetaTagReader {
-
-  def read(res: HttpResource): Future[Option[String]] = {
-    for {
-      resp <- wsClient.url(s"http://${res.uri}").execute()
-    } yield {
-      MetaTagReader.findInHtml(resp.body)
-    }
-  }
-
-}
-
-@Singleton
-case class SimpleROVerificationService @Inject()(generator: ROVerificationGenerator, repo: ROVerificationRepository, resOwnService: ResourceOwnershipService, verificationService: ROVerificationConfirmationService[Resource], implicit val ec: ExecutionContext) extends ROVerificationService {
+case class SimpleROVerificationService @Inject()(generator: ROVerificationGenerator, repo: ROVerificationRepository, resOwnService: ResourceOwnershipService, confirmationService: ROVerificationConfirmationService[Resource], implicit val ec: ExecutionContext) extends ROVerificationService {
 
   override def create(requester: UserID, ownership: Resource): Future[ROVerificationRequest[Resource]] = {
     val req = generator.generate(requester, ownership)
@@ -88,7 +61,7 @@ case class SimpleROVerificationService @Inject()(generator: ROVerificationGenera
     }
 
     for {
-      status <- verificationService.verify(req.resource, req.verificationCode).recover({ case _ => NotVerified })
+      status <- confirmationService.confirm(req.resource, req.verificationCode).recover({ case _ => NotVerified })
       updated <- repo.update(req, status)
     } yield {
       assignOwnershipIfVerified(status)
@@ -102,37 +75,6 @@ case class SimpleROVerificationService @Inject()(generator: ROVerificationGenera
       case Some(req) => doVerify(req).map(Some(_))
       case None => Future.successful(None)
     })
-  }
-
-}
-
-trait ROVerificationConfirmationService[T <: Resource] {
-
-  def verify(resource: T, verificationCode: String): Future[ROVerificationRequestStatus]
-
-}
-
-case class ROVerificationConfirmationFacade(httpVerification: ROVerificationConfirmationService[HttpResource]) extends ROVerificationConfirmationService[Resource] {
-  override def verify(resource: Resource, verificationCode: String): Future[ROVerificationRequestStatus] = {
-    resource match {
-      case httpRes: HttpResource => httpVerification.verify(httpRes, verificationCode)
-      case _ => Future.successful(NotVerified)
-    }
-  }
-}
-
-@Singleton
-case class HttpROVerificationConfirmationService @Inject()(tagReader: MetaTagReader, implicit val ec: ExecutionContext) extends ROVerificationConfirmationService[HttpResource] {
-
-  override def verify(res: HttpResource, verificationCode: String): Future[ROVerificationRequestStatus] = {
-    for {
-      tagOpt <- tagReader.read(res)
-    } yield {
-      tagOpt match {
-        case Some(tag) if (tag == verificationCode) => Verified
-        case _ => NotVerified
-      }
-    }
   }
 
 }

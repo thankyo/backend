@@ -59,7 +59,7 @@ class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySp
       listOwned(user) shouldEqual Set(res)
     }
 
-    "error on assignment of already owned" in {
+    "override ownership" in {
       val A = createUser().id
       val B = createUser().id
       val res = ResourceGenerator.generate()
@@ -70,7 +70,6 @@ class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySp
       listOwned(A) shouldEqual Set.empty[Resource]
       listOwned(B) shouldEqual Set(res)
     }
-
 
   }
 

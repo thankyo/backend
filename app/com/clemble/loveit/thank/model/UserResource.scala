@@ -8,5 +8,5 @@ import com.clemble.loveit.common.model.{Resource, UserID}
 trait UserResource {
   val id: UserID
   val owns: Set[Resource]
-  val ownRequests: Set[ROVerificationRequest[Resource]]
+  val ownRequests: Set[ROVerification[Resource]]
 }

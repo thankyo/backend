@@ -2,10 +2,9 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model._
 import com.clemble.loveit.thank.service.repository.ROVerificationRepository
-import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -14,22 +13,22 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 trait ROVerificationService {
 
-  def get(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]]
+  def get(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]]
 
-  def list(requester: UserID): Future[Set[ROVerificationRequest[Resource]]]
+  def list(requester: UserID): Future[Set[ROVerification[Resource]]]
 
-  def create(requester: UserID, ownership: Resource): Future[ROVerificationRequest[Resource]]
+  def create(requester: UserID, ownership: Resource): Future[ROVerification[Resource]]
 
   def remove(requester: UserID, req: VerificationID): Future[Boolean]
 
-  def verify(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]]
+  def verify(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]]
 
 }
 
 @Singleton
 case class SimpleROVerificationService @Inject()(generator: ROVerificationGenerator, repo: ROVerificationRepository, resOwnService: ResourceOwnershipService, confirmationService: ROVerificationConfirmationService[Resource], implicit val ec: ExecutionContext) extends ROVerificationService {
 
-  override def create(requester: UserID, ownership: Resource): Future[ROVerificationRequest[Resource]] = {
+  override def create(requester: UserID, ownership: Resource): Future[ROVerification[Resource]] = {
     val req = generator.generate(requester, ownership)
     repo.save(req)
   }
@@ -38,16 +37,16 @@ case class SimpleROVerificationService @Inject()(generator: ROVerificationGenera
     repo.delete(requester, req)
   }
 
-  override def list(requester: UserID): Future[Set[ROVerificationRequest[Resource]]] = {
+  override def list(requester: UserID): Future[Set[ROVerification[Resource]]] = {
     repo.list(requester)
   }
 
-  override def get(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]] = {
+  override def get(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]] = {
     repo.get(requester, req)
   }
 
-  private def doVerify(req: ROVerificationRequest[Resource]): Future[ROVerificationRequest[Resource]] = {
-    def assignOwnershipIfVerified(status: ROVerificationRequestStatus): Unit = {
+  private def doVerify(req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
+    def assignOwnershipIfVerified(status: VerificationStatus): Unit = {
       status match {
         case Verified =>
           for {
@@ -70,7 +69,7 @@ case class SimpleROVerificationService @Inject()(generator: ROVerificationGenera
     }
   }
 
-  override def verify(requester: UserID, req: VerificationID): Future[Option[ROVerificationRequest[Resource]]] = {
+  override def verify(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]] = {
     get(requester, req).flatMap(_ match {
       case Some(req) => doVerify(req).map(Some(_))
       case None => Future.successful(None)

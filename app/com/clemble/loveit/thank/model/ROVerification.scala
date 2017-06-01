@@ -7,25 +7,21 @@ import play.api.libs.json._
 /**
   * States of resource ownership verification process
   */
-sealed trait ROVerificationRequestStatus
+sealed trait VerificationStatus
+case object Pending extends VerificationStatus
+case object Running extends VerificationStatus
+case object Verified extends VerificationStatus
+case object NotVerified extends VerificationStatus
 
-case object Pending extends ROVerificationRequestStatus
+object VerificationStatus {
 
-case object Running extends ROVerificationRequestStatus
-
-case object Verified extends ROVerificationRequestStatus
-
-case object NotVerified extends ROVerificationRequestStatus
-
-object ROVerificationRequestStatus {
-
-  implicit val jsonFormat = new Format[ROVerificationRequestStatus] {
+  implicit val jsonFormat = new Format[VerificationStatus] {
     val PENDING = JsString("pending")
     val RUNNING = JsString("running")
     val VERIFIED = JsString("verified")
     val NON_VERIFIED = JsString("notVerified")
 
-    override def reads(json: JsValue): JsResult[ROVerificationRequestStatus] = {
+    override def reads(json: JsValue): JsResult[VerificationStatus] = {
       json match {
         case PENDING => JsSuccess(Pending)
         case RUNNING => JsSuccess(Running)
@@ -35,7 +31,7 @@ object ROVerificationRequestStatus {
       }
     }
 
-    override def writes(o: ROVerificationRequestStatus): JsValue = {
+    override def writes(o: VerificationStatus): JsValue = {
       o match {
         case Pending => PENDING
         case Running => RUNNING
@@ -53,18 +49,18 @@ object ROVerificationRequestStatus {
   * @param status   current status
   * @param resource resource in question
   */
-case class ROVerificationRequest[T <: Resource](
+case class ROVerification[T <: Resource](
                                                  id: VerificationID,
-                                                 status: ROVerificationRequestStatus,
+                                                 status: VerificationStatus,
                                                  resource: T,
                                                  requester: UserID,
                                                  verificationCode: String
                                                )
 
-object ROVerificationRequest {
+object ROVerification {
 
-  implicit val jsonFormat = Json.format[ROVerificationRequest[Resource]]
-  implicit val httpWriteable = WriteableUtils.jsonToWriteable[ROVerificationRequest[Resource]]
-  implicit val listHttpWriteable = WriteableUtils.jsonToWriteable[Set[ROVerificationRequest[Resource]]]
+  implicit val jsonFormat = Json.format[ROVerification[Resource]]
+  implicit val httpWriteable = WriteableUtils.jsonToWriteable[ROVerification[Resource]]
+  implicit val listHttpWriteable = WriteableUtils.jsonToWriteable[Set[ROVerification[Resource]]]
 
 }

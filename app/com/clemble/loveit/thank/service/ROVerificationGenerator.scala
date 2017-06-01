@@ -4,21 +4,21 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.thank.model.{ROVerificationRequest, Pending}
+import com.clemble.loveit.thank.model.{ROVerification, Pending}
 import com.mohiva.play.silhouette.api.crypto.Crypter
 
 trait ROVerificationGenerator {
 
-  def generate(user: UserID, ownership: Resource): ROVerificationRequest[Resource]
+  def generate(user: UserID, ownership: Resource): ROVerification[Resource]
 
 }
 
 @Singleton
 case class CryptROVerificationGenerator @Inject()(crypter: Crypter) extends ROVerificationGenerator {
 
-  override def generate(user: UserID, resource: Resource): ROVerificationRequest[Resource] = {
+  override def generate(user: UserID, resource: Resource): ROVerification[Resource] = {
     val verificationCode = crypter.encrypt(s"${user}@${resource.uri}")
-    ROVerificationRequest(
+    ROVerification(
       id = IDGenerator.generate(),
       status = Pending,
       resource = resource,

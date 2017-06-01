@@ -73,10 +73,11 @@ object MongoSafeUtils {
     for {
       index <- indexes
     } {
-      collection.indexesManager.ensure(index).onFailure({ case t =>
-        t.printStackTrace(System.err)
-        System.exit(2)
-      })
+      collection.indexesManager.ensure(index).
+        recover({ case t =>
+          t.printStackTrace(System.err)
+          System.exit(2)
+        })
     }
   }
 

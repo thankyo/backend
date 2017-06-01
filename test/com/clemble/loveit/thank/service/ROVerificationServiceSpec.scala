@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.error.UserException
+import com.clemble.loveit.common.error.{ResourceException, UserException}
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.util.IDGenerator
 import org.junit.runner.RunWith
@@ -30,6 +30,16 @@ class ROVerificationServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSp
       val res = someRandom[Resource]
 
       await(resVerService.create(A.id, res)).resource shouldEqual res
+    }
+
+    "error on already verifying resource" in {
+      val A = someUser()
+      val B = someUser()
+
+      val res = someRandom[Resource]
+      await(resVerService.create(A.id, res))
+
+      await(resVerService.create(B.id, res)) should throwA[ResourceException]
     }
 
   }

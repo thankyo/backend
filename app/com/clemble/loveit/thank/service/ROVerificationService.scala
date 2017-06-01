@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, UserException}
+import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, ResourceException, UserException}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model._
 import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, ResourceRepository}
@@ -42,7 +42,10 @@ case class SimpleROVerificationService @Inject()(
     } yield {
       if (ownerOpt.isDefined)
         throw UserException.resourceAlreadyOwned(ownerOpt.get)
-      repo.save(generator.generate(requester, res))
+      repo.save(generator.generate(requester, res)).recoverWith({
+        case RepositoryException(Seq(RepositoryError(RepositoryError.DUPLICATE_KEY_CODE, _))) =>
+          Future.failed(ResourceException.verificationAlreadyRequested())
+      })
     }
     fSavedReq.flatMap(f => f)
   }

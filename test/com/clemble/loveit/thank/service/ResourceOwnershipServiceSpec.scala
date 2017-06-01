@@ -6,8 +6,11 @@ import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.test.util.CommonSocialProfileGenerator
 import com.clemble.loveit.thank.model.ResourceOwnership
 import org.apache.commons.lang3.RandomStringUtils
+import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   lazy val service = dependency[ResourceOwnershipService]

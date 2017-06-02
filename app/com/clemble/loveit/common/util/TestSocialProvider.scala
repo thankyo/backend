@@ -10,7 +10,7 @@ import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 
 import scala.concurrent.Future
 
-class TestSocialProvider(
+case class TestSocialProvider(
                                protected val httpLayer: HTTPLayer,
                                protected val stateProvider: OAuth2StateProvider,
                                val settings: OAuth2Settings)

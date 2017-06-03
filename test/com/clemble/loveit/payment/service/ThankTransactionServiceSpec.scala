@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.service
 
 import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{HttpResource, SocialResource}
+import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -46,8 +46,8 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val user = someRandom[User]
 
       await(userRepo.save(user))
-      val A = await(thankTransService.create(user.id, "A", SocialResource("facebook", RandomStringUtils.randomNumeric(100))))
-      val B = await(thankTransService.create(user.id, "B", SocialResource("facebook", RandomStringUtils.randomNumeric(100))))
+      val A = await(thankTransService.create(user.id, "A", someRandom[Resource]))
+      val B = await(thankTransService.create(user.id, "B", someRandom[Resource]))
       val payments = await(thankTransService.list(user.id).runWith(Sink.seq[ThankTransaction]))
 
       val expected = (A ++ B).filter(_.user == user.id)

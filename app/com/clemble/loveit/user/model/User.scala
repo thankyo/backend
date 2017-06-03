@@ -1,7 +1,6 @@
 package com.clemble.loveit.user.model
 
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.user.model.User.ExtendedBasicProfile
 import com.clemble.loveit.payment.model.{BankDetails, Money, UserPayment}
 import com.clemble.loveit.thank.model.{ROVerification, UserResource}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
@@ -49,23 +48,11 @@ case class User(
     copy(owns = owns + resource)
   }
 
-  def increase(thanks: Int): User = {
-    copy(
-      balance = balance + thanks,
-      total = total + thanks
-    )
-  }
-
-  def decrease(): User = {
-    copy(balance = balance - 1)
-  }
-
   def link(socialProfile: CommonSocialProfile): User = {
     this.copy(
       firstName = firstName.orElse(socialProfile.firstName),
       lastName = lastName.orElse(socialProfile.lastName),
       email = email.orElse(socialProfile.email),
-      owns = owns + socialProfile.loginInfo.toResource(),
       thumbnail = thumbnail.orElse(socialProfile.avatarURL),
       profiles = profiles + socialProfile.loginInfo
     )
@@ -97,10 +84,6 @@ object User {
   implicit val jsonFormat = Json.format[User]
 
   implicit val userWriteable = WriteableUtils.jsonToWriteable[User]
-
-  implicit class ExtendedBasicProfile(loginInfo: LoginInfo) {
-    def toResource(): Resource = Resource.from(loginInfo)
-  }
 
   def from(profile: CommonSocialProfile): User = {
     User(IDGenerator.generate()).link(profile)

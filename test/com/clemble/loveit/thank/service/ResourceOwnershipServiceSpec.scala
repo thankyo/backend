@@ -31,10 +31,7 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
       val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"
       assignOwnership(userAuth, resource)
 
-      val expectedResources = List(
-        Resource from social.loginInfo,
-        resource
-      )
+      val expectedResources = List(resource)
       eventually(listResources(userAuth) shouldEqual expectedResources)
     }
 

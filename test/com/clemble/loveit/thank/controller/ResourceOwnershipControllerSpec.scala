@@ -27,7 +27,7 @@ class ResourceOwnershipControllerSpec extends ControllerSpec {
       val userAuth = createUser(social)
 
       val resources = listResources(userAuth)
-      resources shouldEqual List(Resource from social.loginInfo)
+      resources shouldEqual List.empty
     }
 
   }

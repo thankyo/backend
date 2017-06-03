@@ -34,7 +34,7 @@ case class SimpleROVerificationService @Inject()(
                                                   resOwnService: ResourceOwnershipService,
                                                   confirmationService: ROVerificationConfirmationService[Resource],
                                                   implicit val ec: ExecutionContext
-) extends ROVerificationService {
+                                                ) extends ROVerificationService {
 
   override def create(requester: UserID, res: Resource): Future[ROVerification[Resource]] = {
     val fSavedReq = for {
@@ -62,35 +62,25 @@ case class SimpleROVerificationService @Inject()(
     repo.get(requester, req)
   }
 
-  private def doVerify(req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
-    def assignOwnershipIfVerified(status: VerificationStatus): Unit = {
-      status match {
-        case Verified =>
-          for {
-            _ <- resOwnService.assignOwnership(req.requester, req.resource)
-            removed <- repo.delete(req.requester, req.id)
-          } yield {
-            removed
-          }
-        case _ =>
-      }
-    }
-
-    for {
-      status <- confirmationService.confirm(req.resource, req.verificationCode).recover({ case _ => NotVerified })
-      updated <- repo.update(req, status)
-    } yield {
-      assignOwnershipIfVerified(status)
-
-      if (updated) req.copy(status = status) else req
-    }
-  }
-
   override def verify(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]] = {
-    get(requester, req).flatMap(_ match {
-      case Some(req) => doVerify(req).map(Some(_))
-      case None => Future.successful(None)
-    })
+    for {
+      verOpt <- get(requester, req)
+      statusUpdate <- verOpt.
+        map(confirmationService.confirm).
+        getOrElse(Future.successful(NotVerified)).
+        recover({ case _ => NotVerified })
+    } yield {
+      for {
+        ver <- verOpt
+      } yield {
+        repo.update(ver, statusUpdate)
+        if (statusUpdate == Verified) {
+          resOwnService.assignOwnership(requester, ver.resource)
+        }
+      }
+
+      verOpt.map(_.copy(status = statusUpdate))
+    }
   }
 
 }

@@ -1,7 +1,7 @@
 package com.clemble.loveit.test
 
 import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, ThankException, UserException}
-import com.clemble.loveit.common.model.{HttpResource, Resource, SocialResource}
+import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 import com.clemble.loveit.payment.model._
 import com.clemble.loveit.thank.model.{Pending, ROVerification, Thank}
@@ -96,10 +96,7 @@ package object util {
   object ResourceGenerator extends Generator[Resource] {
 
     override def generate(): Resource = {
-      if (nextInt(0, 1) == 0)
-        HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
-      else
-        SocialResource("facebook", RandomStringUtils.randomNumeric(30))
+      HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
     }
 
   }
@@ -153,7 +150,7 @@ package object util {
 
   }
 
-  object UserExceptionGenerator extends Generator[UserException]{
+  object UserExceptionGenerator extends Generator[UserException] {
 
     override def generate(): UserException = UserException.notEnoughFunds()
 

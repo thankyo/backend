@@ -9,8 +9,6 @@ import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
-import scala.util.Try
-
 @RunWith(classOf[JUnitRunner])
 class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
@@ -19,16 +17,14 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
   def createVerification(user: UserID) = await(verificationRepo.save(user, someRandom[ROVerification[Resource]]))
 
-  def getVerification(user: UserID, res: Resource) = await(verificationRepo.get(user, res))
-
-  def listVerifications(user: UserID) = await(verificationRepo.list(user))
+  def getVerification(user: UserID) = await(verificationRepo.get(user))
 
   "GETS" in {
     val user = createUser().id
 
     val verification = createVerification(user)
 
-    val read = getVerification(user, verification.resource)
+    val read = getVerification(user)
     Some(verification) shouldEqual read
   }
 
@@ -37,18 +33,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
     val verification = createVerification(user)
 
-    listVerifications(user) shouldEqual Set(verification)
-  }
-
-  "SAVES the same" in {
-    val user = createUser().id
-    val res = someRandom[Resource]
-
-    await(verificationRepo.save(user, verGen.generate(user, res)))
-    Try{ await(verificationRepo.save(user, verGen.generate(user, res))) }
-
-    val pendingVerif = listVerifications(user)
-    pendingVerif.size shouldEqual 1
+    getVerification(user) shouldEqual Some(verification)
   }
 
   "SAVES multiple ignored" in {
@@ -57,10 +42,10 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
     val req = someRandom[ROVerification[Resource]]
 
     await(verificationRepo.save(A.id, req)) shouldNotEqual None
-    await(verificationRepo.save(B.id , req)) should throwA[RepositoryException]
+    await(verificationRepo.save(B.id, req)) should throwA[RepositoryException]
 
-    await(verificationRepo.list(A.id)) shouldEqual Set(req)
-    await(verificationRepo.list(B.id)) shouldEqual Set()
+    getVerification(A.id) shouldEqual Some(req)
+    getVerification(B.id) shouldEqual None
   }
 
   "UPDATE STATUS" in {
@@ -71,15 +56,15 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
     updated shouldEqual true
 
     val expected = verif.copy(status = Verified)
-    await(verificationRepo.list(user.id)) shouldEqual Set(expected)
+    getVerification(user.id) shouldEqual Some(expected)
   }
 
   "REMOVES" in {
     val user = createUser()
     val ownership = createVerification(user.id)
-    val removed = await(verificationRepo.delete(user.id, ownership.resource))
+    val removed = await(verificationRepo.delete(user.id))
     removed shouldEqual true
-    await(verificationRepo.list(user.id)) shouldEqual Set.empty
+    getVerification(user.id) shouldEqual None
   }
 
 

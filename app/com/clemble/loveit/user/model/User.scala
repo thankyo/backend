@@ -31,7 +31,7 @@ case class User(
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
                  owns: Set[Resource] = Set.empty,
-                 ownRequests: Set[ROVerification[Resource]] = Set.empty,
+                 pending: Option[ROVerification[Resource]] = None,
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
                  bio: String = User.DEFAULT_BIO,

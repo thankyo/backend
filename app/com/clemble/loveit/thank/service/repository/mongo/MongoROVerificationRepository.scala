@@ -22,35 +22,30 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
 
   MongoROVerificationRepository.ensureMeta(collection)
 
-  override def get(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]] = {
-    list(requester).map(_.find(_.resource == res))
-  }
-
-  override def list(user: UserID): Future[Set[ROVerification[Resource]]] = {
+  override def get(user: UserID): Future[Option[ROVerification[Resource]]] = {
     val selector = Json.obj("_id" -> user)
-    val projections = Json.obj("ownRequests" -> 1)
+    val projections = Json.obj("pending" -> 1)
     collection.
       find(selector, projections).
       one[JsObject].
-      map(_.flatMap(obj => (obj \ "ownRequests").asOpt[Set[ROVerification[Resource]]]).getOrElse(Set.empty))
+      map(_.flatMap(obj => (obj \ "pending").asOpt[ROVerification[Resource]]))
   }
 
   override def save(user: UserID, req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
-    val selector = Json.obj("_id" -> user, "ownRequests.resource" -> Json.obj("$ne" -> req.resource))
-    // TODO no point using $addToSet verificationCode will be different each time
-    val push = Json.obj("$push" -> Json.obj("ownRequests" -> req))
+    val selector = Json.obj("_id" -> user)
+    val push = Json.obj("$set" -> Json.obj("pending" -> req))
     MongoSafeUtils.safe(req, collection.update(selector, push))
   }
 
   override def update(user: UserID, res: Resource, status: VerificationStatus): Future[Boolean] = {
-    val selector = Json.obj("_id" -> user, "ownRequests.resource" -> res)
-    val updateStatus = Json.obj("$set" -> Json.obj("ownRequests.$.status" -> status))
+    val selector = Json.obj("_id" -> user, "pending.resource" -> res)
+    val updateStatus = Json.obj("$set" -> Json.obj("pending.status" -> status))
     MongoSafeUtils.safe(collection.update(selector, updateStatus).map(res => res.ok && res.n == 1))
   }
 
-  override def delete(user: UserID, res: Resource): Future[Boolean] = {
+  override def delete(user: UserID): Future[Boolean] = {
     val selector = Json.obj("_id" -> user)
-    val push = Json.obj("$pull" -> Json.obj("ownRequests" -> Json.obj("resource" -> res)))
+    val push = Json.obj("$unset" -> Json.obj("pending" -> ""))
     MongoSafeUtils.safe(collection.update(selector, push).map(res => res.ok && res.n == 1))
   }
 
@@ -62,8 +57,8 @@ object MongoROVerificationRepository {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
-        key = Seq("ownRequests.resource.uri" -> IndexType.Ascending, "ownRequests.resource.type" -> IndexType.Ascending),
-        name = Some("verification_resource_unique"),
+        key = Seq("pending.resource.uri" -> IndexType.Ascending, "pending.resource.type" -> IndexType.Ascending),
+        name = Some("pending_resource_unique"),
         unique = true,
         sparse = true
       )

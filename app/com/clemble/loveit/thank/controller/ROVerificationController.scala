@@ -17,35 +17,30 @@ case class ROVerificationController @Inject()(
                                                implicit val ec: ExecutionContext
                                                     ) extends Controller {
 
-  def getMy(res: Resource) = silhouette.SecuredAction.async(implicit req => {
-    val fVerification = service.get(req.identity.id, res)
+  def getMy() = silhouette.SecuredAction.async(implicit req => {
+    val fVerification = service.get(req.identity.id)
     fVerification.map(_ match {
       case Some(res) => Ok(res)
       case None => NotFound
     })
   })
 
-  def listMy = silhouette.SecuredAction.async(implicit req => {
-    val fVerifications = service.list(req.identity.id)
-    fVerifications.map(Ok(_))
-  })
-
-  def removeMy(res: Resource) = silhouette.SecuredAction.async(implicit req => {
-    val fRemove = service.remove(req.identity.id, res)
+  def removeMy() = silhouette.SecuredAction.async(implicit req => {
+    val fRemove = service.remove(req.identity.id)
     fRemove.map(res => Ok(Json.toJson(res)))
-  })
-
-  def verifyMy(res: Resource) = silhouette.SecuredAction.async(implicit req => {
-    val fVerification = service.verify(req.identity.id, res)
-    fVerification.map(_ match {
-      case Some(res) => Ok(res)
-      case None => NotFound
-    })
   })
 
   def createMy() = silhouette.SecuredAction.async(parse.json[Resource])(implicit req => {
     val fVerification = service.create(req.identity.id, req.body)
     fVerification.map(Created(_))
+  })
+
+  def verifyMy() = silhouette.SecuredAction.async(implicit req => {
+    val fVerification = service.verify(req.identity.id)
+    fVerification.map(_ match {
+      case Some(res) => Ok(res)
+      case None => NotFound
+    })
   })
 
 }

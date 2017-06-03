@@ -14,15 +14,15 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 trait ROVerificationService {
 
-  def get(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]]
+  def get(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]]
 
   def list(requester: UserID): Future[Set[ROVerification[Resource]]]
 
   def create(requester: UserID, req: Resource): Future[ROVerification[Resource]]
 
-  def remove(requester: UserID, req: VerificationID): Future[Boolean]
+  def remove(requester: UserID, res: Resource): Future[Boolean]
 
-  def verify(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]]
+  def verify(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]]
 
 }
 
@@ -50,21 +50,21 @@ case class SimpleROVerificationService @Inject()(
     fSavedReq.flatMap(f => f)
   }
 
-  override def remove(requester: UserID, req: VerificationID): Future[Boolean] = {
-    repo.delete(requester, req)
+  override def remove(requester: UserID, res: Resource): Future[Boolean] = {
+    repo.delete(requester, res)
   }
 
   override def list(requester: UserID): Future[Set[ROVerification[Resource]]] = {
     repo.list(requester)
   }
 
-  override def get(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]] = {
-    repo.get(requester, req)
+  override def get(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]] = {
+    repo.get(requester, res)
   }
 
-  override def verify(requester: UserID, req: VerificationID): Future[Option[ROVerification[Resource]]] = {
+  override def verify(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]] = {
     for {
-      verOpt <- get(requester, req)
+      verOpt <- get(requester, res)
       statusUpdate <- verOpt.
         map(confirmationService.confirm).
         getOrElse(Future.successful(NotVerified)).

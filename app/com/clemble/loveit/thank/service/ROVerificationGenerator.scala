@@ -19,7 +19,6 @@ case class CryptROVerificationGenerator @Inject()(crypter: Crypter) extends ROVe
   override def generate(user: UserID, resource: Resource): ROVerification[Resource] = {
     val verificationCode = crypter.encrypt(s"${user}@${resource.uri}")
     ROVerification(
-      id = IDGenerator.generate(),
       status = Pending,
       resource = resource,
       requester = user,

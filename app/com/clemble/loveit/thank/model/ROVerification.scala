@@ -50,7 +50,6 @@ object VerificationStatus {
   * @param resource resource in question
   */
 case class ROVerification[T <: Resource](
-                                                 id: VerificationID,
                                                  status: VerificationStatus,
                                                  resource: T,
                                                  requester: UserID,

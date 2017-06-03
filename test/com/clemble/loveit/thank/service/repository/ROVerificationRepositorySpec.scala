@@ -3,8 +3,7 @@ package com.clemble.loveit.thank.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.test.util.ROVerificationGenerator
-import com.clemble.loveit.thank.model.{ROVerification, VerificationID, Verified}
+import com.clemble.loveit.thank.model.{ROVerification, Verified}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -16,7 +15,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
   def createVerification(user: UserID) = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user)))
 
-  def getVerification(user: UserID, verifId: VerificationID) = await(verificationRepo.get(user, verifId))
+  def getVerification(user: UserID, res: Resource) = await(verificationRepo.get(user, res))
 
   def listVerifications(user: UserID) = await(verificationRepo.list(user))
 
@@ -25,7 +24,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
     val verification = createVerification(user)
 
-    val read = getVerification(user, verification.id)
+    val read = getVerification(user, verification.resource)
     Some(verification) shouldEqual read
   }
 
@@ -63,7 +62,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
   "REMOVES" in {
     val user = createUser()
     val ownership = createVerification(user.id)
-    val removed = await(verificationRepo.delete(user.id, ownership.id))
+    val removed = await(verificationRepo.delete(user.id, ownership.resource))
     removed shouldEqual true
     await(verificationRepo.list(user.id)) shouldEqual Set.empty
   }

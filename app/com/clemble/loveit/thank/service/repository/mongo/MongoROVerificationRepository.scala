@@ -5,7 +5,7 @@ import javax.inject.{Inject, Named, Singleton}
 import akka.stream.Materializer
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.thank.model.{ROVerification, VerificationStatus, VerificationID}
+import com.clemble.loveit.thank.model.{ROVerification, VerificationStatus}
 import com.clemble.loveit.thank.service.repository.ROVerificationRepository
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.json._
@@ -22,8 +22,8 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
 
   MongoROVerificationRepository.ensureMeta(collection)
 
-  override def get(requester: UserID, request: VerificationID): Future[Option[ROVerification[Resource]]] = {
-    list(requester).map(_.find(_.id == request))
+  override def get(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]] = {
+    list(requester).map(_.find(_.resource == res))
   }
 
   override def list(user: UserID): Future[Set[ROVerification[Resource]]] = {
@@ -37,7 +37,7 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
 
   override def save(req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
     val selector = Json.obj("_id" -> req.requester)
-    val push = Json.obj("$push" -> Json.obj("ownRequests" -> req))
+    val push = Json.obj("$addToSet" -> Json.obj("ownRequests" -> req))
     MongoSafeUtils.safe(req, collection.update(selector, push))
   }
 
@@ -47,9 +47,9 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
     MongoSafeUtils.safe(collection.update(selector, updateStatus).map(res => res.ok && res.n == 1))
   }
 
-  override def delete(requester: UserID, request: VerificationID): Future[Boolean] = {
+  override def delete(requester: UserID, res: Resource): Future[Boolean] = {
     val selector = Json.obj("_id" -> requester)
-    val push = Json.obj("$pull" -> Json.obj("ownRequests" -> Json.obj("id" -> request)))
+    val push = Json.obj("$pull" -> Json.obj("ownRequests" -> Json.obj("resource" -> res)))
     MongoSafeUtils.safe(collection.update(selector, push).map(res => res.ok && res.n == 1))
   }
 

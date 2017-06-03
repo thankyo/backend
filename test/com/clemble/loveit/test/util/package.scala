@@ -17,23 +17,23 @@ import scala.util.Random
 
 package object util {
 
-  implicit val resourceGenerator = ResourceGenerator
-  implicit val commonSocialProfileGenerator = CommonSocialProfileGenerator
-  implicit val paymentTransactionGenerator = PaymentTransactionGenerator
-  implicit val repositoryErrorGenerator = RepositoryErrorGenerator
-  implicit val repositoryExceptionGenerator = RepositoryExceptionGenerator
-  implicit val thankExceptionGenerator = ThankExceptionGenerator
-  implicit val userExceptionGenerator = UserExceptionGenerator
-  implicit val bankDetailsGenerator = BankDetailsGenerator
-  implicit val paymentOperationGenerator = PaymentOperationGenerator
-  implicit val thankTransactionGenerator = ThankTransactionGenerator
-  implicit val verificationGenerator = ROVerificationGenerator
-  implicit val thankGenerator = ThankGenerator
-  implicit val userGenerator = UserGenerator
+  implicit val resourceGenerator: Generator[Resource] = ResourceGenerator
+  implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = CommonSocialProfileGenerator
+  implicit val paymentTransactionGenerator: Generator[PaymentTransaction] = PaymentTransactionGenerator
+  implicit val repositoryErrorGenerator: Generator[RepositoryError] = RepositoryErrorGenerator
+  implicit val repositoryExceptionGenerator: Generator[RepositoryException] = RepositoryExceptionGenerator
+  implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
+  implicit val userExceptionGenerator: Generator[UserException] = UserExceptionGenerator
+  implicit val bankDetailsGenerator: Generator[BankDetails] = BankDetailsGenerator
+  implicit val paymentOperationGenerator: Generator[PaymentOperation] = PaymentOperationGenerator
+  implicit val thankTransactionGenerator: Generator[ThankTransaction] = ThankTransactionGenerator
+  implicit val verificationGenerator: Generator[ROVerification[Resource]] = ROVerificationGenerator
+  implicit val thankGenerator: Generator[Thank] = ThankGenerator
+  implicit val userGenerator: Generator[User] = UserGenerator
 
   def some[T](implicit gen: Generator[T]) = gen.generate()
 
-  object BankDetailsGenerator extends Generator[BankDetails] {
+  private object BankDetailsGenerator extends Generator[BankDetails] {
 
     override def generate(): BankDetails = {
       if (nextInt(0, 1) == 0)
@@ -106,7 +106,6 @@ package object util {
     override def generate(): ROVerification[Resource] = {
       val resource = some[Resource]
       ROVerification(
-        IDGenerator.generate(),
         Pending,
         resource,
         RandomStringUtils.randomNumeric(10),

@@ -13,9 +13,9 @@ GET         /thank/ownership/my              @com.clemble.loveit.thank.controlle
 POST        /thank/verification/my           @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
 
 GET         /thank/verification/my           @com.clemble.loveit.thank.controller.ROVerificationController.listMy()
-GET         /thank/verification/my/:req      @com.clemble.loveit.thank.controller.ROVerificationController.getMy(req)
-PUT         /thank/verification/my/:req      @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy(req)
-DELETE      /thank/verification/my/:req      @com.clemble.loveit.thank.controller.ROVerificationController.removeMy(req)
+GET         /thank/verification/my/:res      @com.clemble.loveit.thank.controller.ROVerificationController.getMy(res: com.clemble.loveit.common.model.Resource)
+PUT         /thank/verification/my/:res      @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy(res: com.clemble.loveit.common.model.Resource)
+DELETE      /thank/verification/my/:res      @com.clemble.loveit.thank.controller.ROVerificationController.removeMy(res: com.clemble.loveit.common.model.Resource)
 
 GET         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.thank(url: com.clemble.loveit.common.model.Resource)

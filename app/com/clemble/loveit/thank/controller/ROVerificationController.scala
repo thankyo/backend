@@ -4,7 +4,6 @@ import javax.inject.Inject
 
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.model.VerificationID
 import com.clemble.loveit.thank.service.ROVerificationService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
@@ -18,8 +17,8 @@ case class ROVerificationController @Inject()(
                                                implicit val ec: ExecutionContext
                                                     ) extends Controller {
 
-  def getMy(verID: VerificationID) = silhouette.SecuredAction.async(implicit req => {
-    val fVerification = service.get(req.identity.id, verID)
+  def getMy(res: Resource) = silhouette.SecuredAction.async(implicit req => {
+    val fVerification = service.get(req.identity.id, res)
     fVerification.map(_ match {
       case Some(res) => Ok(res)
       case None => NotFound
@@ -31,13 +30,13 @@ case class ROVerificationController @Inject()(
     fVerifications.map(Ok(_))
   })
 
-  def removeMy(verID: VerificationID) = silhouette.SecuredAction.async(implicit req => {
-    val fRemove = service.remove(req.identity.id, verID)
+  def removeMy(res: Resource) = silhouette.SecuredAction.async(implicit req => {
+    val fRemove = service.remove(req.identity.id, res)
     fRemove.map(res => Ok(Json.toJson(res)))
   })
 
-  def verifyMy(verID: VerificationID) = silhouette.SecuredAction.async(implicit req => {
-    val fVerification = service.verify(req.identity.id, verID)
+  def verifyMy(res: Resource) = silhouette.SecuredAction.async(implicit req => {
+    val fVerification = service.verify(req.identity.id, res)
     fVerification.map(_ match {
       case Some(res) => Ok(res)
       case None => NotFound

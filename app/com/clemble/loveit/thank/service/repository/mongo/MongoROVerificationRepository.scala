@@ -41,8 +41,8 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
     MongoSafeUtils.safe(req, collection.update(selector, push))
   }
 
-  override def update(req: ROVerification[Resource], status: VerificationStatus): Future[Boolean] = {
-    val selector = Json.obj("_id" -> req.requester, "ownRequests.resource" -> req.resource)
+  override def update(user: UserID, res: Resource, status: VerificationStatus): Future[Boolean] = {
+    val selector = Json.obj("_id" -> user, "ownRequests.resource" -> res)
     val updateStatus = Json.obj("$set" -> Json.obj("ownRequests.$.status" -> status))
     MongoSafeUtils.safe(collection.update(selector, updateStatus).map(res => res.ok && res.n == 1))
   }

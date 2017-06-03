@@ -15,7 +15,7 @@ trait ROVerificationRepository {
 
   def save(req: ROVerification[Resource]): Future[ROVerification[Resource]]
 
-  def update(req: ROVerification[Resource], status: VerificationStatus): Future[Boolean]
+  def update(user: UserID, res: Resource, status: VerificationStatus): Future[Boolean]
 
 }
 

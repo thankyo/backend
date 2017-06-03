@@ -50,12 +50,12 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
   "UPDATE STATUS" in {
     val user = createUser()
-    val ownership = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user.id)))
-    val updated = await(verificationRepo.update(ownership, Verified))
+    val verif = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user.id)))
+    val updated = await(verificationRepo.update(user.id, verif.resource, Verified))
 
     updated shouldEqual true
 
-    val expected = ownership.copy(status = Verified)
+    val expected = verif.copy(status = Verified)
     await(verificationRepo.list(user.id)) shouldEqual Set(expected)
   }
 

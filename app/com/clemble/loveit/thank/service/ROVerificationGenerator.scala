@@ -11,6 +11,10 @@ trait ROVerificationGenerator {
 
   def generate(user: UserID, ownership: Resource): ROVerification[Resource]
 
+  def encrypt(user: UserID, resource: Resource): String
+
+  def decrypt(token: String): (UserID, Resource)
+
 }
 
 @Singleton
@@ -24,6 +28,15 @@ case class CryptROVerificationGenerator @Inject()(crypter: Crypter) extends ROVe
       requester = user,
       verificationCode
     )
+  }
+
+  override def encrypt(user: UserID, resource: Resource): String = {
+    crypter.encrypt(s"${user}@${resource.stringify()}")
+  }
+
+  override def decrypt(token: String): (UserID, Resource) = {
+    val arr = crypter.decrypt(token).split("@")
+    arr(0) -> Resource.from(arr(1))
   }
 
 }

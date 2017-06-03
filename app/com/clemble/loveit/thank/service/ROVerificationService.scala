@@ -63,24 +63,19 @@ case class SimpleROVerificationService @Inject()(
   }
 
   override def verify(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]] = {
-    for {
-      verOpt <- get(requester, res)
-      statusUpdate <- verOpt.
-        map(confirmationService.confirm).
-        getOrElse(Future.successful(NotVerified)).
-        recover({ case _ => NotVerified })
+    val fVerification = for {
+      statusUpdate <- confirmationService.confirm(requester, res)
+      updated <- repo.update(requester, res, statusUpdate)
     } yield {
-      for {
-        ver <- verOpt
-      } yield {
-        repo.update(ver, statusUpdate)
-        if (statusUpdate == Verified) {
-          resOwnService.assignOwnership(requester, ver.resource)
-        }
-      }
+      if (!updated)
+        throw new IllegalArgumentException("Internal problem")
+      if (statusUpdate == Verified)
+        resOwnService.assignOwnership(requester, res)
 
-      verOpt.map(_.copy(status = statusUpdate))
+      statusUpdate
     }
+
+    fVerification.flatMap(_ => get(requester, res))
   }
 
 }

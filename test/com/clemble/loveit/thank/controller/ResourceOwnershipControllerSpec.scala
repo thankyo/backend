@@ -12,7 +12,7 @@ import play.api.test.FakeRequest
 class ResourceOwnershipControllerSpec extends ControllerSpec {
 
   def listResources(userAuth: Seq[(String, String)]): Seq[Resource] = {
-    val req = FakeRequest(GET, s"/api/v1/thank/ownership/my").withHeaders(userAuth:_*)
+    val req = FakeRequest(GET, s"/api/v1/thank/resource/own/my").withHeaders(userAuth:_*)
     val fRes = route(application, req).get
 
     val res = await(fRes)

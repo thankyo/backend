@@ -36,8 +36,9 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
   }
 
   override def save(req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
-    val selector = Json.obj("_id" -> req.requester)
-    val push = Json.obj("$addToSet" -> Json.obj("ownRequests" -> req))
+    val selector = Json.obj("_id" -> req.requester, "ownRequests.resource" -> Json.obj("$ne" -> req.resource))
+    // TODO no point using $addToSet verificationCode will be different each time
+    val push = Json.obj("$push" -> Json.obj("ownRequests" -> req))
     MongoSafeUtils.safe(req, collection.update(selector, push))
   }
 

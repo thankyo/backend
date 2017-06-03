@@ -4,14 +4,18 @@ import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model.{ROVerification, Verified}
+import com.clemble.loveit.thank.service.ROVerificationGenerator
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
+
+import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   lazy val verificationRepo = dependency[ROVerificationRepository]
+  lazy val verGen = dependency[ROVerificationGenerator]
 
   def createVerification(user: UserID) = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user)))
 
@@ -34,6 +38,17 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
     val verification = createVerification(user)
 
     listVerifications(user) shouldEqual Set(verification)
+  }
+
+  "SAVES the same" in {
+    val A = createUser()
+    val res = someRandom[Resource]
+
+    await(verificationRepo.save(verGen.generate(A.id, res)))
+    Try{ await(verificationRepo.save(verGen.generate(A.id, res))) }
+
+    val pendingVerif = listVerifications(A.id)
+    pendingVerif.size shouldEqual 1
   }
 
   "SAVES multiple ignored" in {

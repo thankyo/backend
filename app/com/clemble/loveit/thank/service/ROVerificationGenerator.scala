@@ -9,7 +9,7 @@ import com.mohiva.play.silhouette.api.crypto.Crypter
 
 trait ROVerificationGenerator {
 
-  def generate(user: UserID, ownership: Resource): ROVerification[Resource]
+  def generate(user: UserID, res: Resource): ROVerification[Resource]
 
   def encrypt(user: UserID, resource: Resource): String
 
@@ -20,11 +20,11 @@ trait ROVerificationGenerator {
 @Singleton
 case class CryptROVerificationGenerator @Inject()(crypter: Crypter) extends ROVerificationGenerator {
 
-  override def generate(user: UserID, resource: Resource): ROVerification[Resource] = {
-    val verificationCode = crypter.encrypt(s"${user}@${resource.uri}")
+  override def generate(user: UserID, res: Resource): ROVerification[Resource] = {
+    val verificationCode = crypter.encrypt(s"${user}@${res.uri}")
     ROVerification(
       status = Pending,
-      resource = resource,
+      resource = res,
       requester = user,
       verificationCode
     )

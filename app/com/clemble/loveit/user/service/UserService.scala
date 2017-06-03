@@ -14,14 +14,4 @@ trait UserService {
 
   def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean]
 
-  /**
-    * Updates user balance
-    *
-    * @param user user identifier
-    * @param change amount of change
-    * @return true if enough funds were available
-    */
-  @throws[UserException]
-  def updateBalance(user: UserID, change: Amount): Future[Boolean]
-
 }

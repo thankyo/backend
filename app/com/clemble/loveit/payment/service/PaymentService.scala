@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest, PaymentTransaction}
-import com.clemble.loveit.payment.service.repository.PaymentTransactionRepository
+import com.clemble.loveit.payment.service.repository.{BalanceService, PaymentTransactionRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,7 +24,7 @@ sealed trait PaymentService {
 
 @Singleton
 case class SimplePaymentService @Inject()(
-                                           thankBalanceService: ThankBalanceService,
+                                           thankBalanceService: BalanceService,
                                            bankDetailsService: BankDetailsService,
                                            exchangeService: ExchangeService,
                                            processingService: PaymentProcessingService[PaymentRequest],
@@ -39,7 +39,7 @@ case class SimplePaymentService @Inject()(
       (id, bankDetails, money) <- processingService.process(req)
       thanks = exchangeService.toThanks(money)
       _ <- bankDetailsService.set(user, bankDetails)
-      userUpdate <- thankBalanceService.update(user, thanks) if (userUpdate)
+      userUpdate <- thankBalanceService.updateBalance(user, thanks) if (userUpdate)
       debitTransaction = PaymentTransaction.debit(id, user, thanks, money, bankDetails)
       savedTransaction <- repo.save(debitTransaction)
     } yield {
@@ -53,7 +53,7 @@ case class SimplePaymentService @Inject()(
       bankDetailsOpt <- bankDetailsService.get(user) if (bankDetailsOpt.isDefined)
       bankDetails = bankDetailsOpt.get
       (id, withdraw) <- withdrawService.withdraw(money, bankDetails) if (withdraw)
-      userUpdate <- thankBalanceService.update(user, -amount) if (userUpdate)
+      userUpdate <- thankBalanceService.updateBalance(user, -amount) if (userUpdate)
       creditTransaction = PaymentTransaction.credit(id, user, amount, money, bankDetails)
       savedTransaction <- repo.save(creditTransaction)
     } yield {

@@ -49,12 +49,11 @@ case class SimpleThankService @Inject()(
 
   override def thank(giver: UserID, resource: Resource): Future[Thank] = {
     for {
-      owner <- getOrCreate(resource).map(_.owner) // Ensure Thank exists
-      increased <- repo.increase(giver, resource) if (increased)
-      _ <- transactionService.create(giver, owner, resource)
-      updated <- repo.findByResource(resource).map(_.get)
+      thank <- getOrCreate(resource) // Ensure Thank exists
+      _ <- repo.increase(giver, resource) // TODO need to handle failure properly
     } yield {
-      updated
+      transactionService.create(giver, thank.owner, resource) // TODO need to handle failure properly
+      thank
     }
   }
 

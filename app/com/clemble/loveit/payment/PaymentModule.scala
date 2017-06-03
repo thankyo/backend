@@ -5,8 +5,8 @@ import java.util.Currency
 import com.braintreegateway.BraintreeGateway
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest}
-import com.clemble.loveit.payment.service.repository.{BalanceService, PaymentTransactionRepository, ThankTransactionRepository}
-import com.clemble.loveit.payment.service.repository.mongo.{MongoBalanceService, MongoPaymentTransactionRepository, MongoThankTransactionRepository}
+import com.clemble.loveit.payment.service.repository.{PaymentRepository, PaymentTransactionRepository, ThankTransactionRepository}
+import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentRepository, MongoPaymentTransactionRepository, MongoThankTransactionRepository}
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
@@ -31,7 +31,7 @@ class PaymentModule extends ScalaModule {
 
     bind[BankDetailsService].to[UserBankDetailsService].asEagerSingleton()
 
-    bind[BalanceService].to[MongoBalanceService].asEagerSingleton()
+    bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))

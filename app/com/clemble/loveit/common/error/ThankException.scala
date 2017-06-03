@@ -1,6 +1,6 @@
 package com.clemble.loveit.common.error
 
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.user.model.User
 import play.api.libs.json._
@@ -23,6 +23,7 @@ object UserException {
 case class PaymentException(code: String, message: String) extends ThankException
 object PaymentException {
   def withdrawFailure() = PaymentException("WITHDRAW_FAILURE", "System does not respond try later")
+  def alreadyThanked(user: UserID, res: Resource) = PaymentException("ALREADY_THANKED", s"User ${user} already thanked ${res}")
 }
 
 

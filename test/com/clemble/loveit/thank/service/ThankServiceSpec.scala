@@ -1,6 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
+import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import com.clemble.loveit.user.model.User
@@ -9,8 +10,6 @@ import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
-
-import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
@@ -61,21 +60,23 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       thank(giver.id, url)
       getBalance(url) shouldEqual 1
 
-      val ownerBalanceAfterThank = getBalance(owner.id)
-      (owner.balance + 1) shouldEqual ownerBalanceAfterThank
+      eventually(owner.balance + 1 shouldEqual getBalance(owner.id))
     }
 
-    "Double thank neutralizes effect" in {
+    "Double thank has no effect" in {
       val (url, owner, giver) = createScene()
+
+      getBalance(owner.id) shouldEqual owner.balance
+      getBalance(giver.id) shouldEqual giver.balance
 
       // Double thank has no effect
       thank(giver.id, url)
-      Try{ thank(giver.id, url) }
+      thank(giver.id, url) should throwA[PaymentException]
       getBalance(url) shouldEqual 1
 
       // Balance did not change
-      getBalance(owner.id) shouldEqual owner.balance + 1
-      getBalance(giver.id) shouldEqual giver.balance - 1
+      eventually(getBalance(owner.id) shouldEqual owner.balance + 1)
+      eventually(getBalance(giver.id) shouldEqual giver.balance - 1)
     }
 
   }

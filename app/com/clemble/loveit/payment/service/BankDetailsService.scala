@@ -2,8 +2,10 @@ package com.clemble.loveit.payment.service
 
 import javax.inject.{Inject, Singleton}
 
+import akka.stream.scaladsl.Balance
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.service.repository.PaymentRepository
 import com.clemble.loveit.user.service.UserService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,14 +35,14 @@ trait BankDetailsService {
 }
 
 @Singleton
-case class UserBankDetailsService @Inject() (userService: UserService, implicit val ec: ExecutionContext) extends BankDetailsService {
+case class UserBankDetailsService @Inject() (paymentRepo: PaymentRepository, implicit val ec: ExecutionContext) extends BankDetailsService {
 
   override def get(userId: UserID): Future[Option[BankDetails]] = {
-    userService.findById(userId).map(_.map(_.bankDetails))
+    paymentRepo.getBankDetails(userId)
   }
 
   override def set(userId: UserID, details: BankDetails): Future[Boolean] = {
-    userService.setBankDetails(userId, details)
+    paymentRepo.setBankDetails(userId, details)
   }
 
 }

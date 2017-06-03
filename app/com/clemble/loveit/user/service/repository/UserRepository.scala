@@ -38,15 +38,4 @@ trait UserRepository extends IdentityService[UserIdentity] {
     */
   def remove(users: Seq[UserID]): Future[Boolean]
 
-  /**
-    * Adds bank details to provided user
-    */
-  def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean]
-
-  /**
-    * Change user balance
-    */
-  @throws[UserException]
-  def changeBalance(id: UserID, diff: Amount): Future[Boolean]
-
 }

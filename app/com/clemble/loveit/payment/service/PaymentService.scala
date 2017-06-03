@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest, PaymentTransaction}
-import com.clemble.loveit.payment.service.repository.{BalanceService, PaymentTransactionRepository}
+import com.clemble.loveit.payment.service.repository.{PaymentRepository, PaymentTransactionRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,7 +24,7 @@ sealed trait PaymentService {
 
 @Singleton
 case class SimplePaymentService @Inject()(
-                                           thankBalanceService: BalanceService,
+                                           thankBalanceService: PaymentRepository,
                                            bankDetailsService: BankDetailsService,
                                            exchangeService: ExchangeService,
                                            processingService: PaymentProcessingService[PaymentRequest],

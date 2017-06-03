@@ -55,19 +55,6 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(fUser)
   }
 
-  override def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean] = {
-    val query = Json.obj("_id" -> user)
-    val change = Json.obj("$set" -> Json.obj("bankDetails" -> bankDetails))
-    val update = collection.update(query, change).map(res => res.ok && res.n == 1)
-    MongoSafeUtils.safe(update)
-  }
-
-  override def changeBalance(id: UserID, diff: Amount): Future[Boolean] = {
-    val query = Json.obj("_id" -> id)
-    val change = Json.obj("$inc" -> Json.obj("balance" -> diff))
-    MongoSafeUtils.safeSingleUpdate(collection.update(query, change))
-  }
-
   override def remove(users: Seq[UserID]): Future[Boolean] = {
     val query = Json.obj("_id" -> Json.obj("$in" -> JsArray(users.map(JsString))))
     val fRemove = collection.remove(query).map(_.ok)

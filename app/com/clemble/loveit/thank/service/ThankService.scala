@@ -6,6 +6,8 @@ import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.error.PaymentException
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ThankService {
@@ -19,7 +21,7 @@ trait ThankService {
 @Singleton
 case class SimpleThankService @Inject()(
                                          transactionService: ThankTransactionService,
-                                         repo: ThankRepository,
+                                         thankRepo: ThankRepository,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
 
@@ -33,8 +35,8 @@ case class SimpleThankService @Inject()(
               for {
                 owner <- getOrCreate(parRes).map(_.owner)
                 thank = Thank(resource, owner)
-                createdNew <- repo.save(thank)
-                created <- if(createdNew) Future.successful(thank) else repo.findByResource(resource).map(_.get)
+                createdNew <- thankRepo.save(thank)
+                created <- if(createdNew) Future.successful(thank) else thankRepo.findByResource(resource).map(_.get)
               } yield {
                 created
               }
@@ -44,15 +46,16 @@ case class SimpleThankService @Inject()(
       }
     }
 
-    repo.findByResource(resource).flatMap(createIfMissing)
+    thankRepo.findByResource(resource).flatMap(createIfMissing)
   }
 
-  override def thank(giver: UserID, resource: Resource): Future[Thank] = {
+  override def thank(giver: UserID, res: Resource): Future[Thank] = {
     for {
-      thank <- getOrCreate(resource) // Ensure Thank exists
-      _ <- repo.increase(giver, resource) // TODO need to handle failure properly
+      thank <- getOrCreate(res) // Ensure Thank exists
+      increase <- thankRepo.increase(giver, res)
     } yield {
-      transactionService.create(giver, thank.owner, resource) // TODO need to handle failure properly
+      if (!increase) throw PaymentException.alreadyThanked(giver, res)
+      transactionService.create(giver, thank.owner, res) // TODO need to handle failure properly
       thank
     }
   }

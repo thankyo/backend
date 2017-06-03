@@ -4,6 +4,7 @@ import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.common.error.{RepositoryError, RepositoryException}
 import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.service.repository.PaymentRepository
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -14,6 +15,8 @@ import scala.util.{Failure, Success}
 
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
+
+  lazy val balanceService = dependency[PaymentRepository]
 
   "CREATE" should {
 
@@ -51,7 +54,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       await(userRepo.save(A))
       await(userRepo.save(B))
 
-      await(userRepo.setBankDetails(A.id, B.bankDetails)) must throwA[RepositoryException]
+      await(balanceService.setBankDetails(A.id, B.bankDetails)) must throwA[RepositoryException]
     }
 
     "set BankDetails" in {
@@ -59,7 +62,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val bankDetails = BankDetails.payPal(RandomStringUtils.random(10))
 
       await(userRepo.save(A))
-      await(userRepo.setBankDetails(A.id, bankDetails))
+      await(balanceService.setBankDetails(A.id, bankDetails))
 
       await(userRepo.findById(A.id)).get.bankDetails must beEqualTo(bankDetails)
     }
@@ -73,7 +76,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       val matchResult = for {
         savedUser <- userRepo.save(user)
-        _ <- userRepo.changeBalance(user.id, 10)
+        _ <- balanceService.updateBalance(user.id, 10)
         updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
         savedUser.balance shouldEqual user.balance
@@ -88,7 +91,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       val matchResult = for {
         savedUser <- userRepo.save(user)
-        _ <- userRepo.changeBalance(user.id, -10)
+        _ <- balanceService.updateBalance(user.id, -10)
         updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
         savedUser.balance shouldEqual user.balance

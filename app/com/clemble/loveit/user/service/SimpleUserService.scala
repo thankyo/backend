@@ -15,8 +15,4 @@ case class SimpleUserService @Inject()(repository: UserRepository, implicit val 
     repository.findById(id)
   }
 
-  override def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean] = {
-    repository.setBankDetails(user, bankDetails)
-  }
-
 }

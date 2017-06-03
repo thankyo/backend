@@ -12,6 +12,4 @@ trait UserService {
 
   def findById(userId: UserID): Future[Option[User]]
 
-  def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean]
-
 }

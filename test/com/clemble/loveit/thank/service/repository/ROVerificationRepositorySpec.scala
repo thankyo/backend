@@ -17,7 +17,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
   lazy val verificationRepo = dependency[ROVerificationRepository]
   lazy val verGen = dependency[ROVerificationGenerator]
 
-  def createVerification(user: UserID) = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user)))
+  def createVerification(user: UserID) = await(verificationRepo.save(user, someRandom[ROVerification[Resource]]))
 
   def getVerification(user: UserID, res: Resource) = await(verificationRepo.get(user, res))
 
@@ -41,23 +41,23 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
   }
 
   "SAVES the same" in {
-    val A = createUser()
+    val user = createUser().id
     val res = someRandom[Resource]
 
-    await(verificationRepo.save(verGen.generate(A.id, res)))
-    Try{ await(verificationRepo.save(verGen.generate(A.id, res))) }
+    await(verificationRepo.save(user, verGen.generate(user, res)))
+    Try{ await(verificationRepo.save(user, verGen.generate(user, res))) }
 
-    val pendingVerif = listVerifications(A.id)
+    val pendingVerif = listVerifications(user)
     pendingVerif.size shouldEqual 1
   }
 
   "SAVES multiple ignored" in {
     val A = createUser()
     val B = createUser()
-    val req = someRandom[ROVerification[Resource]].copy(requester = A.id)
+    val req = someRandom[ROVerification[Resource]]
 
-    await(verificationRepo.save(req)) shouldNotEqual None
-    await(verificationRepo.save(req.copy(requester = B.id))) should throwA[RepositoryException]
+    await(verificationRepo.save(A.id, req)) shouldNotEqual None
+    await(verificationRepo.save(B.id , req)) should throwA[RepositoryException]
 
     await(verificationRepo.list(A.id)) shouldEqual Set(req)
     await(verificationRepo.list(B.id)) shouldEqual Set()
@@ -65,7 +65,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
 
   "UPDATE STATUS" in {
     val user = createUser()
-    val verif = await(verificationRepo.save(someRandom[ROVerification[Resource]].copy(requester = user.id)))
+    val verif = await(verificationRepo.save(user.id, someRandom[ROVerification[Resource]]))
     val updated = await(verificationRepo.update(user.id, verif.resource, Verified))
 
     updated shouldEqual true

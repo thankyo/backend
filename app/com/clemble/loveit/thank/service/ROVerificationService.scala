@@ -36,13 +36,13 @@ case class SimpleROVerificationService @Inject()(
                                                   implicit val ec: ExecutionContext
                                                 ) extends ROVerificationService {
 
-  override def create(requester: UserID, res: Resource): Future[ROVerification[Resource]] = {
+  override def create(user: UserID, res: Resource): Future[ROVerification[Resource]] = {
     val fSavedReq = for {
       ownerOpt <- resRepo.findOwner(res)
     } yield {
       if (ownerOpt.isDefined)
         throw UserException.resourceAlreadyOwned(ownerOpt.get)
-      repo.save(generator.generate(requester, res)).recoverWith({
+      repo.save(user, generator.generate(user, res)).recoverWith({
         case RepositoryException(Seq(RepositoryError(RepositoryError.DUPLICATE_KEY_CODE, _))) =>
           Future.failed(ResourceException.verificationAlreadyRequested())
       })

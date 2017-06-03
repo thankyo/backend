@@ -7,13 +7,13 @@ import scala.concurrent.Future
 
 trait ROVerificationRepository {
 
-  def get(requester: UserID, res: Resource): Future[Option[ROVerification[Resource]]]
+  def get(user: UserID, res: Resource): Future[Option[ROVerification[Resource]]]
 
-  def list(requester: UserID): Future[Set[ROVerification[Resource]]]
+  def list(user: UserID): Future[Set[ROVerification[Resource]]]
 
-  def delete(requester: UserID, res: Resource): Future[Boolean]
+  def delete(user: UserID, res: Resource): Future[Boolean]
 
-  def save(req: ROVerification[Resource]): Future[ROVerification[Resource]]
+  def save(user: UserID, req: ROVerification[Resource]): Future[ROVerification[Resource]]
 
   def update(user: UserID, res: Resource, status: VerificationStatus): Future[Boolean]
 

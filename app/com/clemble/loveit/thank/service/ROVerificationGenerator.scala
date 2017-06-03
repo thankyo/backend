@@ -25,7 +25,6 @@ case class CryptROVerificationGenerator @Inject()(crypter: Crypter) extends ROVe
     ROVerification(
       status = Pending,
       resource = res,
-      requester = user,
       verificationCode
     )
   }

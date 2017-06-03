@@ -108,7 +108,6 @@ package object util {
       ROVerification(
         Pending,
         resource,
-        RandomStringUtils.randomNumeric(10),
         RandomStringUtils.randomNumeric(10)
       )
     }

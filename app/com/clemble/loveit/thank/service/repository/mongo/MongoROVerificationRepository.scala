@@ -35,8 +35,8 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
       map(_.flatMap(obj => (obj \ "ownRequests").asOpt[Set[ROVerification[Resource]]]).getOrElse(Set.empty))
   }
 
-  override def save(req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
-    val selector = Json.obj("_id" -> req.requester, "ownRequests.resource" -> Json.obj("$ne" -> req.resource))
+  override def save(user: UserID, req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
+    val selector = Json.obj("_id" -> user, "ownRequests.resource" -> Json.obj("$ne" -> req.resource))
     // TODO no point using $addToSet verificationCode will be different each time
     val push = Json.obj("$push" -> Json.obj("ownRequests" -> req))
     MongoSafeUtils.safe(req, collection.update(selector, push))
@@ -48,8 +48,8 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
     MongoSafeUtils.safe(collection.update(selector, updateStatus).map(res => res.ok && res.n == 1))
   }
 
-  override def delete(requester: UserID, res: Resource): Future[Boolean] = {
-    val selector = Json.obj("_id" -> requester)
+  override def delete(user: UserID, res: Resource): Future[Boolean] = {
+    val selector = Json.obj("_id" -> user)
     val push = Json.obj("$pull" -> Json.obj("ownRequests" -> Json.obj("resource" -> res)))
     MongoSafeUtils.safe(collection.update(selector, push).map(res => res.ok && res.n == 1))
   }

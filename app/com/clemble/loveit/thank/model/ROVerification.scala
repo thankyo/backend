@@ -52,7 +52,6 @@ object VerificationStatus {
 case class ROVerification[T <: Resource](
                                                  status: VerificationStatus,
                                                  resource: T,
-                                                 requester: UserID,
                                                  verificationCode: String
                                                )
 

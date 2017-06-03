@@ -31,7 +31,7 @@ package object util {
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
   implicit val userGenerator: Generator[User] = UserGenerator
 
-  def some[T](implicit gen: Generator[T]) = gen.generate()
+  def someRandom[T](implicit gen: Generator[T]) = gen.generate()
 
   private object BankDetailsGenerator extends Generator[BankDetails] {
 
@@ -46,7 +46,7 @@ package object util {
 
   }
 
-  object CommonSocialProfileGenerator extends Generator[CommonSocialProfile] {
+  private object CommonSocialProfileGenerator extends Generator[CommonSocialProfile] {
 
     override def generate(): CommonSocialProfile = {
       CommonSocialProfile(
@@ -58,7 +58,7 @@ package object util {
 
   }
 
-  object PaymentOperationGenerator extends Generator[PaymentOperation] {
+  private object PaymentOperationGenerator extends Generator[PaymentOperation] {
 
     override def generate(): PaymentOperation = {
       if (nextInt(0, 1) == 0)
@@ -69,31 +69,31 @@ package object util {
 
   }
 
-  object PaymentTransactionGenerator extends Generator[PaymentTransaction] {
+  private object PaymentTransactionGenerator extends Generator[PaymentTransaction] {
 
     override def generate(): PaymentTransaction = {
       if (Random.nextBoolean()) {
-        PaymentTransaction.debit(IDGenerator.generate(), some[User].id, Random.nextLong(), Money(Random.nextLong(), LoveItCurrency.getInstance("USD")), some[BankDetails])
+        PaymentTransaction.debit(IDGenerator.generate(), someRandom[User].id, Random.nextLong(), Money(Random.nextLong(), LoveItCurrency.getInstance("USD")), someRandom[BankDetails])
       } else {
-        PaymentTransaction.credit(IDGenerator.generate(), some[User].id, Random.nextLong(), Money(Random.nextLong(), LoveItCurrency.getInstance("USD")), some[BankDetails])
+        PaymentTransaction.credit(IDGenerator.generate(), someRandom[User].id, Random.nextLong(), Money(Random.nextLong(), LoveItCurrency.getInstance("USD")), someRandom[BankDetails])
       }
     }
 
   }
 
-  object RepositoryErrorGenerator extends Generator[RepositoryError] {
+  private object RepositoryErrorGenerator extends Generator[RepositoryError] {
 
     override def generate(): RepositoryError = RepositoryError(random(10), random(20))
 
   }
 
-  object RepositoryExceptionGenerator extends Generator[RepositoryException] {
+  private object RepositoryExceptionGenerator extends Generator[RepositoryException] {
 
-    override def generate(): RepositoryException = new RepositoryException(some[RepositoryError])
+    override def generate(): RepositoryException = new RepositoryException(someRandom[RepositoryError])
 
   }
 
-  object ResourceGenerator extends Generator[Resource] {
+  private object ResourceGenerator extends Generator[Resource] {
 
     override def generate(): Resource = {
       HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
@@ -101,10 +101,10 @@ package object util {
 
   }
 
-  object ROVerificationGenerator extends Generator[ROVerification[Resource]] {
+  private object ROVerificationGenerator extends Generator[ROVerification[Resource]] {
 
     override def generate(): ROVerification[Resource] = {
-      val resource = some[Resource]
+      val resource = someRandom[Resource]
       ROVerification(
         Pending,
         resource,
@@ -114,22 +114,22 @@ package object util {
 
   }
 
-  object ThankExceptionGenerator extends Generator[ThankException] {
+  private object ThankExceptionGenerator extends Generator[ThankException] {
 
     override def generate(): ThankException = {
       if (Random.nextBoolean())
-        some[RepositoryException]
+        someRandom[RepositoryException]
       else
-        some[UserException]
+        someRandom[UserException]
     }
 
   }
 
-  object ThankGenerator extends Generator[Thank] {
+  private object ThankGenerator extends Generator[Thank] {
 
     override def generate(): Thank = {
       Thank(
-        some[Resource],
+        someRandom[Resource],
         IDGenerator.generate(),
         nextLong(0, Long.MaxValue)
       )
@@ -137,24 +137,24 @@ package object util {
 
   }
 
-  object ThankTransactionGenerator extends Generator[ThankTransaction] {
+  private object ThankTransactionGenerator extends Generator[ThankTransaction] {
 
     override def generate(): ThankTransaction = {
       if (nextInt(0, 1) == 0)
-        ThankTransaction.debit(some[User].id, some[Resource], nextLong(0, Long.MaxValue))
+        ThankTransaction.debit(someRandom[User].id, someRandom[Resource], nextLong(0, Long.MaxValue))
       else
-        ThankTransaction.credit(some[User].id, some[Resource], nextLong(0, Long.MaxValue))
+        ThankTransaction.credit(someRandom[User].id, someRandom[Resource], nextLong(0, Long.MaxValue))
     }
 
   }
 
-  object UserExceptionGenerator extends Generator[UserException] {
+  private object UserExceptionGenerator extends Generator[UserException] {
 
     override def generate(): UserException = UserException.notEnoughFunds()
 
   }
 
-  object UserGenerator extends Generator[User] {
+  private object UserGenerator extends Generator[User] {
 
     override def generate(): User = {
       User(
@@ -164,7 +164,7 @@ package object util {
         owns = Set.empty,
         balance = 200L,
         total = 200L,
-        bankDetails = some[BankDetails],
+        bankDetails = someRandom[BankDetails],
         thumbnail = Some(random(12)),
         dateOfBirth = Some(new DateTime(nextLong(0, Long.MaxValue))),
         profiles = Set.empty[LoginInfo]

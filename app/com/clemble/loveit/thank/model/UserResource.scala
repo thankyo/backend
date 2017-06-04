@@ -10,7 +10,7 @@ import play.api.libs.json.{Format, JsResult, JsValue, Json}
 trait UserResource {
   val id: UserID
   val owns: Set[Resource]
-  val pending: Option[ROVerification[Resource]]
+  val verification: Option[ROVerification[Resource]]
 }
 
 object UserResource {
@@ -19,7 +19,7 @@ object UserResource {
 
   implicit val jsonFormat: Format[UserResource] = new Format[UserResource] {
     override def reads(json: JsValue): JsResult[UserResource] = SimpleUserResource.jsonFormat.reads(json)
-    override def writes(o: UserResource): JsValue = SimpleUserResource.jsonFormat.writes(SimpleUserResource(o.id, o.owns, o.pending))
+    override def writes(o: UserResource): JsValue = SimpleUserResource.jsonFormat.writes(SimpleUserResource(o.id, o.owns, o.verification))
   }
 
   implicit val writeable = WriteableUtils.jsonToWriteable[UserResource]()
@@ -28,7 +28,7 @@ object UserResource {
 case class SimpleUserResource(
                                id: UserID,
                                owns: Set[Resource] = Set.empty,
-                               pending: Option[ROVerification[Resource]] = None
+                               verification: Option[ROVerification[Resource]] = None
                              ) extends UserResource
 
 object SimpleUserResource {

@@ -20,7 +20,7 @@ case class MongoUserResourceRepository @Inject()(@Named("user") collection: JSON
 
   override def find(user: UserID): Future[Option[UserResource]] = {
     val query = Json.obj("_id" -> user)
-    val projection = Json.obj("id" -> 1, "owns" -> 1, "pending" -> 1)
+    val projection = Json.obj("id" -> 1, "owns" -> 1, "verification" -> 1)
     collection.find(query, projection).one[UserResource]
   }
 

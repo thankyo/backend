@@ -24,28 +24,28 @@ case class MongoROVerificationRepository @Inject()(@Named("user") collection: JS
 
   override def get(user: UserID): Future[Option[ROVerification[Resource]]] = {
     val selector = Json.obj("_id" -> user)
-    val projections = Json.obj("pending" -> 1)
+    val projections = Json.obj("verification" -> 1)
     collection.
       find(selector, projections).
       one[JsObject].
-      map(_.flatMap(obj => (obj \ "pending").asOpt[ROVerification[Resource]]))
+      map(_.flatMap(obj => (obj \ "verification").asOpt[ROVerification[Resource]]))
   }
 
   override def save(user: UserID, req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
     val selector = Json.obj("_id" -> user)
-    val push = Json.obj("$set" -> Json.obj("pending" -> req))
+    val push = Json.obj("$set" -> Json.obj("verification" -> req))
     MongoSafeUtils.safe(req, collection.update(selector, push))
   }
 
   override def update(user: UserID, res: Resource, status: VerificationStatus): Future[Boolean] = {
-    val selector = Json.obj("_id" -> user, "pending.resource" -> res)
-    val updateStatus = Json.obj("$set" -> Json.obj("pending.status" -> status))
+    val selector = Json.obj("_id" -> user, "verification.resource" -> res)
+    val updateStatus = Json.obj("$set" -> Json.obj("verification.status" -> status))
     MongoSafeUtils.safe(collection.update(selector, updateStatus).map(res => res.ok && res.n == 1))
   }
 
   override def delete(user: UserID): Future[Boolean] = {
     val selector = Json.obj("_id" -> user)
-    val push = Json.obj("$unset" -> Json.obj("pending" -> ""))
+    val push = Json.obj("$unset" -> Json.obj("verification" -> ""))
     MongoSafeUtils.safe(collection.update(selector, push).map(res => res.ok && res.n == 1))
   }
 
@@ -57,8 +57,8 @@ object MongoROVerificationRepository {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
-        key = Seq("pending.resource.uri" -> IndexType.Ascending, "pending.resource.type" -> IndexType.Ascending),
-        name = Some("pending_resource_unique"),
+        key = Seq("verification.resource.uri" -> IndexType.Ascending, "verification.resource.type" -> IndexType.Ascending),
+        name = Some("verification_unique_per_user"),
         unique = true,
         sparse = true
       )

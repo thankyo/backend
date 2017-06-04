@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.error.{ThankException, UserException}
+import com.clemble.loveit.common.error.{UserException}
 import com.clemble.loveit.common.model.Resource
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.apache.commons.lang3.RandomStringUtils
@@ -39,7 +39,7 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
       val A = createUser()
       val B = createUser()
 
-      val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"
+      val resource = someRandom[Resource]
 
       assignOwnership(A, resource) mustEqual resource
       assignOwnership(B, resource) must throwA[UserException]
@@ -49,25 +49,21 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
       val A = createUser()
       val B = createUser()
 
-      val uri = s"http://${RandomStringUtils.random(10)}.com/"
+      val child = someRandom[Resource]
+      val parent = child.parent.get
 
-      val resource = Resource from uri
-      val subResource = Resource from s"$uri/${RandomStringUtils.random(10)}"
-
-      assignOwnership(A, resource) mustEqual resource
-      assignOwnership(B, subResource) must throwA[UserException]
+      assignOwnership(A, parent) mustEqual parent
+      assignOwnership(B, child) must throwA[UserException]
     }
 
     "allow assigning of sub resource to the owner" in {
       val A = createUser()
 
-      val uri = s"http://${RandomStringUtils.random(10)}.com/"
+      val child = someRandom[Resource]
+      val parent = child.parent.get
 
-      val resource = Resource from uri
-      val subResource = Resource from s"$uri/${RandomStringUtils.random(10)}"
-
-      assignOwnership(A, resource) mustEqual resource
-      assignOwnership(A, subResource) mustEqual subResource
+      assignOwnership(A, parent) mustEqual parent
+      assignOwnership(A, child) mustEqual child
     }
 
   }

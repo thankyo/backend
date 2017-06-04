@@ -2,6 +2,7 @@ package com.clemble.loveit.thank.controller
 
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.thank.model.UserResource
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
@@ -11,12 +12,12 @@ import play.api.test.FakeRequest
 @RunWith(classOf[JUnitRunner])
 class ResourceOwnershipControllerSpec extends ControllerSpec {
 
-  def listResources(userAuth: Seq[(String, String)]): Seq[Resource] = {
-    val req = FakeRequest(GET, s"/api/v1/thank/resource/own/my").withHeaders(userAuth:_*)
+  def listResources(userAuth: Seq[(String, String)]): UserResource = {
+    val req = FakeRequest(GET, s"/api/v1/thank/resource/my").withHeaders(userAuth:_*)
     val fRes = route(application, req).get
 
     val res = await(fRes)
-    val respSource = res.body.consumeData.map(_.utf8String).map(Json.parse(_)).map(_.as[Seq[Resource]])
+    val respSource = res.body.consumeData.map(_.utf8String).map(Json.parse(_).as[UserResource])
     await(respSource)
   }
 
@@ -27,7 +28,8 @@ class ResourceOwnershipControllerSpec extends ControllerSpec {
       val userAuth = createUser(social)
 
       val resources = listResources(userAuth)
-      resources shouldEqual List.empty
+      val expectedUserRes = Json.toJson(getMyUser()(userAuth)).as[UserResource]
+      resources shouldEqual expectedUserRes
     }
 
   }

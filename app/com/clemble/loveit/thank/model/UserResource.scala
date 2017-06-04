@@ -14,6 +14,9 @@ trait UserResource {
 }
 
 object UserResource {
+
+  def empty(user: UserID) = SimpleUserResource(user)
+
   implicit val jsonFormat: Format[UserResource] = new Format[UserResource] {
     override def reads(json: JsValue): JsResult[UserResource] = SimpleUserResource.jsonFormat.reads(json)
     override def writes(o: UserResource): JsValue = SimpleUserResource.jsonFormat.writes(SimpleUserResource(o.id, o.owns, o.pending))
@@ -24,8 +27,8 @@ object UserResource {
 
 case class SimpleUserResource(
                                id: UserID,
-                               owns: Set[Resource],
-                               pending: Option[ROVerification[Resource]]
+                               owns: Set[Resource] = Set.empty,
+                               pending: Option[ROVerification[Resource]] = None
                              ) extends UserResource
 
 object SimpleUserResource {

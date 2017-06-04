@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.error.ThankException
+import com.clemble.loveit.common.error.{ThankException, UserException}
 import com.clemble.loveit.common.model.Resource
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.apache.commons.lang3.RandomStringUtils
@@ -42,7 +42,7 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
       val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"
 
       assignOwnership(A, resource) mustEqual resource
-      assignOwnership(B, resource) must throwA[ThankException]
+      assignOwnership(B, resource) must throwA[UserException]
     }
 
     "prohibit assigning sub resource" in {
@@ -55,7 +55,7 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
       val subResource = Resource from s"$uri/${RandomStringUtils.random(10)}"
 
       assignOwnership(A, resource) mustEqual resource
-      assignOwnership(B, subResource) must throwA[ThankException]
+      assignOwnership(B, subResource) must throwA[UserException]
     }
 
     "allow assigning of sub resource to the owner" in {

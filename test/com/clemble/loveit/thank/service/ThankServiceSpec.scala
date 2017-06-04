@@ -50,8 +50,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       thank(giver.id, url)
       getBalance(url) shouldEqual 1
 
-      val giverBalanceAfterThank = getBalance(giver.id)
-      giver.balance - 1 shouldEqual giverBalanceAfterThank
+      eventually(giver.balance - 1 shouldEqual getBalance(giver.id))
     }
 
     "Increment for the owner" in {

@@ -17,14 +17,6 @@ case class ROVerificationController @Inject()(
                                                implicit val ec: ExecutionContext
                                                     ) extends Controller {
 
-  def getMy() = silhouette.SecuredAction.async(implicit req => {
-    val fVerification = service.get(req.identity.id)
-    fVerification.map(_ match {
-      case Some(res) => Ok(res)
-      case None => NotFound
-    })
-  })
-
   def removeMy() = silhouette.SecuredAction.async(implicit req => {
     val fRemove = service.remove(req.identity.id)
     fRemove.map(res => Ok(Json.toJson(res)))

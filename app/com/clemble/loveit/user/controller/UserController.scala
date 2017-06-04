@@ -16,6 +16,7 @@ case class UserController @Inject()(
                                    ) extends Controller {
 
   def getMy() = silhouette.SecuredAction.async(implicit req => {
+    import com.clemble.loveit.user.model.User.userWriteable
     val realId = req.identity.id
     val fUserOpt = userService.findById(realId)
     fUserOpt.map(userOpt => Ok(userOpt.get))

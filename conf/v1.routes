@@ -8,12 +8,11 @@ POST        /subscribe/creator               @com.clemble.loveit.user.controller
 POST        /subscribe/contributor           @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
 
 
-GET         /thank/resource/own/my           @com.clemble.loveit.thank.controller.ResourceOwnershipController.listMy()
+GET         /thank/resource/my               @com.clemble.loveit.thank.controller.UserResourceController.getMy()
 
-POST        /thank/resource/pending/my       @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
-GET         /thank/resource/pending/my       @com.clemble.loveit.thank.controller.ROVerificationController.getMy()
-PUT         /thank/resource/pending/my       @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()
-DELETE      /thank/resource/pending/my       @com.clemble.loveit.thank.controller.ROVerificationController.removeMy()
+POST        /thank/resource/my/pending       @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
+PUT         /thank/resource/my/pending       @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()
+DELETE      /thank/resource/my/pending       @com.clemble.loveit.thank.controller.ROVerificationController.removeMy()
 
 GET         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.thank(url: com.clemble.loveit.common.model.Resource)

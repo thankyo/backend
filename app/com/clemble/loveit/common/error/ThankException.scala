@@ -1,8 +1,6 @@
 package com.clemble.loveit.common.error
-
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
-import com.clemble.loveit.user.model.User
 import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException
@@ -29,7 +27,10 @@ object PaymentException {
 
 case class ResourceException(code: String, message: String) extends ThankException
 object ResourceException {
+  val OWNER_MISSING_CODE = "OWNER_MISSING_CODE"
+
   def verificationAlreadyRequested() = ResourceException("VERIFICATION_IN_PROGRESS", "Resource verification already in progress")
+  def ownerMissing() = new ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
 }
 
 object ThankException {

@@ -6,9 +6,8 @@ import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import javax.inject.{Inject, Named, Singleton}
 
-import play.api.libs.json.{JsArray, JsObject, Json}
+import play.api.libs.json.{JsArray, Json}
 import play.modules.reactivemongo.json._
-import reactivemongo.api
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
 

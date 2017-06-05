@@ -20,8 +20,10 @@ class ErrorHandler @Inject() (
 
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     exception match {
-      case te: ThankException => Future.successful(BadRequest(te))
-      case exc => super.onServerError(request, exc)
+      case te: ThankException =>
+        Future.successful(BadRequest(te))
+      case exc =>
+        super.onServerError(request, exc)
     }
   }
 

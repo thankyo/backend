@@ -6,7 +6,7 @@ import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.error.PaymentException
+import com.clemble.loveit.common.error.{PaymentException, ResourceException, UserException}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,7 +41,7 @@ case class SimpleThankService @Inject()(
                 created
               }
             case None => // TODO define proper error handling here
-              throw new IllegalArgumentException()
+              throw ResourceException.ownerMissing()
           }
       }
     }

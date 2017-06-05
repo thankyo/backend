@@ -6,7 +6,7 @@ import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.error.{PaymentException, ResourceException, UserException}
+import com.clemble.loveit.common.error.{ResourceException}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,12 +50,18 @@ case class SimpleThankService @Inject()(
   }
 
   override def thank(giver: UserID, res: Resource): Future[Thank] = {
+    val fThank = getOrCreate(res)
+    val fTransaction = fThank.
+      filter(t => t.thankedBy(giver)).
+      flatMap(t => {
+        thankRepo.increase(giver, res).
+          filter(_ == true).
+          flatMap(_ => transactionService.create(giver, t.owner, t.resource))
+      }).recover({ case _ => List.empty})
     for {
-      thank <- getOrCreate(res) // Ensure Thank exists
-      increase <- thankRepo.increase(giver, res)
+      thank <- fThank // Ensure Thank exists
+      _ <- fTransaction
     } yield {
-      if (!increase) throw PaymentException.alreadyThanked(giver, res)
-      transactionService.create(giver, thank.owner, res) // TODO need to handle failure properly
       thank
     }
   }

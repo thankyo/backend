@@ -98,6 +98,7 @@ object MongoUserRepository {
     addOwnRequests(collection)
     addMonthlyLimit(collection)
     changeOwner(collection)
+    removeSocialResources(collection)
   }
 
   private def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
@@ -141,6 +142,12 @@ object MongoUserRepository {
       val resources = owns.value.map(ownership => (ownership \ "resource").as[JsObject])
       collection.update(Json.obj("_id" -> id), Json.obj("$set" -> Json.obj("owns" -> resources)))
     }))
+  }
+
+  private def removeSocialResources(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
+    val selector = Json.obj("owns.type" -> "social")
+    val projection = Json.obj("owns" -> Json.obj("$pull" -> Json.obj("type" -> "social")))
+    collection.update(selector, projection, multi = true)
   }
 
 }

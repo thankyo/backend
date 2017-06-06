@@ -22,9 +22,8 @@ trait ServiceSpec extends ThankSpecification {
   }
 
   // TODO remove balance it's no longer relevant
-  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile], balance: Amount = 200): Seq[(String, String)] = {
+  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): Seq[(String, String)] = {
     val userIdentity = await(authController.createOrUpdateUser(socialProfile)(FakeRequest()))
-    await(balanceService.updateBalance(userIdentity.id, balance))
     Seq("id" -> userIdentity.id)
   }
 

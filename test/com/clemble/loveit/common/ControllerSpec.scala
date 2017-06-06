@@ -19,11 +19,9 @@ trait ControllerSpec extends ThankSpecification {
   implicit val ec = dependency[ExecutionContext]
 
   val userRep = dependency[UserRepository]
-  val balanceService = dependency[PaymentRepository]
   val ownershipService = dependency[ResourceOwnershipService]
 
-  // TODO Remove balance from User
-  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile], balance: Amount = 200): Seq[(String, String)] = {
+  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): Seq[(String, String)] = {
     val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").withJsonBody(Json.toJson(socialProfile))
     val fRes = route(application, req).get
 
@@ -32,9 +30,6 @@ trait ControllerSpec extends ThankSpecification {
 
     val bodyStr = await(res.body.consumeData).utf8String
     val resp = Seq("X-Auth-Token" -> bodyStr)
-
-    // TODO REMOVE this is a hack not to implement fake payments
-    await(balanceService.updateBalance(getMyUser()(resp).id, balance))
 
     resp
   }
@@ -65,5 +60,17 @@ trait ControllerSpec extends ThankSpecification {
     val payments = await(respSource.runWith(Sink.seq[ThankTransaction]))
     payments
   }
+
+}
+
+object ControllerSpec {
+
+  var userToAuth: Map[UserID, Seq[(String, String)]] = Map.empty[String, Seq[(String, String)]]
+
+  def setUser(user: UserID, headers: Seq[(String, String)]) = {
+    userToAuth = userToAuth + (user -> headers)
+  }
+
+  def getUser(user: UserID) = userToAuth(user)
 
 }

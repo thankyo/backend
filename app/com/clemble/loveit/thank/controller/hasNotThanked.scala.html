@@ -1,16 +1,16 @@
-@import com.clemble.loveit.thank.model.Thank
-@(thank: Thank)
+@import com.clemble.loveit.common.model.Resource
+@(res: Resource)
 <!DOCTYPE html>
 <html>
     <body>
-        <span id="SPAN_1" onclick="tip()">@thank.given</span>
+        <span id="SPAN_1" onclick="tip()">LoveIt</span>
         <script>
             function tip() {
                 function singIn() {
                     window.top.location = "https://loveit.tips"
                 }
                 function doTip(token) {
-                    var url = "/api/v1/thank/http/@thank.resource.uri";
+                    var url = "/api/v1/thank/http/@res.uri";
                     var req = new Request(url, {
                         method: "PUT",
                         headers: {

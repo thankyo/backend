@@ -1,7 +1,7 @@
 package com.clemble.loveit.user.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.error.{RepositoryError, RepositoryException}
+import com.clemble.loveit.common.error.{RepositoryException}
 import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.payment.service.ThankTransactionService
@@ -33,11 +33,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
     "return exception on creating the same" in {
       val user = someRandom[User]
-      val createAndCreate = repo.save(user).flatMap(_ => repo.save(user)).
-        map(Success(_)).
-        recover({ case t: Throwable => Failure(t) })
+      val createAndCreate = repo.save(user).flatMap(_ => repo.save(user)).flatMap(_ => repo.save(user))
 
-      createAndCreate must await(beEqualTo(Failure(new RepositoryException(RepositoryError.duplicateKey()))))
+      await(createAndCreate) should throwA[RepositoryException]
     }
 
   }

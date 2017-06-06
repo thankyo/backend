@@ -36,7 +36,6 @@ case class HttpResource(uri: String) extends Resource {
 
     parentUri.map(HttpResource)
   }
-  def append(path: String): HttpResource = HttpResource(s"$uri/$path")
 }
 
 object Resource {

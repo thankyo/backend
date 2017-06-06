@@ -1,6 +1,6 @@
 package com.clemble.loveit.test
 
-import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, ThankException, UserException}
+import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 import com.clemble.loveit.payment.model._
@@ -20,7 +20,6 @@ package object util {
   implicit val resourceGenerator: Generator[Resource] = ResourceGenerator
   implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = CommonSocialProfileGenerator
   implicit val paymentTransactionGenerator: Generator[PaymentTransaction] = PaymentTransactionGenerator
-  implicit val repositoryErrorGenerator: Generator[RepositoryError] = RepositoryErrorGenerator
   implicit val repositoryExceptionGenerator: Generator[RepositoryException] = RepositoryExceptionGenerator
   implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
   implicit val userExceptionGenerator: Generator[UserException] = UserExceptionGenerator
@@ -86,15 +85,9 @@ package object util {
 
   }
 
-  private object RepositoryErrorGenerator extends Generator[RepositoryError] {
-
-    override def generate(): RepositoryError = RepositoryError(random(10), random(20))
-
-  }
-
   private object RepositoryExceptionGenerator extends Generator[RepositoryException] {
 
-    override def generate(): RepositoryException = new RepositoryException(someRandom[RepositoryError])
+    override def generate(): RepositoryException = new RepositoryException(RandomStringUtils.randomNumeric(10), RandomStringUtils.randomNumeric(30))
 
   }
 

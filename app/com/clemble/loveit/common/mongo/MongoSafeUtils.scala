@@ -1,7 +1,7 @@
 package com.clemble.loveit.common.mongo
 
 import akka.stream.Materializer
-import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, ThankException}
+import com.clemble.loveit.common.error.{RepositoryException, ThankException}
 import play.api.libs.json.JsObject
 import reactivemongo.akkastream.cursorProducer
 import reactivemongo.api.ReadPreference
@@ -15,24 +15,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object MongoSafeUtils {
 
-  def toError(code: Int, msg: String) = {
+  def toException(code: Int, msg: String): RepositoryException = {
     code match {
-      case 11000 => RepositoryError.duplicateKey(msg)
-      case _ => RepositoryError(code.toString(), msg)
+      case 11000 => RepositoryException.duplicateKey(msg)
+      case _ => RepositoryException(code.toString(), msg)
     }
   }
 
   def toException(writeErrors: Seq[WriteError]): RepositoryException = {
-    val errors = writeErrors.map(err => toError(err.code, err.errmsg))
-    new RepositoryException(errors)
+    val exception = writeErrors.headOption.map(err => toException(err.code, err.errmsg))
+    exception.getOrElse(RepositoryException.unknown())
   }
 
   def toException(dbExc: DatabaseException): RepositoryException = {
-    val err = toError(
-      dbExc.code.getOrElse(-1),
-      dbExc.message
-    )
-    new RepositoryException(err)
+    toException(dbExc.code.getOrElse(-1), dbExc.message)
   }
 
   def safe[T](success: => T, fTask: Future[WriteResult])(implicit ec: ExecutionContext): Future[T] = {

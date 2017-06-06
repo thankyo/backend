@@ -2,7 +2,7 @@ package com.clemble.loveit.user.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
-import com.clemble.loveit.common.error.{RepositoryError, RepositoryException}
+import com.clemble.loveit.common.error.{RepositoryException}
 import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import org.apache.commons.lang3.RandomStringUtils
@@ -25,8 +25,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val fCreate: Future[User] = userRepo.save(user)
       fCreate must await(beEqualTo(user))
 
-      val fSearch: Future[Option[User]] = userRepo.findById(user.id)
-      fSearch must await(beEqualTo(Some(user)))
+      eventually(await(userRepo.findById(user.id)) must beEqualTo(Some(user)))
     }
 
     "throw Exception on multiple creation" in {
@@ -39,12 +38,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
         sCreate
       }
 
-      val fSecondRes = fSecondCreate.
-        map(Success(_)).
-        recover({
-          case t: Throwable => Failure(t)
-        })
-      fSecondRes must await(beEqualTo(Failure(new RepositoryException(RepositoryError.duplicateKey()))))
+      val fSecondRes = fSecondCreate
+      await(fSecondRes) should throwA[RepositoryException]
     }
 
     "throw Exception on same account used more then once creation" in {

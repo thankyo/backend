@@ -5,32 +5,40 @@ import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException
 
-case class RepositoryException(errors: Seq[RepositoryError]) extends RuntimeException(errors.head.message) with ThankException {
-  def this(error: RepositoryError) = this(Seq(error))
-}
-
+case class RepositoryException(code: String, message: String) extends RuntimeException(message) with ThankException
 case class UserException(code: String, message: String) extends RuntimeException(message) with ThankException
+case class PaymentException(code: String, message: String) extends ThankException
+case class ResourceException(code: String, message: String) extends ThankException
 
 object UserException {
   def notEnoughFunds() = new UserException("NOT_ENOUGH_FUNDS", "Not enough funds")
   def resourceAlreadyOwned(user: UserID) = new UserException("RESOURCE_ALREADY_OWNED", s"Resource already owned by ${user}")
-  def resourceOwnershipImpossible() = new UserException("RESOURCE_OWNERSHIP_IMPOSSIBLE", "Resource can't be owned")
-  def userMissing(userID: UserID) = new UserException("USER_MISSING", s"Can't find user ${userID}")
 }
 
-case class PaymentException(code: String, message: String) extends ThankException
 object PaymentException {
-  def withdrawFailure() = PaymentException("WITHDRAW_FAILURE", "System does not respond try later")
   def alreadyThanked(user: UserID, res: Resource) = PaymentException("ALREADY_THANKED", s"User ${user} already thanked ${res}")
 }
 
-
-case class ResourceException(code: String, message: String) extends ThankException
 object ResourceException {
   val OWNER_MISSING_CODE = "OWNER_MISSING_CODE"
 
   def verificationAlreadyRequested() = ResourceException("VERIFICATION_IN_PROGRESS", "Resource verification already in progress")
   def ownerMissing() = new ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
+}
+
+object RepositoryException {
+  val UNKNOWN_CODE = "0"
+  val UNKNOWN_MESSAGE = "unknown"
+
+  val DUPLICATE_KEY_CODE = "11000"
+  val DUPLICATE_KEY_MESSAGE = "Duplicate key"
+
+  def duplicateKey(message: String = DUPLICATE_KEY_MESSAGE) = {
+    RepositoryException(DUPLICATE_KEY_CODE, message)
+  }
+
+  def unknown() = RepositoryException("UNKNOWN", "Unknown error")
+
 }
 
 object ThankException {

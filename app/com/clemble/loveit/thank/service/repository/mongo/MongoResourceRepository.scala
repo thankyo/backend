@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service.repository.mongo
 import javax.inject.{Inject, Named}
 
 import akka.stream.Materializer
-import com.clemble.loveit.common.error.{RepositoryError, RepositoryException}
+import com.clemble.loveit.common.error.{RepositoryException}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.service.repository.ResourceRepository
@@ -59,7 +59,7 @@ case class MongoResourceRepository @Inject() (@Named("user") collection: JSONCol
 
     doAssignOwnership().
       recoverWith[Boolean]({
-        case RepositoryException(Seq(RepositoryError(RepositoryError.DUPLICATE_KEY_CODE, _))) =>
+        case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
           for {
             cleaned <- cleanPreviousOwner(resource)
             retry <- doAssignOwnership() if (cleaned)

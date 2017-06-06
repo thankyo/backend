@@ -89,11 +89,4 @@ object User {
     User(IDGenerator.generate()).link(profile)
   }
 
-  def empty(uri: Resource) = {
-    User(
-      id = IDGenerator.generate(),
-      owns = Set(uri)
-    )
-  }
-
 }

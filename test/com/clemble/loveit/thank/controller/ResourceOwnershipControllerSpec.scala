@@ -12,11 +12,10 @@ import play.api.test.FakeRequest
 @RunWith(classOf[JUnitRunner])
 class ResourceOwnershipControllerSpec extends ControllerSpec {
 
-  def listResources(userAuth: String): UserResource = {
-    val req = sign(userAuth, FakeRequest(GET, s"/api/v1/thank/resource/my"))
-    val fRes = route(application, req).get
+  def listResources(user: String): UserResource = {
+    val req = sign(user, FakeRequest(GET, s"/api/v1/thank/resource/my"))
+    val res = await(route(application, req).get)
 
-    val res = await(fRes)
     val respSource = res.body.consumeData.map(_.utf8String).map(Json.parse(_).as[UserResource])
     await(respSource)
   }
@@ -24,8 +23,7 @@ class ResourceOwnershipControllerSpec extends ControllerSpec {
   "GET" should {
 
     "List on new user" in {
-      val social = someRandom[CommonSocialProfile]
-      val user = createUser(social)
+      val user = createUser()
 
       val resources = listResources(user)
       val expectedUserRes = Json.toJson(getMyUser(user)).as[UserResource]

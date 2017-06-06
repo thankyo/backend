@@ -10,7 +10,6 @@ import com.clemble.loveit.user.service.repository.UserRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import com.nimbusds.jose.JWSObject
 import play.api.libs.json.Json
-import play.api.mvc.Request
 import play.api.test.FakeRequest
 
 import scala.concurrent.ExecutionContext
@@ -52,8 +51,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def getUser(id: UserID): Option[User] = {
-    val authHeader = ControllerSpec.getUser(id)
-    val readReq = FakeRequest(GET, s"/api/v1/user/${id}").withHeaders(authHeader:_*)
+    val readReq = sign(id, FakeRequest(GET, s"/api/v1/user/my"))
     val resp = await(route(application, readReq).get)
     resp.header.status match {
       case NOT_FOUND => None
@@ -62,8 +60,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def getMyPayments(user: String): Seq[ThankTransaction] = {
-    val authHeaders = ControllerSpec.getUser(user)
-    val req = FakeRequest(GET, s"/api/v1/transaction/user/my").withHeaders(authHeaders:_*)
+    val req = sign(user, FakeRequest(GET, s"/api/v1/transaction/user/my"))
     val fRes = route(application, req).get
 
     val res = await(fRes)
@@ -80,6 +77,7 @@ object ControllerSpec {
 
   def setUser(user: UserID, headers: Seq[(String, String)]) = {
     userToAuth = userToAuth + (user -> headers)
+    userToAuth
   }
 
   def getUser(user: UserID) = userToAuth(user)

@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.model
 
 import com.clemble.loveit.common.model.{Amount, CreatedAware, Resource, UserID}
-import com.clemble.loveit.common.util.WriteableUtils
+import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.Json
 
@@ -29,6 +29,8 @@ case class Thank(
 }
 
 object Thank {
+
+  val INTEGRATION_DEFAULT = Thank(Resource.from("http://example.com/verified"), IDGenerator.ZERO)
 
   /**
     * JSON format for [[Thank]]

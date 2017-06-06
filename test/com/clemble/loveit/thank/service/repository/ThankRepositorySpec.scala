@@ -28,6 +28,10 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
     await(repo.save(ownerResource))
   }
 
+  "DEFAULT exists" in {
+    eventually(await(repo.findByResource(Thank.INTEGRATION_DEFAULT.resource)) shouldNotEqual None)
+  }
+
   "THANKED" should {
 
     "be NONE for non existent" in {

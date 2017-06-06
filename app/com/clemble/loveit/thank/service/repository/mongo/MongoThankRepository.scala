@@ -73,8 +73,17 @@ case class MongoThankRepository @Inject()(
 object MongoThankRepository {
 
   def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext) = {
+    createDefault(collection)
     ensureIndexes(collection)
     addGivers(collection)
+  }
+
+  private def createDefault(collection: JSONCollection)(implicit ex: ExecutionContext) = {
+    collection.find(Json.obj("resource" -> Thank.INTEGRATION_DEFAULT.resource)).
+      one[JsObject].flatMap(_ match {
+        case Some(thank) => Future.successful(thank)
+        case None => collection.insert(Thank.INTEGRATION_DEFAULT)
+    })
   }
 
   private def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext) = {

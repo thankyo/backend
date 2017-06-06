@@ -2,6 +2,7 @@ package com.clemble.loveit.user.controller
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.model.{User, UserIdentity}
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -68,7 +69,7 @@ class SocialAuthController @Inject() (
         value <- silhouette.env.authenticatorService.init(authenticatorWithClaim)
         result <- silhouette.env.authenticatorService.embed(value, Ok(value))
       } yield {
-        result
+        CookieUtils.setUser(result, user.id)
       }
     }
 

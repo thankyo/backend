@@ -51,8 +51,8 @@ case class ThankController @Inject()(
 
   def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     render.async({
-      case Accepts.Json => getJson(res)
-      case Accepts.Html => getHtml(CookieUtils.readUser(req), res)
+      case Accepts.Json() => getJson(res)
+      case Accepts.Html() => getHtml(CookieUtils.readUser(req), res)
     })
   })
 

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
     <body>
-        <span id="SPAN_1" onclick="tip()">LoveIt</span>
+        <a id="SPAN_1" onclick="tip()">LoveIt</a>
         <script>
             function tip() {
                 function singIn() {
@@ -19,8 +19,8 @@
                     });
                     fetch(req).
                         then(function(res) { return res.json() }).
-                        then(function(json) {
-                            document.getElementById("SPAN_1").innerHTML = json.given;
+                        then(function() {
+                            document.getElementById("SPAN_1").style.backgroundColor = "#00D1B2";
                         })
                 }
 
@@ -50,7 +50,7 @@
                 perspective-origin: 44.0781px 16px;
                 transform-origin: 44.0781px 16px;
                 caret-color: rgb(255, 255, 255);
-                background: rgb(0, 209, 178) none repeat scroll 0% 0% / auto padding-box border-box;
+                background: rgb(255, 211, 87) none repeat scroll 0% 0% / auto padding-box border-box;
                 border: 0px none rgb(255, 255, 255);
                 border-radius: 290486px 290486px 290486px 290486px;
                 font: normal normal normal normal 16px / 24px system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;

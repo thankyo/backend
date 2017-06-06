@@ -30,10 +30,10 @@ class ThankControllerSpec extends ControllerSpec {
         uri <- uriVariations
       } yield {
         val req = FakeRequest(PUT, s"/api/v1/thank/http/${uri}").withHeaders(giver:_*)
-        route(application, req).get.map(_.header.status).recoverWith({ case t => Future.successful(500) })
+        route(application, req).get.map(_.header.status).recoverWith({ case _ => Future.successful(500) })
       }
       val updateReq = await(Future.sequence(thanks))
-      updateReq.filter(_ == OK).size shouldEqual 1
+      updateReq.forall(_ == OK) should beTrue
 
       getMyUser()(owner).balance shouldEqual ownerBalanceBefore + 1
     }

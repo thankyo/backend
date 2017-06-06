@@ -43,12 +43,11 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   "Thank " should {
 
-
     "Decrement for the giver" in {
       val (url, _, giver) = createScene()
 
       thank(giver.id, url)
-      getBalance(url) shouldEqual 1
+      eventually(getBalance(url) shouldEqual 1)
 
       eventually(giver.balance - 1 shouldEqual getBalance(giver.id))
     }
@@ -57,7 +56,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       val (url, owner, giver) = createScene()
 
       thank(giver.id, url)
-      getBalance(url) shouldEqual 1
+      eventually(getBalance(url) shouldEqual 1)
 
       eventually(owner.balance + 1 shouldEqual getBalance(owner.id))
     }
@@ -70,8 +69,9 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
       // Double thank has no effect
       thank(giver.id, url)
-      thank(giver.id, url) should throwA[PaymentException]
-      getBalance(url) shouldEqual 1
+      thank(giver.id, url)
+      thank(giver.id, url)
+      eventually(getBalance(url) shouldEqual 1)
 
       // Balance did not change
       eventually(getBalance(owner.id) shouldEqual owner.balance + 1)

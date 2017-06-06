@@ -18,10 +18,6 @@ case class ThankController @Inject()(
                                       implicit val ec: ExecutionContext
                                     ) extends Controller {
 
-  private def ownerMissing() = {
-
-  }
-
   def get(resource: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     val fThank = service.getOrCreate(resource)
     val fResponse = for {

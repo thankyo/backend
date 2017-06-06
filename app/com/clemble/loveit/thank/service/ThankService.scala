@@ -52,9 +52,9 @@ case class SimpleThankService @Inject()(
   override def thank(giver: UserID, res: Resource): Future[Thank] = {
     val fThank = getOrCreate(res)
     val fTransaction = fThank.
-      filter(t => t.thankedBy(giver)).
+      filter(t => !t.thankedBy(giver)).
       flatMap(t => {
-        thankRepo.increase(giver, res).
+        thankRepo.increase(giver, t.resource).
           filter(_ == true).
           flatMap(_ => transactionService.create(giver, t.owner, t.resource))
       }).recover({ case _ => List.empty})

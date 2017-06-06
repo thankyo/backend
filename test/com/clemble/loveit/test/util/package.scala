@@ -1,7 +1,7 @@
 package com.clemble.loveit.test
 
 import com.clemble.loveit.common.error.{RepositoryError, RepositoryException, ThankException, UserException}
-import com.clemble.loveit.common.model.{HttpResource, Resource}
+import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 import com.clemble.loveit.payment.model._
 import com.clemble.loveit.thank.model.{Pending, ROVerification, Thank}
@@ -30,8 +30,13 @@ package object util {
   implicit val verificationGenerator: Generator[ROVerification[Resource]] = ROVerificationGenerator
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
   implicit val userGenerator: Generator[User] = UserGenerator
+  implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
+
+  private object UserIDGenerator extends Generator[UserID] {
+    override def generate(): UserID = IDGenerator.generate()
+  }
 
   private object BankDetailsGenerator extends Generator[BankDetails] {
 

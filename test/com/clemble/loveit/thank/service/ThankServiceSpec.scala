@@ -1,8 +1,9 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.error.PaymentException
+import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
+import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -40,6 +41,33 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
   def getBalance(url: Resource): Amount = {
     await(thankService.getOrCreate(url)).given
   }
+
+  "thanked" should {
+
+    "return false on random res" in {
+      val user = someRandom[UserID]
+      val res = someRandom[Resource]
+
+      await(thankService.thanked(user, res)) should throwA[ResourceException]
+    }
+
+
+    "return false on random res" in {
+      val (res, _, giver) = createScene()
+
+      await(thankService.thanked(giver.id, res)) shouldEqual false
+    }
+
+    "return true if thanked" in {
+      val (res, _, giver) = createScene()
+
+      await(thankService.thank(giver.id, res))
+      await(thankService.thanked(giver.id, res)) shouldEqual true
+    }
+
+
+  }
+
 
   "Thank " should {
 

@@ -28,7 +28,10 @@ case class SimpleThankService @Inject()(
 ) extends ThankService {
 
   override def thanked(giver: UserID, res: Resource): Future[Boolean] = {
-    getOrCreate(res).map(_.thankedBy(giver))
+    thankRepo.thanked(giver, res).flatMap(_ match {
+      case Some(thanked) => Future.successful(thanked)
+      case None => getOrCreate(res).map(thank => thank.thankedBy(giver))
+    })
   }
 
   override def getOrCreate(resource: Resource): Future[Thank] = {

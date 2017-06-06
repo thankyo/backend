@@ -28,6 +28,36 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
     await(repo.save(ownerResource))
   }
 
+  "THANKED" should {
+
+    "be NONE for non existent" in {
+      val user = IDGenerator.generate()
+      val resource = someRandom[Resource]
+
+      await(repo.thanked(user, resource)) shouldEqual None
+    }
+
+    "be false for not thanked" in {
+      val user = IDGenerator.generate()
+
+      val thank = someRandom[Thank]
+      await(repo.save(thank))
+
+      await(repo.thanked(user, thank.resource)) shouldEqual Some(false)
+    }
+
+    "be true for thanked" in {
+      val user = IDGenerator.generate()
+
+      val thank = someRandom[Thank]
+      await(repo.save(thank))
+
+      await(repo.increase(user, thank.resource))
+      await(repo.thanked(user, thank.resource)) shouldEqual Some(true)
+    }
+
+  }
+
   "CREATE" should {
 
     "create all parents" in {

@@ -12,6 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ThankService {
 
+  def thanked(giver: UserID, uri: Resource): Future[Boolean]
+
   def getOrCreate(uri: Resource): Future[Thank]
 
   def thank(giver: UserID, uri: Resource): Future[Thank]
@@ -24,6 +26,10 @@ case class SimpleThankService @Inject()(
                                          thankRepo: ThankRepository,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
+
+  override def thanked(giver: UserID, res: Resource): Future[Boolean] = {
+    getOrCreate(res).map(_.thankedBy(giver))
+  }
 
   override def getOrCreate(resource: Resource): Future[Thank] = {
     def createIfMissing(thankOpt: Option[Thank]): Future[Thank] = {

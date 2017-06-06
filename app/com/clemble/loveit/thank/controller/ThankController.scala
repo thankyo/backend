@@ -6,6 +6,7 @@ import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.{ResourceException}
+import com.clemble.loveit.common.error.ResourceException._
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller
 
@@ -29,7 +30,7 @@ case class ThankController @Inject()(
       }
     }
     fResponse.recover({
-      case ResourceException(ResourceException.OWNER_MISSING_CODE, _) =>
+      case ResourceException(OWNER_MISSING_CODE, _) =>
         Ok(com.clemble.loveit.thank.controller.html.ownerMissing(resource))})
   })
 

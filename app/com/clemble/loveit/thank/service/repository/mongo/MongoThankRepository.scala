@@ -6,7 +6,7 @@ import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import javax.inject.{Inject, Named, Singleton}
 
-import play.api.libs.json.{JsArray, Json}
+import play.api.libs.json.{JsArray, JsObject, Json}
 import play.modules.reactivemongo.json._
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
@@ -20,6 +20,17 @@ case class MongoThankRepository @Inject()(
                                          ) extends ThankRepository {
 
   MongoThankRepository.ensureMeta(collection)
+
+  override def thanked(giver: UserID, resource: Resource): Future[Option[Boolean]] = {
+    val query = Json.obj(
+      "resource" -> resource,
+      "givers" -> Json.obj("$exists" -> giver)
+    )
+    val projection = Json.obj("givers" -> 1)
+    collection.find(query, projection).
+      one[JsObject].
+      map(_.flatMap(json => (json \ "givers").asOpt[JsArray].map(_.value.size > 0)))
+  }
 
   override def save(thank: Thank): Future[Boolean] = {
     MongoSafeUtils.safeSingleUpdate(collection.insert(thank))

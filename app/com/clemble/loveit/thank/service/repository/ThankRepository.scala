@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service.repository
 
-import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model.Thank
 
 import scala.concurrent.Future
@@ -17,6 +17,11 @@ trait ThankRepository {
     * @return true if create was a success
     */
   def save(thank: Thank): Future[Boolean]
+
+  /**
+    * Checks if user thanked resource
+    */
+  def thanked(giver: UserID, resource: Resource): Future[Option[Boolean]]
 
   /**
     * Find [[Thank]]

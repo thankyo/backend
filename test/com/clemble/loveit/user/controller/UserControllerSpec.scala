@@ -17,9 +17,9 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
     "Support single create" in {
       val socialProfile = someRandom[CommonSocialProfile]
-      val userAuth = createUser(socialProfile)
+      val user = createUser(socialProfile)
 
-      val savedUser = getMyUser()(userAuth)
+      val savedUser = getMyUser(user)
       val expectedUser = (User from socialProfile).copy(id = savedUser.id, created = savedUser.created)
       savedUser must beEqualTo(expectedUser)
     }
@@ -27,10 +27,10 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
     "Return same user on the same authentication" in {
       val socialProfile = someRandom[CommonSocialProfile]
       val firstAuth = createUser(socialProfile)
-      val firstUser = getMyUser()(firstAuth)
+      val firstUser = getMyUser(firstAuth)
 
       val secondAuth = createUser(socialProfile)
-      val secondUser = getMyUser()(firstAuth)
+      val secondUser = getMyUser(secondAuth)
 
       firstAuth shouldNotEqual secondAuth
       secondUser shouldEqual firstUser
@@ -48,7 +48,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
       val userCookie = setCookie.get
       val userId = setCookie.get.substring(7, userCookie.indexOf(";"))
-      val expectedId = getMyUser()(res.header.headers.toSeq).id
+      val expectedId = getMyUser(userId).id
       userId shouldEqual expectedId
     }
 

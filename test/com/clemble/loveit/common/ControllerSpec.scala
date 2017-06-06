@@ -1,15 +1,16 @@
 package com.clemble.loveit.common
 
 import akka.stream.scaladsl.Sink
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.payment.service.repository.PaymentRepository
 import com.clemble.loveit.thank.service.ResourceOwnershipService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+import com.nimbusds.jose.JWSObject
 import play.api.libs.json.Json
+import play.api.mvc.Request
 import play.api.test.FakeRequest
 
 import scala.concurrent.ExecutionContext
@@ -21,7 +22,7 @@ trait ControllerSpec extends ThankSpecification {
   val userRep = dependency[UserRepository]
   val ownershipService = dependency[ResourceOwnershipService]
 
-  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): Seq[(String, String)] = {
+  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): String = {
     val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").withJsonBody(Json.toJson(socialProfile))
     val fRes = route(application, req).get
 
@@ -29,20 +30,29 @@ trait ControllerSpec extends ThankSpecification {
     res.header.status must beEqualTo(200)
 
     val bodyStr = await(res.body.consumeData).utf8String
-    val resp = Seq("X-Auth-Token" -> bodyStr)
+    val jsonStr = JWSObject.parse(bodyStr).getPayload.toString
+    val user = (Json.parse(jsonStr) \ "id").as[String]
 
-    resp
+    ControllerSpec.setUser(user, Seq("X-Auth-Token" -> bodyStr))
+
+    user
   }
 
-  def addOwnership(user: UserID, own: Resource)(implicit authHeader: Seq[(String, String)]): Option[Resource] = {
+  def sign[A](user: UserID, req: FakeRequest[A]) = {
+    val userAuth = ControllerSpec.getUser(user)
+    req.withHeaders(userAuth:_*)
+  }
+
+  def addOwnership(user: UserID, own: Resource): Option[Resource] = {
     Some(await(ownershipService.assignOwnership(user, own)))
   }
 
-  def getMyUser()(implicit authHeader: Seq[(String, String)]): User = {
-    getUser("my").get
+  def getMyUser(user: UserID): User = {
+    getUser(user).get
   }
 
-  def getUser(id: UserID)(implicit authHeader: Seq[(String, String)]): Option[User] = {
+  def getUser(id: UserID): Option[User] = {
+    val authHeader = ControllerSpec.getUser(id)
     val readReq = FakeRequest(GET, s"/api/v1/user/${id}").withHeaders(authHeader:_*)
     val resp = await(route(application, readReq).get)
     resp.header.status match {
@@ -51,7 +61,8 @@ trait ControllerSpec extends ThankSpecification {
     }
   }
 
-  def getMyPayments()(implicit authHeaders: Seq[(String, String)]): Seq[ThankTransaction] = {
+  def getMyPayments(user: String): Seq[ThankTransaction] = {
+    val authHeaders = ControllerSpec.getUser(user)
     val req = FakeRequest(GET, s"/api/v1/transaction/user/my").withHeaders(authHeaders:_*)
     val fRes = route(application, req).get
 

@@ -14,8 +14,8 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
 
   lazy val service = dependency[ResourceOwnershipService]
 
-  def listResources(userAuth: Seq[(String, String)]): Set[Resource] = {
-    await(service.list(userAuth.head._2))
+  def listResources(user: String): Set[Resource] = {
+    await(service.list(user))
   }
 
   def assignOwnership(userAuth: Seq[(String, String)], resource: Resource) = {
@@ -26,13 +26,13 @@ class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends Servic
 
     "assign ownership" in {
       val social = someRandom[CommonSocialProfile]
-      val userAuth = createUser(social)
+      val user = createUser(social)
 
       val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"
-      assignOwnership(userAuth, resource)
+      assignOwnership(user, resource)
 
       val expectedResources = List(resource)
-      eventually(listResources(userAuth) shouldEqual expectedResources)
+      eventually(listResources(user) shouldEqual expectedResources)
     }
 
     "prohibit assigning same resource" in {

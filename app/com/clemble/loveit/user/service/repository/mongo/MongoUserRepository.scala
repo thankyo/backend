@@ -99,6 +99,7 @@ object MongoUserRepository {
     addMonthlyLimit(collection)
     changeOwner(collection)
     removeSocialResources(collection)
+    addPending(collection)
   }
 
   private def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
@@ -148,6 +149,12 @@ object MongoUserRepository {
     val selector = Json.obj("owns.type" -> "social")
     val projection = Json.obj("owns" -> Json.obj("$pull" -> Json.obj("type" -> "social")))
     collection.update(selector, projection, multi = true)
+  }
+
+  private def addPending(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
+    val selector = Json.obj("pending" -> Json.obj("$exists" -> false))
+    val update = Json.obj("$set" -> Json.obj("pending" -> Json.arr()))
+    collection.update(selector, update, multi = true).map(res => if (!res.ok) System.exit(3))
   }
 
 }

@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ThankService {
 
-  def thanked(giver: UserID, uri: Resource): Future[Boolean]
+  def hasThanked(giver: UserID, uri: Resource): Future[Boolean]
 
   def getOrCreate(uri: Resource): Future[Thank]
 
@@ -27,7 +27,7 @@ case class SimpleThankService @Inject()(
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
 
-  override def thanked(giver: UserID, res: Resource): Future[Boolean] = {
+  override def hasThanked(giver: UserID, res: Resource): Future[Boolean] = {
     thankRepo.thanked(giver, res).flatMap(_ match {
       case Some(thanked) => Future.successful(thanked)
       case None => getOrCreate(res).map(thank => thank.thankedBy(giver))

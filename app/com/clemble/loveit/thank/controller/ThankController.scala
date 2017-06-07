@@ -32,7 +32,7 @@ case class ThankController @Inject()(
     val fResponse = giver match {
       case Some(giver) =>
         for {
-          thanked <- service.thanked(giver, res)
+          thanked <- service.hasThanked(giver, res)
         } yield {
           if (thanked) {
             Ok(hasThanked())

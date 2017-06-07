@@ -1,18 +1,17 @@
 package com.clemble.loveit.payment.model
 
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
+import com.clemble.loveit.common.util.{WriteableUtils}
+import com.clemble.loveit.user.model.UserAware
 import org.joda.time.DateTime
 import play.api.libs.json._
 
 case class ThankTransaction(
-                             id: PaymentID,
                              user: UserID,
-                             amount: Amount,
+                             destination: UserID,
                              resource: Resource,
-                             operation: PaymentOperation,
                              created: DateTime = DateTime.now()
-                  ) extends Transaction with ResourceAware
+                  ) extends ResourceAware with UserAware
 
 object ThankTransaction {
 
@@ -22,25 +21,5 @@ object ThankTransaction {
   implicit val jsonFormat = Json.format[ThankTransaction]
 
   implicit val thankTransactionWriteable = WriteableUtils.jsonToWriteable[ThankTransaction]
-
-  def debit(user: UserID, uri: Resource, amount: Amount): ThankTransaction = {
-    ThankTransaction(
-      IDGenerator.generate(),
-      user,
-      amount,
-      uri,
-      Debit
-    )
-  }
-
-  def credit(user: UserID, uri: Resource, amount: Amount): ThankTransaction = {
-    ThankTransaction(
-      IDGenerator.generate(),
-      user,
-      amount,
-      uri,
-      Credit
-    )
-  }
 
 }

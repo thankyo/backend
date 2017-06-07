@@ -16,6 +16,6 @@ trait ThankTransactionRepository extends UserAwareRepository[ThankTransaction] {
     * @param payment payment to save
     * @return saved Payment presentation
     */
-  def save(payment: ThankTransaction): Future[ThankTransaction]
+  def save(payment: ThankTransaction): Future[Boolean]
 
 }

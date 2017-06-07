@@ -53,12 +53,6 @@ class ThankControllerSpec extends ControllerSpec {
 
       giverTransactions.size shouldEqual 1
       ownerTransactions.size shouldEqual 1
-
-      giverTransactions.head.amount shouldEqual 1L
-      giverTransactions.head.operation shouldEqual Credit
-
-      ownerTransactions.head.amount shouldEqual 1L
-      ownerTransactions.head.operation shouldEqual Debit
     }
 
   }

@@ -24,11 +24,4 @@ case class PaymentController @Inject()(
     transaction.map(Ok(_))
   })
 
-  def withdraw() = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "amount"))(req => {
-    val amount = req.body.as[Int]
-    val fTransaction = service.withdraw(req.identity.id, amount)
-    fTransaction.map(Ok(_))
-  })
-
-
 }

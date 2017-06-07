@@ -138,10 +138,7 @@ package object util {
   private object ThankTransactionGenerator extends Generator[ThankTransaction] {
 
     override def generate(): ThankTransaction = {
-      if (nextInt(0, 1) == 0)
-        ThankTransaction.debit(someRandom[User].id, someRandom[Resource], nextLong(0, Long.MaxValue))
-      else
-        ThankTransaction.credit(someRandom[User].id, someRandom[Resource], nextLong(0, Long.MaxValue))
+      ThankTransaction(someRandom[UserID], someRandom[UserID], someRandom[Resource], new DateTime(nextLong(0, Long.MaxValue)))
     }
 
   }

@@ -43,15 +43,13 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
     }
 
     "list all transactions" in {
-      val user = someRandom[User]
+      val giver = createUser()
 
-      await(userRepo.save(user))
-      val A = await(thankTransService.create(user.id, "A", someRandom[Resource]))
-      val B = await(thankTransService.create(user.id, "B", someRandom[Resource]))
-      val payments = await(thankTransService.list(user.id).runWith(Sink.seq[ThankTransaction]))
+      val transactionA = await(thankTransService.create(giver, "A", someRandom[Resource]))
+      val transactionB = await(thankTransService.create(giver, "B", someRandom[Resource]))
+      val payments = await(thankTransService.list(giver).runWith(Sink.seq[ThankTransaction]))
 
-      val expected = (A ++ B).filter(_.user == user.id)
-      payments must containAllOf(expected)
+      payments must containAllOf(Seq(transactionA, transactionB))
     }
 
   }

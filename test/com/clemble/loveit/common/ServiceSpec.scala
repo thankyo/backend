@@ -22,9 +22,9 @@ trait ServiceSpec extends ThankSpecification {
   }
 
   // TODO remove balance it's no longer relevant
-  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): Seq[(String, String)] = {
+  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): String = {
     val userIdentity = await(authController.createOrUpdateUser(socialProfile)(FakeRequest()))
-    Seq("id" -> userIdentity.id)
+    userIdentity.id
   }
 
   def assignOwnership(user: UserID, res: Resource) = await(resService.assignOwnership(user, res))

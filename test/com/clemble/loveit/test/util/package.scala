@@ -30,11 +30,24 @@ package object util {
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
   implicit val userGenerator: Generator[User] = UserGenerator
   implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
+  implicit val payoutGenerator: Generator[Payout] = PayoutGenerator
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
 
   private object UserIDGenerator extends Generator[UserID] {
     override def generate(): UserID = IDGenerator.generate()
+  }
+
+  private object PayoutGenerator extends Generator[Payout] {
+    override def generate(): Payout = Payout(
+      IDGenerator.generate(),
+      someRandom[UserID],
+      someRandom[BankDetails],
+      nextLong(0, Long.MaxValue),
+      nextLong(0, Long.MaxValue),
+      nextLong(0, Long.MaxValue),
+      PayoutStatus.Pending
+    )
   }
 
   private object BankDetailsGenerator extends Generator[BankDetails] {

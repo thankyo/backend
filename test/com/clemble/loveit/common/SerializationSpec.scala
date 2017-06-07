@@ -1,11 +1,14 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.test.util.Generator
+import org.joda.time.DateTimeZone
 import play.api.libs.json.{Format, JsValue, Json}
 
 import scala.util.Try
 
 abstract class SerializationSpec[T](implicit jsonFormat: Format[T], generator: Generator[T]) extends ThankSpecification {
+
+  DateTimeZone.setDefault(DateTimeZone.UTC)
 
   "JSON" should {
     val value: T = someRandom[T]

@@ -24,8 +24,7 @@ sealed trait PaymentService {
 
 @Singleton
 case class SimplePaymentService @Inject()(
-                                           thankBalanceService: PaymentRepository,
-                                           bankDetailsService: BankDetailsService,
+                                           paymentRepo: PaymentRepository,
                                            exchangeService: ExchangeService,
                                            processingService: PaymentProcessingService[PaymentRequest],
                                            withdrawService: WithdrawService[BankDetails],
@@ -38,8 +37,8 @@ case class SimplePaymentService @Inject()(
     for {
       (id, bankDetails, money) <- processingService.process(req)
       thanks = exchangeService.toThanks(money)
-      _ <- bankDetailsService.set(user, bankDetails)
-      userUpdate <- thankBalanceService.updateBalance(user, thanks) if (userUpdate)
+      _ <- paymentRepo.setBankDetails(user, bankDetails)
+      userUpdate <- paymentRepo.updateBalance(user, thanks) if (userUpdate)
       debitTransaction = PaymentTransaction.debit(id, user, thanks, money, bankDetails)
       savedTransaction <- repo.save(debitTransaction)
     } yield {
@@ -50,10 +49,10 @@ case class SimplePaymentService @Inject()(
   override def withdraw(user: UserID, amount: Amount): Future[PaymentTransaction] = {
     val money = exchangeService.toAmount(amount)
     for {
-      bankDetailsOpt <- bankDetailsService.get(user) if (bankDetailsOpt.isDefined)
+      bankDetailsOpt <- paymentRepo.getBankDetails(user) if (bankDetailsOpt.isDefined)
       bankDetails = bankDetailsOpt.get
       (id, withdraw) <- withdrawService.withdraw(money, bankDetails) if (withdraw)
-      userUpdate <- thankBalanceService.updateBalance(user, -amount) if (userUpdate)
+      userUpdate <- paymentRepo.updateBalance(user, -amount) if (userUpdate)
       creditTransaction = PaymentTransaction.credit(id, user, amount, money, bankDetails)
       savedTransaction <- repo.save(creditTransaction)
     } yield {

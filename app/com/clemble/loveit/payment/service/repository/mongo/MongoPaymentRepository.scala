@@ -2,6 +2,7 @@ package com.clemble.loveit.payment.service.repository.mongo
 
 import javax.inject.{Inject, Named, Singleton}
 
+import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.BankDetails
@@ -14,6 +15,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 case class MongoPaymentRepository @Inject()(@Named("user") collection: JSONCollection, implicit val ec: ExecutionContext) extends PaymentRepository {
+
+  override def listBankDetails(): Source[(String, Option[BankDetails]), _] = {
+    Source.empty
+  }
 
   override def getBalance(user: UserID): Future[Amount] = {
     val selector = Json.obj("_id" -> user)

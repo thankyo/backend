@@ -18,7 +18,7 @@ trait UserPayment {
   /**
     * BankDetails to use for withdraw and
     */
-  val bankDetails: BankDetails
+  val bankDetails: Option[BankDetails]
   /**
     * Monthly transaction limit
     */

@@ -9,7 +9,6 @@ import play.api.libs.json._
   * Bank details abstraction
   */
 sealed trait BankDetails
-case object EmptyBankDetails extends BankDetails
 case class PayPalBankDetails(email: Email) extends BankDetails {
   require(email != null)
 }
@@ -18,8 +17,6 @@ case class StripeBankDetails(customer: String) extends BankDetails {
 }
 
 object BankDetails {
-
-  val empty: BankDetails = EmptyBankDetails
 
   def payPal(email: String): PayPalBankDetails = PayPalBankDetails(email)
 

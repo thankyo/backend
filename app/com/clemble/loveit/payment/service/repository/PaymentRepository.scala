@@ -7,6 +7,8 @@ import scala.concurrent.Future
 
 trait PaymentRepository {
 
+  def getBalance(user: UserID): Future[Amount]
+
   def updateBalance(user: UserID, change: Amount): Future[Boolean]
 
   def getBankDetails(user: UserID): Future[Option[BankDetails]]

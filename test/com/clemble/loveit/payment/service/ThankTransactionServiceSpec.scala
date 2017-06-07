@@ -2,11 +2,9 @@ package com.clemble.loveit.payment.service
 
 import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{HttpResource, Resource}
+import com.clemble.loveit.common.model.{Resource}
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
-import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -19,27 +17,37 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
 
   "PAYMENT" should {
 
-    "Debit increases User balance" in {
-      val user = someRandom[User].copy(balance = 100)
-      val savedUser = await(userRepo.save(user))
+    "same resource transactions ignored" in {
+      val giver = createUser()
+      val res = someRandom[Resource]
 
-      await(thankTransService.create(user.id, "A", HttpResource("example.com")))
-      val readUser = await(userRepo.findById(user.id).map(_.get))
+      await(thankTransService.create(giver, "A", res))
+      await(thankTransService.create(giver, "B", res))
 
-      savedUser.balance shouldEqual 100
-      readUser.balance shouldEqual 99
+      val payments = await(thankTransService.list(giver).runWith(Sink.seq[ThankTransaction]))
+      payments.size must beEqualTo(1)
+
+      val giverBalanceAfter = await(balanceService.getBalance(giver))
+      giverBalanceAfter shouldEqual -1
     }
 
-    "Credit decrease User balance" in {
-      val url = HttpResource(s"${RandomStringUtils.randomNumeric(100)}.com")
-      val user = someRandom[User].copy(balance = 100)
-      val savedUser = await(userRepo.save(user))
+    "increase resource owner balance" in {
+      val giver = createUser()
+      val owner = createUser()
 
-      await(thankTransService.create(user.id, "B", url))
-      val readUser = await(userRepo.findById(user.id).map(_.get))
+      await(thankTransService.create(giver, owner, someRandom[Resource]))
+      val ownerBalanceAfter = await(balanceService.getBalance(owner))
 
-      savedUser.balance shouldEqual 100
-      readUser.balance shouldEqual 99
+      ownerBalanceAfter shouldEqual 1
+    }
+
+    "decrease giver balance" in {
+      val giver = createUser()
+
+      await(thankTransService.create(giver, "B", someRandom[Resource]))
+      val giverBalanceAfter = await(balanceService.getBalance(giver))
+
+      giverBalanceAfter shouldEqual -1
     }
 
     "list all transactions" in {

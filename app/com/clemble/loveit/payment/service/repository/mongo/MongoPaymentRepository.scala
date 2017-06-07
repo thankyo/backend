@@ -15,6 +15,15 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class MongoPaymentRepository @Inject()(@Named("user") collection: JSONCollection, implicit val ec: ExecutionContext) extends PaymentRepository {
 
+  override def getBalance(user: UserID): Future[Amount] = {
+    val selector = Json.obj("_id" -> user)
+    val projection = Json.obj("balance" -> 1)
+    collection.
+      find(selector, projection).
+      one[JsObject].
+      map(_.flatMap(json => (json \ "balance").asOpt[Amount]).getOrElse(0))
+  }
+
   override def updateBalance(user: UserID, update: Amount): Future[Boolean] = {
     val query = Json.obj("_id" -> user)
     val change = Json.obj("$inc" -> Json.obj("balance" -> update))

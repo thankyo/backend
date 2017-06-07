@@ -27,7 +27,6 @@ case class Payout(
                    bankDetails: BankDetails,
                    failed: Long,
                    pending: Long,
-                   processed: Long,
                    status: PayoutStatus,
                    created: DateTime = new DateTime()
 ) extends UserAware with CreatedAware

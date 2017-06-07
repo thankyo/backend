@@ -1,6 +1,5 @@
 package com.clemble.loveit.payment.service.repository
 
-import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.payment.model.BankDetails
 
@@ -19,11 +18,6 @@ trait PaymentRepository {
     * @return true if operation proceeded as expected, false otherwise
     */
   def updateBalance(user: UserID, change: Amount): Future[Boolean]
-
-  /**
-    * Lists users with BankDetails specified
-    */
-  def listBankDetails(): Source[(UserID, Option[BankDetails]), _]
 
   /**
     * Get user bank details

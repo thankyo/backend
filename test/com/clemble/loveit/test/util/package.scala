@@ -45,7 +45,6 @@ package object util {
       someRandom[BankDetails],
       nextLong(0, Long.MaxValue),
       nextLong(0, Long.MaxValue),
-      nextLong(0, Long.MaxValue),
       PayoutStatus.Pending
     )
   }

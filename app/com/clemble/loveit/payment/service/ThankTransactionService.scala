@@ -28,9 +28,9 @@ case class SimpleThankTransactionService @Inject()(ownershipService: PaymentRepo
   override def create(giver: UserID, owner: UserID, url: Resource): Future[ThankTransaction] = {
     val transaction = ThankTransaction(giver, owner, url)
     for {
-      updatedOwner <- ownershipService.updateBalance(owner, 1)
-      updatedGiver <- ownershipService.updateBalance(giver, -1)
       savedInRepo <- repository.save(transaction)
+      updatedOwner <- ownershipService.updateBalance(owner, 1) if (savedInRepo)
+      updatedGiver <- ownershipService.updateBalance(giver, -1) if (savedInRepo)
     } yield {
       if (!updatedGiver || !updatedOwner || !savedInRepo)
         logger.error(s"${giver} ${owner} ${url} failed to properly process transaction ${updatedGiver} ${updatedOwner} ${savedInRepo}")

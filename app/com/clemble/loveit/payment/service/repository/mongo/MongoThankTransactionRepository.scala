@@ -22,7 +22,7 @@ case class MongoThankTransactionRepository @Inject()(
   extends ThankTransactionRepository {
 
   override def save(transaction: ThankTransaction): Future[Boolean] = {
-    val selector = Json.obj("_id" -> transaction.user)
+    val selector = Json.obj("_id" -> transaction.user, "pending.resource" -> Json.obj("$ne" -> transaction.resource))
     val update = Json.obj("$push" -> Json.obj("pending" -> transaction))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }

@@ -52,7 +52,7 @@ class ThankControllerSpec extends ControllerSpec {
       val ownerTransactions = getMyPayments(owner)
 
       giverTransactions.size shouldEqual 1
-      ownerTransactions.size shouldEqual 1
+      ownerTransactions.size shouldEqual 0
     }
 
   }

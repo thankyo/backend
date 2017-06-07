@@ -2,12 +2,14 @@ package com.clemble.loveit.payment.service
 
 import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{Resource}
+import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
+
+import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
@@ -22,7 +24,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val res = someRandom[Resource]
 
       await(thankTransService.create(giver, "A", res))
-      await(thankTransService.create(giver, "B", res))
+      Try(await(thankTransService.create(giver, "B", res)))
 
       val payments = await(thankTransService.list(giver).runWith(Sink.seq[ThankTransaction]))
       payments.size must beEqualTo(1)

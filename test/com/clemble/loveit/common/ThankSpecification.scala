@@ -4,6 +4,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{Reads, Writes}
 import play.api.test.PlaySpecification
 
 import scala.collection.immutable
@@ -19,6 +20,10 @@ trait ThankSpecification extends PlaySpecification {
 
   import com.clemble.loveit.test.util._
   def someRandom[T](implicit generator: Generator[T]) = generator.generate()
+
+  def view[S, V](source: S)(implicit sWrites: Writes[S], vReads: Reads[V]): V = {
+    vReads.reads(sWrites.writes(source)).get
+  }
 
   implicit lazy val materializer: Materializer = dependency[Materializer]
 

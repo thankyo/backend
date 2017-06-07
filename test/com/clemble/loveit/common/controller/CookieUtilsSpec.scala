@@ -3,11 +3,13 @@ package com.clemble.loveit.common.controller
 import akka.util.ByteString
 import com.clemble.loveit.common.ThankSpecification
 import com.clemble.loveit.common.model.UserID
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 import play.api.http.HttpEntity.Strict
 import play.api.mvc.{ResponseHeader, Result}
 import play.api.test.FakeRequest
 
-
+@RunWith(classOf[JUnitRunner])
 class CookieUtilsSpec extends ThankSpecification {
 
   "READ cookie" in {

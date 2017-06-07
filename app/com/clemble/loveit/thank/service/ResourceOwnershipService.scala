@@ -27,15 +27,19 @@ case class SimpleResourceOwnershipService @Inject() (userRepo: ResourceRepositor
   override def assignOwnership(user: UserID, res: Resource): Future[Resource] = {
     // TODO assign is internal operation, so it might not need to throw Exception,
     // since verification has already been done before
-    for {
+    val fUpdate = for {
       ownerOpt <- userRepo.findOwner(res)
     } yield {
       if (ownerOpt.map(_ != user).getOrElse(false))
         throw UserException.resourceAlreadyOwned(ownerOpt.get)
-      thankRepo.updateOwner(user, res)
-      userRepo.assignOwnership(user, res)
-      res
+      for {
+        updThanks <- thankRepo.updateOwner(user, res) if(updThanks)
+        updRes <- userRepo.assignOwnership(user, res) if(updRes)
+      } yield {
+        res
+      }
     }
+    fUpdate.flatMap(f => f)
   }
 
 }

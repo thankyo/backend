@@ -15,30 +15,30 @@ class ROVerificationServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSp
   "CREATE" should {
 
     "ignore if resource already owned" in {
-      val A = someUser()
-      val B = someUser()
+      val A = createUser()
+      val B = createUser()
 
       val res = someRandom[Resource]
-      assignOwnership(A.id, res)
+      assignOwnership(A, res)
 
-      await(resVerService.create(B.id, res)) should throwA[UserException]
+      await(resVerService.create(B, res)) should throwA[UserException]
     }
 
     "simply works" in {
-      val A = someUser()
+      val A = createUser()
       val res = someRandom[Resource]
 
-      await(resVerService.create(A.id, res)).resource shouldEqual res
+      await(resVerService.create(A, res)).resource shouldEqual res
     }
 
     "error on already verifying resource" in {
-      val A = someUser()
-      val B = someUser()
+      val A = createUser()
+      val B = createUser()
 
       val res = someRandom[Resource]
-      await(resVerService.create(A.id, res))
+      await(resVerService.create(A, res))
 
-      await(resVerService.create(B.id, res)) should throwA[ResourceException]
+      await(resVerService.create(B, res)) should throwA[ResourceException]
     }
 
   }

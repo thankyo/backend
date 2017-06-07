@@ -3,7 +3,10 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.user.model.User
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class ROVerificationGeneratorSpec extends ServiceSpec {
 
   lazy val enc = dependency[ROVerificationGenerator]

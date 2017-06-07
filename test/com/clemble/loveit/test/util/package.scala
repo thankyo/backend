@@ -42,8 +42,6 @@ package object util {
     override def generate(): BankDetails = {
       if (nextInt(0, 1) == 0)
         BankDetails.payPal(randomNumeric(10))
-      else if (nextInt(0, 1) == 0)
-        BankDetails.empty
       else
         BankDetails.stripe(randomNumeric(10))
     }
@@ -159,7 +157,7 @@ package object util {
         owns = Set.empty,
         balance = 200L,
         total = 200L,
-        bankDetails = someRandom[BankDetails],
+        bankDetails = Some(someRandom[BankDetails]),
         thumbnail = Some(random(12)),
         dateOfBirth = Some(new DateTime(nextLong(0, Long.MaxValue))),
         profiles = Set.empty[LoginInfo]

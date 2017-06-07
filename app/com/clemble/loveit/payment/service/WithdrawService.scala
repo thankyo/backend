@@ -29,7 +29,6 @@ case class WithdrawServiceFacade(
     account match {
       case ppbd : PayPalBankDetails => payPalWS.withdraw(money, ppbd)
       case stripe: StripeBankDetails => stripeWS.withdraw(money, stripe)
-      case EmptyBankDetails => Future.successful("" -> false)
     }
   }
 

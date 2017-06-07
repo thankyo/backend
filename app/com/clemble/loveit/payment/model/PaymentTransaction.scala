@@ -2,8 +2,7 @@ package com.clemble.loveit.payment.model
 
 import com.braintreegateway.{Transaction => BraintreeTransaction}
 import com.clemble.loveit.common.model.{Amount, PaymentID, UserID}
-import com.clemble.loveit.user.model._
-import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
+import com.clemble.loveit.common.util.{WriteableUtils}
 import org.joda.time.DateTime
 import play.api.libs.json._
 
@@ -42,7 +41,6 @@ case class PaymentTransaction(
                                thanks: Amount,
                                money: Money,
                                source: BankDetails,
-                               destination: BankDetails,
                                status: PaymentStatus,
                                created: DateTime = DateTime.now()
                              ) extends Transaction
@@ -60,7 +58,6 @@ object PaymentTransaction {
       money = Money from transaction,
       thanks = thanks,
       source = BankDetails.from(transaction.getCustomer),
-      destination = BankDetails.empty,
       status = Complete,
       created = new DateTime(transaction.getCreatedAt)
     )
@@ -74,20 +71,18 @@ object PaymentTransaction {
       thanks = thanks,
       money = money,
       source = source,
-      destination = BankDetails.empty,
       status = Complete
     )
   }
 
-  def credit(id: String, user: UserID, thanks: Amount, money: Money, destination: BankDetails): PaymentTransaction = {
+  def credit(id: String, user: UserID, thanks: Amount, money: Money, credit: BankDetails): PaymentTransaction = {
     PaymentTransaction(
       id = id,
       operation = Credit,
       user = user,
       thanks = thanks,
       money = money,
-      source = BankDetails.empty,
-      destination = destination,
+      source = credit,
       status = Complete
     )
   }

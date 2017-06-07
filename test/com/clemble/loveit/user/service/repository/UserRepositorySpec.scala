@@ -43,13 +43,10 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "throw Exception on same account used more then once creation" in {
-      val A = someRandom[User].copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
-      val B = someRandom[User].copy(bankDetails = BankDetails.payPal(RandomStringUtils.random(10)))
+      val A = createUser()
+      val B = createUser()
 
-      await(userRepo.save(A))
-      await(userRepo.save(B))
-
-      await(balanceService.setBankDetails(A.id, B.bankDetails)) must throwA[RepositoryException]
+      await(balanceService.setBankDetails(A.id, B.bankDetails.get)) must throwA[RepositoryException]
     }
 
     "set BankDetails" in {
@@ -59,7 +56,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       await(userRepo.save(A))
       await(balanceService.setBankDetails(A.id, bankDetails))
 
-      await(userRepo.findById(A.id)).get.bankDetails must beEqualTo(bankDetails)
+      await(userRepo.findById(A.id)).get.bankDetails must beEqualTo(Some(bankDetails))
+      await(balanceService.getBankDetails(A.id)) must beEqualTo(Some(bankDetails))
     }
 
   }

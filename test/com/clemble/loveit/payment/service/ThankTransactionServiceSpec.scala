@@ -1,9 +1,7 @@
 package com.clemble.loveit.payment.service
 
-import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -26,7 +24,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       await(thankTransService.create(giver, "A", res))
       Try(await(thankTransService.create(giver, "B", res)))
 
-      val payments = await(thankTransService.list(giver).runWith(Sink.seq[ThankTransaction]))
+      val payments = thankTransService.list(giver).toSeq()
       payments.size must beEqualTo(1)
 
       val giverBalanceAfter = await(balanceService.getBalance(giver))
@@ -57,7 +55,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
 
       val transactionA = await(thankTransService.create(giver, "A", someRandom[Resource]))
       val transactionB = await(thankTransService.create(giver, "B", someRandom[Resource]))
-      val payments = await(thankTransService.list(giver).runWith(Sink.seq[ThankTransaction]))
+      val payments = thankTransService.list(giver).toSeq()
 
       payments must containAllOf(Seq(transactionA, transactionB))
     }

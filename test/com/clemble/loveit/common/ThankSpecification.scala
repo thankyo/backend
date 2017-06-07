@@ -1,11 +1,12 @@
 package com.clemble.loveit.common
 
 import akka.stream.Materializer
+import akka.stream.scaladsl.{Sink, Source}
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.PlaySpecification
 
-
+import scala.collection.immutable
 import scala.reflect.ClassTag
 
 trait ThankSpecification extends PlaySpecification {
@@ -20,6 +21,12 @@ trait ThankSpecification extends PlaySpecification {
   def someRandom[T](implicit generator: Generator[T]) = generator.generate()
 
   implicit lazy val materializer: Materializer = dependency[Materializer]
+
+  implicit class SourceToList[T](source: Source[T, _]) {
+    def toSeq(): immutable.Seq[T] = {
+      await(source.runWith(Sink.seq[T]))
+    }
+  }
 
 }
 

@@ -1,6 +1,5 @@
 package com.clemble.loveit.payment.service.repository
 
-import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
@@ -26,7 +25,7 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
       await(repo.save(A))
       await(repo.save(B))
 
-      val userTransactions = await(repo.findByUser(user).runWith(Sink.seq[ThankTransaction]))
+      val userTransactions = repo.findByUser(user).toSeq()
       userTransactions.size shouldEqual 1
     }
 
@@ -35,14 +34,9 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
       val A = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
       val B = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
 
-      val fTransactions = for {
-        _ <- repo.save(A)
-        _ <- repo.save(B)
-        transactions <- repo.findByUser(user).runWith(Sink.seq[ThankTransaction])
-      } yield {
-        transactions
-      }
-      val transactions = await(fTransactions)
+      await(repo.save(A))
+      await(repo.save(B))
+      val transactions = repo.findByUser(user).toSeq
 
       transactions must containAllOf(Seq(A, B)).exactly
     }

@@ -6,7 +6,7 @@ import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.payment.service.repository.ThankTransactionRepository
 import javax.inject.{Inject, Named, Singleton}
 
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{Source}
 import com.clemble.loveit.common.model.UserID
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.play.json.collection.JSONCollection

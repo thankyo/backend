@@ -2,22 +2,35 @@ package com.clemble.loveit.payment.service.repository.mongo
 
 import javax.inject.{Inject, Named, Singleton}
 
+import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
-import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.akkastream.cursorProducer
+import reactivemongo.api.ReadPreference
 import reactivemongo.play.json._
+import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class MongoPaymentRepository @Inject()(@Named("user") collection: JSONCollection, implicit val ec: ExecutionContext) extends PaymentRepository {
+case class MongoPaymentRepository @Inject()(
+                                             @Named("user") collection: JSONCollection,
+                                             implicit val ec: ExecutionContext,
+                                             implicit val m: Materializer
+                                           ) extends PaymentRepository {
 
   override def listBankDetails(): Source[(String, Option[BankDetails]), _] = {
-    Source.empty
+    val selector = Json.obj()
+    val projection = Json.obj("bankDetails" -> 1)
+    collection.
+      find(selector, projection).
+      cursor[JsObject](ReadPreference.nearest).
+      documentSource().
+      map(json => (json \ "_id").as[String] -> (json \ "bankDetails").asOpt[BankDetails])
   }
 
   override def getBalance(user: UserID): Future[Amount] = {

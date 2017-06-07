@@ -1,6 +1,5 @@
 package com.clemble.loveit.payment.controller
 
-import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.payment.model.ThankTransaction
 import org.junit.runner.RunWith
@@ -20,7 +19,7 @@ class ThankTransactionControllerSpec extends ControllerSpec {
 
       val res = await(fRes)
       val respSource = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[ThankTransaction])
-      val payments = await(respSource.runWith(Sink.seq[ThankTransaction]))
+      val payments = respSource.toSeq
       payments shouldEqual Nil
     }
 

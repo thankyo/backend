@@ -9,11 +9,6 @@ import scala.concurrent.Future
 trait PaymentRepository {
 
   /**
-    * Lists users with BankDetails specified
-    */
-  def listBankDetails(): Source[(UserID, Option[BankDetails]), _]
-
-  /**
     * @return 0 if user is missing, or has no activity, otherwise returns current user balance
     */
   def getBalance(user: UserID): Future[Amount]
@@ -24,6 +19,11 @@ trait PaymentRepository {
     * @return true if operation proceeded as expected, false otherwise
     */
   def updateBalance(user: UserID, change: Amount): Future[Boolean]
+
+  /**
+    * Lists users with BankDetails specified
+    */
+  def listBankDetails(): Source[(UserID, Option[BankDetails]), _]
 
   /**
     * Get user bank details

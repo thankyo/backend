@@ -3,7 +3,6 @@ package com.clemble.loveit.common
 import java.util.concurrent.ConcurrentHashMap
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.thank.service.ResourceOwnershipService
@@ -63,7 +62,7 @@ trait ControllerSpec extends ThankSpecification {
 
     val res = await(fRes)
     val respSource = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[ThankTransaction])
-    val payments = await(respSource.runWith(Sink.seq[ThankTransaction]))
+    val payments = respSource.toSeq()
     payments
   }
 

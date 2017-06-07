@@ -1,5 +1,8 @@
 package com.clemble.loveit.common
 
+import java.util.concurrent.ConcurrentHashMap
+
+import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
@@ -10,9 +13,11 @@ import com.clemble.loveit.user.service.repository.UserRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import com.nimbusds.jose.JWSObject
 import play.api.libs.json.Json
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
 
 trait ControllerSpec extends ThankSpecification {
 
@@ -26,14 +31,7 @@ trait ControllerSpec extends ThankSpecification {
     val fRes = route(application, req).get
 
     val res = await(fRes)
-    res.header.status must beEqualTo(200)
-
-    val bodyStr = await(res.body.consumeData).utf8String
-    val jsonStr = JWSObject.parse(bodyStr).getPayload.toString
-    val user = (Json.parse(jsonStr) \ "id").as[String]
-
-    ControllerSpec.setUser(user, Seq("X-Auth-Token" -> bodyStr))
-
+    val user = ControllerSpec.setUser(res)
     user
   }
 
@@ -73,13 +71,20 @@ trait ControllerSpec extends ThankSpecification {
 
 object ControllerSpec {
 
-  var userToAuth: Map[UserID, Seq[(String, String)]] = Map.empty[String, Seq[(String, String)]]
+  var userToAuth: ConcurrentHashMap[UserID, Seq[(String, String)]] = new ConcurrentHashMap[String, Seq[(String, String)]]
 
-  def setUser(user: UserID, headers: Seq[(String, String)]) = {
-    userToAuth = userToAuth + (user -> headers)
-    userToAuth
+  def setUser(res: Result)(implicit m: Materializer): String = {
+    val bodyStr = Await.result(res.body.consumeData, 30 second).utf8String
+    val jsonStr = JWSObject.parse(bodyStr).getPayload.toString
+    val user = (Json.parse(jsonStr) \ "id").as[String]
+
+    userToAuth.put(user, Seq("X-Auth-Token" -> bodyStr))
+    user
   }
 
-  def getUser(user: UserID) = userToAuth(user)
+  def getUser(user: UserID) = {
+    require(userToAuth.get(user) != null)
+    userToAuth.get(user)
+  }
 
 }

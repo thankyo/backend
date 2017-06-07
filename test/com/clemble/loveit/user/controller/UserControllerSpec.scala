@@ -26,11 +26,11 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
     "Return same user on the same authentication" in {
       val socialProfile = someRandom[CommonSocialProfile]
-      val firstAuth = createUser(socialProfile)
-      val firstUser = getMyUser(firstAuth)
+      val firstUser = createUser(socialProfile)
+      val firstAuth = ControllerSpec.getUser(firstUser)
 
-      val secondAuth = createUser(socialProfile)
-      val secondUser = getMyUser(secondAuth)
+      val secondUser = createUser(socialProfile)
+      val secondAuth = ControllerSpec.getUser(secondUser)
 
       firstAuth shouldNotEqual secondAuth
       secondUser shouldEqual firstUser
@@ -40,8 +40,9 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
       val json = Json.toJson(someRandom[CommonSocialProfile])
       val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").
         withJsonBody(json)
-      val fRes = route(application, req).get
-      val res = await(fRes)
+      val res = await(route(application, req).get)
+
+      ControllerSpec.setUser(res)
       val setCookie = res.header.headers.get(SET_COOKIE)
 
       setCookie shouldNotEqual None

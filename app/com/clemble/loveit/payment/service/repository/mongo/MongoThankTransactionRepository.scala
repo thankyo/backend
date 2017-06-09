@@ -27,8 +27,6 @@ case class MongoThankTransactionRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
-
-
   override def findByUser(user: UserID): Source[ThankTransaction, _] = {
     val selector = Json.obj("_id" -> user)
     val projection = Json.obj("pending" -> 1)

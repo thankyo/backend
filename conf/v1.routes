@@ -23,5 +23,6 @@ PUT         /thank/http/*url                 @com.clemble.loveit.thank.controlle
 GET         /transaction/user/my             @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
 GET         /payment/transaction/user/my     @com.clemble.loveit.payment.controller.PaymentTransactionController.listMy()
 
-POST        /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.updateBankDetails()
+GET         /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.getMyBankDetails()
+POST        /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.updateMyBankDetails()
 

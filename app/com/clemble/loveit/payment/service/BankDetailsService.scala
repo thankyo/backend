@@ -18,12 +18,19 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 trait BankDetailsService {
 
+  def getBankDetails(user: UserID): Future[Option[BankDetails]]
+
   def updateBankDetails(user: UserID, token: StripeCustomerToken): Future[BankDetails]
 
 }
 
 @Singleton
 case class SimpleBankDetailsService @Inject()(repo: PaymentRepository, bankDetailsService: BankDetailsConverter, implicit val ec: ExecutionContext) extends BankDetailsService {
+
+
+  override def getBankDetails(user: UserID): Future[Option[BankDetails]] = {
+    repo.getBankDetails(user)
+  }
 
   override def updateBankDetails(user: UserID, token: StripeCustomerToken): Future[BankDetails] = {
     for {

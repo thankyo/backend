@@ -1,7 +1,6 @@
 package com.clemble.loveit.payment.model
 
 import com.clemble.loveit.common.util.WriteableUtils
-import com.clemble.loveit.thank.model.Thank
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 

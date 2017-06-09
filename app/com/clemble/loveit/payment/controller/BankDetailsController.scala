@@ -16,7 +16,15 @@ case class BankDetailsController @Inject()(
                                        implicit val ec: ExecutionContext
                                      ) extends Controller {
 
-  def updateBankDetails = silhouette.SecuredAction.async(parse.json[String])(implicit req => {
+  def getMyBankDetails = silhouette.SecuredAction.async(parse.json[String])(implicit req => {
+    val user = req.identity.id
+    bankDetailsService.getBankDetails(user).map(_ match {
+      case Some(bankDetails) => Ok(bankDetails)
+      case None => NotFound
+    })
+  })
+
+  def updateMyBankDetails = silhouette.SecuredAction.async(parse.json[String])(implicit req => {
     val user = req.identity.id
     val fUpdate = bankDetailsService.updateBankDetails(user, req.body)
     fUpdate.map(Ok(_))

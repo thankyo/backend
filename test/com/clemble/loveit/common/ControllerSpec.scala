@@ -3,6 +3,8 @@ package com.clemble.loveit.common
 import java.util.concurrent.ConcurrentHashMap
 
 import akka.stream.Materializer
+import akka.stream.scaladsl.{Sink, Source}
+import akka.util.ByteString
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
 import com.clemble.loveit.thank.service.ResourceOwnershipService
@@ -24,6 +26,10 @@ trait ControllerSpec extends ThankSpecification {
 
   val userRep = dependency[UserRepository]
   val ownershipService = dependency[ResourceOwnershipService]
+
+  implicit class ByteSourceReader(source: Source[ByteString, _]) {
+    def read(): String = await(source.runWith(Sink.fold("")((agg, s) => agg.concat(s.utf8String))))
+  }
 
   def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): String = {
     val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").withJsonBody(Json.toJson(socialProfile))

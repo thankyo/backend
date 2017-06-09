@@ -8,7 +8,7 @@ import play.api.libs.json._
 
 object ChargeStatus extends Enumeration {
   type ChargeStatus = Value
-  val Pending, Running, Complete, Failed = Value
+  val Pending, Running, Success, Failed = Value
 
   implicit val jsonFormat = new Format[ChargeStatus] {
     override def writes(o: ChargeStatus): JsValue = {
@@ -26,7 +26,8 @@ case class Charge(
                    user: UserID,
                    source: BankDetails,
                    status: ChargeStatus,
-                   money: Money,
+                   amount: Money,
+                   details: Option[JsValue],
                    transactions: List[ThankTransaction],
                    created: DateTime = DateTime.now()
 ) extends Transaction

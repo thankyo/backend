@@ -1,63 +1,56 @@
 package com.clemble.loveit.payment.service
 
-import javax.inject.{Inject, Singleton}
+import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
+import com.clemble.loveit.payment.model._
+import com.google.common.collect.Maps
+import com.stripe.model.{Charge => StripeCharge, Customer => StripeCustomer}
+import play.api.libs.json.{JsValue, Json}
 
-import com.clemble.loveit.common.model.{Amount, UserID}
-import com.clemble.loveit.payment.model.{BankDetails, Charge, PaymentRequest, UserPayment}
-import com.clemble.loveit.payment.service.repository.{PaymentRepository, PaymentTransactionRepository}
-
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 sealed trait ChargeService {
 
   /**
-    * Charges user with
+    * Charges user with specified amount
     */
-  def charge(user: UserPayment): Future[Charge]
-
-//  /**
-//    * Withdraw money to external system
-//    */
-//  def withdraw(user: UserID, amount: Amount): Future[Charge]
+  def process(charge: Charge): Future[(ChargeStatus, JsValue)]
 
 }
-//
-//@Singleton
-//case class SimpleChargeService @Inject()(
-//                                           paymentRepo: PaymentRepository,
-//                                           exchangeService: ExchangeService,
-//                                           processingService: PaymentProcessingService[PaymentRequest],
-//                                           withdrawService: WithdrawService[BankDetails],
-//                                           repo: PaymentTransactionRepository,
-//                                           implicit val ec: ExecutionContext
-//                                         ) extends ChargeService {
-//
-//
-//  override def charge(user: UserID, req: PaymentRequest): Future[Charge] = {
-//    for {
-//      (id, bankDetails, money) <- processingService.process(req)
-//      thanks = exchangeService.toThanks(money)
-//      _ <- paymentRepo.setBankDetails(user, bankDetails)
-//      userUpdate <- paymentRepo.updateBalance(user, thanks) if (userUpdate)
-//      debitTransaction = Charge(id, user, thanks, money, bankDetails)
-//      savedTransaction <- repo.save(debitTransaction)
-//    } yield {
-//      savedTransaction
-//    }
-//  }
-//
-//  override def withdraw(user: UserID, amount: Amount): Future[Charge] = {
-//    val money = exchangeService.toAmount(amount)
-//    for {
-//      bankDetailsOpt <- paymentRepo.getBankDetails(user) if (bankDetailsOpt.isDefined)
-//      bankDetails = bankDetailsOpt.get
-//      (id, withdraw) <- withdrawService.withdraw(money, bankDetails) if (withdraw)
-//      userUpdate <- paymentRepo.updateBalance(user, -amount) if (userUpdate)
-//      creditTransaction = Charge.credit(id, user, amount, money, bankDetails)
-//      savedTransaction <- repo.save(creditTransaction)
-//    } yield {
-//      savedTransaction
-//    }
-//  }
-//
-//}
+
+case object StripeChargeService extends ChargeService {
+
+  /**
+    * Charges customer with specified charge
+    *
+    * @param bankDetails - customer reference
+    * @param amount amount to charge
+    * @return StripeCharge
+    */
+  def chargeStripe(bankDetails: StripeBankDetails, amount: Money): StripeCharge = {
+    val chargeParams = Maps.newHashMap[String, Object]()
+    val stripeAmount = (amount.amount * 100).toInt
+    chargeParams.put("amount", stripeAmount.toString)
+    chargeParams.put("currency", amount.currency.getCurrencyCode.toLowerCase())
+    chargeParams.put("customer", bankDetails.customer)
+    StripeCharge.create(chargeParams)
+  }
+
+  /**
+    * Charges user with specified amount
+    */
+  override def process(charge: Charge): Future[(ChargeStatus, JsValue)] = {
+    val res = Try({
+      chargeStripe(charge.source.asInstanceOf[StripeBankDetails], charge.amount)
+    }) match {
+      case Success(charge) =>
+        val details = Json.parse(charge.toJson())
+        charge.getStatus
+        (ChargeStatus.Success, details)
+      case Failure(t) =>
+        (ChargeStatus.Failed, Json.obj("error" -> t.getMessage))
+    }
+    Future.successful(res)
+  }
+
+}

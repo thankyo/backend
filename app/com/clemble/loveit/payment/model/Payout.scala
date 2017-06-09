@@ -27,6 +27,7 @@ case class Payout(
                    bankDetails: BankDetails,
                    failed: Long,
                    pending: Long,
+                   amount: Money,
                    status: PayoutStatus,
                    created: DateTime = new DateTime()
 ) extends Transaction

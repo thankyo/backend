@@ -51,6 +51,7 @@ package object util {
       someRandom[BankDetails],
       nextLong(0, Long.MaxValue),
       nextLong(0, Long.MaxValue),
+      someRandom[Money],
       PayoutStatus.Pending
     )
   }
@@ -81,7 +82,7 @@ package object util {
   private object PaymentTransactionGenerator extends Generator[Charge] {
 
     override def generate(): Charge = {
-      Charge(IDGenerator.generate(), someRandom[UserID], someRandom[BankDetails], ChargeStatus.Pending, someRandom[Money], List(someRandom[ThankTransaction]))
+      Charge(IDGenerator.generate(), someRandom[UserID], someRandom[BankDetails], ChargeStatus.Pending, someRandom[Money], None, List(someRandom[ThankTransaction]))
     }
 
   }

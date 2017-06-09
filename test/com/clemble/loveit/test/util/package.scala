@@ -97,7 +97,7 @@ package object util {
   private object BankDetailsGenerator extends Generator[BankDetails] {
 
     override def generate(): BankDetails = {
-        BankDetails.stripe(randomNumeric(10))
+        StripeBankDetails(randomNumeric(10), Some(randomNumeric(4)), Some(randomNumeric(4)))
     }
 
   }

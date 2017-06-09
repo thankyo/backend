@@ -7,13 +7,11 @@ import play.api.libs.json._
   * Bank details abstraction
   */
 sealed trait BankDetails
-case class StripeBankDetails(customer: String) extends BankDetails {
+case class StripeBankDetails(customer: String, brand: Option[String] = None, last4: Option[String] = None) extends BankDetails {
   require(customer != null)
 }
 
 object BankDetails {
-
-  def stripe(customer: String): StripeBankDetails = StripeBankDetails(customer)
 
   /**
     * JSON format for [[StripeBankDetails]]

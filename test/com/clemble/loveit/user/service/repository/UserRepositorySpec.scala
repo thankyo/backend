@@ -2,21 +2,19 @@ package com.clemble.loveit.user.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
-import com.clemble.loveit.common.error.{RepositoryException}
+import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.payment.model.BankDetails
-import com.clemble.loveit.payment.service.repository.PaymentRepository
-import org.apache.commons.lang3.RandomStringUtils
+import com.clemble.loveit.payment.service.repository.{BalanceRepository, BankDetailsRepository}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  lazy val balanceService = dependency[PaymentRepository]
+  lazy val balanceRepo = dependency[BankDetailsRepository with BalanceRepository]
 
   "CREATE" should {
 
@@ -47,10 +45,10 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val bankDetails = someRandom[BankDetails]
 
       await(userRepo.save(A))
-      await(balanceService.setBankDetails(A.id, bankDetails))
+      await(balanceRepo.setBankDetails(A.id, bankDetails))
 
       await(userRepo.findById(A.id)).get.bankDetails must beEqualTo(Some(bankDetails))
-      await(balanceService.getBankDetails(A.id)) must beEqualTo(Some(bankDetails))
+      await(balanceRepo.getBankDetails(A.id)) must beEqualTo(Some(bankDetails))
     }
 
   }
@@ -62,7 +60,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       val matchResult = for {
         savedUser <- userRepo.save(user)
-        _ <- balanceService.updateBalance(user.id, 10)
+        _ <- balanceRepo.updateBalance(user.id, 10)
         updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
         savedUser.balance shouldEqual user.balance
@@ -77,7 +75,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       val matchResult = for {
         savedUser <- userRepo.save(user)
-        _ <- balanceService.updateBalance(user.id, -10)
+        _ <- balanceRepo.updateBalance(user.id, -10)
         updatedUser <- userRepo.findById(user.id).map(_.get)
       } yield {
         savedUser.balance shouldEqual user.balance

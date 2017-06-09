@@ -3,9 +3,9 @@ package com.clemble.loveit.payment
 import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
-import com.clemble.loveit.payment.model.{BankDetails}
-import com.clemble.loveit.payment.service.repository.{PaymentRepository, EOMChargeRepository, ThankTransactionRepository, UserPaymentRepository}
-import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentRepository, MongoEOMChargeRepository, MongoThankTransactionRepository, MongoUserPaymentRepository}
+import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.service.repository.{BalanceRepository, _}
+import com.clemble.loveit.payment.service.repository.mongo.{MongoEOMChargeRepository, MongoPaymentRepository, MongoThankTransactionRepository, MongoUserPaymentRepository}
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
@@ -25,7 +25,11 @@ class PaymentModule extends ScalaModule {
   override def configure() = {
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
+    bind[BalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[BankDetailsRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[MonthlyLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
+
     bind[BankDetailsService].to[SimpleBankDetailsService].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
 

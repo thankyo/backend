@@ -1,12 +1,12 @@
 package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.payment.service.repository.PaymentRepository
+import com.clemble.loveit.payment.service.repository.{BankDetailsRepository}
 
 class BankDetailsServiceSpec extends ServiceSpec with TestStripeUtils {
 
   val service = dependency[BankDetailsService]
-  val repo = dependency[PaymentRepository]
+  val repo = dependency[BankDetailsRepository]
 
   "STRIPE" should {
 

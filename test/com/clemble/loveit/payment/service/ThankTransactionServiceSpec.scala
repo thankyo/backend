@@ -2,6 +2,7 @@ package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.payment.service.repository.BalanceRepository
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -14,6 +15,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
 
   val thankTransService = dependency[ThankTransactionService]
   val userRepo = dependency[UserRepository]
+  val balanceRepo = dependency[BalanceRepository]
 
   "PAYMENT" should {
 
@@ -27,7 +29,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val payments = thankTransService.list(giver).toSeq()
       payments.size must beEqualTo(1)
 
-      val giverBalanceAfter = await(balanceService.getBalance(giver))
+      val giverBalanceAfter = await(balanceRepo.getBalance(giver))
       giverBalanceAfter shouldEqual -1
     }
 
@@ -36,7 +38,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val owner = createUser()
 
       await(thankTransService.create(giver, owner, someRandom[Resource]))
-      val ownerBalanceAfter = await(balanceService.getBalance(owner))
+      val ownerBalanceAfter = await(balanceRepo.getBalance(owner))
 
       ownerBalanceAfter shouldEqual 1
     }
@@ -45,7 +47,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val giver = createUser()
 
       await(thankTransService.create(giver, "B", someRandom[Resource]))
-      val giverBalanceAfter = await(balanceService.getBalance(giver))
+      val giverBalanceAfter = await(balanceRepo.getBalance(giver))
 
       giverBalanceAfter shouldEqual -1
     }

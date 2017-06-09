@@ -1,7 +1,6 @@
 package com.clemble.loveit.common
 
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
-import com.clemble.loveit.payment.service.repository.PaymentRepository
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.service.ResourceOwnershipService
 import com.clemble.loveit.user.controller.SocialAuthController
 import com.clemble.loveit.user.model.UserIdentity
@@ -13,7 +12,6 @@ trait ServiceSpec extends ThankSpecification {
 
   lazy val authController = dependency[SocialAuthController]
   lazy val userRep = dependency[UserRepository]
-  lazy val balanceService = dependency[PaymentRepository]
 
   lazy val resService = dependency[ResourceOwnershipService]
 

@@ -5,8 +5,8 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.{BankDetails, StripeBankDetails, StripeCustomerToken}
-import com.clemble.loveit.payment.service.repository.PaymentRepository
-import com.google.common.collect.{ImmutableMap, Maps}
+import com.clemble.loveit.payment.service.repository.{BankDetailsRepository}
+import com.google.common.collect.{ImmutableMap}
 import com.stripe.Stripe
 import com.stripe.model.Card
 
@@ -25,7 +25,7 @@ trait BankDetailsService {
 }
 
 @Singleton
-case class SimpleBankDetailsService @Inject()(repo: PaymentRepository, bankDetailsService: BankDetailsConverter, implicit val ec: ExecutionContext) extends BankDetailsService {
+case class SimpleBankDetailsService @Inject()(repo: BankDetailsRepository, bankDetailsService: BankDetailsConverter, implicit val ec: ExecutionContext) extends BankDetailsService {
 
 
   override def getBankDetails(user: UserID): Future[Option[BankDetails]] = {

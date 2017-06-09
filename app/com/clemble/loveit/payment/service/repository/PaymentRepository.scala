@@ -5,19 +5,7 @@ import com.clemble.loveit.payment.model.{BankDetails, Money}
 
 import scala.concurrent.Future
 
-trait PaymentRepository {
-
-  /**
-    * @return 0 if user is missing, or has no activity, otherwise returns current user balance
-    */
-  def getBalance(user: UserID): Future[Amount]
-
-  /**
-    * Changes user balance
-    *
-    * @return true if operation proceeded as expected, false otherwise
-    */
-  def updateBalance(user: UserID, change: Amount): Future[Boolean]
+trait MonthlyLimitRepository {
 
   /**
     * Get monthly limit
@@ -31,6 +19,9 @@ trait PaymentRepository {
     */
   def setMonthlyLimit(user: UserID, monthlyLimit: Money): Future[Boolean]
 
+}
+
+trait BankDetailsRepository {
 
   /**
     * Get user bank details
@@ -49,4 +40,23 @@ trait PaymentRepository {
     */
   def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean]
 
+}
+
+trait BalanceRepository {
+
+  /**
+    * @return 0 if user is missing, or has no activity, otherwise returns current user balance
+    */
+  def getBalance(user: UserID): Future[Amount]
+
+  /**
+    * Changes user balance
+    *
+    * @return true if operation proceeded as expected, false otherwise
+    */
+  def updateBalance(user: UserID, change: Amount): Future[Boolean]
+
+}
+
+trait PaymentRepository extends MonthlyLimitRepository with BankDetailsRepository with BalanceRepository {
 }

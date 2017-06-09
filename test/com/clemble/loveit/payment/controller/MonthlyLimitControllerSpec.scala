@@ -2,10 +2,13 @@ package com.clemble.loveit.payment.controller
 
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{Money}
-import play.api.libs.json.{Json}
+import com.clemble.loveit.payment.model.Money
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 
+@RunWith(classOf[JUnitRunner])
 class MonthlyLimitControllerSpec extends ControllerSpec {
 
   def getMonthlyLimit(user: UserID): Option[Money] = {

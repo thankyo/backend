@@ -1,1 +1,3 @@
-[![Coverage Status](https://coveralls.io/repos/github/thankyo/thank/badge.svg?branch=master)](https://coveralls.io/github/thankyo/thank?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/thankyo/thank/badge.svg)](https://coveralls.io/github/thankyo/thank)
+
+[![CircleCI](https://circleci.com/gh/thankyo/thank-brunch.svg?style=svg)](https://circleci.com/gh/thankyo/thank-brunch)

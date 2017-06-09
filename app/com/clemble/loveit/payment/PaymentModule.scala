@@ -30,6 +30,7 @@ class PaymentModule extends ScalaModule {
     bind[MonthlyLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
+    bind[EOMService].to[SimpleEOMService].asEagerSingleton()
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
 
     bind[BankDetailsService].to[SimpleBankDetailsService].asEagerSingleton()

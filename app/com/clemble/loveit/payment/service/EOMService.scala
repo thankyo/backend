@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.payment.model.{EOMStatistics, EOMStatus}
 import com.clemble.loveit.payment.service.repository.EOMStatusRepository
+import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,12 +42,13 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, implicit val ec
 
   private def doRun(yom: YearMonth) = {
     for {
-      createChanges <- doCreateCharges(yom)
-      applyChanges <- doApplyCharges(yom)
+      createCharges <- doCreateCharges(yom)
+      applyCharges <- doApplyCharges(yom)
       createPayout <- doCreatePayout(yom)
       applyPayout <- doApplyPayout(yom)
+      update <- repo.update(yom, createCharges = createCharges, applyCharges = applyCharges, createPayout = createPayout, applyPayout = applyPayout, finished = DateTime.now())
     } yield {
-
+      update
     }
   }
 

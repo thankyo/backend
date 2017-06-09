@@ -51,8 +51,8 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def payoutService(): PayoutService[BankDetails] = {
-    StripePayoutService
+  def payoutService(): EOMPayoutService[BankDetails] = {
+    StripeEOMPayoutService
   }
 
   @Provides

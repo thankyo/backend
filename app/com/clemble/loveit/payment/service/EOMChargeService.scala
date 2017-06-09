@@ -9,7 +9,7 @@ import play.api.libs.json.{JsValue, Json}
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-sealed trait ChargeService {
+sealed trait EOMChargeService {
 
   /**
     * Charges user with specified amount
@@ -18,7 +18,7 @@ sealed trait ChargeService {
 
 }
 
-case object StripeChargeService extends ChargeService {
+case object StripeEOMChargeService extends EOMChargeService {
 
   /**
     * Charges customer with specified charge

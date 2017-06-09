@@ -7,13 +7,13 @@ import play.api.libs.json._
 
 import scala.concurrent.Future
 
-sealed trait PayoutService[BankDetails] {
+sealed trait EOMPayoutService[BankDetails] {
 
   def process(payout: EOMPayout): Future[(PayoutStatus, JsValue)]
 
 }
 
-case object StripePayoutService extends PayoutService[BankDetails] {
+case object StripeEOMPayoutService extends EOMPayoutService[BankDetails] {
 
   override def process(payout: EOMPayout): Future[(PayoutStatus, JsValue)] = {
     Future.successful(PayoutStatus.Failed -> Json.obj())

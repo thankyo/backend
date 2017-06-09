@@ -33,11 +33,11 @@ package object util {
   implicit val eomStatGenerator: Generator[EOMStatistics] = EndOfMonthStatisticsGenerator
   implicit val eomProcGenerator: Generator[EOMPaymentStatus] = EndOfMonthProcessingGenerator
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
-  implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenrator
+  implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenerator
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
 
-  private object DateTimeGenrator extends Generator[DateTime] {
+  private object DateTimeGenerator extends Generator[DateTime] {
     override def generate(): DateTime = new DateTime(Random.nextLong())
   }
 

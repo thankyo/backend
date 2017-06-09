@@ -1,5 +1,8 @@
 package com.clemble.loveit.payment.model
 
+import java.time.YearMonth
+
+import com.clemble.loveit.common.model.CreatedAware
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
@@ -32,13 +35,13 @@ case class EOMStatistics(
   * @param created creation time
   */
 case class EOMPaymentStatus(
-                             id: String,
+                             yom: YearMonth,
                              createCharges: EOMStatistics = EOMStatistics(),
                              applyCharges: EOMStatistics = EOMStatistics(),
                              createPayout: EOMStatistics = EOMStatistics(),
                              applyPayout: EOMStatistics = EOMStatistics(),
                              created: DateTime
-              ) {
+              ) extends CreatedAware with EOMAware{
 
   def isValid = createCharges.isValid &&
     applyCharges.isValid &&

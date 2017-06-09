@@ -1,5 +1,7 @@
 package com.clemble.loveit.payment.model
 
+import java.time.YearMonth
+
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import org.joda.time.DateTime
@@ -22,13 +24,14 @@ case object PayoutStatus extends Enumeration {
 
 case class EOMPayout(
                       user: UserID,
+                      yom: YearMonth,
                       bankDetails: BankDetails,
                       failed: Long,
                       pending: Long,
                       amount: Money,
                       status: PayoutStatus,
                       created: DateTime = new DateTime()
-) extends Transaction
+) extends Transaction with EOMAware
 
 object EOMPayout {
 

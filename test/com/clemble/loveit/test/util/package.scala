@@ -1,5 +1,7 @@
 package com.clemble.loveit.test
 
+import java.time.YearMonth
+
 import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
@@ -34,11 +36,16 @@ package object util {
   implicit val eomProcGenerator: Generator[EOMPaymentStatus] = EndOfMonthProcessingGenerator
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
   implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenerator
+  implicit val yomGenerator: Generator[YearMonth] = YearMonthGenerator
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
 
   private object DateTimeGenerator extends Generator[DateTime] {
     override def generate(): DateTime = new DateTime(Random.nextLong())
+  }
+
+  private object YearMonthGenerator extends Generator[YearMonth] {
+    override def generate(): YearMonth = YearMonth.of(nextInt(1000, 3000), nextInt(1, 13))
   }
 
   private object UserIDGenerator extends Generator[UserID] {
@@ -54,7 +61,7 @@ package object util {
   private object EndOfMonthProcessingGenerator extends Generator[EOMPaymentStatus] {
     override def generate(): EOMPaymentStatus = {
       EOMPaymentStatus(
-        IDGenerator.generate(),
+        someRandom[YearMonth],
         someRandom[EOMStatistics],
         someRandom[EOMStatistics],
         someRandom[EOMStatistics],
@@ -78,6 +85,7 @@ package object util {
   private object PayoutGenerator extends Generator[EOMPayout] {
     override def generate(): EOMPayout = EOMPayout(
       someRandom[UserID],
+      someRandom[YearMonth],
       someRandom[BankDetails],
       nextLong(0, Long.MaxValue),
       nextLong(0, Long.MaxValue),
@@ -111,6 +119,7 @@ package object util {
     override def generate(): EOMCharge = {
       EOMCharge(
         someRandom[UserID],
+        someRandom[YearMonth],
         someRandom[BankDetails],
         ChargeStatus.Pending,
         someRandom[Money],

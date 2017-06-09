@@ -1,6 +1,9 @@
 package com.clemble.loveit.payment.service.repository
 
+import java.time.YearMonth
+
 import com.clemble.loveit.common.RepositorySpec
+import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge}
 import org.joda.time.DateTime
 import org.junit.runner.RunWith
@@ -25,7 +28,7 @@ class EOMChargeRepositorySpec extends RepositorySpec {
       val charge = someRandom[EOMCharge]
 
       await(repo.save(charge))
-      await(repo.save(charge))
+      await(repo.save(charge)) should throwA[RepositoryException]
 
       val userCharges = repo.findByUser(charge.user).toSeq()
       userCharges.size shouldEqual 1
@@ -37,27 +40,27 @@ class EOMChargeRepositorySpec extends RepositorySpec {
   "LIST pending" should {
 
     "list only pending" in {
-      val date = someRandom[DateTime]
-      val A = someRandom[EOMCharge].copy(created = date, status = ChargeStatus.Failed)
-      val B = someRandom[EOMCharge].copy(created = date, status = ChargeStatus.Pending)
+      val yom = someRandom[YearMonth]
+      val A = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Failed)
+      val B = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Pending)
 
       await(repo.save(A))
       await(repo.save(B))
 
-      val pending = repo.listPending(date).toSeq()
+      val pending = repo.listPending(yom).toSeq()
       pending should not contain(A)
       pending should contain(B)
     }
 
     "list all pending" in {
-      val date = someRandom[DateTime]
-      val A = someRandom[EOMCharge].copy(created = date, status = ChargeStatus.Pending)
-      val B = someRandom[EOMCharge].copy(created = date, status = ChargeStatus.Pending)
+      val yom = someRandom[YearMonth]
+      val A = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Pending)
+      val B = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Pending)
 
       await(repo.save(A))
       await(repo.save(B))
 
-      val pending = repo.listPending(date).toSeq()
+      val pending = repo.listPending(yom).toSeq()
       pending should containAllOf(Seq(A, B))
     }
 

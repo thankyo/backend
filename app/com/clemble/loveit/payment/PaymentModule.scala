@@ -62,11 +62,11 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  @Named("paymentTransactions")
+  @Named("eomCharge")
   def paymentTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.
-      map(_.collection[JSONCollection]("paymentTransaction", FailoverStrategy.default))(ec)
+      map(_.collection[JSONCollection]("eomCharge", FailoverStrategy.default))(ec)
     Await.result(fCollection, 1 minute)
   }
 

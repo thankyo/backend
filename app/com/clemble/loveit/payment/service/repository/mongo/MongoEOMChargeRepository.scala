@@ -1,5 +1,7 @@
 package com.clemble.loveit.payment.service.repository.mongo
 
+import java.time.YearMonth
+
 import akka.stream.Materializer
 import com.clemble.loveit.common.mongo.{MongoSafeUtils, MongoUserAwareRepository}
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, UserPayment}
@@ -18,6 +20,7 @@ import reactivemongo.akkastream.cursorProducer
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
+import com.clemble.loveit.payment.model._
 
 @Singleton
 case class MongoEOMChargeRepository @Inject()(
@@ -30,11 +33,10 @@ case class MongoEOMChargeRepository @Inject()(
 
   override implicit val format = EOMCharge.jsonFormat
 
-  override def listPending(date: DateTime): Source[EOMCharge, _] = {
-    val selector = Json.obj()
-    val projection = Json.obj("status" -> ChargeStatus.Pending)
+  override def listPending(yom: YearMonth): Source[EOMCharge, _] = {
+    val selector = Json.obj("yom" -> yom, "status" -> ChargeStatus.Pending)
     collection.
-      find(selector, projection).
+      find(selector).
       cursor[EOMCharge](ReadPreference.nearest).
       documentSource()
   }

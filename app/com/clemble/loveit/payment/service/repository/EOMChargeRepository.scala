@@ -1,5 +1,7 @@
 package com.clemble.loveit.payment.service.repository
 
+import java.time.YearMonth
+
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.UserID
@@ -19,10 +21,10 @@ trait EOMChargeRepository extends UserAwareRepository[EOMCharge] {
   /**
     * Lists all charges with specified status
     *
-    * @param date - interested period
+    * @param yom year of month
     * @return list of charges with specified status
     */
-  def listPending(date: DateTime): Source[EOMCharge, _]
+  def listPending(yom: YearMonth): Source[EOMCharge, _]
 
   /**
     * Updates charge status, specifying details and status for pending Charge,

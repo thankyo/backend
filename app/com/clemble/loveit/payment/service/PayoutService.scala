@@ -5,7 +5,8 @@ import java.util
 import com.clemble.loveit.payment.model._
 import com.clemble.loveit.common.util.IDGenerator
 import com.google.common.collect.Lists
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
+
 import com.paypal.api.payments
 import com.paypal.api.payments.{Payout, PayoutItem, PayoutSenderBatchHeader}
 import com.paypal.base.rest.APIContext
@@ -13,17 +14,17 @@ import com.paypal.base.rest.APIContext
 import scala.concurrent.Future
 import scala.util.Try
 
-sealed trait WithdrawService[T <: BankDetails] {
+sealed trait PayoutService[T <: BankDetails] {
 
   def withdraw(money: Money, account: T): Future[(String, Boolean)]
 
 }
 
 @Singleton
-case class WithdrawServiceFacade(
-                                  payPalWS: WithdrawService[PayPalBankDetails],
-                                  stripeWS: WithdrawService[StripeBankDetails]
-                                ) extends WithdrawService[BankDetails] {
+case class PayoutServiceFacade @Inject() (
+                                payPalWS: PayoutService[PayPalBankDetails],
+                                stripeWS: PayoutService[StripeBankDetails]
+                                ) extends PayoutService[BankDetails] {
 
   override def withdraw(money: Money, account: BankDetails): Future[(String, Boolean)] = {
     account match {
@@ -34,14 +35,14 @@ case class WithdrawServiceFacade(
 
 }
 
-object StripeWithdrawalService extends WithdrawService[StripeBankDetails] {
+object StripeWithdrawalService extends PayoutService[StripeBankDetails] {
   override def withdraw(money: Money, account: StripeBankDetails): Future[(String, Boolean)] = {
     Future.successful(IDGenerator.generate() -> false)
   }
 }
 
 @Singleton
-case class PayPalWithdrawService(context: APIContext) extends WithdrawService[PayPalBankDetails] {
+case class PayPalPayoutService @Inject()(context: APIContext) extends PayoutService[PayPalBankDetails] {
 
   override def withdraw(money: Money, account: PayPalBankDetails): Future[(String, Boolean)] = {
     val id = IDGenerator.generate()

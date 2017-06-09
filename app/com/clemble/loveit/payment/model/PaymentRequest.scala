@@ -3,11 +3,14 @@ package com.clemble.loveit.payment.model
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
+@Deprecated
 sealed trait PaymentRequest {
   val charge: Money
 }
 
+@Deprecated
 case class BraintreePaymentRequest(nonce: String, charge: Money, details: Option[JsObject]) extends PaymentRequest
+@Deprecated
 case class StripePaymentRequest(token: String, charge: Money, details: JsObject) extends PaymentRequest
 
 object PaymentRequest {

@@ -11,7 +11,7 @@ case class ThankTransaction(
                              destination: UserID,
                              resource: Resource,
                              created: DateTime = DateTime.now()
-                  ) extends ResourceAware with UserAware
+                  ) extends ResourceAware with Transaction
 
 object ThankTransaction {
 

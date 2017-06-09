@@ -2,7 +2,6 @@ package com.clemble.loveit.thank.controller
 
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.HttpResource
-import com.clemble.loveit.payment.model.{Credit, Debit}
 import com.clemble.loveit.user.model.ResourceSpec
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith

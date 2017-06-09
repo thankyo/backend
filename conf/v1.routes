@@ -21,11 +21,5 @@ PUT         /thank/http/*url                 @com.clemble.loveit.thank.controlle
 # Payment related ENDPOINTS
 
 GET         /transaction/user/my             @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
-
-GET         /payment/braintree/token         @com.clemble.loveit.payment.controller.BraintreeController.generateToken()
-POST        /payment/braintree/nonce         @com.clemble.loveit.payment.controller.PaymentController.process()
-POST        /payment/process                 @com.clemble.loveit.payment.controller.PaymentController.process()
-
-
 GET         /payment/transaction/user/my     @com.clemble.loveit.payment.controller.PaymentTransactionController.listMy()
 

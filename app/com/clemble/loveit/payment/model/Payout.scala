@@ -29,7 +29,7 @@ case class Payout(
                    pending: Long,
                    status: PayoutStatus,
                    created: DateTime = new DateTime()
-) extends UserAware with CreatedAware
+) extends Transaction
 
 object Payout {
 

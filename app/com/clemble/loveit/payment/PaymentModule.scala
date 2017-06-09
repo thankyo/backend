@@ -34,7 +34,6 @@ class PaymentModule extends ScalaModule {
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
-    bind[PaymentService].to[SimplePaymentService]
 
     bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService])
     bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
@@ -60,8 +59,8 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def withdrawService(context: APIContext): WithdrawService[BankDetails] = {
-    WithdrawServiceFacade(PayPalWithdrawService(context), StripeWithdrawalService)
+  def withdrawService(context: APIContext): PayoutService[BankDetails] = {
+    PayoutServiceFacade(PayPalPayoutService(context), StripeWithdrawalService)
   }
 
   @Provides

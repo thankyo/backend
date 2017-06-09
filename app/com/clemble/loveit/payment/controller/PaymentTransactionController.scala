@@ -14,7 +14,7 @@ case class PaymentTransactionController @Inject()(
                                                    transactionRepo: PaymentTransactionRepository,
                                                    silhouette: Silhouette[AuthEnv],
                                                    implicit val ec: ExecutionContext
-                                            )extends Controller {
+                                            ) extends Controller {
 
   def listMy() = silhouette.SecuredAction(req => {
     val thanks = transactionRepo.findByUser(req.identity.id)

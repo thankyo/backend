@@ -19,23 +19,29 @@ package object util {
 
   implicit val resourceGenerator: Generator[Resource] = ResourceGenerator
   implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = CommonSocialProfileGenerator
-  implicit val paymentTransactionGenerator: Generator[PaymentTransaction] = PaymentTransactionGenerator
+  implicit val paymentTransactionGenerator: Generator[Charge] = PaymentTransactionGenerator
   implicit val repositoryExceptionGenerator: Generator[RepositoryException] = RepositoryExceptionGenerator
   implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
   implicit val userExceptionGenerator: Generator[UserException] = UserExceptionGenerator
   implicit val bankDetailsGenerator: Generator[BankDetails] = BankDetailsGenerator
-  implicit val paymentOperationGenerator: Generator[PaymentOperation] = PaymentOperationGenerator
   implicit val thankTransactionGenerator: Generator[ThankTransaction] = ThankTransactionGenerator
   implicit val verificationGenerator: Generator[ROVerification[Resource]] = ROVerificationGenerator
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
   implicit val userGenerator: Generator[User] = UserGenerator
   implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
   implicit val payoutGenerator: Generator[Payout] = PayoutGenerator
+  implicit val moneyGenerator: Generator[Money] = MoneyGenerator
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
 
   private object UserIDGenerator extends Generator[UserID] {
     override def generate(): UserID = IDGenerator.generate()
+  }
+
+  private object MoneyGenerator extends Generator[Money] {
+    override def generate(): Money = {
+      Money(Random.nextLong(), LoveItCurrency.getInstance("USD"))
+    }
   }
 
   private object PayoutGenerator extends Generator[Payout] {
@@ -72,25 +78,10 @@ package object util {
 
   }
 
-  private object PaymentOperationGenerator extends Generator[PaymentOperation] {
+  private object PaymentTransactionGenerator extends Generator[Charge] {
 
-    override def generate(): PaymentOperation = {
-      if (nextInt(0, 1) == 0)
-        Debit
-      else
-        Credit
-    }
-
-  }
-
-  private object PaymentTransactionGenerator extends Generator[PaymentTransaction] {
-
-    override def generate(): PaymentTransaction = {
-      if (Random.nextBoolean()) {
-        PaymentTransaction.debit(IDGenerator.generate(), someRandom[User].id, Random.nextLong(), Money(Random.nextLong(), LoveItCurrency.getInstance("USD")), someRandom[BankDetails])
-      } else {
-        PaymentTransaction.credit(IDGenerator.generate(), someRandom[User].id, Random.nextLong(), Money(Random.nextLong(), LoveItCurrency.getInstance("USD")), someRandom[BankDetails])
-      }
+    override def generate(): Charge = {
+      Charge(IDGenerator.generate(), someRandom[UserID], someRandom[BankDetails], ChargeStatus.Pending, someRandom[Money], List(someRandom[ThankTransaction]))
     }
 
   }

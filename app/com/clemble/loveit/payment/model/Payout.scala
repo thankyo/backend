@@ -1,14 +1,13 @@
 package com.clemble.loveit.payment.model
 
-import com.clemble.loveit.common.model.{CreatedAware, UserID}
+import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
-import com.clemble.loveit.user.model.UserAware
 import org.joda.time.DateTime
 import play.api.libs.json._
 
 object PayoutStatus extends Enumeration {
   type PayoutStatus = Value
-  val Pending, Running, Complete, Failed = Value
+  val Pending, Running, Success, Failed = Value
 
   implicit val jsonFormat = new Format[PayoutStatus] {
     override def writes(o: PayoutStatus): JsValue = {

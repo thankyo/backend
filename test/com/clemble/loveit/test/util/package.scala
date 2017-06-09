@@ -59,9 +59,6 @@ package object util {
   private object BankDetailsGenerator extends Generator[BankDetails] {
 
     override def generate(): BankDetails = {
-      if (nextInt(0, 1) == 0)
-        BankDetails.payPal(randomNumeric(10))
-      else
         BankDetails.stripe(randomNumeric(10))
     }
 

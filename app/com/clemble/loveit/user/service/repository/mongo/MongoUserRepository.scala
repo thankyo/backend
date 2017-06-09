@@ -82,12 +82,6 @@ object MongoUserRepository {
         name = Some("user_owns_unique"),
         unique = true,
         sparse = true
-      ),
-      Index(
-        key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),
-        name = Some("user_bank_details_unique"),
-        unique = true,
-        partialFilter = Some(BSONDocument("bankDetails.type" -> BSONString("payPal")))
       )
     )
   }

@@ -9,27 +9,14 @@ import play.api.libs.json._
   * Bank details abstraction
   */
 sealed trait BankDetails
-case class PayPalBankDetails(email: Email) extends BankDetails {
-  require(email != null)
-}
 case class StripeBankDetails(customer: String) extends BankDetails {
   require(customer != null)
 }
 
 object BankDetails {
 
-  def payPal(email: String): PayPalBankDetails = PayPalBankDetails(email)
-
   def stripe(customer: String): StripeBankDetails = StripeBankDetails(customer)
 
-  def from(customer: Customer): PayPalBankDetails = payPal(customer.getEmail)
-
-  def from(payPalDetails: PayPalDetails): PayPalBankDetails = payPal(payPalDetails.getPayerEmail())
-
-  /**
-    * JSON format for [[PayPalBankDetails]]
-    */
-  private val payPalJsonFormat = Json.format[PayPalBankDetails]
   /**
     * JSON format for [[StripeBankDetails]]
     */
@@ -40,17 +27,14 @@ object BankDetails {
     */
   implicit val jsonFormat = new Format[BankDetails] {
 
-    val PAY_PAL_TAG = JsString("payPal")
     val STRIPE_TAG = JsString("stripe")
 
     override def reads(json: JsValue): JsResult[BankDetails] = (json \ "type") match {
-      case JsDefined(PAY_PAL_TAG) => payPalJsonFormat.reads(json)
       case JsDefined(STRIPE_TAG) => stripeJsonFormat.reads(json)
       case unknown => JsError(__ \ "type", ValidationError(s"Invalid BankDetails value ${unknown}"))
     }
 
     override def writes(o: BankDetails): JsValue = o match {
-      case pp: PayPalBankDetails => payPalJsonFormat.writes(pp) + ("type" -> PAY_PAL_TAG)
       case s: StripeBankDetails => stripeJsonFormat.writes(s) + ("type" -> STRIPE_TAG)
     }
   }

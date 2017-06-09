@@ -27,7 +27,6 @@ class PaymentModule extends ScalaModule {
 
   override def configure() = {
     bind[PaymentTransactionRepository].to[MongoPaymentTransactionRepository]
-    bind[BraintreeProcessingService].to[SimpleBraintreeProcessingService]
 
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
@@ -41,11 +40,9 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def processingService(braintreeService: BraintreeProcessingService, configuration: Configuration): PaymentProcessingService[PaymentRequest] = {
+  def processingService(configuration: Configuration): PaymentProcessingService[PaymentRequest] = {
     Stripe.apiKey = configuration.getString("payment.stripe.apiKey").get
-    PaymentProcessingServiceFacade(
-      braintreeService, JavaClientStripeProcessingService
-    )
+    JavaClientStripeProcessingService
   }
 
   @Provides
@@ -59,15 +56,8 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def withdrawService(context: APIContext): PayoutService[BankDetails] = {
-    PayoutServiceFacade(PayPalPayoutService(context), StripeWithdrawalService)
-  }
-
-  @Provides
-  @Singleton
-  def braintreeGateway(configuration: Configuration): BraintreeGateway = {
-    val tokeOpt = configuration.getString("payment.braintree.token")
-    new BraintreeGateway(tokeOpt.get)
+  def payoutService(): PayoutService[BankDetails] = {
+    StripePayoutService
   }
 
   @Provides

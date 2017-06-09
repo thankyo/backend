@@ -26,3 +26,7 @@ GET         /payment/transaction/user/my     @com.clemble.loveit.payment.control
 GET         /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.getMyBankDetails()
 POST        /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.updateMyBankDetails()
 
+GET         /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.getMonthlyLimit()
+POST        /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.setMonthlyLimit()
+
+

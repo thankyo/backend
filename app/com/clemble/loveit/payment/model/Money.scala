@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.model
 
 import java.util.Currency
 
-import com.clemble.loveit.common.util.LoveItCurrency
+import com.clemble.loveit.common.util.{LoveItCurrency, WriteableUtils}
 import play.api.libs.json._
 
 case class Money(
@@ -25,5 +25,7 @@ object Money {
   }
 
   implicit val jsonFormat = Json.format[Money]
+
+  implicit val writeableJson = WriteableUtils.jsonToWriteable[Money]
 
 }

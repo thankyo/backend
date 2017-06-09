@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{BankDetails, StripeBankDetails, StripeChargeToken}
+import com.clemble.loveit.payment.model.{BankDetails, StripeBankDetails, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import com.google.common.collect.{ImmutableMap, Maps}
 import com.stripe.Stripe
@@ -18,14 +18,14 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 trait BankDetailsService {
 
-  def setBankDetails(user: UserID, token: StripeChargeToken): Future[BankDetails]
+  def updateBankDetails(user: UserID, token: StripeCustomerToken): Future[BankDetails]
 
 }
 
 @Singleton
 case class SimpleBankDetailsService @Inject()(repo: PaymentRepository, bankDetailsService: BankDetailsConverter, implicit val ec: ExecutionContext) extends BankDetailsService {
 
-  override def setBankDetails(user: UserID, token: StripeChargeToken): Future[BankDetails] = {
+  override def updateBankDetails(user: UserID, token: StripeCustomerToken): Future[BankDetails] = {
     for {
       bankDetails <- bankDetailsService.process(token)
       updated <- repo.setBankDetails(user, bankDetails)

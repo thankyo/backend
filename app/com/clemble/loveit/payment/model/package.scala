@@ -9,7 +9,7 @@ import play.api.libs.json._
   */
 package object model {
 
-  type StripeChargeToken = String
+  type StripeCustomerToken = String
 
   //TODO switch to simpler presentation
   implicit val yomJsonFormat = new Format[YearMonth] {

@@ -1,5 +1,7 @@
 package com.clemble.loveit.payment.service
 
+import com.clemble.loveit.payment.model.StripeCustomerToken
+
 import scala.util.Random
 
 trait TestStripeUtils {
@@ -33,10 +35,10 @@ trait TestStripeUtils {
     "tok_chargeDeclinedProcessingError"
   )
 
-  def someValidStripeToken() = VALID_USA_TOKENS(Random.nextInt(VALID_USA_TOKENS.size))
-  def someInValidStripeToken() = INVALID_TOKENS(Random.nextInt(INVALID_TOKENS.size))
+  def someValidStripeToken(): StripeCustomerToken = VALID_USA_TOKENS(Random.nextInt(VALID_USA_TOKENS.size))
+  def someInValidStripeToken(): StripeCustomerToken = INVALID_TOKENS(Random.nextInt(INVALID_TOKENS.size))
 
-  def allValidStripeTokens = VALID_USA_TOKENS
-  def allInvalidTokens = INVALID_TOKENS
+  def allValidStripeTokens: Seq[StripeCustomerToken] = VALID_USA_TOKENS
+  def allInvalidTokens: Seq[StripeCustomerToken] = INVALID_TOKENS
 
 }

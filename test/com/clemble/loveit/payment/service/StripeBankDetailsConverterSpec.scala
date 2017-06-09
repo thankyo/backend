@@ -5,7 +5,7 @@ import com.clemble.loveit.payment.model.StripeBankDetails
 
 import scala.util.Try
 
-class StripeChargeBankDetailsServiceSpec extends ServiceSpec with TestStripeUtils{
+class StripeBankDetailsConverterSpec extends ServiceSpec with TestStripeUtils{
 
   val service = dependency[BankDetailsConverter]
 

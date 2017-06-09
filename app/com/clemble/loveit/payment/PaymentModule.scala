@@ -2,7 +2,6 @@ package com.clemble.loveit.payment
 
 import java.util.Currency
 
-import com.braintreegateway.BraintreeGateway
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest}
 import com.clemble.loveit.payment.service.repository.{PaymentRepository, EOMChargeRepository, ThankTransactionRepository, UserPaymentRepository}
@@ -12,7 +11,6 @@ import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
 
 import com.google.inject.Provides
-import com.paypal.base.rest.APIContext
 import com.stripe.Stripe
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
@@ -43,15 +41,6 @@ class PaymentModule extends ScalaModule {
   def processingService(configuration: Configuration): PaymentProcessingService[PaymentRequest] = {
     Stripe.apiKey = configuration.getString("payment.stripe.apiKey").get
     StripeProcessingService
-  }
-
-  @Provides
-  @Singleton
-  def apiContext(configuration: Configuration): APIContext = {
-    val clientId = configuration.getString("payment.payPal.rest.clientId").get
-    val clientSecret = configuration.getString("payment.payPal.rest.clientSecret").get
-    val mode = configuration.getString("payment.payPal.rest.mode").get
-    new APIContext(clientId, clientSecret, mode)
   }
 
   @Provides

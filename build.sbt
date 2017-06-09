@@ -21,17 +21,13 @@ libraryDependencies ++= Seq(
 
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
-  "com.iheart" %% "ficus" % "1.4.0",
-
+  "com.iheart" %% "ficus" % "1.4.1",
   "com.mohiva" %% "play-silhouette" % "4.0.0",
   "com.mohiva" %% "play-silhouette-password-bcrypt" % "4.0.0",
   "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
   "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
 
-  "com.paypal.sdk" % "rest-api-sdk" % "1.13.1",
-  "com.braintreepayments.gateway" % "braintree-java" % "2.72.0",
-
-  "com.stripe" % "stripe-java" % "4.9.0",
+  "com.stripe" % "stripe-java" % "5.1.0",
 
   "com.atlassian.jwt" % "jwt-core" % "1.6.2",
   "com.atlassian.jwt" % "jwt-api" % "1.6.2",

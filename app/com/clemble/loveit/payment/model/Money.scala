@@ -2,9 +2,7 @@ package com.clemble.loveit.payment.model
 
 import java.util.Currency
 
-import com.braintreegateway.{Transaction => BraintreeTransaction}
 import com.clemble.loveit.common.util.LoveItCurrency
-import com.paypal.api.payments
 import play.api.libs.json._
 
 case class Money(
@@ -25,9 +23,5 @@ object Money {
   }
 
   implicit val jsonFormat = Json.format[Money]
-
-  def from(transaction: BraintreeTransaction): Money = {
-    Money(transaction.getAmount(), LoveItCurrency.getInstance(transaction.getCurrencyIsoCode))
-  }
 
 }

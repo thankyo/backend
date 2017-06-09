@@ -7,7 +7,7 @@ import scala.util.Try
 
 class StripeChargeBankDetailsServiceSpec extends ServiceSpec with TestStripeUtils{
 
-  val service = dependency[ChargeBankDetailsService]
+  val service = dependency[BankDetailsConverter]
 
   "STRIPE" should {
 

@@ -17,6 +17,7 @@ object UserException {
 
 object PaymentException {
   def alreadyThanked(user: UserID, res: Resource) = PaymentException("ALREADY_THANKED", s"User ${user} already thanked ${res}")
+  def failedToLinkBankDetails(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link bank details")
 }
 
 object ResourceException {

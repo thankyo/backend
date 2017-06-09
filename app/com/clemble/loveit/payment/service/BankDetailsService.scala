@@ -1,27 +1,47 @@
 package com.clemble.loveit.payment.service
 
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{BankDetails, StripeBankDetails}
+import com.clemble.loveit.payment.model.{BankDetails, StripeBankDetails, StripeChargeToken}
+import com.clemble.loveit.payment.service.repository.PaymentRepository
 import com.google.common.collect.{ImmutableMap, Maps}
+import com.stripe.Stripe
 import com.stripe.model.Card
 
 import scala.collection.JavaConversions._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * BankDetails integration service
+  */
 trait BankDetailsService {
 
-  def setChargeToken(user: UserID, token: String): Future[BankDetails]
-
-  def setPayoutToken(user: UserID, token: String): Future[BankDetails]
+  def setBankDetails(user: UserID, token: StripeChargeToken): Future[BankDetails]
 
 }
+
+@Singleton
+case class SimpleBankDetailsService @Inject()(repo: PaymentRepository, bankDetailsService: BankDetailsConverter, implicit val ec: ExecutionContext) extends BankDetailsService {
+
+  override def setBankDetails(user: UserID, token: StripeChargeToken): Future[BankDetails] = {
+    for {
+      bankDetails <- bankDetailsService.process(token)
+      updated <- repo.setBankDetails(user, bankDetails)
+    } yield {
+      if (!updated) throw PaymentException.failedToLinkBankDetails(user)
+      bankDetails
+    }
+  }
+
+}
+
 
 /**
   * Payment processing service abstraction
   */
-sealed trait ChargeBankDetailsService {
+sealed trait BankDetailsConverter {
 
   /**
     * Process payment request by the user
@@ -35,7 +55,9 @@ sealed trait ChargeBankDetailsService {
   * Stripe processing service
   */
 @Singleton
-case object StripeChargeBankDetailsService extends ChargeBankDetailsService {
+class StripeBankDetailsConverter(apiKey: String) extends BankDetailsConverter {
+  Stripe.apiKey = apiKey
+
   import com.stripe.model.Customer
 
   private def toInternalBankDetails(customer: Customer): StripeBankDetails = {

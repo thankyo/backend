@@ -9,6 +9,8 @@ import play.api.libs.json._
   */
 package object model {
 
+  type StripeChargeToken = String
+
   //TODO switch to simpler presentation
   implicit val yomJsonFormat = new Format[YearMonth] {
     override def writes(o: YearMonth): JsValue = {

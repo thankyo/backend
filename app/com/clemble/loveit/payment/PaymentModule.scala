@@ -3,7 +3,7 @@ package com.clemble.loveit.payment
 import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
-import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest}
+import com.clemble.loveit.payment.model.{BankDetails}
 import com.clemble.loveit.payment.service.repository.{PaymentRepository, EOMChargeRepository, ThankTransactionRepository, UserPaymentRepository}
 import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentRepository, MongoEOMChargeRepository, MongoThankTransactionRepository, MongoUserPaymentRepository}
 import com.clemble.loveit.payment.service._
@@ -11,7 +11,6 @@ import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
 
 import com.google.inject.Provides
-import com.stripe.Stripe
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -27,6 +26,7 @@ class PaymentModule extends ScalaModule {
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[BankDetailsService].to[SimpleBankDetailsService].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
@@ -38,9 +38,8 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def bankDetailsService(configuration: Configuration): ChargeBankDetailsService = {
-    Stripe.apiKey = configuration.getString("payment.stripe.apiKey").get
-    StripeChargeBankDetailsService
+  def bankDetailsService(configuration: Configuration): BankDetailsConverter = {
+    new StripeBankDetailsConverter(configuration.getString("payment.stripe.apiKey").get)
   }
 
   @Provides

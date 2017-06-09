@@ -9,7 +9,7 @@ import play.api.test.FakeRequest
 
 class BankDetailsControllerSpec extends ControllerSpec with TestStripeUtils {
 
-  def get(user: UserID): Option[BankDetails] = {
+  def getBankDetails(user: UserID): Option[BankDetails] = {
     val req = sign(user, FakeRequest(GET, s"/api/v1/payment/bank/my"))
     val fRes = route(application, req).get
 
@@ -20,28 +20,23 @@ class BankDetailsControllerSpec extends ControllerSpec with TestStripeUtils {
     }
   }
 
-  def set(user: UserID, token: StripeCustomerToken): BankDetails = {
+  def setBankDetails(user: UserID, token: StripeCustomerToken): BankDetails = {
     val req = sign(user, FakeRequest(POST, s"/api/v1/payment/bank/my").withJsonBody(JsString(token)))
     val res = await(route(application, req).get)
 
     Json.parse(res.body.dataStream.read()).as[BankDetails]
   }
 
-  "GET" should {
+  "Update BankDetails" in {
+    val user = createUser()
 
-    "List on new user" in {
-      val user = createUser()
+    val bankDetailsBefore = getBankDetails(user)
+    val updatedBankDetails = Some(setBankDetails(user, someValidStripeToken()))
 
-      val bankDetailsBefore = get(user)
-      val updatedBankDetails = Some(set(user, someValidStripeToken()))
+    val bankDetailsAfter = getBankDetails(user)
 
-      val bankDetailsAfter = get(user)
-
-      bankDetailsAfter shouldEqual updatedBankDetails
-      bankDetailsBefore shouldNotEqual bankDetailsAfter
-    }
-
+    bankDetailsAfter shouldEqual updatedBankDetails
+    bankDetailsBefore shouldNotEqual bankDetailsAfter
   }
-
 
 }

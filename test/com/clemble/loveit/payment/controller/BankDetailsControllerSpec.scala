@@ -33,7 +33,7 @@ class BankDetailsControllerSpec extends ControllerSpec with TestStripeUtils {
       val user = createUser()
 
       val bankDetailsBefore = get(user)
-      val updatedBankDetails = set(user, someValidStripeToken())
+      val updatedBankDetails = Some(set(user, someValidStripeToken()))
 
       val bankDetailsAfter = get(user)
 

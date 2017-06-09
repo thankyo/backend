@@ -9,13 +9,13 @@ import scala.concurrent.Future
 
 sealed trait PayoutService[BankDetails] {
 
-  def process(payout: Payout): Future[(PayoutStatus, JsValue)]
+  def process(payout: EOMPayout): Future[(PayoutStatus, JsValue)]
 
 }
 
 case object StripePayoutService extends PayoutService[BankDetails] {
 
-  override def process(payout: Payout): Future[(PayoutStatus, JsValue)] = {
+  override def process(payout: EOMPayout): Future[(PayoutStatus, JsValue)] = {
     Future.successful(PayoutStatus.Failed -> Json.obj())
   }
 

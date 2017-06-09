@@ -14,7 +14,7 @@ sealed trait ChargeService {
   /**
     * Charges user with specified amount
     */
-  def process(charge: Charge): Future[(ChargeStatus, JsValue)]
+  def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)]
 
 }
 
@@ -39,7 +39,7 @@ case object StripeChargeService extends ChargeService {
   /**
     * Charges user with specified amount
     */
-  override def process(charge: Charge): Future[(ChargeStatus, JsValue)] = {
+  override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     val res = Try({
       chargeStripe(charge.source.asInstanceOf[StripeBankDetails], charge.amount)
     }) match {

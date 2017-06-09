@@ -5,4 +5,4 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class PayoutSerializationSpec extends SerializationSpec[EOMPayout]
+class EndOfMonthProcessingSerializationSpec extends SerializationSpec[EOMPaymentStatus]

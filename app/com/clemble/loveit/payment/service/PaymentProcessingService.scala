@@ -1,6 +1,6 @@
 package com.clemble.loveit.payment.service
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Singleton}
 
 import com.clemble.loveit.payment.model._
 import com.google.common.collect.Maps
@@ -31,7 +31,7 @@ import com.stripe.model.Charge
 import com.stripe.model.Customer
 
 @Singleton
-case object JavaClientStripeProcessingService extends StripeProcessingService {
+case object StripeProcessingService extends StripeProcessingService {
 
   def charge(bankDetails: StripeBankDetails, amount: Money): Charge = {
     val chargeParams = Maps.newHashMap[String, Object]()

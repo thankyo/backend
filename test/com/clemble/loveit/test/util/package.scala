@@ -19,7 +19,7 @@ package object util {
 
   implicit val resourceGenerator: Generator[Resource] = ResourceGenerator
   implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = CommonSocialProfileGenerator
-  implicit val paymentTransactionGenerator: Generator[Charge] = PaymentTransactionGenerator
+  implicit val paymentTransactionGenerator: Generator[EOMCharge] = PaymentTransactionGenerator
   implicit val repositoryExceptionGenerator: Generator[RepositoryException] = RepositoryExceptionGenerator
   implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
   implicit val userExceptionGenerator: Generator[UserException] = UserExceptionGenerator
@@ -29,10 +29,17 @@ package object util {
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
   implicit val userGenerator: Generator[User] = UserGenerator
   implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
-  implicit val payoutGenerator: Generator[Payout] = PayoutGenerator
+  implicit val payoutGenerator: Generator[EOMPayout] = PayoutGenerator
+  implicit val eomStatGenerator: Generator[EOMStatistics] = EndOfMonthStatisticsGenerator
+  implicit val eomProcGenerator: Generator[EOMPaymentStatus] = EndOfMonthProcessingGenerator
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
+  implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenrator
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
+
+  private object DateTimeGenrator extends Generator[DateTime] {
+    override def generate(): DateTime = new DateTime(Random.nextLong())
+  }
 
   private object UserIDGenerator extends Generator[UserID] {
     override def generate(): UserID = IDGenerator.generate()
@@ -44,9 +51,32 @@ package object util {
     }
   }
 
-  private object PayoutGenerator extends Generator[Payout] {
-    override def generate(): Payout = Payout(
-      IDGenerator.generate(),
+  private object EndOfMonthProcessingGenerator extends Generator[EOMPaymentStatus] {
+    override def generate(): EOMPaymentStatus = {
+      EOMPaymentStatus(
+        IDGenerator.generate(),
+        someRandom[EOMStatistics],
+        someRandom[EOMStatistics],
+        someRandom[EOMStatistics],
+        someRandom[EOMStatistics],
+        new DateTime(nextLong(0, Long.MaxValue))
+      )
+    }
+  }
+
+  private object EndOfMonthStatisticsGenerator extends Generator[EOMStatistics] {
+    override def generate(): EOMStatistics = {
+      EOMStatistics(
+        nextLong(0, Long.MaxValue),
+        nextLong(0, Long.MaxValue),
+        nextLong(0, Long.MaxValue),
+        nextLong(0, Long.MaxValue)
+      )
+    }
+  }
+
+  private object PayoutGenerator extends Generator[EOMPayout] {
+    override def generate(): EOMPayout = EOMPayout(
       someRandom[UserID],
       someRandom[BankDetails],
       nextLong(0, Long.MaxValue),
@@ -76,10 +106,17 @@ package object util {
 
   }
 
-  private object PaymentTransactionGenerator extends Generator[Charge] {
+  private object PaymentTransactionGenerator extends Generator[EOMCharge] {
 
-    override def generate(): Charge = {
-      Charge(IDGenerator.generate(), someRandom[UserID], someRandom[BankDetails], ChargeStatus.Pending, someRandom[Money], None, List(someRandom[ThankTransaction]))
+    override def generate(): EOMCharge = {
+      EOMCharge(
+        someRandom[UserID],
+        someRandom[BankDetails],
+        ChargeStatus.Pending,
+        someRandom[Money],
+        None,
+        List(someRandom[ThankTransaction])
+      )
     }
 
   }

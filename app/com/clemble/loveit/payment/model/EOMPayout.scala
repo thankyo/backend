@@ -1,11 +1,11 @@
 package com.clemble.loveit.payment.model
 
-import com.clemble.loveit.common.model.{UserID}
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import org.joda.time.DateTime
 import play.api.libs.json._
 
-object PayoutStatus extends Enumeration {
+case object PayoutStatus extends Enumeration {
   type PayoutStatus = Value
   val Pending, Running, Success, Failed = Value
 
@@ -20,19 +20,18 @@ object PayoutStatus extends Enumeration {
   }
 }
 
-case class Payout(
-                   id: String,
-                   user: UserID,
-                   bankDetails: BankDetails,
-                   failed: Long,
-                   pending: Long,
-                   amount: Money,
-                   status: PayoutStatus,
-                   created: DateTime = new DateTime()
+case class EOMPayout(
+                      user: UserID,
+                      bankDetails: BankDetails,
+                      failed: Long,
+                      pending: Long,
+                      amount: Money,
+                      status: PayoutStatus,
+                      created: DateTime = new DateTime()
 ) extends Transaction
 
-object Payout {
+object EOMPayout {
 
-  implicit val jsonFormat = Json.format[Payout]
+  implicit val jsonFormat = Json.format[EOMPayout]
 
 }

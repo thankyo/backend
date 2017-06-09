@@ -1,6 +1,6 @@
 package com.clemble.loveit.payment.model
 
-import com.clemble.loveit.common.model.{Amount, PaymentID, UserID}
+import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import org.joda.time.DateTime
@@ -21,21 +21,20 @@ object ChargeStatus extends Enumeration {
   }
 }
 
-case class Charge(
-                   id: PaymentID,
-                   user: UserID,
-                   source: BankDetails,
-                   status: ChargeStatus,
-                   amount: Money,
-                   details: Option[JsValue],
-                   transactions: List[ThankTransaction],
-                   created: DateTime = DateTime.now()
+case class EOMCharge(
+                      user: UserID,
+                      source: BankDetails,
+                      status: ChargeStatus,
+                      amount: Money,
+                      details: Option[JsValue],
+                      transactions: List[ThankTransaction],
+                      created: DateTime = DateTime.now()
 ) extends Transaction
 
-object Charge {
+object EOMCharge {
 
-  implicit val jsonFormat = Json.format[Charge]
-  implicit val chargeWriteable = WriteableUtils.jsonToWriteable[Charge]
+  implicit val jsonFormat = Json.format[EOMCharge]
+  implicit val chargeWriteable = WriteableUtils.jsonToWriteable[EOMCharge]
 
 }
 

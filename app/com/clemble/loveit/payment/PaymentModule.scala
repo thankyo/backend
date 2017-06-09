@@ -5,8 +5,8 @@ import java.util.Currency
 import com.braintreegateway.BraintreeGateway
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.{BankDetails, PaymentRequest}
-import com.clemble.loveit.payment.service.repository.{PaymentRepository, PaymentTransactionRepository, ThankTransactionRepository, UserPaymentRepository}
-import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentRepository, MongoPaymentTransactionRepository, MongoThankTransactionRepository, MongoUserPaymentRepository}
+import com.clemble.loveit.payment.service.repository.{PaymentRepository, EOMChargeRepository, ThankTransactionRepository, UserPaymentRepository}
+import com.clemble.loveit.payment.service.repository.mongo.{MongoPaymentRepository, MongoEOMChargeRepository, MongoThankTransactionRepository, MongoUserPaymentRepository}
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
@@ -26,7 +26,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class PaymentModule extends ScalaModule {
 
   override def configure() = {
-    bind[PaymentTransactionRepository].to[MongoPaymentTransactionRepository]
+    bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
@@ -42,7 +42,7 @@ class PaymentModule extends ScalaModule {
   @Singleton
   def processingService(configuration: Configuration): PaymentProcessingService[PaymentRequest] = {
     Stripe.apiKey = configuration.getString("payment.stripe.apiKey").get
-    JavaClientStripeProcessingService
+    StripeProcessingService
   }
 
   @Provides

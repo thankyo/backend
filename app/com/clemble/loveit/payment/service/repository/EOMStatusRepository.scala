@@ -8,8 +8,14 @@ import scala.concurrent.Future
 
 trait EOMStatusRepository {
 
-  def get(yom: YearMonth): Future[Option[YearMonth]]
+  /**
+    * @return optional EOMStatus
+    */
+  def get(yom: YearMonth): Future[Option[EOMStatus]]
 
+  /**
+    * Saves EOM status, if there were no previous EOMStatus created
+    */
   def save(status: EOMStatus): Future[EOMStatus]
 
 }

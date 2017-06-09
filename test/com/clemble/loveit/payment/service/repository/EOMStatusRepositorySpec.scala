@@ -34,7 +34,7 @@ class EOMStatusRepositorySpec extends RepositorySpec {
       val status = someRandom[EOMStatus]
 
       await(repo.save(status))
-      await(repo.get(status.yom)) shouldEqual status
+      await(repo.get(status.yom)) shouldEqual Some(status)
     }
 
   }

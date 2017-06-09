@@ -38,7 +38,7 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def processingService(configuration: Configuration): PaymentProcessingService[PaymentRequest] = {
+  def processingService(configuration: Configuration): ChargeBankDetailsService[PaymentRequest] = {
     Stripe.apiKey = configuration.getString("payment.stripe.apiKey").get
     StripeProcessingService
   }

@@ -34,7 +34,7 @@ package object util {
   implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
   implicit val payoutGenerator: Generator[EOMPayout] = PayoutGenerator
   implicit val eomStatGenerator: Generator[EOMStatistics] = EndOfMonthStatisticsGenerator
-  implicit val eomProcGenerator: Generator[EOMPaymentStatus] = EndOfMonthProcessingGenerator
+  implicit val eomProcGenerator: Generator[EOMStatus] = EndOfMonthProcessingGenerator
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
   implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenerator
   implicit val yomGenerator: Generator[YearMonth] = YearMonthGenerator
@@ -64,9 +64,9 @@ package object util {
     }
   }
 
-  private object EndOfMonthProcessingGenerator extends Generator[EOMPaymentStatus] {
-    override def generate(): EOMPaymentStatus = {
-      EOMPaymentStatus(
+  private object EndOfMonthProcessingGenerator extends Generator[EOMStatus] {
+    override def generate(): EOMStatus = {
+      EOMStatus(
         someRandom[YearMonth],
         someRandom[EOMStatistics],
         someRandom[EOMStatistics],

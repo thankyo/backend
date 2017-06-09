@@ -34,7 +34,7 @@ case class EOMStatistics(
   * @param applyPayout statistics for applying payouts
   * @param created creation time
   */
-case class EOMPaymentStatus(
+case class EOMStatus(
                              yom: YearMonth,
                              createCharges: EOMStatistics = EOMStatistics(),
                              applyCharges: EOMStatistics = EOMStatistics(),
@@ -50,9 +50,9 @@ case class EOMPaymentStatus(
 
 }
 
-object EOMPaymentStatus {
+object EOMStatus {
 
   private implicit val statJsonFormat = Json.format[EOMStatistics]
-  implicit val jsonFormat = Json.format[EOMPaymentStatus]
+  implicit val jsonFormat = Json.format[EOMStatus]
 
 }

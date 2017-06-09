@@ -5,7 +5,7 @@ import java.util.Currency
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.BankDetails
 import com.clemble.loveit.payment.service.repository.{BalanceRepository, _}
-import com.clemble.loveit.payment.service.repository.mongo.{MongoEOMChargeRepository, MongoPaymentRepository, MongoThankTransactionRepository, MongoUserPaymentRepository}
+import com.clemble.loveit.payment.service.repository.mongo._
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
@@ -29,6 +29,8 @@ class PaymentModule extends ScalaModule {
     bind[BankDetailsRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[MonthlyLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
+
+    bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
 
     bind[BankDetailsService].to[SimpleBankDetailsService].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
@@ -55,10 +57,20 @@ class PaymentModule extends ScalaModule {
   @Provides
   @Singleton
   @Named("eomCharge")
-  def paymentTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+  def eomChargeMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.
       map(_.collection[JSONCollection]("eomCharge", FailoverStrategy.default))(ec)
+    Await.result(fCollection, 1 minute)
+  }
+
+  @Provides
+  @Singleton
+  @Named("eomStatus")
+  def eomStatusMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    val fCollection: Future[JSONCollection] = mongoApi.
+      database.
+      map(_.collection[JSONCollection]("eomStatus", FailoverStrategy.default))(ec)
     Await.result(fCollection, 1 minute)
   }
 

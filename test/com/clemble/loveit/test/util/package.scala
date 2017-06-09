@@ -60,7 +60,7 @@ package object util {
 
   private object MoneyGenerator extends Generator[Money] {
     override def generate(): Money = {
-      Money(Random.nextLong(), someRandom[Currency])
+      Money(nextLong(0, Long.MaxValue), someRandom[Currency])
     }
   }
 

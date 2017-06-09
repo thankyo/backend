@@ -72,6 +72,7 @@ package object util {
         someRandom[EOMStatistics],
         someRandom[EOMStatistics],
         someRandom[EOMStatistics],
+        None,
         new DateTime(nextLong(0, Long.MaxValue))
       )
     }

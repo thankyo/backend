@@ -25,6 +25,10 @@ case class EOMStatistics(
 
 }
 
+object EOMStatistics {
+  implicit val statJsonFormat = Json.format[EOMStatistics]
+}
+
 /**
   * EOM processing status generator
   *
@@ -40,7 +44,8 @@ case class EOMStatus(
                              applyCharges: EOMStatistics = EOMStatistics(),
                              createPayout: EOMStatistics = EOMStatistics(),
                              applyPayout: EOMStatistics = EOMStatistics(),
-                             created: DateTime
+                             finished: Option[DateTime] = None,
+                             created: DateTime = DateTime.now()
               ) extends CreatedAware with EOMAware{
 
   def isValid = createCharges.isValid &&
@@ -52,7 +57,6 @@ case class EOMStatus(
 
 object EOMStatus {
 
-  private implicit val statJsonFormat = Json.format[EOMStatistics]
   implicit val jsonFormat = Json.format[EOMStatus]
 
 }

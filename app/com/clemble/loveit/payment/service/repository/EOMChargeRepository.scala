@@ -31,7 +31,7 @@ trait EOMChargeRepository extends UserAwareRepository[EOMCharge] {
     *
     *
     * @param user target user
-    * @param date target date
+    * @param yom year of month
     * @param status new status
     * @param details transaction details
     * @return true if processing was Successful, false otherwise
@@ -40,7 +40,7 @@ trait EOMChargeRepository extends UserAwareRepository[EOMCharge] {
     *                             that must be addressed by the admin
     */
   @throws[RepositoryException]
-  def updatePending(user: UserID, date: DateTime, status: ChargeStatus, details: JsValue): Future[Boolean]
+  def updatePending(user: UserID, yom: YearMonth, status: ChargeStatus, details: JsValue): Future[Boolean]
 
   /**
     * Saves charge for future processing

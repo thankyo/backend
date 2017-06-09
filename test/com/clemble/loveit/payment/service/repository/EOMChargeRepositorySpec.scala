@@ -3,11 +3,12 @@ package com.clemble.loveit.payment.service.repository
 import java.time.YearMonth
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge}
-import org.joda.time.DateTime
+import com.clemble.loveit.common.error.{RepositoryException, ThankException}
+import com.clemble.loveit.payment.model.{EOMCharge}
+import com.clemble.loveit.payment.model.ChargeStatus._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
+import play.api.libs.json.Json
 
 @RunWith(classOf[JUnitRunner])
 class EOMChargeRepositorySpec extends RepositorySpec {
@@ -41,8 +42,8 @@ class EOMChargeRepositorySpec extends RepositorySpec {
 
     "list only pending" in {
       val yom = someRandom[YearMonth]
-      val A = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Failed)
-      val B = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Pending)
+      val A = someRandom[EOMCharge].copy(yom = yom, status = Failed)
+      val B = someRandom[EOMCharge].copy(yom = yom, status = Pending)
 
       await(repo.save(A))
       await(repo.save(B))
@@ -54,8 +55,8 @@ class EOMChargeRepositorySpec extends RepositorySpec {
 
     "list all pending" in {
       val yom = someRandom[YearMonth]
-      val A = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Pending)
-      val B = someRandom[EOMCharge].copy(yom = yom, status = ChargeStatus.Pending)
+      val A = someRandom[EOMCharge].copy(yom = yom, status = Pending)
+      val B = someRandom[EOMCharge].copy(yom = yom, status = Pending)
 
       await(repo.save(A))
       await(repo.save(B))
@@ -65,4 +66,24 @@ class EOMChargeRepositorySpec extends RepositorySpec {
     }
 
   }
+
+  "UPDATE pending" should {
+
+    "fail on nonexistent" in {
+      val A = someRandom[EOMCharge].copy(status = Pending)
+
+      await(repo.updatePending(A.user, A.yom, Failed, Json.obj())) shouldEqual false
+    }
+
+    "update pending" in {
+      val A = someRandom[EOMCharge].copy(status = Pending)
+
+      await(repo.save(A))
+
+      await(repo.updatePending(A.user, A.yom, Failed, Json.obj())) shouldEqual true
+      await(repo.updatePending(A.user, A.yom, Success, Json.obj())) shouldEqual false
+    }
+
+  }
+
 }

@@ -11,7 +11,6 @@ import javax.inject.{Inject, Named, Singleton}
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
-import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, JsValue, Json}
 import reactivemongo.api.ReadPreference
 
@@ -41,7 +40,11 @@ case class MongoEOMChargeRepository @Inject()(
       documentSource()
   }
 
-  override def updatePending(user: UserID, date: DateTime, status: ChargeStatus, details: JsValue): Future[Boolean] = ???
+  override def updatePending(user: UserID, yom: YearMonth, status: ChargeStatus, details: JsValue): Future[Boolean] = {
+    val selector = Json.obj("user" -> user, "yom" -> yom, "status" -> ChargeStatus.Pending)
+    val update = Json.obj("$set" -> Json.obj("status" -> status, "details" -> details))
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+  }
 
   override def save(charge: EOMCharge): Future[EOMCharge] = {
     val json = Json.toJson(charge).as[JsObject]

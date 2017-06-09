@@ -3,9 +3,10 @@ package com.clemble.loveit.payment.service.repository.mongo
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.stream.Materializer
+import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.model.{BankDetails, Money}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -37,6 +38,20 @@ case class MongoPaymentRepository @Inject()(
     val query = Json.obj("_id" -> user)
     val change = Json.obj("$inc" -> Json.obj("balance" -> update))
     MongoSafeUtils.safeSingleUpdate(collection.update(query, change))
+  }
+
+  override def getMonthlyLimit(user: UserID): Future[Option[Money]] = {
+    val selector = Json.obj("_id" -> user)
+    val projection = Json.obj("monthlyLimit" -> 1)
+    val fLimit = collection.find(selector, projection).one[JsObject].map(_.flatMap(json => (json \ "monthlyLimit").asOpt[Money]))
+    MongoSafeUtils.safe(fLimit)
+  }
+
+  override def setMonthlyLimit(user: UserID, monthlyLimit: Money): Future[Boolean] = {
+    if (monthlyLimit.isNegative) throw PaymentException.limitIsNegative(user, monthlyLimit)
+    val selector = Json.obj("_id" -> user)
+    val update = Json.obj("$set" -> Json.obj("monthlyLimit" -> monthlyLimit))
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
   override def getBankDetails(user: UserID): Future[Option[BankDetails]] = {

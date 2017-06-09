@@ -1,6 +1,7 @@
 package com.clemble.loveit.test
 
 import java.time.YearMonth
+import java.util.Currency
 
 import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
@@ -37,8 +38,13 @@ package object util {
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
   implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenerator
   implicit val yomGenerator: Generator[YearMonth] = YearMonthGenerator
+  implicit val currencyGenerator: Generator[Currency] = CurrencyGenerator
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
+
+  private object CurrencyGenerator extends Generator[Currency] {
+    val generate: Currency = LoveItCurrency.getInstance("USD")
+  }
 
   private object DateTimeGenerator extends Generator[DateTime] {
     override def generate(): DateTime = new DateTime(Random.nextLong())
@@ -54,7 +60,7 @@ package object util {
 
   private object MoneyGenerator extends Generator[Money] {
     override def generate(): Money = {
-      Money(Random.nextLong(), LoveItCurrency.getInstance("USD"))
+      Money(Random.nextLong(), someRandom[Currency])
     }
   }
 

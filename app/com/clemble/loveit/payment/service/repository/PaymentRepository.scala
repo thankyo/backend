@@ -1,7 +1,7 @@
 package com.clemble.loveit.payment.service.repository
 
 import com.clemble.loveit.common.model.{Amount, UserID}
-import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.model.{BankDetails, Money}
 
 import scala.concurrent.Future
 
@@ -18,6 +18,19 @@ trait PaymentRepository {
     * @return true if operation proceeded as expected, false otherwise
     */
   def updateBalance(user: UserID, change: Amount): Future[Boolean]
+
+  /**
+    * Get monthly limit
+    */
+  def getMonthlyLimit(user: UserID): Future[Option[Money]]
+
+  /**
+    * Sets transaction limit for specified User
+    *
+    * @return true if update was success, false otherwise
+    */
+  def setMonthlyLimit(user: UserID, monthlyLimit: Money): Future[Boolean]
+
 
   /**
     * Get user bank details

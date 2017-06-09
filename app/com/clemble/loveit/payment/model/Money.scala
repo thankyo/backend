@@ -8,7 +8,9 @@ import play.api.libs.json._
 case class Money(
                   amount: BigDecimal,
                   currency: Currency
-                )
+                ) {
+  def isNegative: Boolean = amount < 0
+}
 
 object Money {
 

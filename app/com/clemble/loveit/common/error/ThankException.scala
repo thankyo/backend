@@ -1,6 +1,7 @@
 package com.clemble.loveit.common.error
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
+import com.clemble.loveit.payment.model.Money
 import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException
@@ -18,6 +19,7 @@ object UserException {
 object PaymentException {
   def alreadyThanked(user: UserID, res: Resource) = PaymentException("ALREADY_THANKED", s"User ${user} already thanked ${res}")
   def failedToLinkBankDetails(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link bank details")
+  def limitIsNegative(user: UserID, limit: Money) = PaymentException("LIMIT_IS_NEGATIVE", s"User ${user} limit can't be negative")
 }
 
 object ResourceException {

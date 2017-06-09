@@ -1,5 +1,7 @@
 package com.clemble.loveit.payment.model
 
+import com.clemble.loveit.common.util.WriteableUtils
+import com.clemble.loveit.thank.model.Thank
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
@@ -34,5 +36,7 @@ object BankDetails {
       case s: StripeBankDetails => stripeJsonFormat.writes(s) + ("type" -> STRIPE_TAG)
     }
   }
+
+  implicit val bankDetailsWriteable = WriteableUtils.jsonToWriteable[BankDetails]
 
 }

@@ -7,7 +7,6 @@ import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MetaTagReaderSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   lazy val tagReader = dependency[MetaTagReader]

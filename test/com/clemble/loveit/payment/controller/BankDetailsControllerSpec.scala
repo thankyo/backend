@@ -15,7 +15,7 @@ class BankDetailsControllerSpec extends ControllerSpec with TestStripeUtils {
 
     val res = await(fRes)
     res.header.status match {
-      case 200 => Json.parse(res.body.dataStream.read()).asOpt[BankDetails]
+      case 200 => res.body.dataStream.readJson[BankDetails]
       case 404 => None
     }
   }
@@ -24,7 +24,7 @@ class BankDetailsControllerSpec extends ControllerSpec with TestStripeUtils {
     val req = sign(user, FakeRequest(POST, s"/api/v1/payment/bank/my").withJsonBody(JsString(token)))
     val res = await(route(application, req).get)
 
-    Json.parse(res.body.dataStream.read()).as[BankDetails]
+    res.body.dataStream.readJson[BankDetails].get
   }
 
   "Update BankDetails" in {

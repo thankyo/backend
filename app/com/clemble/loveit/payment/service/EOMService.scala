@@ -38,7 +38,7 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOM
   override def run(yom: YearMonth): Future[EOMStatus] = {
     val status = EOMStatus(yom)
     val fSaved = repo.save(status)
-    fSaved.onSuccess({ case status => doRun(yom)})
+    fSaved.onSuccess({ case _ => doRun(yom)})
     fSaved
   }
 
@@ -79,7 +79,7 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOM
     // TODO 2 - is a dark blood magic number it should be configured, based on system preferences
     paymentRepository.
       find().
-      mapAsync(2)(createCharge).
+      mapAsync(8)(createCharge).
       runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
   }
 

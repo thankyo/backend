@@ -12,7 +12,7 @@ class AdminUserControllerSpec extends ControllerSpec {
 
   def count() = {
     val res = perform(admin, FakeRequest(GET, "/api/v1/user/admin/count"))
-    res.body.dataStream.read().toInt
+    res.body.dataStream.readJson[Int]().get
   }
 
   "count" in {

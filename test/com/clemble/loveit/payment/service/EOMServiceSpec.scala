@@ -5,22 +5,27 @@ import java.time.YearMonth
 import com.clemble.loveit.common.{ServiceSpec, ThankSpecification}
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{EOMCharge, EOMStatus}
+import com.clemble.loveit.payment.model.{BankDetails, EOMCharge, EOMStatus}
 import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec {
+class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStripeUtils {
 
   val service = dependency[EOMService]
   val chargeRepo = dependency[EOMChargeRepository]
+  val bankDetails = dependency[BankDetailsService]
 
   override def getStatus(yom: YearMonth) = await(service.getStatus(yom))
   override def run(yom: YearMonth) = await(service.run(yom))
 
   override def charges(user: UserID): Seq[EOMCharge] = chargeRepo.findByUser(user).toSeq()
+
+  override def addBankDetails(user: UserID): BankDetails = {
+    await(bankDetails.updateBankDetails(user, someValidStripeToken()))
+  }
 
 }
 
@@ -31,6 +36,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
 
   def charges(user: UserID): Seq[EOMCharge]
   def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): UserID
+  def addBankDetails(user: UserID): BankDetails
 
   // This one can finish since it runs on all of the users at the time, so transaction might take more, than 40 seconds
   "EOM run set's finished" in {
@@ -52,18 +58,20 @@ trait GenericEOMServiceSpec extends ThankSpecification {
   "EOM creates charges" in {
     val yom = someRandom[YearMonth]
     val user = createUser()
+    addBankDetails(user)
 
     charges(user) shouldEqual Nil
     run(yom)
     eventually(getStatus(yom).get.finished shouldNotEqual None)
 
     val statusAfter = getStatus(yom)
-    statusAfter.get.createCharges.success shouldEqual 1
+    statusAfter.get.createCharges.success should beGreaterThan(0L)
+    statusAfter.get.createCharges.total shouldEqual beGreaterThan(0L)
 
     eventually(charges(user) shouldNotEqual Nil)
     val chargesAfterYom = charges(user)
-    chargesAfterYom.size shouldEqual 1
-    chargesAfterYom(0).yom shouldEqual yom
+    chargesAfterYom.size should beGreaterThan(0)
+    chargesAfterYom.map(_.yom) should contain(yom)
   }
 
 }

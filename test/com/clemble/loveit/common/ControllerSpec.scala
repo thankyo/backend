@@ -14,7 +14,7 @@ import com.clemble.loveit.user.service.repository.UserRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import com.nimbusds.jose.JWSObject
 import play.api.http.Writeable
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 
@@ -30,6 +30,7 @@ trait ControllerSpec extends ThankSpecification {
 
   implicit class ByteSourceReader(source: Source[ByteString, _]) {
     def read(): String = await(source.runWith(Sink.fold("")((agg, s) => agg.concat(s.utf8String))))
+    def readJson[T]()(implicit reader: Reads[T]): Option[T] = Json.parse(read()).asOpt[T]
   }
 
   def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): String = {

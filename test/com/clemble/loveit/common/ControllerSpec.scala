@@ -13,6 +13,7 @@ import com.clemble.loveit.user.model._
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import com.nimbusds.jose.JWSObject
+import play.api.http.Writeable
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -45,6 +46,12 @@ trait ControllerSpec extends ThankSpecification {
     req.withHeaders(userAuth:_*)
   }
 
+  def perform[A](user: UserID, req: FakeRequest[A])(implicit writeable: Writeable[A]) = {
+    val singed = sign(user, req)
+    val fRes = route(application, singed).get
+    await(fRes)
+  }
+
   def addOwnership(user: UserID, own: Resource): Option[Resource] = {
     Some(await(ownershipService.assignOwnership(user, own)))
   }
@@ -63,7 +70,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def getMyPayments(user: String): Seq[ThankTransaction] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/transaction/user/my"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/pending/my"))
     val fRes = route(application, req).get
 
     val res = await(fRes)

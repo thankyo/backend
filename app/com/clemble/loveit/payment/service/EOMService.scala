@@ -17,7 +17,7 @@ trait EOMService {
   /**
     * Simple wrap of repo access
     */
-  def get(yom: YearMonth): Future[Option[EOMStatus]]
+  def getStatus(yom: YearMonth): Future[Option[EOMStatus]]
 
   /**
     * Running yom for EOMStatus, if there is no EOMStatus exists
@@ -29,7 +29,7 @@ trait EOMService {
 @Singleton
 case class SimpleEOMService @Inject()(repo: EOMStatusRepository, implicit val ec: ExecutionContext) extends EOMService {
 
-  override def get(yom: YearMonth): Future[Option[EOMStatus]] = {
+  override def getStatus(yom: YearMonth): Future[Option[EOMStatus]] = {
     repo.get(yom)
   }
 

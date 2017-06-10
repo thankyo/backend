@@ -1,3 +1,5 @@
+import play.sbt.routes.RoutesKeys
+
 name := "thank-backend"
 
 version := "1.0-SNAPSHOT"
@@ -34,6 +36,8 @@ libraryDependencies ++= Seq(
 
   specs2 % Test
 )
+
+RoutesKeys.routesImport += "com.clemble.loveit.payment.controller._"
 
 testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxml")
 coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*;.*ReverseRoutes.*;.*Routes.*;.*Module.*;.*TestSocialProvider.*"""

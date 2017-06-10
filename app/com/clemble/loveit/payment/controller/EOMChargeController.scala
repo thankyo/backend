@@ -10,7 +10,7 @@ import play.api.mvc.Controller
 import scala.concurrent.ExecutionContext
 
 @Singleton
-case class PaymentTransactionController @Inject()(
+case class EOMChargeController @Inject()(
                                                    transactionRepo: EOMChargeRepository,
                                                    silhouette: Silhouette[AuthEnv],
                                                    implicit val ec: ExecutionContext

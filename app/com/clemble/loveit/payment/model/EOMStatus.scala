@@ -3,6 +3,7 @@ package com.clemble.loveit.payment.model
 import java.time.YearMonth
 
 import com.clemble.loveit.common.model.CreatedAware
+import com.clemble.loveit.common.util.WriteableUtils
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
@@ -58,5 +59,7 @@ case class EOMStatus(
 object EOMStatus {
 
   implicit val jsonFormat = Json.format[EOMStatus]
+
+  implicit val writeableFormat = WriteableUtils.jsonToWriteable[EOMStatus]()
 
 }

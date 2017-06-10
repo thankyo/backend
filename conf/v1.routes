@@ -20,13 +20,17 @@ PUT         /thank/http/*url                 @com.clemble.loveit.thank.controlle
 
 # Payment related ENDPOINTS
 
-GET         /transaction/user/my             @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
-GET         /payment/transaction/user/my     @com.clemble.loveit.payment.controller.PaymentTransactionController.listMy()
+GET         /payment/pending/my              @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
+GET         /payment/charge/my               @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
+GET         /payment/payout/my               @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 
 GET         /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.getMyBankDetails()
 POST        /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.updateMyBankDetails()
 
 GET         /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.getMonthlyLimit()
 POST        /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.setMonthlyLimit()
+
+GET         /payment/admin/eom/*yom           @com.clemble.loveit.payment.controller.AdminEOMController.getStatus(yom: java.time.YearMonth)
+POST        /payment/admin/eom/*yom           @com.clemble.loveit.payment.controller.AdminEOMController.run(yom: java.time.YearMonth)
 
 

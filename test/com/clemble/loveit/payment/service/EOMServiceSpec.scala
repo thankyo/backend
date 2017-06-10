@@ -2,18 +2,26 @@ package com.clemble.loveit.payment.service
 
 import java.time.YearMonth
 
-import com.clemble.loveit.common.ServiceSpec
+import com.clemble.loveit.common.{ServiceSpec, ThankSpecification}
 import com.clemble.loveit.common.error.RepositoryException
+import com.clemble.loveit.payment.model.EOMStatus
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EOMServiceSpec extends ServiceSpec {
+class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec {
 
   val service = dependency[EOMService]
 
-  def getStatus(yom: YearMonth) = await(service.get(yom))
-  def run(yom: YearMonth) = await(service.run(yom))
+  override def getStatus(yom: YearMonth) = await(service.getStatus(yom))
+  override def run(yom: YearMonth) = await(service.run(yom))
+
+}
+
+trait GenericEOMServiceSpec extends ThankSpecification {
+
+  def getStatus(yom: YearMonth): Option[EOMStatus]
+  def run(yom: YearMonth): EOMStatus
 
   "EOM run set's finished" in {
     val yom = someRandom[YearMonth]

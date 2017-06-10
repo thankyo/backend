@@ -14,7 +14,7 @@ class ThankTransactionControllerSpec extends ControllerSpec {
 
     "List on new user" in {
       val user = createUser()
-      val req = sign(user, FakeRequest(GET, s"/api/v1/transaction/user/my"))
+      val req = sign(user, FakeRequest(GET, s"/api/v1/payment/pending/my"))
       val fRes = route(application, req).get
 
       val res = await(fRes)

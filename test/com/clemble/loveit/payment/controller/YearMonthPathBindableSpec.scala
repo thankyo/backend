@@ -12,7 +12,7 @@ class YearMonthPathBindableSpec extends ThankSpecification {
   "read from string" in {
     val yom = someRandom[YearMonth]
     val readValue = stringToYearMonth.bind("some", s"${yom.getYear}/${yom.getMonthValue}")
-    readValue shouldEqual Left(yom)
+    readValue shouldEqual Right(yom)
   }
 
   "write to string" in {

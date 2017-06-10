@@ -16,6 +16,7 @@ trait ThankTransactionService {
 
   def create(giver: UserID, owner: UserID, url: Resource): Future[ThankTransaction]
 
+  def removeAll(thank: Seq[ThankTransaction]): Future[Boolean]
 }
 
 @Singleton
@@ -36,6 +37,10 @@ case class SimpleThankTransactionService @Inject()(ownershipService: BalanceRepo
         logger.error(s"${giver} ${owner} ${url} failed to properly process transaction ${updatedGiver} ${updatedOwner} ${savedInRepo}")
       transaction
     }
+  }
+
+  override def removeAll(thanks: Seq[ThankTransaction]): Future[Boolean] = {
+    repository.removeAll(thanks)
   }
 
 }

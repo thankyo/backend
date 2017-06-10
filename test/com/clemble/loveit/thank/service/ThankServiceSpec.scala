@@ -51,7 +51,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       await(thankService.hasThanked(user, res)) should throwA[ResourceException]
     }
 
-    "return false on random res" in {
+    "return false on not thanked res" in {
       val (res, _, giver) = createScene()
 
       await(thankService.hasThanked(giver.id, res)) shouldEqual false

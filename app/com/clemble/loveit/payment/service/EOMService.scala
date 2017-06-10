@@ -34,6 +34,7 @@ case class SimpleEOMService @Inject()(
                                        statusRepo: EOMStatusRepository,
                                        chargeRepo: EOMChargeRepository,
                                        chargeService: EOMChargeService,
+                                       thankService: ThankTransactionService,
                                        paymentRepo: UserPaymentRepository,
                                        exchangeService: ExchangeService,
                                        implicit val ec: ExecutionContext,
@@ -110,6 +111,7 @@ case class SimpleEOMService @Inject()(
         (status, details) <- chargeService.process(charge)
         _ <- chargeRepo.updatePending(charge.user, charge.yom, status, details)
       } yield {
+        if (status == ChargeStatus.Success) thankService.removeAll(charge.transactions)
         status
       }
     }

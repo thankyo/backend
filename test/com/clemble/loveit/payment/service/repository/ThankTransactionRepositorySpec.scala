@@ -41,6 +41,20 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
       transactions must containAllOf(Seq(A, B)).exactly
     }
 
+    "remove specified" in {
+      val user = createUser().id
+      val A = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
+      val B = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
+
+      await(repo.save(A))
+      await(repo.save(B))
+
+      await(repo.removeAll(Seq(A)))
+
+      val afterRemove = repo.findByUser(user).toSeq
+      afterRemove shouldEqual Seq(B)
+    }
+
   }
 
 }

@@ -62,6 +62,20 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       payments must containAllOf(Seq(transactionA, transactionB))
     }
 
+    "remove transactions" in {
+      val giver = createUser()
+
+      val transactionA = await(thankTransService.create(giver, "A", someRandom[Resource]))
+      val transactionB = await(thankTransService.create(giver, "B", someRandom[Resource]))
+      await(thankTransService.removeAll(Seq(transactionB)))
+
+      val payments = thankTransService.list(giver).toSeq()
+
+      payments must containAllOf(Seq(transactionA))
+
+
+    }
+
   }
 
 }

@@ -41,4 +41,10 @@ case class MongoThankTransactionRepository @Inject()(
     Source.fromFuture(fSource).flatMapConcat(s => s)
   }
 
+  override def removeAll(thanks: Seq[ThankTransaction]): Future[Boolean] = {
+    val selector = Json.obj("_id" -> Json.obj("$in" -> thanks.map(_.user).distinct))
+    val update = Json.obj("$pull" -> Json.obj("pending" -> Json.obj("$in" -> thanks)))
+    MongoSafeUtils.safe(collection.update(selector, update, multi = true).map(_.ok))
+  }
+
 }

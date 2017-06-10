@@ -11,7 +11,6 @@ import org.specs2.runner.JUnitRunner
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 
-@RunWith(classOf[JUnitRunner])
 class AdminEOMControllerSpec extends GenericEOMServiceSpec with ControllerSpec with TestStripeUtils {
 
   val admin = createUser()

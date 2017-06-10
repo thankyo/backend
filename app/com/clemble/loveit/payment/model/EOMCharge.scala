@@ -33,7 +33,11 @@ case class EOMCharge(
                       transactions: List[ThankTransaction],
                       postpones: List[ThankTransaction],
                       created: DateTime = DateTime.now()
-) extends Transaction with EOMAware
+) extends Transaction with EOMAware {
+
+  def moreThanMinCharge = amount >= source.minCharge
+
+}
 
 object EOMCharge {
 

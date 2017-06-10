@@ -18,7 +18,7 @@ package object controller {
     }
 
     override def unbind(key: String, value: YearMonth): String = {
-      s"${value.getYear}/${value.getMonth}"
+      s"${value.getYear}/${value.getMonthValue}"
     }
   }
 

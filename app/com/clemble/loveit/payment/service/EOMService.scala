@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
+import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMStatistics, EOMStatus, UserPayment}
 import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMStatusRepository, UserPaymentRepository}
 import org.joda.time.DateTime
@@ -29,15 +30,23 @@ trait EOMService {
 }
 
 @Singleton
-case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOMChargeRepository, paymentRepository: UserPaymentRepository, exchangeService: ExchangeService, implicit val ec: ExecutionContext, implicit val m: Materializer) extends EOMService {
+case class SimpleEOMService @Inject()(
+                                       statusRepo: EOMStatusRepository,
+                                       chargeRepo: EOMChargeRepository,
+                                       chargeService: EOMChargeService,
+                                       paymentRepo: UserPaymentRepository,
+                                       exchangeService: ExchangeService,
+                                       implicit val ec: ExecutionContext,
+                                       implicit val m: Materializer
+                                     ) extends EOMService {
 
   override def getStatus(yom: YearMonth): Future[Option[EOMStatus]] = {
-    repo.get(yom)
+    statusRepo.get(yom)
   }
 
   override def run(yom: YearMonth): Future[EOMStatus] = {
     val status = EOMStatus(yom)
-    val fSaved = repo.save(status)
+    val fSaved = statusRepo.save(status)
     fSaved.onSuccess({ case _ => doRun(yom)})
     fSaved
   }
@@ -48,7 +57,7 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOM
       applyCharges <- doApplyCharges(yom)
       createPayout <- doCreatePayout(yom)
       applyPayout <- doApplyPayout(yom)
-      update <- repo.update(yom, createCharges = createCharges, applyCharges = applyCharges, createPayout = createPayout, applyPayout = applyPayout, finished = DateTime.now())
+      update <- statusRepo.update(yom, createCharges = createCharges, applyCharges = applyCharges, createPayout = createPayout, applyPayout = applyPayout, finished = DateTime.now())
     } yield {
       update
     }
@@ -56,10 +65,15 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOM
 
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
     def toCharge(user: UserPayment): Option[EOMCharge] = {
-      val thanks = exchangeService.toThanks(user.monthlyLimit)
-      val (satisfied, unsatisfied) = user.pending.splitAt(thanks.toInt)
-      val amount = exchangeService.toAmount(satisfied.size)
-      user.bankDetails.map(EOMCharge(user.id, yom, _, ChargeStatus.Pending, amount, None, satisfied, unsatisfied))
+      user.
+        bankDetails.
+        map(bd => {
+          val thanks = exchangeService.toThanks(user.monthlyLimit)
+          val (satisfied, unsatisfied) = user.pending.splitAt(thanks.toInt)
+          val charge = exchangeService.toAmount(satisfied.size)
+          val amount = charge + bd.fee
+          EOMCharge(user.id, yom, bd, ChargeStatus.Pending, amount, None, satisfied, unsatisfied)
+        })
     }
 
     def createCharge(user: UserPayment): Future[Option[EOMCharge]] = {
@@ -69,7 +83,7 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOM
       }
     }
 
-    def updateStatistics(stat: EOMStatistics, res: Option[EOMCharge]) = {
+    def updateStatistics(stat: EOMStatistics, res: Option[EOMCharge]): EOMStatistics = {
       res match {
         case Some(_) => stat.copy(success = stat.success + 1, total = stat.total + 1)
         case _ => stat.copy(failed = stat.failed + 1, total = stat.total + 1)
@@ -77,14 +91,33 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOM
     }
 
     // TODO 2 - is a dark blood magic number it should be configured, based on system preferences
-    paymentRepository.
+    paymentRepo.
       find().
       mapAsync(1)(createCharge).
       runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
   }
 
   private def doApplyCharges(yom: YearMonth): Future[EOMStatistics] = {
-    Future.successful(EOMStatistics())
+    def updateStatistics(stat: EOMStatistics, status: ChargeStatus): EOMStatistics = {
+      status match {
+        case ChargeStatus.Success => stat.copy(success = stat.success + 1, total = stat.total + 1)
+        case _ => stat.copy(failed = stat.failed + 1, total = stat.failed + 1)
+      }
+    }
+
+    def applyCharge(charge: EOMCharge): Future[ChargeStatus] = {
+      for {
+        (status, details) <- chargeService.process(charge)
+        _ <- chargeRepo.updatePending(charge.user, charge.yom, status, details)
+      } yield {
+        status
+      }
+    }
+
+    chargeRepo.
+      listPending(yom).
+      mapAsync(1)(applyCharge).
+      runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
   }
 
   private def doCreatePayout(yom: YearMonth): Future[EOMStatistics] = {

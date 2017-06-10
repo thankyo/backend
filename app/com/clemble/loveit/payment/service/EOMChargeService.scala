@@ -27,7 +27,7 @@ case object StripeEOMChargeService extends EOMChargeService {
     * @param amount amount to charge
     * @return StripeCharge
     */
-  def chargeStripe(bankDetails: StripeBankDetails, amount: Money): StripeCharge = {
+  private def chargeStripe(bankDetails: StripeBankDetails, amount: Money): StripeCharge = {
     val chargeParams = Maps.newHashMap[String, Object]()
     val stripeAmount = (amount.amount * 100).toInt
     chargeParams.put("amount", stripeAmount.toString)
@@ -36,10 +36,7 @@ case object StripeEOMChargeService extends EOMChargeService {
     StripeCharge.create(chargeParams)
   }
 
-  /**
-    * Charges user with specified amount
-    */
-  override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
+  private def doCharge(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     val res = Try({
       chargeStripe(charge.source.asInstanceOf[StripeBankDetails], charge.amount)
     }) match {
@@ -51,6 +48,17 @@ case object StripeEOMChargeService extends EOMChargeService {
         (ChargeStatus.Failed, Json.obj("error" -> t.getMessage))
     }
     Future.successful(res)
+  }
+
+  /**
+    * Charges user with specified amount
+    */
+  override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
+    if (charge.moreThanMinCharge) {
+      Future.successful(ChargeStatus.UnderMin -> Json.obj())
+    } else {
+      doCharge(charge)
+    }
   }
 
 }

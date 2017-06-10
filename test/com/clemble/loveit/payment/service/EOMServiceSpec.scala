@@ -8,9 +8,7 @@ import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.{BankDetails, EOMCharge, EOMStatus}
 import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import org.junit.runner.RunWith
 import scala.concurrent.duration._
-import org.specs2.runner.JUnitRunner
 
 class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStripeUtils {
 

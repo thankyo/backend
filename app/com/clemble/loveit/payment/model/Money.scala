@@ -8,8 +8,20 @@ import play.api.libs.json._
 case class Money(
                   amount: BigDecimal,
                   currency: Currency
-                ) {
+                ) extends Ordered[Money] {
+
   def isNegative: Boolean = amount < 0
+
+  def +(that: Money) = {
+    require(currency == that.currency)
+    Money(amount + that.amount, currency)
+  }
+
+  override def compare(that: Money): Int = {
+    require(currency == that.currency)
+    amount.compare(that.amount)
+  }
+
 }
 
 object Money {

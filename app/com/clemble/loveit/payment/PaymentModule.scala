@@ -13,15 +13,13 @@ import javax.inject.{Named, Singleton}
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.Provides
 import net.codingwell.scalaguice.ScalaModule
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.api.FailoverStrategy
 import reactivemongo.play.json.collection.JSONCollection
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext}
 
-class PaymentModule extends ScalaModule {
+case class PaymentModule(env: Environment, conf: Configuration) extends ScalaModule {
 
   override def configure() = {
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
@@ -46,8 +44,8 @@ class PaymentModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def bankDetailsService(configuration: Configuration): BankDetailsConverter = {
-    new StripeBankDetailsConverter(configuration.getString("payment.stripe.apiKey").get)
+  def bankDetailsService(): BankDetailsConverter = {
+    new StripeBankDetailsConverter(conf.getString("payment.stripe.apiKey").get)
   }
 
   @Provides
@@ -60,21 +58,21 @@ class PaymentModule extends ScalaModule {
   @Singleton
   @Named("eomCharge")
   def eomChargeMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("eomCharge", mongoApi, ec)
+    JSONCollectionFactory.create("eomCharge", mongoApi, ec, env)
   }
 
   @Provides
   @Singleton
   @Named("eomStatus")
   def eomStatusMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("eomStatus", mongoApi, ec)
+    JSONCollectionFactory.create("eomStatus", mongoApi, ec, env)
   }
 
   @Provides
   @Singleton
   @Named("thankTransactions")
   def thankTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("thankTransaction", mongoApi, ec)
+    JSONCollectionFactory.create("thankTransaction", mongoApi, ec, env)
   }
 
 }

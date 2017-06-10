@@ -4,19 +4,17 @@ import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, Re
 import com.clemble.loveit.thank.service.repository.mongo.{MongoROVerificationRepository, MongoResourceRepository, MongoThankRepository, MongoUserResourceRepository}
 import com.clemble.loveit.thank.service._
 import com.google.inject.Provides
-import javax.inject.{Named, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import net.codingwell.scalaguice.ScalaModule
+import play.api.{Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.api.FailoverStrategy
 import reactivemongo.play.json.collection.JSONCollection
+import scala.concurrent.{ExecutionContext}
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
-
-class ThankModule extends ScalaModule {
+class ThankModule @Inject()(env: Environment, conf: Configuration) extends ScalaModule {
 
   override def configure(): Unit = {
     bind(classOf[ThankService]).to(classOf[SimpleThankService])
@@ -47,7 +45,7 @@ class ThankModule extends ScalaModule {
   @Singleton
   @Named("thank")
   def thankMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("thank", mongoApi, ec)
+    JSONCollectionFactory.create("thank", mongoApi, ec, env)
   }
 
 }

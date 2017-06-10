@@ -32,7 +32,7 @@ import play.api.{Configuration, Mode}
 import scala.concurrent.ExecutionContext
 import net.ceedubs.ficus.readers.EnumerationReader._
 
-class SocialModule extends ScalaModule {
+class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModule {
 
   override def configure(): Unit = {
     bind[Clock].toInstance(Clock())
@@ -77,10 +77,9 @@ class SocialModule extends ScalaModule {
   @Singleton
   def facebookProvider(
                         httpLayer: HTTPLayer,
-                        stateProvider: OAuth2StateProvider,
-                        configuration: Configuration
+                        stateProvider: OAuth2StateProvider
                       ): FacebookProvider = {
-    val facebookConfig = configuration.underlying.as[OAuth2Settings]("silhouette.facebook")
+    val facebookConfig = conf.underlying.as[OAuth2Settings]("silhouette.facebook")
     new FacebookProvider(httpLayer, stateProvider, facebookConfig)
   }
 
@@ -88,8 +87,7 @@ class SocialModule extends ScalaModule {
   @Singleton
   def testProvider(
                     httpLayer: HTTPLayer,
-                    stateProvider: OAuth2StateProvider,
-                    configuration: Configuration
+                    stateProvider: OAuth2StateProvider
                   ): TestSocialProvider = {
     val testConfig = new OAuth2Settings(
       accessTokenURL = "",
@@ -102,7 +100,7 @@ class SocialModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def socialProviderRegistry(env: api.Environment, fp: FacebookProvider, tp: TestSocialProvider): SocialProviderRegistry = {
+  def socialProviderRegistry(fp: FacebookProvider, tp: TestSocialProvider): SocialProviderRegistry = {
     val providers = if (env.mode == Mode.Prod) Seq(fp) else Seq(fp, tp)
     SocialProviderRegistry(providers)
   }
@@ -115,8 +113,8 @@ class SocialModule extends ScalaModule {
 
   @Provides
   @Singleton
-  def crypter(configuration: Configuration): Crypter = {
-    val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.jwt.authenticator.crypter")
+  def crypter(): Crypter = {
+    val config = conf.underlying.as[JcaCrypterSettings]("silhouette.jwt.authenticator.crypter")
     new JcaCrypter(config)
   }
 
@@ -125,11 +123,10 @@ class SocialModule extends ScalaModule {
   def provideAuthenticatorService(
                                    crypter: Crypter,
                                    idGenerator: IDGenerator,
-                                   configuration: Configuration,
                                    clock: Clock,
                                    ec: ExecutionContext): AuthenticatorService[JWTAuthenticator] = {
 
-    val config = configuration.underlying.as[JWTAuthenticatorSettings]("silhouette.jwt.authenticator.jwt")
+    val config = conf.underlying.as[JWTAuthenticatorSettings]("silhouette.jwt.authenticator.jwt")
     val encoder = new CrypterAuthenticatorEncoder(crypter)
 
     new JWTAuthenticatorService(config, None, encoder, idGenerator, clock)(ec)

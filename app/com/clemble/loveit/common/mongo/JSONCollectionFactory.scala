@@ -1,7 +1,7 @@
 package com.clemble.loveit.common.mongo
 
 import play.api.Environment
-import play.api.Mode.Mode
+import play.api.Mode
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
 import reactivemongo.play.json.collection.JSONCollection
@@ -23,6 +23,7 @@ object JSONCollectionFactory {
 
   def create(collectionName: String, mongoApi: ReactiveMongoApi, ec: ExecutionContext, env: Environment): JSONCollection = {
     val collection = doCreate(collectionName, mongoApi, ec)
+    if (env.mode == Mode.Test) Await.result(collection.drop(false)(ec), 1 minute)
     collection
   }
 

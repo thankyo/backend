@@ -57,8 +57,11 @@ trait GenericEOMServiceSpec extends ThankSpecification {
     run(yom)
     eventually(getStatus(yom).get.finished shouldNotEqual None)
 
+    val statusAfter = getStatus(yom)
+    statusAfter.get.createCharges.success shouldEqual 1
+
+    eventually(charges(user) shouldNotEqual Nil)
     val chargesAfterYom = charges(user)
-    chargesAfterYom shouldNotEqual Nil
     chargesAfterYom.size shouldEqual 1
     chargesAfterYom(0).yom shouldEqual yom
   }

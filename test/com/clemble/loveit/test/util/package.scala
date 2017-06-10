@@ -93,7 +93,7 @@ package object util {
     override def generate(): EOMPayout = EOMPayout(
       someRandom[UserID],
       someRandom[YearMonth],
-      someRandom[BankDetails],
+      Some(someRandom[BankDetails]),
       someRandom[Money],
       PayoutStatus.Pending
     )

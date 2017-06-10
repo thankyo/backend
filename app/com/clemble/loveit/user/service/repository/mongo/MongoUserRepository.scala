@@ -8,7 +8,7 @@ import com.clemble.loveit.payment.model.{BankDetails, UserPayment}
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Named, Singleton}
 
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Sink, Source}
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json._
 import reactivemongo.play.json._
@@ -18,7 +18,6 @@ import reactivemongo.akkastream.cursorProducer
 
 import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONString}
 
 
 @Singleton
@@ -59,6 +58,14 @@ case class MongoUserRepository @Inject()(
     val query = Json.obj("_id" -> Json.obj("$in" -> JsArray(users.map(JsString))))
     val fRemove = collection.remove(query).map(_.ok)
     MongoSafeUtils.safe(fRemove)
+  }
+
+  override def find(): Source[User, _] = {
+    collection.find(Json.obj()).cursor[User]().documentSource()
+  }
+
+  override def count(): Future[Int] = {
+    collection.count()
   }
 
 }

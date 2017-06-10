@@ -2,7 +2,9 @@
 POST        /auth/authenticate/test          @com.clemble.loveit.user.controller.SocialAuthController.authenticate(`provider` = "test")
 GET         /auth/authenticate/:provider     @com.clemble.loveit.user.controller.SocialAuthController.authenticate(provider)
 
-GET         /user/my                         @com.clemble.loveit.user.controller.UserController.getMy()
+GET         /user/profile/my                 @com.clemble.loveit.user.controller.UserController.getMy()
+
+GET         /user/admin/count                @com.clemble.loveit.user.controller.AdminUserController.count()
 
 POST        /subscribe/creator               @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
 POST        /subscribe/contributor           @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()

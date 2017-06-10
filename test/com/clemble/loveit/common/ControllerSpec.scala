@@ -61,7 +61,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def getUser(id: UserID): Option[User] = {
-    val readReq = sign(id, FakeRequest(GET, s"/api/v1/user/my"))
+    val readReq = sign(id, FakeRequest(GET, s"/api/v1/user/profile/my"))
     val resp = await(route(application, readReq).get)
     resp.header.status match {
       case NOT_FOUND => None

@@ -1,9 +1,9 @@
 package com.clemble.loveit.user.service.repository
 
-import com.clemble.loveit.common.error.{RepositoryException, UserException}
-import com.clemble.loveit.common.model.{Amount, UserID}
+import akka.stream.scaladsl.Source
+import com.clemble.loveit.common.error.{RepositoryException}
+import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.user.model._
-import com.clemble.loveit.payment.model.BankDetails
 import com.mohiva.play.silhouette.api.services.IdentityService
 
 import scala.concurrent.Future
@@ -37,5 +37,15 @@ trait UserRepository extends IdentityService[UserIdentity] {
     * Remove users
     */
   def remove(users: Seq[UserID]): Future[Boolean]
+
+  /**
+    * Find all users in the system
+    */
+  def find(): Source[User, _]
+
+  /**
+    * Count number of users
+    */
+  def count(): Future[Int]
 
 }

@@ -32,6 +32,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[EOMService].to[SimpleEOMService].asEagerSingleton()
     bind[EOMChargeService].toInstance(StripeEOMChargeService)
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
+    bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
 
     bind[BankDetailsService].to[SimpleBankDetailsService].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
@@ -60,6 +61,13 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   @Named("eomCharge")
   def eomChargeMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("eomCharge", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
+  @Named("eomPayout")
+  def eomPayoutMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("eomPayout", mongoApi, ec, env)
   }
 
   @Provides

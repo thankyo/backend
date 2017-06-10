@@ -67,6 +67,35 @@ class EOMChargeRepositorySpec extends RepositorySpec {
 
   }
 
+  "LIST successful" should {
+
+    "list only Successful" in {
+      val yom = someRandom[YearMonth]
+      val A = someRandom[EOMCharge].copy(yom = yom, status = Failed)
+      val B = someRandom[EOMCharge].copy(yom = yom, status = Success)
+
+      await(repo.save(A))
+      await(repo.save(B))
+
+      val pending = repo.listSuccessful(yom).toSeq()
+      pending should not contain(A)
+      pending should contain(B)
+    }
+
+    "list all Successful" in {
+      val yom = someRandom[YearMonth]
+      val A = someRandom[EOMCharge].copy(yom = yom, status = Success)
+      val B = someRandom[EOMCharge].copy(yom = yom, status = Success)
+
+      await(repo.save(A))
+      await(repo.save(B))
+
+      val pending = repo.listSuccessful(yom).toSeq()
+      pending should containAllOf(Seq(A, B))
+    }
+
+  }
+
   "UPDATE pending" should {
 
     "fail on nonexistent" in {

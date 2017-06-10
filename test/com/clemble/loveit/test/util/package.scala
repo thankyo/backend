@@ -94,8 +94,6 @@ package object util {
       someRandom[UserID],
       someRandom[YearMonth],
       someRandom[BankDetails],
-      nextLong(0, Long.MaxValue),
-      nextLong(0, Long.MaxValue),
       someRandom[Money],
       PayoutStatus.Pending
     )
@@ -131,7 +129,6 @@ package object util {
         ChargeStatus.Pending,
         someRandom[Money],
         None,
-        List(someRandom[ThankTransaction]),
         List(someRandom[ThankTransaction])
       )
     }

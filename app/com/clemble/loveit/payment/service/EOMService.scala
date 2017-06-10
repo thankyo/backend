@@ -4,12 +4,16 @@ import java.time.YearMonth
 import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Sink, Source}
+import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
-import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMStatistics, EOMStatus, UserPayment}
-import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMStatusRepository, UserPaymentRepository}
+import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
+import com.clemble.loveit.payment.model.{BankDetails, ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutStatus, UserPayment}
+import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, EOMStatusRepository, UserPaymentRepository}
 import org.joda.time.DateTime
 
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -33,7 +37,9 @@ trait EOMService {
 case class SimpleEOMService @Inject()(
                                        statusRepo: EOMStatusRepository,
                                        chargeRepo: EOMChargeRepository,
+                                       payoutRepo: EOMPayoutRepository,
                                        chargeService: EOMChargeService,
+                                       bankDetailsService: BankDetailsService,
                                        thankService: ThankTransactionService,
                                        paymentRepo: UserPaymentRepository,
                                        exchangeService: ExchangeService,
@@ -70,10 +76,10 @@ case class SimpleEOMService @Inject()(
         bankDetails.
         map(bd => {
           val thanks = exchangeService.toThanks(user.monthlyLimit)
-          val (satisfied, unsatisfied) = user.pending.splitAt(thanks.toInt)
+          val (satisfied, _) = user.pending.splitAt(thanks.toInt)
           val charge = exchangeService.toAmount(satisfied.size)
           val amount = charge + bd.fee
-          EOMCharge(user.id, yom, bd, ChargeStatus.Pending, amount, None, satisfied, unsatisfied)
+          EOMCharge(user.id, yom, bd, ChargeStatus.Pending, amount, None, satisfied)
         })
     }
 
@@ -86,8 +92,8 @@ case class SimpleEOMService @Inject()(
 
     def updateStatistics(stat: EOMStatistics, res: Option[EOMCharge]): EOMStatistics = {
       res match {
-        case Some(_) => stat.copy(success = stat.success + 1, total = stat.total + 1)
-        case _ => stat.copy(failed = stat.failed + 1, total = stat.total + 1)
+        case Some(_) => stat.incSuccess()
+        case _ => stat.incFailure()
       }
     }
 
@@ -101,8 +107,8 @@ case class SimpleEOMService @Inject()(
   private def doApplyCharges(yom: YearMonth): Future[EOMStatistics] = {
     def updateStatistics(stat: EOMStatistics, status: ChargeStatus): EOMStatistics = {
       status match {
-        case ChargeStatus.Success => stat.copy(success = stat.success + 1, total = stat.total + 1)
-        case _ => stat.copy(failed = stat.failed + 1, total = stat.failed + 1)
+        case ChargeStatus.Success => stat.incSuccess()
+        case _ => stat.incFailure()
       }
     }
 
@@ -123,7 +129,38 @@ case class SimpleEOMService @Inject()(
   }
 
   private def doCreatePayout(yom: YearMonth): Future[EOMStatistics] = {
-    Future.successful(EOMStatistics())
+    def toPayoutMap(charge: EOMCharge): Map[UserID, Int] = {
+      charge.transactions.groupBy(_.destination).mapValues(_.size)
+    }
+    def combinePayoutMaps(agg: Map[UserID, Int], payout: Map[UserID, Int]): Map[UserID, Int] = {
+      agg ++ payout.map({ case (user, amount) => user -> (amount + agg.getOrElse(user, 0)) })
+    }
+    def toPayout(user: UserID, bankDetails: Option[BankDetails], payout: Amount): EOMPayout = {
+      EOMPayout(user, yom, bankDetails, exchangeService.toAmount(payout, LoveItCurrency.DEFAULT), PayoutStatus.Pending)
+    }
+    def savePayouts(payoutMap: Map[UserID, Int]): Future[immutable.Iterable[Boolean]] = {
+      val fSavedPayouts = for {
+        (user, payout) <- payoutMap
+      } yield {
+        for {
+          bankDetails <- bankDetailsService.getBankDetails(user)
+          saved <- payoutRepo.save(toPayout(user, bankDetails, payout))
+        } yield {
+          saved
+        }
+      }
+      Future.sequence(fSavedPayouts)
+    }
+    def updateStatus(stat: EOMStatistics, payouts: Iterable[Boolean]) = {
+      payouts.foldLeft(stat)((stat, success) => {
+        if (success) stat.incSuccess() else stat.incFailure()
+      })
+    }
+    chargeRepo.
+      listSuccessful(yom).
+      map(toPayoutMap).
+      runWith(Sink.fold(Map.empty[UserID, Int])((agg, ch) => combinePayoutMaps(agg, ch))).
+      flatMap(payoutMap => savePayouts(payoutMap)).map(updateStatus(EOMStatistics(), _))
   }
 
   private def doApplyPayout(yom: YearMonth): Future[EOMStatistics] = {

@@ -19,6 +19,14 @@ import scala.concurrent.Future
 trait EOMChargeRepository extends UserAwareRepository[EOMCharge] {
 
   /**
+    * Lists success charges
+    *
+    * @param yom
+    * @return
+    */
+  def listSuccessful(yom: YearMonth): Source[EOMCharge, _]
+
+  /**
     * Lists all charges with specified status
     *
     * @param yom year of month

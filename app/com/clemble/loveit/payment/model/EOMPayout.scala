@@ -25,9 +25,7 @@ case object PayoutStatus extends Enumeration {
 case class EOMPayout(
                       user: UserID,
                       yom: YearMonth,
-                      bankDetails: BankDetails,
-                      failed: Long,
-                      pending: Long,
+                      bankDetails: Option[BankDetails],
                       amount: Money,
                       status: PayoutStatus,
                       created: DateTime = new DateTime()

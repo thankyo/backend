@@ -24,6 +24,8 @@ case class EOMStatistics(
 
   def isValid = total == (pending + success + failed)
 
+  def incSuccess() = copy(total = total + 1, success = success + 1)
+  def incFailure() = copy(total = total + 1, failed = failed + 1)
 }
 
 object EOMStatistics {

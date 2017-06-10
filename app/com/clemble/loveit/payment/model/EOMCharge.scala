@@ -31,7 +31,6 @@ case class EOMCharge(
                       amount: Money,
                       details: Option[JsValue],
                       transactions: List[ThankTransaction],
-                      postpones: List[ThankTransaction],
                       created: DateTime = DateTime.now()
 ) extends Transaction with EOMAware {
 

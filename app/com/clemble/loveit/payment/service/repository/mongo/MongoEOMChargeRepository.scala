@@ -32,6 +32,14 @@ case class MongoEOMChargeRepository @Inject()(
 
   override implicit val format = EOMCharge.jsonFormat
 
+  override def listSuccessful(yom: YearMonth): Source[EOMCharge, _] = {
+    val selector = Json.obj("yom" -> yom, "status" -> ChargeStatus.Success)
+    collection.
+      find(selector).
+      cursor[EOMCharge](ReadPreference.nearest).
+      documentSource()
+  }
+
   override def listPending(yom: YearMonth): Source[EOMCharge, _] = {
     val selector = Json.obj("yom" -> yom, "status" -> ChargeStatus.Pending)
     collection.

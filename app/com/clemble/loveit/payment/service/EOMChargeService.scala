@@ -55,9 +55,9 @@ case object StripeEOMChargeService extends EOMChargeService {
     */
   override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     if (charge.moreThanMinCharge) {
-      Future.successful(ChargeStatus.UnderMin -> Json.obj())
-    } else {
       doCharge(charge)
+    } else {
+      Future.successful(ChargeStatus.UnderMin -> Json.obj())
     }
   }
 

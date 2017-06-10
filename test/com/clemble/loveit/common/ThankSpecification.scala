@@ -6,6 +6,7 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{Reads, Writes}
 import play.api.test.PlaySpecification
+import reactivemongo.api.MongoDriver
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
@@ -37,8 +38,11 @@ trait ThankSpecification extends PlaySpecification {
 
 object ThankSpecification {
 
-  lazy val application = new GuiceApplicationBuilder().
-    in(Mode.Test).
-    build
+  lazy val application = {
+    val app = new GuiceApplicationBuilder().
+      in(Mode.Test).
+      build
+    app
+  }
 
 }

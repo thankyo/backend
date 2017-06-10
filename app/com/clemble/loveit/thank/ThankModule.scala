@@ -7,6 +7,7 @@ import com.google.inject.Provides
 import javax.inject.{Named, Singleton}
 
 import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import net.codingwell.scalaguice.ScalaModule
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.FailoverStrategy
@@ -46,10 +47,7 @@ class ThankModule extends ScalaModule {
   @Singleton
   @Named("thank")
   def thankMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    val fCollection: Future[JSONCollection] = mongoApi.
-      database.
-      map(_.collection[JSONCollection]("thank", FailoverStrategy.default))(ec)
-    Await.result(fCollection, 1 minute)
+    JSONCollectionFactory.create("thank", mongoApi, ec)
   }
 
 }

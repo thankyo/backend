@@ -20,7 +20,7 @@ trait ServiceSpec extends ThankSpecification {
   }
 
   // TODO remove balance it's no longer relevant
-  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): String = {
+  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): UserID = {
     val userIdentity = await(authController.createOrUpdateUser(socialProfile)(FakeRequest()))
     userIdentity.id
   }

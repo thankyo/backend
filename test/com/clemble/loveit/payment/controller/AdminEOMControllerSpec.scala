@@ -3,7 +3,8 @@ package com.clemble.loveit.payment.controller
 import java.time.YearMonth
 
 import com.clemble.loveit.common.ControllerSpec
-import com.clemble.loveit.payment.model.{EOMStatus}
+import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.payment.model.{EOMCharge, EOMStatus, ThankTransaction}
 import com.clemble.loveit.payment.service.GenericEOMServiceSpec
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
@@ -28,5 +29,10 @@ class AdminEOMControllerSpec extends GenericEOMServiceSpec with ControllerSpec {
     Json.parse(res.body.dataStream.read()).as[EOMStatus]
   }
 
+  override def charges(user: UserID): Seq[EOMCharge] = {
+    val res = perform(admin, FakeRequest(GET, s"/api/v1/payment/charge/my"))
+    val charges = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[EOMCharge])
+    charges.toSeq()
+  }
 
 }

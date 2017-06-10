@@ -10,6 +10,7 @@ import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
 
+import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.Provides
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
@@ -59,30 +60,21 @@ class PaymentModule extends ScalaModule {
   @Singleton
   @Named("eomCharge")
   def eomChargeMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    val fCollection: Future[JSONCollection] = mongoApi.
-      database.
-      map(_.collection[JSONCollection]("eomCharge", FailoverStrategy.default))(ec)
-    Await.result(fCollection, 1 minute)
+    JSONCollectionFactory.create("eomCharge", mongoApi, ec)
   }
 
   @Provides
   @Singleton
   @Named("eomStatus")
   def eomStatusMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    val fCollection: Future[JSONCollection] = mongoApi.
-      database.
-      map(_.collection[JSONCollection]("eomStatus", FailoverStrategy.default))(ec)
-    Await.result(fCollection, 1 minute)
+    JSONCollectionFactory.create("eomStatus", mongoApi, ec)
   }
 
   @Provides
   @Singleton
   @Named("thankTransactions")
   def thankTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    val fCollection: Future[JSONCollection] = mongoApi.
-      database.
-      map(_.collection[JSONCollection]("thankTransaction", FailoverStrategy.default))(ec)
-    Await.result(fCollection, 1 minute)
+    JSONCollectionFactory.create("thankTransaction", mongoApi, ec)
   }
 
 }

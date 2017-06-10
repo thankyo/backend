@@ -34,7 +34,7 @@ package object util {
   implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
   implicit val payoutGenerator: Generator[EOMPayout] = PayoutGenerator
   implicit val eomStatGenerator: Generator[EOMStatistics] = EndOfMonthStatisticsGenerator
-  implicit val eomProcGenerator: Generator[EOMStatus] = EndOfMonthProcessingGenerator
+  implicit val eomProcGenerator: Generator[EOMStatus] = EOMStatusGenerator
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
   implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenerator
   implicit val yomGenerator: Generator[YearMonth] = YearMonthGenerator
@@ -64,7 +64,7 @@ package object util {
     }
   }
 
-  private object EndOfMonthProcessingGenerator extends Generator[EOMStatus] {
+  private object EOMStatusGenerator extends Generator[EOMStatus] {
     override def generate(): EOMStatus = {
       EOMStatus(
         someRandom[YearMonth],
@@ -131,6 +131,7 @@ package object util {
         ChargeStatus.Pending,
         someRandom[Money],
         None,
+        List(someRandom[ThankTransaction]),
         List(someRandom[ThankTransaction])
       )
     }

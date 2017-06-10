@@ -3,8 +3,10 @@ package com.clemble.loveit.payment.service
 import java.time.YearMonth
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.payment.model.{EOMStatistics, EOMStatus}
-import com.clemble.loveit.payment.service.repository.EOMStatusRepository
+import akka.stream.Materializer
+import akka.stream.scaladsl.Sink
+import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMStatistics, EOMStatus, UserPayment}
+import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMStatusRepository, UserPaymentRepository}
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,7 +29,7 @@ trait EOMService {
 }
 
 @Singleton
-case class SimpleEOMService @Inject()(repo: EOMStatusRepository, implicit val ec: ExecutionContext) extends EOMService {
+case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOMChargeRepository, paymentRepository: UserPaymentRepository, exchangeService: ExchangeService, implicit val ec: ExecutionContext, implicit val m: Materializer) extends EOMService {
 
   override def getStatus(yom: YearMonth): Future[Option[EOMStatus]] = {
     repo.get(yom)
@@ -53,7 +55,32 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, implicit val ec
   }
 
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
-    Future.successful(EOMStatistics())
+    def toCharge(user: UserPayment): Option[EOMCharge] = {
+      val thanks = exchangeService.toThanks(user.monthlyLimit)
+      val (satisfied, unsatisfied) = user.pending.splitAt(thanks.toInt)
+      val amount = exchangeService.toAmount(satisfied.size)
+      user.bankDetails.map(EOMCharge(user.id, yom, _, ChargeStatus.Pending, amount, None, satisfied, unsatisfied))
+    }
+
+    def createCharge(user: UserPayment): Future[Option[EOMCharge]] = {
+      toCharge(user) match {
+        case Some(charge) => chargeRepo.save(charge).map(Some(_))
+        case None => Future.successful(None)
+      }
+    }
+
+    def updateStatistics(stat: EOMStatistics, res: Option[EOMCharge]) = {
+      res match {
+        case Some(_) => stat.copy(success = stat.success + 1, total = stat.total + 1)
+        case _ => stat.copy(failed = stat.failed + 1, total = stat.total + 1)
+      }
+    }
+
+    // TODO 2 - is a dark blood magic number it should be configured, based on system preferences
+    paymentRepository.
+      find().
+      mapAsync(2)(createCharge).
+      runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
   }
 
   private def doApplyCharges(yom: YearMonth): Future[EOMStatistics] = {

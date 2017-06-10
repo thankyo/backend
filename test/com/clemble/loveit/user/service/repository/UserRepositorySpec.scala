@@ -89,7 +89,6 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   "COUNT" should {
     await(userRepo.count()) shouldEqual userRepo.find().toSeq().size
-
   }
 
 }

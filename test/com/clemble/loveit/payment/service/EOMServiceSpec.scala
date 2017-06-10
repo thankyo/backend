@@ -9,6 +9,7 @@ import com.clemble.loveit.payment.model.{BankDetails, EOMCharge, EOMStatus}
 import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.junit.runner.RunWith
+import scala.concurrent.duration._
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -66,7 +67,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
 
     val statusAfter = getStatus(yom)
     statusAfter.get.createCharges.success should beGreaterThan(0L)
-    statusAfter.get.createCharges.total shouldEqual beGreaterThan(0L)
+    statusAfter.get.createCharges.total should beGreaterThan(0L)
 
     eventually(charges(user) shouldNotEqual Nil)
     val chargesAfterYom = charges(user)

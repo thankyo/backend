@@ -79,7 +79,7 @@ case class SimpleEOMService @Inject()(repo: EOMStatusRepository, chargeRepo: EOM
     // TODO 2 - is a dark blood magic number it should be configured, based on system preferences
     paymentRepository.
       find().
-      mapAsync(8)(createCharge).
+      mapAsync(1)(createCharge).
       runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
   }
 

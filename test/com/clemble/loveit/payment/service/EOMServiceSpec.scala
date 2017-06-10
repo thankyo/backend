@@ -42,6 +42,50 @@ class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStr
     thankService.list(user).toSeq()
   }
 
+  "EOM charge Success on positive amount" in {
+    val yom = someRandom[YearMonth]
+
+    val owner = createUser()
+    val giver = createUser()
+    addBankDetails(giver)
+
+    val expectedTransactions = 1 to 30 map(_ => thank(giver, owner, someRandom[Resource]))
+    pendingThanks(giver) should containAllOf(expectedTransactions)
+
+    run(yom)
+    eventually(getStatus(yom).get.finished shouldNotEqual None)
+
+    val chargeOpt = charges(giver).find(_.yom == yom)
+    chargeOpt shouldNotEqual None
+
+    chargeOpt.get.status shouldEqual ChargeStatus.Success
+    chargeOpt.get.transactions shouldEqual expectedTransactions
+    // If success there should be no pending transactions left
+    pendingThanks(giver) shouldEqual List.empty
+  }
+
+  "EOM charge UnderMin on small thank amount" in {
+    val yom = someRandom[YearMonth]
+
+    val owner = createUser()
+    val giver = createUser()
+    addBankDetails(giver)
+
+    val expectedTransactions = 1 to 3 map(_ => thank(giver, owner, someRandom[Resource]))
+    pendingThanks(giver) should containAllOf(expectedTransactions)
+
+    run(yom)
+    eventually(getStatus(yom).get.finished shouldNotEqual None)
+
+    val chargeOpt = charges(giver).find(_.yom == yom)
+    chargeOpt shouldNotEqual None
+
+    chargeOpt.get.status shouldEqual ChargeStatus.UnderMin
+    chargeOpt.get.transactions shouldEqual expectedTransactions
+    // If UnderMin there should be no change in pending transactions
+    pendingThanks(giver) shouldEqual expectedTransactions
+  }
+
 }
 
 trait GenericEOMServiceSpec extends ThankSpecification {
@@ -93,50 +137,6 @@ trait GenericEOMServiceSpec extends ThankSpecification {
     val chargesAfterYom = charges(user)
     chargesAfterYom.size should beGreaterThan(0)
     chargesAfterYom.map(_.yom) should contain(yom)
-  }
-
-  "EOM charge Success on positive amount" in {
-    val yom = someRandom[YearMonth]
-
-    val owner = createUser()
-    val giver = createUser()
-    addBankDetails(giver)
-
-    val expectedTransactions = 1 to 30 map(_ => thank(giver, owner, someRandom[Resource]))
-    pendingThanks(giver) should containAllOf(expectedTransactions)
-
-    run(yom)
-    eventually(getStatus(yom).get.finished shouldNotEqual None)
-
-    val chargeOpt = charges(giver).find(_.yom == yom)
-    chargeOpt shouldNotEqual None
-
-    chargeOpt.get.status shouldEqual ChargeStatus.Success
-    chargeOpt.get.transactions shouldEqual expectedTransactions
-    // If success there should be no pending transactions left
-    pendingThanks(giver) shouldEqual List.empty
-  }
-
-  "EOM charge UnderMin on small thank amount" in {
-    val yom = someRandom[YearMonth]
-
-    val owner = createUser()
-    val giver = createUser()
-    addBankDetails(giver)
-
-    val expectedTransactions = 1 to 3 map(_ => thank(giver, owner, someRandom[Resource]))
-    pendingThanks(giver) should containAllOf(expectedTransactions)
-
-    run(yom)
-    eventually(getStatus(yom).get.finished shouldNotEqual None)
-
-    val chargeOpt = charges(giver).find(_.yom == yom)
-    chargeOpt shouldNotEqual None
-
-    chargeOpt.get.status shouldEqual ChargeStatus.UnderMin
-    chargeOpt.get.transactions shouldEqual expectedTransactions
-    // If UnderMin there should be no change in pending transactions
-    pendingThanks(giver) shouldEqual expectedTransactions
   }
 
 }

@@ -102,8 +102,8 @@ trait GenericEOMServiceSpec extends ThankSpecification {
     val giver = createUser()
     addBankDetails(giver)
 
-    val expectedTransactions = 1 to 30 foreach(_ => thank(giver, owner, someRandom[Resource]))
-    eventually(pendingThanks(giver) shouldEqual expectedTransactions)
+    val expectedTransactions = 1 to 30 map(_ => thank(giver, owner, someRandom[Resource]))
+    pendingThanks(giver) should containAllOf(expectedTransactions)
 
     run(yom)
     eventually(getStatus(yom).get.finished shouldNotEqual None)
@@ -117,15 +117,15 @@ trait GenericEOMServiceSpec extends ThankSpecification {
     pendingThanks(giver) shouldEqual List.empty
   }
 
-  "EOM charge Success on positive amount" in {
+  "EOM charge UnderMin on small thank amount" in {
     val yom = someRandom[YearMonth]
 
     val owner = createUser()
     val giver = createUser()
     addBankDetails(giver)
 
-    val expectedTransactions = 1 to 3 foreach(_ => thank(giver, owner, someRandom[Resource]))
-    eventually(pendingThanks(giver) shouldEqual expectedTransactions)
+    val expectedTransactions = 1 to 3 map(_ => thank(giver, owner, someRandom[Resource]))
+    pendingThanks(giver) should containAllOf(expectedTransactions)
 
     run(yom)
     eventually(getStatus(yom).get.finished shouldNotEqual None)

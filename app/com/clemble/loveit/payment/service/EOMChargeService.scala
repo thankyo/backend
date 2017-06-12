@@ -1,5 +1,6 @@
 package com.clemble.loveit.payment.service
 
+import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model._
 import com.google.common.collect.Maps
@@ -18,7 +19,14 @@ sealed trait EOMChargeService {
 
 }
 
+object EOMChargeService {
+
+  val MIN_CHARGE = Money(1.0, LoveItCurrency.getInstance("USD"))
+
+}
+
 case object StripeEOMChargeService extends EOMChargeService {
+
 
   /**
     * Charges customer with specified charge
@@ -54,7 +62,7 @@ case object StripeEOMChargeService extends EOMChargeService {
     * Charges user with specified amount
     */
   override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
-    if (charge.moreThanMinCharge) {
+    if (charge.amount >= EOMChargeService.MIN_CHARGE) {
       doCharge(charge)
     } else {
       Future.successful(ChargeStatus.UnderMin -> Json.obj())

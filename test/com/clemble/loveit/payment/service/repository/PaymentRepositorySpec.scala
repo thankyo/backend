@@ -28,7 +28,7 @@ class PaymentRepositorySpec extends RepositorySpec {
   "get bankDetails" in {
     val A = createUser()
 
-    await(repo.getBankDetails(A.id)) shouldEqual A.bankDetails
+    await(repo.getBankDetails(A.id)) shouldEqual A.chargeAccount
   }
 
   "set same BankDetails" in {

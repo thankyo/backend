@@ -209,7 +209,7 @@ package object util {
         owns = Set.empty,
         balance = 200L,
         total = 200L,
-        bankDetails = Some(someRandom[BankDetails]),
+        chargeAccount = Some(someRandom[BankDetails]),
         thumbnail = Some(random(12)),
         dateOfBirth = Some(new DateTime(nextLong(0, Long.MaxValue))),
         profiles = Set.empty[LoginInfo]

@@ -73,7 +73,7 @@ case class SimpleEOMService @Inject()(
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
     def toCharge(user: UserPayment): Option[EOMCharge] = {
       user.
-        bankDetails.
+        chargeAccount.
         map(bd => {
           val thanks = exchangeService.toThanks(user.monthlyLimit)
           val (satisfied, _) = user.pending.splitAt(thanks.toInt)

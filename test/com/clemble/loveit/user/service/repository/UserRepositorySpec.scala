@@ -47,7 +47,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       await(userRepo.save(A))
       await(balanceRepo.setBankDetails(A.id, bankDetails))
 
-      await(userRepo.findById(A.id)).get.bankDetails must beEqualTo(Some(bankDetails))
+      await(userRepo.findById(A.id)).get.chargeAccount must beEqualTo(Some(bankDetails))
       await(balanceRepo.getBankDetails(A.id)) must beEqualTo(Some(bankDetails))
     }
 

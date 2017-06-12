@@ -32,16 +32,9 @@ case class EOMCharge(
                       details: Option[JsValue],
                       transactions: List[ThankTransaction],
                       created: DateTime = DateTime.now()
-) extends Transaction with EOMAware {
-
-  def moreThanMinCharge = amount >= source.minCharge
-
-}
+) extends Transaction with EOMAware
 
 object EOMCharge {
-
-  // TODO This is dark magic number, should be configured appropriately
-  val MIN_TRANSACTIONS = 7
 
   implicit val jsonFormat = Json.format[EOMCharge]
   implicit val chargeWriteable = WriteableUtils.jsonToWriteable[EOMCharge]

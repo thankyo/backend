@@ -17,9 +17,13 @@ trait UserPayment {
     */
   val balance: Amount
   /**
-    * BankDetails to use for withdraw and
+    * [[BankDetails]] to use for withdraw and
     */
-  val bankDetails: Option[BankDetails]
+  val chargeAccount: Option[BankDetails]
+  /**
+    * BankDetails for Payout
+    */
+  val payoutAccount: Option[BankDetails]
   /**
     * Monthly transaction limit
     */
@@ -40,11 +44,12 @@ object UserPayment {
 }
 
 private case class SimpleUserPayment(
-                            id: UserID,
-                            balance: Amount,
-                            bankDetails: Option[BankDetails],
-                            monthlyLimit: Money,
-                            pending: List[ThankTransaction]
+                                      id: UserID,
+                                      balance: Amount,
+                                      chargeAccount: Option[BankDetails],
+                                      payoutAccount: Option[BankDetails],
+                                      monthlyLimit: Money,
+                                      pending: List[ThankTransaction]
 ) extends UserPayment
 
 private object SimpleUserPayment {

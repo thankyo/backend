@@ -24,6 +24,8 @@ PUT         /thank/http/*url                 @com.clemble.loveit.thank.controlle
 
 GET         /payment/pending/my              @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
 GET         /payment/charge/my               @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
+GET         /payment/charge/my/account       @com.clemble.loveit.payment.controller.EOMChargeController.getMyAccount()
+POST        /payment/charge/my/account       @com.clemble.loveit.payment.controller.EOMChargeController.setMyAccount()
 GET         /payment/payout/my               @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
 
 GET         /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.getMyBankDetails()

@@ -39,7 +39,8 @@ case class User(
                  balance: Amount = 0L,
                  pending: List[ThankTransaction] = List.empty,
                  total: Amount = 0L,
-                 bankDetails: Option[BankDetails] = None,
+                 chargeAccount: Option[BankDetails] = None,
+                 payoutAccount: Option[BankDetails] = None,
                  monthlyLimit: Money = UserPayment.DEFAULT_LIMIT,
                  profiles: Set[LoginInfo] = Set.empty,
                  created: DateTime = DateTime.now()

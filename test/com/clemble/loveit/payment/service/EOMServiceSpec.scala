@@ -179,7 +179,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
       finalStatus.createPayout.success shouldEqual 1
       val ownerPayouts = payouts(owner)
       ownerPayouts.size shouldEqual 1
-      ownerPayouts(0).amount shouldEqual new Money(6.0, "USD")
+      ownerPayouts(0).amount shouldEqual new Money(5.4, "USD")
     }
 
   }

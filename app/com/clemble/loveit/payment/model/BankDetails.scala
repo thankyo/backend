@@ -8,19 +8,16 @@ import play.api.libs.json._
   * Bank details abstraction
   */
 sealed trait BankDetails {
-  def fee: Money
   def minCharge: Money
 }
 
 case class StripeBankDetails(customer: String, brand: Option[String] = None, last4: Option[String] = None) extends BankDetails {
   require(customer != null)
-  val fee = StripeBankDetails.STRIPE_FEE
   val minCharge = StripeBankDetails.STRIPE_MIN_CHARGE
 }
 
 object StripeBankDetails {
 
-  private val STRIPE_FEE = Money(0.3, LoveItCurrency.getInstance("USD"))
   private val STRIPE_MIN_CHARGE = Money(1.0, LoveItCurrency.getInstance("USD"))
 
 }

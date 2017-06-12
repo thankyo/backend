@@ -77,8 +77,7 @@ case class SimpleEOMService @Inject()(
         map(bd => {
           val thanks = exchangeService.toThanks(user.monthlyLimit)
           val (satisfied, _) = user.pending.splitAt(thanks.toInt)
-          val charge = exchangeService.toAmount(satisfied.size)
-          val amount = charge + bd.fee
+          val amount = exchangeService.toAmountWithClientFee(satisfied.size)
           EOMCharge(user.id, yom, bd, ChargeStatus.Pending, amount, None, satisfied)
         })
     }
@@ -132,12 +131,16 @@ case class SimpleEOMService @Inject()(
     def toPayoutMap(charge: EOMCharge): Map[UserID, Int] = {
       charge.transactions.groupBy(_.destination).mapValues(_.size)
     }
+
     def combinePayoutMaps(agg: Map[UserID, Int], payout: Map[UserID, Int]): Map[UserID, Int] = {
       agg ++ payout.map({ case (user, amount) => user -> (amount + agg.getOrElse(user, 0)) })
     }
+
     def toPayout(user: UserID, bankDetails: Option[BankDetails], payout: Amount): EOMPayout = {
-      EOMPayout(user, yom, bankDetails, exchangeService.toAmount(payout, LoveItCurrency.DEFAULT), PayoutStatus.Pending)
+      val amount = exchangeService.toAmountAfterPlatformFee(payout, LoveItCurrency.DEFAULT)
+      EOMPayout(user, yom, bankDetails, amount, PayoutStatus.Pending)
     }
+
     def savePayouts(payoutMap: Map[UserID, Int]): Future[immutable.Iterable[Boolean]] = {
       val fSavedPayouts = for {
         (user, payout) <- payoutMap

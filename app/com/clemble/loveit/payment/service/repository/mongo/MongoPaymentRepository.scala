@@ -94,6 +94,12 @@ object MongoPaymentRepository {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
+        key = Seq("payoutAccount.accountId" -> IndexType.Ascending),
+        name = Some("stripe_payout_uniquer"),
+        unique = true,
+        partialFilter = Some(BSONDocument("payoutAccount.type" -> BSONString("stripe")))
+      ),
+      Index(
         key = Seq("chargeAccount.type" -> IndexType.Ascending, "chargeAccount.customer" -> IndexType.Ascending),
         name = Some("stripe_customer_uniquer"),
         unique = true,

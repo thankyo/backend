@@ -5,7 +5,7 @@ import java.util.Currency
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.{PaymentException, RepositoryException}
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{ChargeAccount, Money}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -25,22 +25,49 @@ class PaymentRepositorySpec extends RepositorySpec {
     await(repo.getBalance(A.id)) shouldEqual A.balance -100
   }
 
-  "get chargeAccount" in {
-    val A = createUser()
+  "PAYOUT ACCOUNT" should {
 
-    await(repo.getChargeAccount(A.id)) shouldEqual A.chargeAccount
+    "get" in {
+      val A = createUser()
+
+      await(repo.getPayoutAccount(A.id)) shouldEqual A.payoutAccount
+    }
+
+    "set same" in {
+      val A = createUser()
+      val B = createUser()
+      val ptAcc = someRandom[PayoutAccount]
+
+      await(repo.setPayoutAccount(A.id, ptAcc)) shouldEqual true
+      await(repo.setPayoutAccount(B.id, ptAcc)) should throwA[RepositoryException]
+
+      await(repo.getPayoutAccount(A.id)) shouldEqual Some(ptAcc)
+      await(repo.getPayoutAccount(B.id)) shouldNotEqual Some(ptAcc)
+    }
+
   }
 
-  "set same ChargeAccount" in {
-    val A = createUser()
-    val B = createUser()
-    val chAcc = someRandom[ChargeAccount]
 
-    await(repo.setChargeAccount(A.id, chAcc)) shouldEqual true
-    await(repo.setChargeAccount(B.id, chAcc)) should throwA[RepositoryException]
+  "CHARGE ACCOUNT" should {
 
-    await(repo.getChargeAccount(A.id)) shouldEqual Some(chAcc)
-    await(repo.getChargeAccount(B.id)) shouldNotEqual Some(chAcc)
+    "get chargeAccount" in {
+      val A = createUser()
+
+      await(repo.getChargeAccount(A.id)) shouldEqual A.chargeAccount
+    }
+
+    "set same ChargeAccount" in {
+      val A = createUser()
+      val B = createUser()
+      val chAcc = someRandom[ChargeAccount]
+
+      await(repo.setChargeAccount(A.id, chAcc)) shouldEqual true
+      await(repo.setChargeAccount(B.id, chAcc)) should throwA[RepositoryException]
+
+      await(repo.getChargeAccount(A.id)) shouldEqual Some(chAcc)
+      await(repo.getChargeAccount(B.id)) shouldNotEqual Some(chAcc)
+    }
+
   }
 
   "LIMIT" should {

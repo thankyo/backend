@@ -3,8 +3,8 @@ package com.clemble.loveit.user.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.payment.model.BankDetails
-import com.clemble.loveit.payment.service.repository.{BalanceRepository, BankDetailsRepository}
+import com.clemble.loveit.payment.model.ChargeAccount
+import com.clemble.loveit.payment.service.repository.{BalanceRepository, ChargeAccountRepository}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -14,7 +14,7 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  lazy val balanceRepo = dependency[BankDetailsRepository with BalanceRepository]
+  lazy val balanceRepo = dependency[ChargeAccountRepository with BalanceRepository]
 
   "CREATE" should {
 
@@ -40,15 +40,15 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       await(fSecondRes) should throwA[RepositoryException]
     }
 
-    "set BankDetails" in {
+    "set ChargeAccount" in {
       val A = someRandom[User]
-      val bankDetails = someRandom[BankDetails]
+      val chAcc = someRandom[ChargeAccount]
 
       await(userRepo.save(A))
-      await(balanceRepo.setBankDetails(A.id, bankDetails))
+      await(balanceRepo.setChargeAccount(A.id, chAcc))
 
-      await(userRepo.findById(A.id)).get.chargeAccount must beEqualTo(Some(bankDetails))
-      await(balanceRepo.getBankDetails(A.id)) must beEqualTo(Some(bankDetails))
+      await(userRepo.findById(A.id)).get.chargeAccount must beEqualTo(Some(chAcc))
+      await(balanceRepo.getChargeAccount(A.id)) must beEqualTo(Some(chAcc))
     }
 
   }

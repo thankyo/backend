@@ -16,7 +16,7 @@ class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStr
   val service = dependency[EOMService]
   val chargeRepo = dependency[EOMChargeRepository]
   val payoutRepo = dependency[EOMPayoutRepository]
-  val bankDetails = dependency[BankDetailsService]
+  val chAccService = dependency[ChargeAccountService]
   val thankService = dependency[ThankTransactionService]
 
 
@@ -36,8 +36,8 @@ class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStr
     payoutRepo.findByUser(user).toSeq()
   }
 
-  override def addBankDetails(user: UserID): BankDetails = {
-    await(bankDetails.updateBankDetails(user, someValidStripeToken()))
+  override def addChargeAccount(user: UserID): ChargeAccount = {
+    await(chAccService.updateChargeAccount(user, someValidStripeToken()))
   }
 
   override def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction = {
@@ -71,7 +71,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
   def charges(user: UserID): Seq[EOMCharge]
   def payouts(user: UserID): Seq[EOMPayout]
   def pendingThanks(user: UserID): Seq[ThankTransaction]
-  def addBankDetails(user: UserID): BankDetails
+  def addChargeAccount(user: UserID): ChargeAccount
 
   "GENERAL" should {
 
@@ -98,7 +98,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
     "EOM creates charges" in {
       val yom = someRandom[YearMonth]
       val user = createUser()
-      addBankDetails(user)
+      addChargeAccount(user)
 
       charges(user) shouldEqual Nil
 
@@ -120,7 +120,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
 
       val owner = createUser()
       val giver = createUser()
-      addBankDetails(giver)
+      addChargeAccount(giver)
 
       val expectedTransactions = 1 to 30 map (_ => thank(giver, owner, someRandom[Resource]))
       pendingThanks(giver) should containAllOf(expectedTransactions)
@@ -141,7 +141,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
 
       val owner = createUser()
       val giver = createUser()
-      addBankDetails(giver)
+      addChargeAccount(giver)
 
       val expectedTransactions = 1 to 3 map (_ => thank(giver, owner, someRandom[Resource]))
       pendingThanks(giver) should containAllOf(expectedTransactions)
@@ -166,10 +166,10 @@ trait GenericEOMServiceSpec extends ThankSpecification {
       val owner = createUser()
 
       val giverA = createUser()
-      addBankDetails(giverA)
+      addChargeAccount(giverA)
 
       val giverB = createUser()
-      addBankDetails(giverB)
+      addChargeAccount(giverB)
 
       1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]));
       1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]));

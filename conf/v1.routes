@@ -28,9 +28,6 @@ GET         /payment/charge/my/account       @com.clemble.loveit.payment.control
 POST        /payment/charge/my/account       @com.clemble.loveit.payment.controller.EOMChargeController.setMyAccount()
 GET         /payment/payout/my               @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
 
-GET         /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.getMyBankDetails()
-POST        /payment/bank/my                 @com.clemble.loveit.payment.controller.BankDetailsController.updateMyBankDetails()
-
 GET         /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.getMonthlyLimit()
 POST        /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.setMonthlyLimit()
 

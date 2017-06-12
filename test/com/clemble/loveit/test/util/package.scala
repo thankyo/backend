@@ -26,7 +26,7 @@ package object util {
   implicit val repositoryExceptionGenerator: Generator[RepositoryException] = RepositoryExceptionGenerator
   implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
   implicit val userExceptionGenerator: Generator[UserException] = UserExceptionGenerator
-  implicit val bankDetailsGenerator: Generator[BankDetails] = BankDetailsGenerator
+  implicit val chargeAccountGenerator: Generator[ChargeAccount] = ChargeAccountGenerator
   implicit val thankTransactionGenerator: Generator[ThankTransaction] = ThankTransactionGenerator
   implicit val verificationGenerator: Generator[ROVerification[Resource]] = ROVerificationGenerator
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
@@ -93,16 +93,16 @@ package object util {
     override def generate(): EOMPayout = EOMPayout(
       someRandom[UserID],
       someRandom[YearMonth],
-      Some(someRandom[BankDetails]),
+      Some(someRandom[ChargeAccount]),
       someRandom[Money],
       PayoutStatus.Pending
     )
   }
 
-  private object BankDetailsGenerator extends Generator[BankDetails] {
+  private object ChargeAccountGenerator extends Generator[ChargeAccount] {
 
-    override def generate(): BankDetails = {
-        StripeBankDetails(randomNumeric(10), Some(randomNumeric(4)), Some(randomNumeric(4)))
+    override def generate(): ChargeAccount = {
+        StripeChargeAccount(randomNumeric(10), Some(randomNumeric(4)), Some(randomNumeric(4)))
     }
 
   }
@@ -125,7 +125,7 @@ package object util {
       EOMCharge(
         someRandom[UserID],
         someRandom[YearMonth],
-        someRandom[BankDetails],
+        someRandom[ChargeAccount],
         ChargeStatus.Pending,
         someRandom[Money],
         None,
@@ -209,7 +209,7 @@ package object util {
         owns = Set.empty,
         balance = 200L,
         total = 200L,
-        chargeAccount = Some(someRandom[BankDetails]),
+        chargeAccount = Some(someRandom[ChargeAccount]),
         thumbnail = Some(random(12)),
         dateOfBirth = Some(new DateTime(nextLong(0, Long.MaxValue))),
         profiles = Set.empty[LoginInfo]

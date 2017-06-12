@@ -9,7 +9,7 @@ import play.api.libs.json._
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-sealed trait EOMPayoutService[BankDetails] {
+sealed trait EOMPayoutService[ChargeAccount] {
 
   def process(payout: EOMPayout): Future[(PayoutStatus, JsValue)]
 
@@ -17,23 +17,23 @@ sealed trait EOMPayoutService[BankDetails] {
 
 import com.stripe.model.Transfer
 
-case object StripeEOMPayoutService extends EOMPayoutService[BankDetails] {
+case object StripeEOMPayoutService extends EOMPayoutService[ChargeAccount] {
 
   /**
-    * Transfer specified amount to specified BankDetails
+    * Transfer specified amount to specified [[ChargeAccount]]
     */
-  private def transferStripe(bankDetails: StripeBankDetails, amount: Money): Transfer = {
+  private def transferStripe(chAcc: StripeChargeAccount, amount: Money): Transfer = {
     val transferParams = Maps.newHashMap[String, Object]()
     val stripeAmount = (amount.amount * 100).toInt
     transferParams.put("amount", stripeAmount.toString)
     transferParams.put("currency", "usd")
-    transferParams.put("destination", bankDetails.customer)
+    transferParams.put("destination", chAcc.customer)
     Transfer.create(transferParams)
   }
 
   private def doProcess(payout: EOMPayout): (PayoutStatus, JsValue) = {
     Try({
-      transferStripe(payout.destination.asInstanceOf[StripeBankDetails], payout.amount)
+      transferStripe(payout.destination.asInstanceOf[StripeChargeAccount], payout.amount)
     }) match {
       case Success(transfer) =>
         val details = Json.parse(transfer.toJson())

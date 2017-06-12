@@ -9,7 +9,7 @@ import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
-import com.clemble.loveit.payment.model.{BankDetails, ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutStatus, UserPayment}
+import com.clemble.loveit.payment.model.{ChargeAccount, ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutStatus, UserPayment}
 import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, EOMStatusRepository, UserPaymentRepository}
 import org.joda.time.DateTime
 
@@ -39,7 +39,7 @@ case class SimpleEOMService @Inject()(
                                        chargeRepo: EOMChargeRepository,
                                        payoutRepo: EOMPayoutRepository,
                                        chargeService: EOMChargeService,
-                                       bankDetailsService: BankDetailsService,
+                                       chAccService: ChargeAccountService,
                                        thankService: ThankTransactionService,
                                        paymentRepo: UserPaymentRepository,
                                        exchangeService: ExchangeService,
@@ -136,9 +136,9 @@ case class SimpleEOMService @Inject()(
       agg ++ payout.map({ case (user, amount) => user -> (amount + agg.getOrElse(user, 0)) })
     }
 
-    def toPayout(user: UserID, bankDetails: Option[BankDetails], payout: Amount): EOMPayout = {
+    def toPayout(user: UserID, chAcc: Option[ChargeAccount], payout: Amount): EOMPayout = {
       val amount = exchangeService.toAmountAfterPlatformFee(payout, LoveItCurrency.DEFAULT)
-      EOMPayout(user, yom, bankDetails, amount, PayoutStatus.Pending)
+      EOMPayout(user, yom, chAcc, amount, PayoutStatus.Pending)
     }
 
     def savePayouts(payoutMap: Map[UserID, Int]): Future[immutable.Iterable[Boolean]] = {
@@ -146,8 +146,8 @@ case class SimpleEOMService @Inject()(
         (user, payout) <- payoutMap
       } yield {
         for {
-          bankDetails <- bankDetailsService.getBankDetails(user)
-          saved <- payoutRepo.save(toPayout(user, bankDetails, payout))
+          chAcc <- chAccService.getChargeAccount(user)
+          saved <- payoutRepo.save(toPayout(user, chAcc, payout))
         } yield {
           saved
         }

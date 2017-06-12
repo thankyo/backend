@@ -5,7 +5,7 @@ import java.util.Currency
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.{PaymentException, RepositoryException}
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{BankDetails, Money}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -25,22 +25,22 @@ class PaymentRepositorySpec extends RepositorySpec {
     await(repo.getBalance(A.id)) shouldEqual A.balance -100
   }
 
-  "get bankDetails" in {
+  "get chargeAccount" in {
     val A = createUser()
 
-    await(repo.getBankDetails(A.id)) shouldEqual A.chargeAccount
+    await(repo.getChargeAccount(A.id)) shouldEqual A.chargeAccount
   }
 
-  "set same BankDetails" in {
+  "set same ChargeAccount" in {
     val A = createUser()
     val B = createUser()
-    val bankDetails = someRandom[BankDetails]
+    val chAcc = someRandom[ChargeAccount]
 
-    await(repo.setBankDetails(A.id, bankDetails)) shouldEqual true
-    await(repo.setBankDetails(B.id, bankDetails)) should throwA[RepositoryException]
+    await(repo.setChargeAccount(A.id, chAcc)) shouldEqual true
+    await(repo.setChargeAccount(B.id, chAcc)) should throwA[RepositoryException]
 
-    await(repo.getBankDetails(A.id)) shouldEqual Some(bankDetails)
-    await(repo.getBankDetails(B.id)) shouldNotEqual Some(bankDetails)
+    await(repo.getChargeAccount(A.id)) shouldEqual Some(chAcc)
+    await(repo.getChargeAccount(B.id)) shouldNotEqual Some(chAcc)
   }
 
   "LIMIT" should {

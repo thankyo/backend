@@ -18,7 +18,7 @@ object UserException {
 
 object PaymentException {
   def alreadyThanked(user: UserID, res: Resource) = PaymentException("ALREADY_THANKED", s"User ${user} already thanked ${res}")
-  def failedToLinkBankDetails(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link bank details")
+  def failedToLinkChargeAccount(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link bank details")
   def limitIsNegative(user: UserID, limit: Money) = PaymentException("LIMIT_IS_NEGATIVE", s"User ${user} limit can't be negative")
 }
 

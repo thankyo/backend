@@ -4,7 +4,7 @@ import java.time.YearMonth
 
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.payment.model.{BankDetails, EOMCharge, EOMPayout, EOMStatus, ThankTransaction}
+import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, EOMStatus, ThankTransaction}
 import com.clemble.loveit.payment.service.{GenericEOMServiceSpec, TestStripeUtils, ThankTransactionService}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
@@ -39,9 +39,9 @@ class AdminEOMControllerSpec extends GenericEOMServiceSpec with ControllerSpec w
     charges.toSeq()
   }
 
-  override def addBankDetails(user: UserID): BankDetails = {
+  override def addChargeAccount(user: UserID): ChargeAccount = {
     val res = perform(user, FakeRequest(POST, s"/api/v1/payment/bank/my").withJsonBody(JsString(someValidStripeToken())))
-    res.body.dataStream.readJson[BankDetails].get
+    res.body.dataStream.readJson[ChargeAccount].get
   }
 
   override def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction = {

@@ -3,7 +3,7 @@ package com.clemble.loveit.payment
 import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
-import com.clemble.loveit.payment.model.BankDetails
+import com.clemble.loveit.payment.model.ChargeAccount
 import com.clemble.loveit.payment.service.repository.{BalanceRepository, _}
 import com.clemble.loveit.payment.service.repository.mongo._
 import com.clemble.loveit.payment.service._
@@ -25,7 +25,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
     bind[BalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
-    bind[BankDetailsRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[ChargeAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[MonthlyLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
@@ -34,7 +34,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
     bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
 
-    bind[BankDetailsService].to[SimpleBankDetailsService].asEagerSingleton()
+    bind[ChargeAccountService].to[SimpleChargeAccountService].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
@@ -46,13 +46,13 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
   @Provides
   @Singleton
-  def bankDetailsService(): BankDetailsConverter = {
-    new StripeBankDetailsConverter(conf.getString("payment.stripe.apiKey").get)
+  def chargeAccountService(): ChargeAccountConverter = {
+    new StripeChargeAccountConverter(conf.getString("payment.stripe.apiKey").get)
   }
 
   @Provides
   @Singleton
-  def payoutService(): EOMPayoutService[BankDetails] = {
+  def payoutService(): EOMPayoutService[ChargeAccount] = {
     StripeEOMPayoutService
   }
 

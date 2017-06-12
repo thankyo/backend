@@ -26,7 +26,7 @@ object ChargeStatus extends Enumeration {
 case class EOMCharge(
                       user: UserID,
                       yom: YearMonth,
-                      source: BankDetails,
+                      source: ChargeAccount,
                       status: ChargeStatus,
                       amount: Money,
                       details: Option[JsValue],

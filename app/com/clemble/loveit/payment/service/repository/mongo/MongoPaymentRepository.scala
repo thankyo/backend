@@ -6,7 +6,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.{BankDetails, Money}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -54,16 +54,16 @@ case class MongoPaymentRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
-  override def getBankDetails(user: UserID): Future[Option[BankDetails]] = {
+  override def getChargeAccount(user: UserID): Future[Option[ChargeAccount]] = {
     val query = Json.obj("_id" -> user)
-    val projection = Json.obj("bankDetails" -> 1)
-    val find = collection.find(query, projection).one[JsObject].map(_.flatMap(json => (json \ "bankDetails").asOpt[BankDetails]))
+    val projection = Json.obj("chargeAccount" -> 1)
+    val find = collection.find(query, projection).one[JsObject].map(_.flatMap(json => (json \ "chargeAccount").asOpt[ChargeAccount]))
     MongoSafeUtils.safe(find)
   }
 
-  override def setBankDetails(user: UserID, bankDetails: BankDetails): Future[Boolean] = {
+  override def setChargeAccount(user: UserID, chAcc: ChargeAccount): Future[Boolean] = {
     val query = Json.obj("_id" -> user)
-    val change = Json.obj("$set" -> Json.obj("bankDetails" -> bankDetails))
+    val change = Json.obj("$set" -> Json.obj("chargeAccount" -> chAcc))
     val update = collection.update(query, change).map(res => res.ok && res.n == 1)
     MongoSafeUtils.safe(update)
   }
@@ -80,16 +80,16 @@ object MongoPaymentRepository {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
-        key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.customer" -> IndexType.Ascending),
+        key = Seq("chargeAccount.type" -> IndexType.Ascending, "chargeAccount.customer" -> IndexType.Ascending),
         name = Some("stripe_customer_uniquer"),
         unique = true,
-        partialFilter = Some(BSONDocument("bankDetails.type" -> BSONString("stripe")))
+        partialFilter = Some(BSONDocument("chargeAccount.type" -> BSONString("stripe")))
       ),
       Index(
-        key = Seq("bankDetails.type" -> IndexType.Ascending, "bankDetails.email" -> IndexType.Ascending),
+        key = Seq("chargeAccount.type" -> IndexType.Ascending, "chargeAccount.email" -> IndexType.Ascending),
         name = Some("paypal_email_unique"),
         unique = true,
-        partialFilter = Some(BSONDocument("bankDetails.type" -> BSONString("payPal")))
+        partialFilter = Some(BSONDocument("chargeAccount.type" -> BSONString("payPal")))
       )
 
     )

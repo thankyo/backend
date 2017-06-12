@@ -21,7 +21,7 @@ case class MongoUserPaymentRepository @Inject()(@Named("user") collection: JSONC
 
   override def find(): Source[UserPayment, _] = {
     val selector = Json.obj()
-    val projection = Json.obj("id" -> 1, "balance" -> 1, "bankDetails" -> 1, "monthlyLimit" -> 1, "pending" -> 1)
+    val projection = Json.obj("id" -> 1, "balance" -> 1, "chargeAccount" -> 1, "monthlyLimit" -> 1, "pending" -> 1)
     collection.
       find(selector, projection).
       cursor[UserPayment](ReadPreference.nearest).

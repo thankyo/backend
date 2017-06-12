@@ -4,7 +4,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.{BankDetails, UserPayment}
+import com.clemble.loveit.payment.model.{ChargeAccount, UserPayment}
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Named, Singleton}
 
@@ -101,7 +101,7 @@ object MongoUserRepository {
     changeOwner(collection)
     removeSocialResources(collection)
     addPending(collection)
-    removeEmptyBankDetails(collection)
+    removeEmptyChargeAccount(collection)
   }
 
   private def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
@@ -159,9 +159,14 @@ object MongoUserRepository {
     collection.update(selector, update, multi = true).map(res => if (!res.ok) System.exit(3))
   }
 
-  private def removeEmptyBankDetails(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
-    val selector = Json.obj("bankDetails.type" -> "empty")
-    val update = Json.obj("$unset" -> Json.obj("bankDetails" -> ""))
+  private def removeEmptyChargeAccount(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
+    val selector = Json.obj("$or" ->
+      Json.arr(
+        Json.obj("bankDetails.type" -> "empty"),
+        Json.obj("chargeAccount.type" -> "empty")
+      )
+    )
+    val update = Json.obj("$unset" -> Json.obj("bankDetails" -> "", "chargeAccount" -> ""))
     collection.update(selector, update, multi = true).map(res => if (!res.ok) System.exit(4))
   }
 

@@ -31,22 +31,22 @@ case object StripeEOMChargeService extends EOMChargeService {
   /**
     * Charges customer with specified charge
     *
-    * @param bankDetails - customer reference
+    * @param chAcc - customer reference
     * @param amount amount to charge
     * @return StripeCharge
     */
-  private def chargeStripe(bankDetails: StripeBankDetails, amount: Money): StripeCharge = {
+  private def chargeStripe(chAcc: StripeChargeAccount, amount: Money): StripeCharge = {
     val chargeParams = Maps.newHashMap[String, Object]()
     val stripeAmount = (amount.amount * 100).toInt
     chargeParams.put("amount", stripeAmount.toString)
     chargeParams.put("currency", amount.currency.getCurrencyCode.toLowerCase())
-    chargeParams.put("customer", bankDetails.customer)
+    chargeParams.put("customer", chAcc.customer)
     StripeCharge.create(chargeParams)
   }
 
   private def doCharge(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     val res = Try({
-      chargeStripe(charge.source.asInstanceOf[StripeBankDetails], charge.amount)
+      chargeStripe(charge.source.asInstanceOf[StripeChargeAccount], charge.amount)
     }) match {
       case Success(charge) =>
         val details = Json.parse(charge.toJson())

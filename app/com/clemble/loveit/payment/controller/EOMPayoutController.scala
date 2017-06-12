@@ -1,5 +1,6 @@
 package com.clemble.loveit.payment.controller
 
+import java.net.URI
 import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.controller.CookieUtils
@@ -11,6 +12,7 @@ import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import play.api.Configuration
 import play.api.mvc.{Controller, Request, Result}
+import play.utils.UriEncoding
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,11 +33,11 @@ case class EOMPayoutController @Inject()(
       s"response_type=code&" +
       s"client_id=${clientId}&" +
       s"scope=read_write&" +
-      s"state=${crypter.encrypt(user)}"
+      s"state=${user}"
   }
 
   private def readUser(encUser: UserID) = {
-    crypter.decrypt(encUser)
+    encUser
   }
 
 
@@ -50,7 +52,7 @@ case class EOMPayoutController @Inject()(
         case (Some(token), Some(user)) =>
           paymentAccService.
             updatePayoutAccount(user, token).
-            map(_ => Redirect("/my/account"))
+            map(_ => Redirect("/my/integration"))
         case _ =>
           Future.successful(BadRequest)
       }

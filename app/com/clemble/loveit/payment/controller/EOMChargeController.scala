@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 case class EOMChargeController @Inject()(
                                           chargeRepo: EOMChargeRepository,
-                                          chAccService: PaymentAccountService,
+                                          paymentAccService: PaymentAccountService,
                                           silhouette: Silhouette[AuthEnv],
                                           implicit val ec: ExecutionContext
 ) extends Controller {
@@ -25,7 +25,7 @@ case class EOMChargeController @Inject()(
 
   def getMyAccount = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id
-    chAccService.getChargeAccount(user).map(_ match {
+    paymentAccService.getChargeAccount(user).map(_ match {
       case Some(chAcc) => Ok(chAcc)
       case None => NotFound
     })
@@ -33,7 +33,7 @@ case class EOMChargeController @Inject()(
 
   def setMyAccount = silhouette.SecuredAction.async(parse.json[String])(implicit req => {
     val user = req.identity.id
-    val fUpdate = chAccService.updateChargeAccount(user, req.body)
+    val fUpdate = paymentAccService.updateChargeAccount(user, req.body)
     fUpdate.map(Ok(_))
   })
 

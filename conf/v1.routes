@@ -26,7 +26,9 @@ GET         /payment/pending/my              @com.clemble.loveit.payment.control
 GET         /payment/charge/my               @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 GET         /payment/charge/my/account       @com.clemble.loveit.payment.controller.EOMChargeController.getMyAccount()
 POST        /payment/charge/my/account       @com.clemble.loveit.payment.controller.EOMChargeController.setMyAccount()
+
 GET         /payment/payout/my               @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
+GET         /payment/payout/my/account       @com.clemble.loveit.payment.controller.EOMPayoutController.connectMyAccount()
 
 GET         /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.getMonthlyLimit()
 POST        /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.setMonthlyLimit()

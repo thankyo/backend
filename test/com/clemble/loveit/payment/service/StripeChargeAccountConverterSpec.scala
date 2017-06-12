@@ -14,7 +14,7 @@ class StripeChargeAccountConverterSpec extends ServiceSpec with TestStripeUtils{
     "create bank details" in {
       val token = someValidStripeToken()
 
-      val chAcc = Try(await(service.process(token)))
+      val chAcc = Try(await(service.processChargeToken(token)))
 
       chAcc.isSuccess shouldEqual true
     }
@@ -22,7 +22,7 @@ class StripeChargeAccountConverterSpec extends ServiceSpec with TestStripeUtils{
     "specify card brand  and last4 digits" in {
       val token = someValidStripeToken()
 
-      val chAcc = await(service.process(token)).asInstanceOf[StripeChargeAccount]
+      val chAcc = await(service.processChargeToken(token)).asInstanceOf[StripeChargeAccount]
 
       chAcc.last4 shouldNotEqual None
       chAcc.brand shouldNotEqual None

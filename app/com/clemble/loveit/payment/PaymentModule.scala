@@ -13,11 +13,12 @@ import javax.inject.{Named, Singleton}
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.Provides
 import net.codingwell.scalaguice.ScalaModule
+import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 
 case class PaymentModule(env: Environment, conf: Configuration) extends ScalaModule {
 
@@ -46,8 +47,10 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
   @Provides
   @Singleton
-  def chargeAccountService(): ChargeAccountConverter = {
-    new StripeChargeAccountConverter(conf.getString("payment.stripe.apiKey").get)
+  def chargeAccountService(wsClient: WSClient, ec: ExecutionContext): ChargeAccountConverter = {
+    val apiKey = conf.getString("payment.stripe.apiKey").get
+    val clientId = conf.getString("payment.stripe.clientId").get
+    new StripeChargeAccountConverter(apiKey, clientId, wsClient, ec)
   }
 
   @Provides

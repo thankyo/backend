@@ -4,11 +4,14 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{ChargeAccount, PayoutAccount, StripeChargeAccount, StripeCustomerToken}
+import com.clemble.loveit.payment.model.{ChargeAccount, PayoutAccount, StripeChargeAccount, StripeCustomerToken, StripePayoutAccount}
 import com.clemble.loveit.payment.service.repository.PaymentAccountRepository
 import com.google.common.collect.ImmutableMap
 import com.stripe.Stripe
 import com.stripe.model.Card
+import play.api.libs.json.Json
+import play.api.libs.ws.WSClient
+import play.api.mvc.Results
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +41,7 @@ case class SimplePaymentAccountService @Inject()(repo: PaymentAccountRepository,
 
   override def updateChargeAccount(user: UserID, token: StripeCustomerToken): Future[ChargeAccount] = {
     for {
-      chAcc <- chAccService.process(token)
+      chAcc <- chAccService.processChargeToken(token)
       updated <- repo.setChargeAccount(user, chAcc)
     } yield {
       if (!updated) throw PaymentException.failedToLinkChargeAccount(user)
@@ -51,7 +54,13 @@ case class SimplePaymentAccountService @Inject()(repo: PaymentAccountRepository,
   }
 
   override def updatePayoutAccount(user: UserID, token: String): Future[PayoutAccount] = {
-    ???
+    for {
+      ptAcc <- chAccService.processPayoutToken(token)
+      updated <- repo.setPayoutAccount(user, ptAcc)
+    } yield {
+      if (!updated) throw PaymentException.failedToLinkChargeAccount(user)
+      ptAcc
+    }
   }
 
 }
@@ -65,7 +74,12 @@ sealed trait ChargeAccountConverter {
   /**
     * Process payment request by the user
     */
-  def process(token: String): Future[_ <: ChargeAccount]
+  def processChargeToken(token: String): Future[_ <: ChargeAccount]
+
+  /**
+    * Converts payout token to [[PayoutAccount]]
+    */
+  def processPayoutToken(token: String): Future[_ <: PayoutAccount]
 
 }
 
@@ -74,7 +88,7 @@ sealed trait ChargeAccountConverter {
   * Stripe processing service
   */
 @Singleton
-class StripeChargeAccountConverter(apiKey: String) extends ChargeAccountConverter {
+class StripeChargeAccountConverter(apiKey: String, clientKey: String, wsClient: WSClient, implicit val ec: ExecutionContext) extends ChargeAccountConverter {
   Stripe.apiKey = apiKey
 
   import com.stripe.model.Customer
@@ -89,7 +103,7 @@ class StripeChargeAccountConverter(apiKey: String) extends ChargeAccountConverte
     StripeChargeAccount(customer.getId, brand, last4)
   }
 
-  override def process(token: String): Future[StripeChargeAccount] = {
+  override def processChargeToken(token: String): Future[StripeChargeAccount] = {
     // Step 1. Generating customer params
     val customerParams = ImmutableMap.of[String, Object]("source", token)
     // Step 2. Generating customer
@@ -100,4 +114,25 @@ class StripeChargeAccountConverter(apiKey: String) extends ChargeAccountConverte
     Future.successful(chargeAccount)
   }
 
+  /**
+    * Converts payout token to [[PayoutAccount]]
+    */
+  override def processPayoutToken(token: String): Future[_ <: PayoutAccount] = {
+    // Step 1. Make a request to PayoutToken
+    val fRes = wsClient.url("https://connect.stripe.com/oauth/token").
+      withQueryString(
+        "client_secret" -> apiKey,
+        "grant_type" -> "authorization_code",
+        "client_id" -> clientKey,
+        "code" -> token
+      ).post(Results.EmptyContent())
+    // Step 2. Convert response to PayoutAccount
+    fRes.map(res => {
+      val json = Json.parse(res.body)
+      val accountId = (json \ "stripe_user_id").as[String]
+      val refreshToken = (json \ "refresh_token").as[String]
+      val accessToken = (json \ "access_token").as[String]
+      StripePayoutAccount(accountId, refreshToken, accessToken)
+    })
+  }
 }

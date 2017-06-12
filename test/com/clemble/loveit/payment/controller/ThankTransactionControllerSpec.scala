@@ -25,6 +25,4 @@ class ThankTransactionControllerSpec extends ControllerSpec {
 
   }
 
-
-
 }

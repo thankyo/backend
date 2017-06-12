@@ -32,7 +32,7 @@ package object util {
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
   implicit val userGenerator: Generator[User] = UserGenerator
   implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
-  implicit val payoutGenerator: Generator[EOMPayout] = PayoutGenerator
+  implicit val payoutGenerator: Generator[EOMPayout] = EOMPayoutGenerator
   implicit val eomStatGenerator: Generator[EOMStatistics] = EndOfMonthStatisticsGenerator
   implicit val eomProcGenerator: Generator[EOMStatus] = EOMStatusGenerator
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
@@ -89,7 +89,7 @@ package object util {
     }
   }
 
-  private object PayoutGenerator extends Generator[EOMPayout] {
+  private object EOMPayoutGenerator extends Generator[EOMPayout] {
     override def generate(): EOMPayout = EOMPayout(
       someRandom[UserID],
       someRandom[YearMonth],

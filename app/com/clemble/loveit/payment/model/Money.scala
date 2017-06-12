@@ -10,6 +10,8 @@ case class Money(
                   currency: Currency
                 ) extends Ordered[Money] {
 
+  def this(amount: BigDecimal, currency: String) = this(amount, LoveItCurrency.getInstance(currency))
+
   def isNegative: Boolean = amount < 0
 
   def +(that: Money) = {

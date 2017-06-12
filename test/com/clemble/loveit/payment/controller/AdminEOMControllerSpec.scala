@@ -4,7 +4,7 @@ import java.time.YearMonth
 
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.payment.model.{BankDetails, EOMCharge, EOMStatus, ThankTransaction}
+import com.clemble.loveit.payment.model.{BankDetails, EOMCharge, EOMPayout, EOMStatus, ThankTransaction}
 import com.clemble.loveit.payment.service.{GenericEOMServiceSpec, TestStripeUtils, ThankTransactionService}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
@@ -28,13 +28,19 @@ class AdminEOMControllerSpec extends GenericEOMServiceSpec with ControllerSpec w
   }
 
   override def charges(user: UserID): Seq[EOMCharge] = {
-    val res = perform(admin, FakeRequest(GET, s"/api/v1/payment/charge/my"))
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/charge/my"))
     val charges = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[EOMCharge])
     charges.toSeq()
   }
 
+  override def payouts(user: UserID): Seq[EOMPayout] = {
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/payout/my"))
+    val charges = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[EOMPayout])
+    charges.toSeq()
+  }
+
   override def addBankDetails(user: UserID): BankDetails = {
-    val res = perform(admin, FakeRequest(POST, s"/api/v1/payment/bank/my").withJsonBody(JsString(someValidStripeToken())))
+    val res = perform(user, FakeRequest(POST, s"/api/v1/payment/bank/my").withJsonBody(JsString(someValidStripeToken())))
     res.body.dataStream.readJson[BankDetails].get
   }
 

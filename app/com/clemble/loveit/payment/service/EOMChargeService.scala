@@ -46,7 +46,7 @@ case object StripeEOMChargeService extends EOMChargeService {
 
   private def doCharge(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     val res = Try({
-      chargeStripe(charge.source.asInstanceOf[StripeChargeAccount], charge.amount)
+      chargeStripe(charge.account.asInstanceOf[StripeChargeAccount], charge.amount)
     }) match {
       case Success(charge) =>
         val details = Json.parse(charge.toJson())

@@ -22,18 +22,18 @@ case object StripeEOMPayoutService extends EOMPayoutService[ChargeAccount] {
   /**
     * Transfer specified amount to specified [[ChargeAccount]]
     */
-  private def transferStripe(chAcc: StripeChargeAccount, amount: Money): Transfer = {
+  private def transferStripe(chAcc: StripePayoutAccount, amount: Money): Transfer = {
     val transferParams = Maps.newHashMap[String, Object]()
     val stripeAmount = (amount.amount * 100).toInt
     transferParams.put("amount", stripeAmount.toString)
     transferParams.put("currency", "usd")
-    transferParams.put("destination", chAcc.customer)
+    transferParams.put("destination", chAcc.accountId)
     Transfer.create(transferParams)
   }
 
   private def doProcess(payout: EOMPayout): (PayoutStatus, JsValue) = {
     Try({
-      transferStripe(payout.destination.asInstanceOf[StripeChargeAccount], payout.amount)
+      transferStripe(payout.destination.asInstanceOf[StripePayoutAccount], payout.amount)
     }) match {
       case Success(transfer) =>
         val details = Json.parse(transfer.toJson())

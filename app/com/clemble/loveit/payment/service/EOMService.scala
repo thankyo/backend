@@ -4,10 +4,11 @@ import java.time.YearMonth
 import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.{Sink}
+import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
+import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutAccount, PayoutStatus, UserPayment}
 import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, EOMStatusRepository, UserPaymentRepository}
 import org.joda.time.DateTime
@@ -38,6 +39,7 @@ case class SimpleEOMService @Inject()(
                                        chargeRepo: EOMChargeRepository,
                                        payoutRepo: EOMPayoutRepository,
                                        chargeService: EOMChargeService,
+                                       payoutService: EOMPayoutService,
                                        paymentAccService: PaymentAccountService,
                                        thankService: ThankTransactionService,
                                        paymentRepo: UserPaymentRepository,
@@ -166,7 +168,26 @@ case class SimpleEOMService @Inject()(
   }
 
   private def doApplyPayout(yom: YearMonth): Future[EOMStatistics] = {
-    Future.successful(EOMStatistics())
+    def updateStatistics(stat: EOMStatistics, status: PayoutStatus): EOMStatistics = {
+      status match {
+        case PayoutStatus.Success => stat.incSuccess()
+        case _ => stat.incFailure()
+      }
+    }
+
+    def applyPayout(payout: EOMPayout): Future[PayoutStatus] = {
+      for {
+        (status, details) <- payoutService.process(payout)
+        _ <- payoutRepo.updatePending(payout.user, payout.yom, status, details)
+      } yield {
+        status
+      }
+    }
+
+    payoutRepo.
+      listPending(yom).
+      mapAsync(1)(applyPayout).
+      runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
   }
 
 }

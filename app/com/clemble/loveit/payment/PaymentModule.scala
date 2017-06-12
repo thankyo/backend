@@ -55,7 +55,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
   @Provides
   @Singleton
-  def payoutService(): EOMPayoutService[ChargeAccount] = {
+  def payoutService(): EOMPayoutService = {
     StripeEOMPayoutService
   }
 

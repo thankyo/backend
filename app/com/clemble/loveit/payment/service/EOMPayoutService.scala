@@ -9,7 +9,7 @@ import play.api.libs.json._
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-sealed trait EOMPayoutService[ChargeAccount] {
+sealed trait EOMPayoutService {
 
   def process(payout: EOMPayout): Future[(PayoutStatus, JsValue)]
 
@@ -17,7 +17,7 @@ sealed trait EOMPayoutService[ChargeAccount] {
 
 import com.stripe.model.Transfer
 
-case object StripeEOMPayoutService extends EOMPayoutService[ChargeAccount] {
+case object StripeEOMPayoutService extends EOMPayoutService {
 
   /**
     * Transfer specified amount to specified [[ChargeAccount]]

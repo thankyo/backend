@@ -36,8 +36,8 @@ class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStr
     payoutRepo.findByUser(user).toSeq()
   }
 
-  override def addChargeAccount(user: UserID): ChargeAccount = {
-    await(chAccService.updateChargeAccount(user, someValidStripeToken()))
+  override def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount = {
+    await(chAccService.updateChargeAccount(user, token))
   }
 
   override def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction = {
@@ -52,7 +52,7 @@ class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStr
 
 }
 
-trait GenericEOMServiceSpec extends ThankSpecification {
+trait GenericEOMServiceSpec extends ThankSpecification with TestStripeUtils {
 
   sequential
 
@@ -71,7 +71,7 @@ trait GenericEOMServiceSpec extends ThankSpecification {
   def charges(user: UserID): Seq[EOMCharge]
   def payouts(user: UserID): Seq[EOMPayout]
   def pendingThanks(user: UserID): Seq[ThankTransaction]
-  def addChargeAccount(user: UserID): ChargeAccount
+  def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount
 
   "GENERAL" should {
 

@@ -1,24 +1,24 @@
 package com.clemble.loveit.payment.controller
 
-import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.payment.service.repository.EOMChargeRepository
+import com.clemble.loveit.common.util.AuthEnv
+import com.clemble.loveit.payment.service.repository.{EOMPayoutRepository}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
-case class EOMChargeController @Inject()(
-                                          chargeRepo: EOMChargeRepository,
+case class EOMPayoutController @Inject()(
+                                          payoutRepo: EOMPayoutRepository,
                                           silhouette: Silhouette[AuthEnv],
                                           implicit val ec: ExecutionContext
-) extends Controller {
+                                   ) extends Controller {
 
   def listMy() = silhouette.SecuredAction(req => {
-    val charges = chargeRepo.findByUser(req.identity.id)
-    Ok.chunked(charges)
+    val payouts = payoutRepo.findByUser(req.identity.id)
+    Ok.chunked(payouts)
   })
 
 }

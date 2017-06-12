@@ -3,6 +3,7 @@ package com.clemble.loveit.payment.model
 import java.time.YearMonth
 
 import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -34,5 +35,7 @@ case class EOMPayout(
 object EOMPayout {
 
   implicit val jsonFormat = Json.format[EOMPayout]
+
+  implicit val writeableJson = WriteableUtils.jsonToWriteable[EOMPayout]
 
 }

@@ -25,7 +25,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
     bind[BalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
-    bind[ChargeAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[PaymentAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[MonthlyLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
@@ -34,7 +34,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
     bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
 
-    bind[ChargeAccountService].to[SimpleChargeAccountService].asEagerSingleton()
+    bind[PaymentAccountService].to[SimplePaymentAccountService].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)

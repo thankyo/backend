@@ -38,6 +38,6 @@ object PayoutAccount {
     }
   }
 
-  implicit val chargeAccountWriteable = WriteableUtils.jsonToWriteable[StripePayoutAccount]
+  implicit val chargeAccountWriteable = WriteableUtils.jsonToWriteable[PayoutAccount]
 
 }

@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.controller
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.payment.service.ChargeAccountService
+import com.clemble.loveit.payment.service.PaymentAccountService
 import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller
@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 case class EOMChargeController @Inject()(
                                           chargeRepo: EOMChargeRepository,
-                                          chAccService: ChargeAccountService,
+                                          chAccService: PaymentAccountService,
                                           silhouette: Silhouette[AuthEnv],
                                           implicit val ec: ExecutionContext
 ) extends Controller {

@@ -1,7 +1,7 @@
 package com.clemble.loveit.user.model
 
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.payment.model.{ChargeAccount, Money, ThankTransaction, UserPayment}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, ThankTransaction, UserPayment}
 import com.clemble.loveit.thank.model.{ROVerification, UserResource}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
@@ -40,7 +40,7 @@ case class User(
                  pending: List[ThankTransaction] = List.empty,
                  total: Amount = 0L,
                  chargeAccount: Option[ChargeAccount] = None,
-                 payoutAccount: Option[ChargeAccount] = None,
+                 payoutAccount: Option[PayoutAccount] = None,
                  monthlyLimit: Money = UserPayment.DEFAULT_LIMIT,
                  profiles: Set[LoginInfo] = Set.empty,
                  created: DateTime = DateTime.now()

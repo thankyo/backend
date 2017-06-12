@@ -4,7 +4,7 @@ import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.payment.model.ChargeAccount
-import com.clemble.loveit.payment.service.repository.{BalanceRepository, ChargeAccountRepository}
+import com.clemble.loveit.payment.service.repository.{BalanceRepository, PaymentAccountRepository}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -14,7 +14,7 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  lazy val balanceRepo = dependency[ChargeAccountRepository with BalanceRepository]
+  lazy val balanceRepo = dependency[PaymentAccountRepository with BalanceRepository]
 
   "CREATE" should {
 

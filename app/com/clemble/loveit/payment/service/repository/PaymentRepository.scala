@@ -1,7 +1,7 @@
 package com.clemble.loveit.payment.service.repository
 
 import com.clemble.loveit.common.model.{Amount, UserID}
-import com.clemble.loveit.payment.model.{ChargeAccount, Money}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
 
 import scala.concurrent.Future
 
@@ -21,7 +21,7 @@ trait MonthlyLimitRepository {
 
 }
 
-trait ChargeAccountRepository {
+trait PaymentAccountRepository {
 
   /**
     * Get user bank details
@@ -30,6 +30,7 @@ trait ChargeAccountRepository {
     * @return optional user [[ChargeAccount]]
     */
   def getChargeAccount(user: UserID): Future[Option[ChargeAccount]]
+
 
   /**
     * Set user bank details
@@ -40,6 +41,15 @@ trait ChargeAccountRepository {
     */
   def setChargeAccount(user: UserID, chargeAccount: ChargeAccount): Future[Boolean]
 
+  /**
+    * Retrieve [[PayoutAccount]]
+    */
+  def getPayoutAccount(user: UserID): Future[Option[PayoutAccount]]
+
+  /**
+    * Set [[PayoutAccount]] for the user
+    */
+  def setPayoutAccount(user: UserID, payoutAccount: PayoutAccount): Future[Boolean]
 }
 
 trait BalanceRepository {
@@ -58,5 +68,5 @@ trait BalanceRepository {
 
 }
 
-trait PaymentRepository extends MonthlyLimitRepository with ChargeAccountRepository with BalanceRepository {
+trait PaymentRepository extends MonthlyLimitRepository with PaymentAccountRepository with BalanceRepository {
 }

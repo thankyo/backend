@@ -76,8 +76,8 @@ class SocialAuthController @Inject() (
     (socialProviderRegistry.get[SocialProvider](provider) match {
       case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
         p.authenticate().flatMap {
-          case Left(result) =>
-            Future.successful(result)
+          case Left(redirect) =>
+            Future.successful(redirect)
           case Right(authInfo) => for {
             profile <- p.retrieveProfile(authInfo)
             user <- createOrUpdateUser(profile)

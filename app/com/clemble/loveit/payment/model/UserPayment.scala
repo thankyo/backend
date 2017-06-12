@@ -23,7 +23,7 @@ trait UserPayment {
   /**
     * [[ChargeAccount]] for Payout
     */
-  val payoutAccount: Option[ChargeAccount]
+  val payoutAccount: Option[PayoutAccount]
   /**
     * Monthly transaction limit
     */
@@ -47,7 +47,7 @@ private case class SimpleUserPayment(
                                       id: UserID,
                                       balance: Amount,
                                       chargeAccount: Option[ChargeAccount],
-                                      payoutAccount: Option[ChargeAccount],
+                                      payoutAccount: Option[PayoutAccount],
                                       monthlyLimit: Money,
                                       pending: List[ThankTransaction]
 ) extends UserPayment

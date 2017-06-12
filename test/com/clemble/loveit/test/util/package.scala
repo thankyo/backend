@@ -27,6 +27,7 @@ package object util {
   implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
   implicit val userExceptionGenerator: Generator[UserException] = UserExceptionGenerator
   implicit val chargeAccountGenerator: Generator[ChargeAccount] = ChargeAccountGenerator
+  implicit val payoutAccountGenerator: Generator[PayoutAccount] = PayoutAccountGenerator
   implicit val thankTransactionGenerator: Generator[ThankTransaction] = ThankTransactionGenerator
   implicit val verificationGenerator: Generator[ROVerification[Resource]] = ROVerificationGenerator
   implicit val thankGenerator: Generator[Thank] = ThankGenerator
@@ -93,7 +94,7 @@ package object util {
     override def generate(): EOMPayout = EOMPayout(
       someRandom[UserID],
       someRandom[YearMonth],
-      Some(someRandom[ChargeAccount]),
+      Some(someRandom[PayoutAccount]),
       someRandom[Money],
       PayoutStatus.Pending
     )
@@ -105,6 +106,12 @@ package object util {
         StripeChargeAccount(randomNumeric(10), Some(randomNumeric(4)), Some(randomNumeric(4)))
     }
 
+  }
+
+  private object PayoutAccountGenerator extends Generator[PayoutAccount] {
+    override def generate(): PayoutAccount = {
+      StripePayoutAccount(randomNumeric(10), randomNumeric(4), randomNumeric(4))
+    }
   }
 
   private object CommonSocialProfileGenerator extends Generator[CommonSocialProfile] {

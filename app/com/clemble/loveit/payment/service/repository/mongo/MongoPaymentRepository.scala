@@ -6,7 +6,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.{ChargeAccount, Money}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -64,6 +64,20 @@ case class MongoPaymentRepository @Inject()(
   override def setChargeAccount(user: UserID, chAcc: ChargeAccount): Future[Boolean] = {
     val query = Json.obj("_id" -> user)
     val change = Json.obj("$set" -> Json.obj("chargeAccount" -> chAcc))
+    val update = collection.update(query, change).map(res => res.ok && res.n == 1)
+    MongoSafeUtils.safe(update)
+  }
+
+  override def getPayoutAccount(user: UserID): Future[Option[PayoutAccount]] = {
+    val query = Json.obj("_id" -> user)
+    val projection = Json.obj("payoutAccount" -> 1)
+    val find = collection.find(query, projection).one[JsObject].map(_.flatMap(json => (json \ "payoutAccount").asOpt[PayoutAccount]))
+    MongoSafeUtils.safe(find)
+  }
+
+  override def setPayoutAccount(user: UserID, ptAcc: PayoutAccount): Future[Boolean] = {
+    val query = Json.obj("_id" -> user)
+    val change = Json.obj("$set" -> Json.obj("payoutAccount" -> ptAcc))
     val update = collection.update(query, change).map(res => res.ok && res.n == 1)
     MongoSafeUtils.safe(update)
   }

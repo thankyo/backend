@@ -16,7 +16,7 @@ class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStr
   val service = dependency[EOMService]
   val chargeRepo = dependency[EOMChargeRepository]
   val payoutRepo = dependency[EOMPayoutRepository]
-  val chAccService = dependency[ChargeAccountService]
+  val chAccService = dependency[PaymentAccountService]
   val thankService = dependency[ThankTransactionService]
 
 

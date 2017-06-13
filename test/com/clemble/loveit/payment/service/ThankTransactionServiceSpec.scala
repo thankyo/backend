@@ -1,6 +1,5 @@
 package com.clemble.loveit.payment.service
 
-import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.payment.service.repository.BalanceRepository
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -11,7 +10,7 @@ import org.specs2.runner.JUnitRunner
 import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
-class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
+class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
   val thankTransService = dependency[ThankTransactionService]
   val userRepo = dependency[UserRepository]
@@ -23,10 +22,10 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val giver = createUser()
       val res = someRandom[Resource]
 
-      await(thankTransService.create(giver, "A", res))
-      Try(await(thankTransService.create(giver, "B", res)))
+      thank(giver, "A", res)
+      Try(thank(giver, "B", res))
 
-      val payments = thankTransService.list(giver).toSeq()
+      val payments = pendingThanks(giver)
       payments.size must beEqualTo(1)
 
       val giverBalanceAfter = await(balanceRepo.getBalance(giver))
@@ -37,7 +36,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
       val giver = createUser()
       val owner = createUser()
 
-      await(thankTransService.create(giver, owner, someRandom[Resource]))
+      thank(giver, owner, someRandom[Resource])
       val ownerBalanceAfter = await(balanceRepo.getBalance(owner))
 
       ownerBalanceAfter shouldEqual 1
@@ -46,7 +45,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
     "decrease giver balance" in {
       val giver = createUser()
 
-      await(thankTransService.create(giver, "B", someRandom[Resource]))
+      thank(giver, "B", someRandom[Resource])
       val giverBalanceAfter = await(balanceRepo.getBalance(giver))
 
       giverBalanceAfter shouldEqual -1
@@ -55,9 +54,9 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
     "list all transactions" in {
       val giver = createUser()
 
-      val transactionA = await(thankTransService.create(giver, "A", someRandom[Resource]))
-      val transactionB = await(thankTransService.create(giver, "B", someRandom[Resource]))
-      val payments = thankTransService.list(giver).toSeq()
+      val transactionA = thank(giver, "A", someRandom[Resource])
+      val transactionB = thank(giver, "B", someRandom[Resource])
+      val payments = pendingThanks(giver)
 
       payments must containAllOf(Seq(transactionA, transactionB))
     }
@@ -65,11 +64,11 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec
     "remove transactions" in {
       val giver = createUser()
 
-      val transactionA = await(thankTransService.create(giver, "A", someRandom[Resource]))
-      val transactionB = await(thankTransService.create(giver, "B", someRandom[Resource]))
+      val transactionA = thank(giver, "A", someRandom[Resource])
+      val transactionB = thank(giver, "B", someRandom[Resource])
       await(thankTransService.removeAll(Seq(transactionB)))
 
-      val payments = thankTransService.list(giver).toSeq()
+      val payments = pendingThanks(giver)
 
       payments must containAllOf(Seq(transactionA))
 

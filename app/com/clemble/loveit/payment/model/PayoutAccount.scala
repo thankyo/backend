@@ -7,7 +7,7 @@ import play.api.libs.json._
 /**
   * Simple abstraction over payout account
   */
-trait PayoutAccount
+trait PayoutAccount extends PaymentAccount
 
 /**
   * Stripe account credentials

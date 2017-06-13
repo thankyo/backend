@@ -5,20 +5,16 @@ import java.time.YearMonth
 import com.clemble.loveit.common.{ServiceSpec, ThankSpecification}
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model._
 import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 
 import scala.concurrent.duration._
 
-class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStripeUtils {
+class EOMServiceSpec extends GenericEOMServiceSpec with PaymentServiceTestExecutor {
 
   val service = dependency[EOMService]
-  val chargeRepo = dependency[EOMChargeRepository]
-  val payoutRepo = dependency[EOMPayoutRepository]
-  val chAccService = dependency[PaymentAccountService]
-  val thankService = dependency[ThankTransactionService]
-
 
   override def getStatus(yom: YearMonth) = {
     await(service.getStatus(yom))
@@ -28,37 +24,13 @@ class EOMServiceSpec extends GenericEOMServiceSpec with ServiceSpec with TestStr
     await(service.run(yom))
   }
 
-  override def charges(user: UserID): Seq[EOMCharge] = {
-    chargeRepo.findByUser(user).toSeq()
-  }
-
-  override def payouts(user: UserID): Seq[EOMPayout] = {
-    payoutRepo.findByUser(user).toSeq()
-  }
-
-  override def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount = {
-    await(chAccService.updateChargeAccount(user, token))
-  }
-
-  override def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction = {
-    await(thankService.create(giver, owner, resource))
-  }
-
-  override def pendingThanks(user: UserID): Seq[ThankTransaction] = {
-    thankService.list(user).toSeq()
-  }
-
-
-
 }
 
-trait GenericEOMServiceSpec extends ThankSpecification with TestStripeUtils {
+trait GenericEOMServiceSpec extends ThankSpecification with PaymentTestExecutor {
 
   sequential
 
   def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): UserID
-
-  def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction
 
   def getStatus(yom: YearMonth): Option[EOMStatus]
   def run(yom: YearMonth): EOMStatus
@@ -67,11 +39,6 @@ trait GenericEOMServiceSpec extends ThankSpecification with TestStripeUtils {
     eventually(getStatus(yom).get.finished shouldNotEqual None)
     getStatus(yom).get
   }
-
-  def charges(user: UserID): Seq[EOMCharge]
-  def payouts(user: UserID): Seq[EOMPayout]
-  def pendingThanks(user: UserID): Seq[ThankTransaction]
-  def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount
 
   "GENERAL" should {
 

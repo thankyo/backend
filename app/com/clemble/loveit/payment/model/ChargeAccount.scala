@@ -7,7 +7,7 @@ import play.api.libs.json._
 /**
   * Bank details abstraction
   */
-sealed trait ChargeAccount
+sealed trait ChargeAccount extends PaymentAccount
 
 case class StripeChargeAccount(customer: String, brand: Option[String] = None, last4: Option[String] = None) extends ChargeAccount {
   require(customer != null && customer.length != 0)

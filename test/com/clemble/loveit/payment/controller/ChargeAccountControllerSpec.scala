@@ -1,17 +1,16 @@
 package com.clemble.loveit.payment.controller
 
-class ChargeAccountControllerSpec extends PaymentControllerSpec {
+class ChargeAccountControllerSpec extends PaymentControllerTestExecutor {
 
   "Update ChargeAccount" in {
     val user = createUser()
 
     val chAccBefore = getChargeAccount(user)
-    val updatedChAcc = Some(addChargeAccount(user, someValidStripeToken()))
+    val updatedChAcc = addChargeAccount(user)
 
-    val chAccAfter = getChargeAccount(user)
+    chAccBefore shouldNotEqual Some(updatedChAcc)
 
-    chAccAfter shouldEqual updatedChAcc
-    chAccBefore shouldNotEqual chAccAfter
+    eventually(getChargeAccount(user) shouldEqual Some(updatedChAcc))
   }
 
 }

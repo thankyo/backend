@@ -1,4 +1,4 @@
-package com.clemble.loveit.payment.service
+package com.clemble.loveit.payment
 
 import com.clemble.loveit.payment.model.StripeCustomerToken
 

@@ -4,7 +4,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ThankTransactionControllerSpec extends PaymentControllerSpec {
+class ThankTransactionControllerSpec extends PaymentControllerTestExecutor {
 
   "GET" should {
 

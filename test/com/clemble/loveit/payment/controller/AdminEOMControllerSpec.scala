@@ -5,11 +5,11 @@ import java.time.YearMonth
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, EOMStatus, ThankTransaction}
-import com.clemble.loveit.payment.service.{GenericEOMServiceSpec, TestStripeUtils, ThankTransactionService}
+import com.clemble.loveit.payment.service.{GenericEOMServiceSpec, ThankTransactionService}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 
-class AdminEOMControllerSpec extends GenericEOMServiceSpec with PaymentControllerSpec {
+class AdminEOMControllerSpec extends GenericEOMServiceSpec with PaymentControllerTestExecutor {
 
   val admin = createUser()
 

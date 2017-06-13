@@ -1,6 +1,7 @@
 package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.ServiceSpec
+import com.clemble.loveit.payment.TestStripeUtils
 import com.clemble.loveit.payment.model.StripeChargeAccount
 
 import scala.util.Try

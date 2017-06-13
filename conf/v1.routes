@@ -6,8 +6,8 @@ GET         /user/profile/my                 @com.clemble.loveit.user.controller
 
 GET         /user/admin/count                @com.clemble.loveit.user.controller.AdminUserController.count()
 
-POST        /subscribe/creator               @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
-POST        /subscribe/contributor           @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
+POST        /user/subscribe/creator          @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
+POST        /user/subscribe/contributor      @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
 
 # Thank related ENDPOINTS
 

@@ -50,7 +50,7 @@ javaOptions in Test ++= Seq("-Dconfig.resource=application.test.conf")
 
 version in Docker := "latest"
 maintainer in Docker := "antono@clemble.com"
-dockerBaseImage := "openjdk:8u131-jre-alpine"
+dockerBaseImage := "openjdk:8u131-jre"
 dockerRepository := Some("mavarazy")
 dockerExposedPorts := Seq(9000, 9443)
 

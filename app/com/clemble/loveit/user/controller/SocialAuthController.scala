@@ -73,19 +73,24 @@ class SocialAuthController @Inject() (
       }
     }
 
+    def processProviderResponse(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A): Future[Result] = {
+      for {
+        profile <- p.retrieveProfile(authInfo)
+        user <- createOrUpdateUser(profile)
+        result <- createAuthResult(user, profile, authInfo)
+      } yield {
+        silhouette.env.eventBus.publish(LoginEvent(user, req))
+        result
+      }
+    }
+
     (socialProviderRegistry.get[SocialProvider](provider) match {
       case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
         p.authenticate().flatMap {
           case Left(redirect) =>
             Future.successful(redirect)
-          case Right(authInfo) => for {
-            profile <- p.retrieveProfile(authInfo)
-            user <- createOrUpdateUser(profile)
-            result <- createAuthResult(user, profile, authInfo)
-          } yield {
-            silhouette.env.eventBus.publish(LoginEvent(user, req))
-            result
-          }
+          case Right(authInfo) =>
+            processProviderResponse(p)(authInfo)
         }
       case _ => {
         Future.failed(new ProviderException(s"Cannot authenticate with unexpected social provider $provider"))

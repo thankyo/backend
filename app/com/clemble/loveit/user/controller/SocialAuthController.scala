@@ -11,7 +11,7 @@ import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -67,7 +67,7 @@ class SocialAuthController @Inject() (
         authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
         authenticatorWithClaim = authenticator.copy(customClaims = userDetails)
         value <- silhouette.env.authenticatorService.init(authenticatorWithClaim)
-        result <- silhouette.env.authenticatorService.embed(value, Ok(value))
+        result <- silhouette.env.authenticatorService.embed(value, Ok(JsString(value)))
       } yield {
         CookieUtils.setUser(result, user.id)
       }

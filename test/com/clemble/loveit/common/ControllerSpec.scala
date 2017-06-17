@@ -87,7 +87,7 @@ object ControllerSpec {
   var userToAuth: ConcurrentHashMap[UserID, Seq[(String, String)]] = new ConcurrentHashMap[String, Seq[(String, String)]]
 
   def setUser(res: Result)(implicit m: Materializer): String = {
-    val bodyStr = Await.result(res.body.consumeData, 30 second).utf8String
+    val bodyStr = Json.parse(Await.result(res.body.consumeData, 30 second).utf8String).as[String]
     val jsonStr = JWSObject.parse(bodyStr).getPayload.toString
     val user = (Json.parse(jsonStr) \ "id").as[String]
 

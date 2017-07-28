@@ -9,6 +9,8 @@ GET         /user/admin/count                @com.clemble.loveit.user.controller
 POST        /user/subscribe/creator          @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
 POST        /user/subscribe/contributor      @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
 
+POST        /user/invite                     @com.clemble.loveit.user.controller.InvitationController.invite()
+
 # Thank related ENDPOINTS
 
 GET         /thank/resource/my               @com.clemble.loveit.thank.controller.UserResourceController.getMy()

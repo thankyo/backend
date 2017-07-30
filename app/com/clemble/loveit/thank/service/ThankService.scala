@@ -3,10 +3,10 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.service.ThankTransactionService
 import com.clemble.loveit.thank.model.Thank
-import com.clemble.loveit.thank.service.repository.ThankRepository
+import com.clemble.loveit.thank.service.repository.{ThankRepository, UserStatRepo}
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.error.{ResourceException}
+import com.clemble.loveit.common.error.ResourceException
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,6 +24,7 @@ trait ThankService {
 case class SimpleThankService @Inject()(
                                          transactionService: ThankTransactionService,
                                          thankRepo: ThankRepository,
+                                         userStatRepo: UserStatRepo,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
 
@@ -71,6 +72,7 @@ case class SimpleThankService @Inject()(
       thank <- fThank // Ensure Thank exists
       _ <- fTransaction
     } yield {
+      userStatRepo.record(thank)
       thank
     }
   }

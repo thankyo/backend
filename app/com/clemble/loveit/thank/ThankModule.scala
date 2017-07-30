@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank
 
-import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, ResourceRepository, ThankRepository, UserResourceRepository}
-import com.clemble.loveit.thank.service.repository.mongo.{MongoROVerificationRepository, MongoResourceRepository, MongoThankRepository, MongoUserResourceRepository}
+import com.clemble.loveit.thank.service.repository._
+import com.clemble.loveit.thank.service.repository.mongo._
 import com.clemble.loveit.thank.service._
 import com.google.inject.Provides
 import javax.inject.{Inject, Named, Singleton}
@@ -12,7 +12,8 @@ import net.codingwell.scalaguice.ScalaModule
 import play.api.{Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
-import scala.concurrent.{ExecutionContext}
+
+import scala.concurrent.ExecutionContext
 
 class ThankModule @Inject()(env: Environment, conf: Configuration) extends ScalaModule {
 
@@ -21,9 +22,10 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[ThankRepository]).to(classOf[MongoThankRepository])
 
     bind(classOf[ResourceRepository]).to(classOf[MongoResourceRepository]).asEagerSingleton()
-    bind(classOf[ResourceOwnershipService]).to(classOf[SimpleResourceOwnershipService])
+    bind(classOf[ROService]).to(classOf[SimpleResourceOwnershipService])
 
     bind(classOf[UserResourceRepository]).to(classOf[MongoUserResourceRepository])
+    bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
 
     ownershipVerification()
   }
@@ -46,6 +48,13 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Named("thank")
   def thankMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("thank", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
+  @Named("stat")
+  def statMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("stat", mongoApi, ec, env)
   }
 
 }

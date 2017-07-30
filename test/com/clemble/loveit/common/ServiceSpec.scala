@@ -1,7 +1,7 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.service.ResourceOwnershipService
+import com.clemble.loveit.thank.service.ROService
 import com.clemble.loveit.user.controller.SocialAuthController
 import com.clemble.loveit.user.model.UserIdentity
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -13,7 +13,7 @@ trait ServiceSpec extends ThankSpecification {
   lazy val authController = dependency[SocialAuthController]
   lazy val userRep = dependency[UserRepository]
 
-  lazy val resService = dependency[ResourceOwnershipService]
+  lazy val resService = dependency[ROService]
 
   def someUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): UserIdentity = {
     await(authController.createOrUpdateUser(socialProfile)(FakeRequest()))

@@ -2,7 +2,7 @@ package com.clemble.loveit.user
 
 import com.clemble.loveit.user.service._
 import com.clemble.loveit.user.service.repository._
-import com.clemble.loveit.user.service.repository.mongo.MongoUserRepository
+import com.clemble.loveit.user.service.repository.mongo.{MongoInvitationRepository, MongoUserRepository}
 import javax.inject.{Named, Singleton}
 
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
@@ -14,7 +14,7 @@ import play.api.{Configuration, Environment, Mode}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 
 /**
   * Module with all service dependencies
@@ -26,6 +26,9 @@ class UserModule(env: Environment, conf: Configuration) extends ScalaModule {
 
     bind(classOf[UserService]).to(classOf[SimpleUserService])
     bind(classOf[UserRepository]).to(classOf[MongoUserRepository])
+
+    bind(classOf[InvitationRepository]).to(classOf[MongoInvitationRepository])
+    bind(classOf[InvitationService]).to(classOf[SimpleInvitationService])
   }
 
   @Provides
@@ -34,6 +37,14 @@ class UserModule(env: Environment, conf: Configuration) extends ScalaModule {
   def userMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("user", mongoApi, ec, env)
   }
+
+  @Provides
+  @Named("invitation")
+  @Singleton
+  def inviteMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("invitation", mongoApi, ec, env)
+  }
+
 
   @Provides
   @Singleton

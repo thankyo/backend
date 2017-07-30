@@ -83,10 +83,6 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
   "INCREASE" should {
 
-    def increaseAll(resources: List[Resource]): Future[Boolean] = {
-      Future.sequence(resources.map(repo.increase("some", _))).map(_.forall(_ == true))
-    }
-
     "increase only the nodes" in {
       val thank = someRandom[Thank].copy(given = 0)
       createParentThank(thank)

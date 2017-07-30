@@ -9,7 +9,7 @@ import com.clemble.loveit.thank.service.repository.{ResourceRepository, ThankRep
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ResourceOwnershipService {
+trait ROService {
 
   def list(user: UserID): Future[Set[Resource]]
 
@@ -18,7 +18,7 @@ trait ResourceOwnershipService {
 }
 
 @Singleton
-case class SimpleResourceOwnershipService @Inject() (userRepo: ResourceRepository, thankRepo: ThankRepository, implicit val ec: ExecutionContext) extends ResourceOwnershipService {
+case class SimpleResourceOwnershipService @Inject() (userRepo: ResourceRepository, thankRepo: ThankRepository, implicit val ec: ExecutionContext) extends ROService {
 
   override def list(user: UserID): Future[Set[Resource]] = {
     userRepo.listOwned(user)

@@ -10,9 +10,9 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ResourceOwnershipServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
+class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
-  lazy val service = dependency[ResourceOwnershipService]
+  lazy val service = dependency[ROService]
 
   def listResources(user: String): Set[Resource] = {
     await(service.list(user))

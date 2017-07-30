@@ -29,7 +29,7 @@ case class SimpleROVerificationService @Inject()(
                                                   generator: ROVerificationGenerator,
                                                   repo: ROVerificationRepository,
                                                   resRepo: ResourceRepository,
-                                                  resOwnService: ResourceOwnershipService,
+                                                  resOwnService: ROService,
                                                   confirmationService: ROVerificationConfirmationService[Resource],
                                                   implicit val ec: ExecutionContext
                                                 ) extends ROVerificationService {

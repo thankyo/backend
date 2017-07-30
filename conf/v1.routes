@@ -4,14 +4,16 @@ GET         /auth/authenticate/:provider     @com.clemble.loveit.user.controller
 
 GET         /user/profile/my                 @com.clemble.loveit.user.controller.UserController.getMy()
 
-GET         /user/admin/count                @com.clemble.loveit.user.controller.AdminUserController.count()
-
 POST        /user/subscribe/creator          @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
 POST        /user/subscribe/contributor      @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
 
 POST        /user/invite                     @com.clemble.loveit.user.controller.InvitationController.invite()
 
+GET         /user/stat/count                 @com.clemble.loveit.user.controller.AdminUserController.count()
+
 # Thank related ENDPOINTS
+
+GET         /thank/stat/my/:year/:month      @com.clemble.loveit.thank.controller.UserStatController.getMy(year: Int, month: Int)
 
 GET         /thank/resource/my               @com.clemble.loveit.thank.controller.UserResourceController.getMy()
 

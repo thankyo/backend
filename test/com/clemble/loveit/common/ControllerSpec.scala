@@ -7,7 +7,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.thank.service.ResourceOwnershipService
+import com.clemble.loveit.thank.service.ROService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -26,7 +26,7 @@ trait ControllerSpec extends ThankSpecification {
   implicit val ec = dependency[ExecutionContext]
 
   val userRep = dependency[UserRepository]
-  val ownershipService = dependency[ResourceOwnershipService]
+  val ownershipService = dependency[ROService]
 
   implicit class ByteSourceReader(source: Source[ByteString, _]) {
     def read(): String = await(source.runWith(Sink.fold("")((agg, s) => agg.concat(s.utf8String))))

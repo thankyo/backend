@@ -11,7 +11,7 @@ class AdminUserControllerSpec extends ControllerSpec {
   val admin = createUser()
 
   def count() = {
-    val res = perform(admin, FakeRequest(GET, "/api/v1/user/admin/count"))
+    val res = perform(admin, FakeRequest(GET, "/api/v1/user/stat/count"))
     res.body.dataStream.readJson[Int]().get
   }
 

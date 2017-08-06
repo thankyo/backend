@@ -29,6 +29,8 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
   "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
 
+  "io.sentry" % "sentry-logback" % "1.4.0",
+
   "com.stripe" % "stripe-java" % "5.1.0",
 
   "com.atlassian.jwt" % "jwt-core" % "1.6.2",

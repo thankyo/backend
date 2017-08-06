@@ -23,7 +23,7 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
         map(identity => Future.successful(identity)).
         getOrElse(userRepo.save(User from profile).map(_.toIdentity()))
     } yield {
-      if (existingUserOpt.isEmpty) {
+      if (existingUserOpt.isDefined) {
         Left(user)
       } else {
         Right(user)

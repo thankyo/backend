@@ -43,7 +43,7 @@
   <root level="WARN">
     <appender-ref ref="ASYNCFILE" />
     <appender-ref ref="ASYNCSTDOUT" />
-    <appender-ref ref="SENTRY" />
+    <!--<appender-ref ref="SENTRY" />-->
   </root>
 
 </configuration>

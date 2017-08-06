@@ -95,9 +95,10 @@ case class SimpleDevUserDataService @Inject()(
     val resources = for {
       (creator, resource) <- creatorToRes
     } yield {
-      roService.assignOwnership(creator.id, resource)
+      roService.assignOwnership(creator.id, resource).
+        map(res => (1 to 200).map(i => HttpResource(s"${res.uri}/comics/${i}")))
     }
-    Future.sequence(resources).map(_.toList)
+    Future.sequence(resources).map(_.flatten.toList)
   }
 
 }

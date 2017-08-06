@@ -24,6 +24,9 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[ResourceRepository]).to(classOf[MongoResourceRepository]).asEagerSingleton()
     bind(classOf[ROService]).to(classOf[SimpleResourceOwnershipService])
 
+    bind(classOf[UserSupportedProjectsService]).to(classOf[SimpleUserSupportedProjectsService])
+    bind(classOf[UserSupportedProjectsRepo]).to(classOf[MongoUserSupportedProjectsRepo])
+
     bind(classOf[UserResourceRepository]).to(classOf[MongoUserResourceRepository])
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
 

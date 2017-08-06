@@ -102,6 +102,7 @@ object MongoUserRepository {
     removeSocialResources(collection)
     addPending(collection)
     removeEmptyChargeAccount(collection)
+    addSupported(collection)
   }
 
   private def addTotalField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
@@ -167,6 +168,14 @@ object MongoUserRepository {
       )
     )
     val update = Json.obj("$unset" -> Json.obj("bankDetails" -> "", "chargeAccount" -> ""))
+    collection.update(selector, update, multi = true).map(res => if (!res.ok) System.exit(4))
+  }
+
+  private def addSupported(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
+    val selector = Json.obj(
+      "supported" -> Json.obj("$exists" -> false)
+    )
+    val update = Json.obj("$set" -> Json.obj("supported" -> List.empty[JsObject]))
     collection.update(selector, update, multi = true).map(res => if (!res.ok) System.exit(4))
   }
 

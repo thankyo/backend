@@ -25,6 +25,7 @@ case class SimpleThankService @Inject()(
                                          transactionService: ThankTransactionService,
                                          thankRepo: ThankRepository,
                                          userStatRepo: UserStatRepo,
+                                         supportedProjectsService: UserSupportedProjectsService,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
 
@@ -64,6 +65,7 @@ case class SimpleThankService @Inject()(
     val fTransaction = fThank.
       filter(t => !t.thankedBy(giver)).
       flatMap(t => {
+        supportedProjectsService.markSupported(giver, t.owner)
         thankRepo.increase(giver, t.resource).
           filter(_ == true).
           flatMap(_ => transactionService.create(giver, t.owner, t.resource))

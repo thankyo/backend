@@ -12,7 +12,10 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MongoUserStatRepo @Inject()(@Named("stat") collection: JSONCollection, implicit val ec: ExecutionContext) extends UserStatRepo {
+class MongoUserStatRepo @Inject()(
+                                   @Named("stat") collection: JSONCollection,
+                                   implicit val ec: ExecutionContext
+) extends UserStatRepo {
 
   private def toStr(yearMonth: YearMonth) = {
     val yearMonth = YearMonth.now()

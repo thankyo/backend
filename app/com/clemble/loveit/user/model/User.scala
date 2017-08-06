@@ -39,6 +39,7 @@ case class User(
                  balance: Amount = 0L,
                  pending: List[ThankTransaction] = List.empty,
                  total: Amount = 0L,
+                 supported: List[UserIdentity] = List.empty,
                  chargeAccount: Option[ChargeAccount] = None,
                  payoutAccount: Option[PayoutAccount] = None,
                  monthlyLimit: Money = UserPayment.DEFAULT_LIMIT,

@@ -4,8 +4,8 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.user.model.{User, UserIdentity}
-import com.clemble.loveit.user.service.repository.UserRepository
+import com.clemble.loveit.user.model.{UserIdentity}
+import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
@@ -21,7 +21,6 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @param messagesApi The Play messages API.
   * @param silhouette The Silhouette stack.
-  * @param userRepo The user service implementation.
   * @param authInfoRepository The auth info service implementation.
   * @param socialProviderRegistry The social provider registry.
   */
@@ -29,28 +28,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class SocialAuthController @Inject() (
                                        val messagesApi: MessagesApi,
                                        silhouette: Silhouette[AuthEnv],
-                                       userRepo: UserRepository,
+                                       userService: UserService,
                                        authInfoRepository: AuthInfoRepository,
                                        socialProviderRegistry: SocialProviderRegistry,
                                        implicit val ec: ExecutionContext
 ) extends Controller with I18nSupport with Logger {
-
-  def createOrUpdateUser(profile: CommonSocialProfile)(implicit header: RequestHeader): Future[UserIdentity] = {
-    for {
-      existingUserOpt <- userRepo.retrieve(profile.loginInfo)
-      user <- existingUserOpt.
-        map(identity => Future.successful(identity)).
-        getOrElse(userRepo.save(User from profile).map(_.toIdentity()))
-    } yield {
-      if (existingUserOpt.isEmpty) {
-        silhouette.env.eventBus.publish(SignUpEvent(user, header))
-      } else {
-        silhouette.env.eventBus.publish(LoginEvent(user, header))
-      }
-      logger.debug(s"${if (existingUserOpt.isDefined) "NEW user created" else "Using existing user"}")
-      user
-    }
-  }
 
   /**
     * Authenticates a user against a social provider.
@@ -76,9 +58,16 @@ class SocialAuthController @Inject() (
     def processProviderResponse(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A): Future[Result] = {
       for {
         profile <- p.retrieveProfile(authInfo)
-        user <- createOrUpdateUser(profile)
+        eitherUser <- userService.createOrUpdateUser(profile)
+        user = eitherUser match {
+          case Left(user) => user
+          case Right(user) => user
+        }
         result <- createAuthResult(user, profile, authInfo)
       } yield {
+        if (eitherUser.isRight) {
+          silhouette.env.eventBus.publish(SignUpEvent(user, req))
+        }
         silhouette.env.eventBus.publish(LoginEvent(user, req))
         result
       }

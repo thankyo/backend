@@ -1,15 +1,19 @@
 package com.clemble.loveit.user.service
 
 import com.clemble.loveit.user.model._
-import com.clemble.loveit.common.error.UserException
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
-import com.clemble.loveit.payment.model.ChargeAccount
-import com.clemble.loveit.thank.service.ROService
+import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 
+import com.clemble.loveit.common.model.{UserID}
 import scala.concurrent.Future
 
 trait UserService {
 
   def findById(userId: UserID): Future[Option[User]]
+
+  /**
+    *
+    * @param profile Either Left if user already existed or Right if it's a new user
+    */
+  def createOrUpdateUser(profile: CommonSocialProfile): Future[Either[UserIdentity, UserIdentity]]
 
 }

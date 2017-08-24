@@ -75,9 +75,13 @@ trait ControllerSpec extends ThankSpecification {
     val fRes = route(application, req).get
 
     val res = await(fRes)
-    val respSource = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[ThankTransaction])
-    val payments = respSource.toSeq()
-    payments
+    val payments = res.body.consumeData(materializer).
+      map(byteStream => byteStream.utf8String).
+      map(str => {
+        Json.parse(str).as[List[ThankTransaction]]
+      })
+
+    await(payments)
   }
 
 }

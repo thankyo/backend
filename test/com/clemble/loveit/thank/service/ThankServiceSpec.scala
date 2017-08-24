@@ -17,6 +17,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   val thankService = dependency[ThankService]
   val thankRepo = dependency[ThankRepository]
+  val supportedProjectService = dependency[UserSupportedProjectsService]
   val userRepo = dependency[UserRepository]
 
   def createScene():(Resource, User, User) = {
@@ -26,12 +27,15 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
     await(thankRepo.updateOwner(owner.id, url))
     val giver = await(userRepo.save(someRandom[User]))
 
-
     (url, owner, giver)
   }
 
   def thank(user: UserID, url: Resource) = {
     await(thankService.thank(user, url))
+  }
+
+  def getSupported(user: UserID) = {
+    await(supportedProjectService.getSupported(user));
   }
 
   def getBalance(user: String): Amount = {
@@ -63,7 +67,6 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       await(thankService.thank(giver.id, res))
       await(thankService.hasThanked(giver.id, res)) shouldEqual true
     }
-
 
   }
 
@@ -103,6 +106,22 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       // Balance did not change
       eventually(getBalance(owner.id) shouldEqual owner.balance + 1)
       eventually(getBalance(giver.id) shouldEqual giver.balance - 1)
+    }
+
+  }
+
+  "Supported projects " should {
+
+    "be initialized on Thank" in {
+      val (url, owner, giver) = createScene()
+
+      getSupported(giver.id) shouldEqual Nil
+      getSupported(owner.id) shouldEqual Nil
+
+      thank(giver.id, url)
+
+      getSupported(owner.id) shouldEqual Nil
+      eventually(getSupported(giver.id) shouldEqual List(owner.toIdentity()))
     }
 
   }

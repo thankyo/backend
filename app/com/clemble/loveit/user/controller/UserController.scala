@@ -1,8 +1,11 @@
 package com.clemble.loveit.user.controller
 
 import com.clemble.loveit.user.service.UserService
-import com.clemble.loveit.common.util.{AuthEnv}
+import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
+
+import com.clemble.loveit.common.controller.ControllerUtils._
+import com.clemble.loveit.common.model.UserID
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller
 
@@ -15,9 +18,9 @@ case class UserController @Inject()(
                                      implicit val ec: ExecutionContext
                                    ) extends Controller {
 
-  def getMy() = silhouette.SecuredAction.async(implicit req => {
+  def get(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     import com.clemble.loveit.user.model.User.userWriteable
-    val realId = req.identity.id
+    val realId = idOrMe(user)
     val fUserOpt = userService.findById(realId)
     fUserOpt.map(userOpt => Ok(userOpt.get))
   })

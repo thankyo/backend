@@ -1,46 +1,45 @@
 # Test Endpoint for creating users, this won't work in production
-POST        /auth/authenticate/test          @com.clemble.loveit.user.controller.SocialAuthController.authenticate(`provider` = "test")
-GET         /auth/authenticate/:provider     @com.clemble.loveit.user.controller.SocialAuthController.authenticate(provider)
+POST        /auth/authenticate/test                  @com.clemble.loveit.user.controller.SocialAuthController.authenticate(`provider` = "test")
+GET         /auth/authenticate/:provider             @com.clemble.loveit.user.controller.SocialAuthController.authenticate(provider)
 
-GET         /user/profile/my                 @com.clemble.loveit.user.controller.UserController.getMy()
+GET         /user/profile/:user                      @com.clemble.loveit.user.controller.UserController.get(user)
 
-POST        /user/subscribe/creator          @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
-POST        /user/subscribe/contributor      @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
+POST        /user/subscribe/creator                  @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
+POST        /user/subscribe/contributor              @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
 
-POST        /user/invite                     @com.clemble.loveit.user.controller.InvitationController.invite()
+POST        /user/invite                             @com.clemble.loveit.user.controller.InvitationController.invite()
 
-GET         /user/stat/count                 @com.clemble.loveit.user.controller.AdminUserController.count()
+GET         /user/stat/count                         @com.clemble.loveit.user.controller.AdminUserController.count()
 
 # Thank related ENDPOINTS
 
-GET         /thank/stat/my/:year/:month      @com.clemble.loveit.thank.controller.UserStatController.getMy(year: Int, month: Int)
+GET         /thank/stat/:supporter/:year/:month      @com.clemble.loveit.thank.controller.UserStatController.get(supporter, year: Int, month: Int)
 
-GET         /thank/resource/my               @com.clemble.loveit.thank.controller.UserResourceController.getMy()
+GET         /thank/resource/:owner                   @com.clemble.loveit.thank.controller.UserResourceController.get(owner)
 
-POST        /thank/resource/my/verification  @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
-PUT         /thank/resource/my/verification  @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()
-DELETE      /thank/resource/my/verification  @com.clemble.loveit.thank.controller.ROVerificationController.removeMy()
+POST        /thank/resource/my/verification          @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
+PUT         /thank/resource/my/verification          @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()
+DELETE      /thank/resource/my/verification          @com.clemble.loveit.thank.controller.ROVerificationController.removeMy()
 
-GET         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.get(url: com.clemble.loveit.common.model.Resource)
-PUT         /thank/http/*url                 @com.clemble.loveit.thank.controller.ThankController.thank(url: com.clemble.loveit.common.model.Resource)
+GET         /thank/http/*url                         @com.clemble.loveit.thank.controller.ThankController.get(url: com.clemble.loveit.common.model.Resource)
+PUT         /thank/http/*url                         @com.clemble.loveit.thank.controller.ThankController.thank(url: com.clemble.loveit.common.model.Resource)
 
-GET         /thank/supported/my              @com.clemble.loveit.thank.controller.UserSupportedProjectController.getMySupported()
-GET         /thank/supported/:supporter      @com.clemble.loveit.thank.controller.UserSupportedProjectController.getSupported(supporter)
+GET         /thank/supported/:supporter              @com.clemble.loveit.thank.controller.UserSupportedProjectController.getSupported(supporter)
 
 # Payment related ENDPOINTS
 
-GET         /payment/pending/my              @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
-GET         /payment/charge/my               @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
-GET         /payment/charge/my/account       @com.clemble.loveit.payment.controller.EOMChargeController.getMyAccount()
-POST        /payment/charge/my/account       @com.clemble.loveit.payment.controller.EOMChargeController.setMyAccount()
+GET         /payment/pending/my                      @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
+GET         /payment/charge/my                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
+GET         /payment/charge/my/account               @com.clemble.loveit.payment.controller.EOMChargeController.getMyAccount()
+POST        /payment/charge/my/account               @com.clemble.loveit.payment.controller.EOMChargeController.setMyAccount()
 
-GET         /payment/payout/my               @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
-GET         /payment/payout/my/account       @com.clemble.loveit.payment.controller.EOMPayoutController.connectMyAccount()
+GET         /payment/payout/my                       @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
+GET         /payment/payout/my/account               @com.clemble.loveit.payment.controller.EOMPayoutController.connectMyAccount()
 
-GET         /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.getMonthlyLimit()
-POST        /payment/limit/month/my          @com.clemble.loveit.payment.controller.MonthlyLimitController.setMonthlyLimit()
+GET         /payment/limit/month/my                  @com.clemble.loveit.payment.controller.MonthlyLimitController.getMonthlyLimit()
+POST        /payment/limit/month/my                  @com.clemble.loveit.payment.controller.MonthlyLimitController.setMonthlyLimit()
 
-GET         /payment/admin/eom/*yom           @com.clemble.loveit.payment.controller.AdminEOMController.getStatus(yom: java.time.YearMonth)
-POST        /payment/admin/eom/*yom           @com.clemble.loveit.payment.controller.AdminEOMController.run(yom: java.time.YearMonth)
+GET         /payment/admin/eom/*yom                  @com.clemble.loveit.payment.controller.AdminEOMController.getStatus(yom: java.time.YearMonth)
+POST        /payment/admin/eom/*yom                  @com.clemble.loveit.payment.controller.AdminEOMController.run(yom: java.time.YearMonth)
 
 

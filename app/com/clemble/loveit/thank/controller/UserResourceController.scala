@@ -2,6 +2,8 @@ package com.clemble.loveit.thank.controller
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.controller.ControllerUtils._
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.service.repository.UserResourceRepository
 import com.mohiva.play.silhouette.api.Silhouette
@@ -16,8 +18,9 @@ case class UserResourceController @Inject()(
                                              implicit val ec: ExecutionContext
                                            ) extends Controller {
 
-  def getMy() = silhouette.SecuredAction.async(implicit req => {
-    val fUserResource = repo.find(req.identity.id)
+  def get(owner: UserID) = silhouette.SecuredAction.async(implicit req => {
+    val id = idOrMe(owner)
+    val fUserResource = repo.find(id)
     fUserResource.map(_ match {
       case Some(res) => Ok(res)
       case None => NotFound

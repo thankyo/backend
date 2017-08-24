@@ -3,6 +3,8 @@ package com.clemble.loveit.thank.controller
 import java.time.YearMonth
 import javax.inject.Inject
 
+import com.clemble.loveit.common.controller.ControllerUtils._
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.service.repository.UserStatRepo
 import com.mohiva.play.silhouette.api.Silhouette
@@ -17,10 +19,10 @@ class UserStatController @Inject()(
                                     implicit val ec: ExecutionContext
                                   ) extends Controller {
 
-  def getMy(year: Int, month: Int) = silhouette.SecuredAction.async(implicit req => {
-    val user = req.identity.id;
+  def get(supporter: UserID, year: Int, month: Int) = silhouette.SecuredAction.async(implicit req => {
+    val user = idOrMe(supporter)
     val yearMonth = YearMonth.of(year, month)
-    statRepo.get(req.identity.id, yearMonth).map(stat => Ok(Json.toJson(stat)))
+    statRepo.get(user, yearMonth).map(stat => Ok(Json.toJson(stat)))
   })
 
 }

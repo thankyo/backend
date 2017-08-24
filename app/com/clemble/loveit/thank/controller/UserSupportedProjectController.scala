@@ -17,6 +17,12 @@ class UserSupportedProjectController @Inject()(
                                                 implicit val ec: ExecutionContext
                                               ) extends Controller {
 
+  def getMySupported() = silhouette.SecuredAction.async(implicit req => {
+    supportedProjectsService.
+      getSupported(req.identity.id).
+      map(projects => Ok(Json.toJson(projects)))
+  })
+
   def getSupported(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {
     supportedProjectsService.
       getSupported(supporter).

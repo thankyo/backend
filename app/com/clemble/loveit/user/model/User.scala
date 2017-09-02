@@ -34,7 +34,7 @@ case class User(
                  verification: Option[ROVerification[Resource]] = None,
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
-                 bio: String = User.DEFAULT_BIO,
+                 bio: Option[String] = None,
                  dateOfBirth: Option[DateTime] = None,
                  balance: Amount = 0L,
                  pending: List[ThankTransaction] = List.empty,
@@ -79,7 +79,6 @@ trait UserAware {
 
 object User {
 
-  val DEFAULT_BIO = "Mysterious Hero ;)"
   val DEFAULT_AMOUNT = 0L
   val DEFAULT_DATE_OF_BIRTH = new DateTime(0)
 

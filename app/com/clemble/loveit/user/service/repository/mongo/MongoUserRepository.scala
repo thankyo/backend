@@ -95,7 +95,6 @@ object MongoUserRepository {
 
   private def ensureUpToDate(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     addTotalField(collection)
-    addBioField(collection)
     addOwnRequests(collection)
     addMonthlyLimit(collection)
     changeOwner(collection)
@@ -113,13 +112,6 @@ object MongoUserRepository {
       collection.update(Json.obj("_id" -> id), Json.obj("$set" -> Json.obj("total" -> balance)))
     }
     MongoSafeUtils.ensureUpdate(collection, selector, update)
-  }
-
-  private def addBioField(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
-    val selector = Json.obj("bio" -> Json.obj("$exists" -> false))
-    val update = Json.obj("$set" -> Json.obj("bio" -> User.DEFAULT_BIO))
-    val fUpdate = collection.update(selector, update, upsert = false, multi = true)
-    fUpdate.foreach(res => if (!res.ok) System.exit(2));
   }
 
   private def addOwnRequests(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {

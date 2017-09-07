@@ -28,7 +28,7 @@ GET         /thank/supported/:supporter              @com.clemble.loveit.thank.c
 
 # Payment related ENDPOINTS
 
-GET         /payment/pending/my                      @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
+GET         /payment/my/pending                      @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
 GET         /payment/charge/my                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 GET         /payment/charge/my/account               @com.clemble.loveit.payment.controller.EOMChargeController.getMyAccount()
 POST        /payment/charge/my/account               @com.clemble.loveit.payment.controller.EOMChargeController.setMyAccount()

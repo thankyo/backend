@@ -71,7 +71,7 @@ trait ControllerSpec extends ThankSpecification {
   }
 
   def getMyPayments(user: String): Seq[ThankTransaction] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/pending/my"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/pending"))
     val fRes = route(application, req).get
 
     val res = await(fRes)

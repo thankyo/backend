@@ -66,7 +66,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def pendingThanks(giver: UserID): Seq[ThankTransaction] = {
-    val res = perform(giver, FakeRequest(GET, s"/api/v1/payment/pending/my"))
+    val res = perform(giver, FakeRequest(GET, s"/api/v1/payment/my/pending"))
     val pending = res.body.consumeData.map(str => Json.parse(str.utf8String).as[List[ThankTransaction]])
     await(pending)
   }

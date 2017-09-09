@@ -3,6 +3,7 @@ package com.clemble.loveit.payment.controller
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.payment.model.ChargeAccount
 import com.clemble.loveit.payment.service.PaymentAccountService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
@@ -21,7 +22,7 @@ case class PaymentAccountController @Inject()(
     val user = req.identity.id
     paymentAccService.getChargeAccount(user).map(_ match {
       case Some(chAcc) => Ok(chAcc)
-      case None => Ok(Json.obj("notConnected" -> true))
+      case None => Ok(ChargeAccount.DEFAULT)
     })
   })
 

@@ -15,6 +15,8 @@ case class StripeChargeAccount(customer: String, brand: Option[String] = None, l
 
 object ChargeAccount {
 
+  val DEFAULT = StripeChargeAccount("undefined", brand = Some("Visa"), last4 = Some("0000"))
+
   /**
     * JSON format for [[StripeChargeAccount]]
     */

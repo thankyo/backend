@@ -13,7 +13,7 @@ import play.api.test.FakeRequest
 class ResourceOwnershipControllerSpec extends ControllerSpec {
 
   def listResources(user: String): UserResource = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/thank/resource/my"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/thank/my/resource"))
     val res = await(route(application, req).get)
 
     val respSource = res.body.consumeData.map(_.utf8String).map(Json.parse(_).as[UserResource])

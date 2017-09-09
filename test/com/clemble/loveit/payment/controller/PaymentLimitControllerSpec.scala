@@ -5,7 +5,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MonthlyLimitControllerSpec extends PaymentControllerTestExecutor {
+class PaymentLimitControllerSpec extends PaymentControllerTestExecutor {
 
   "Update Limit" in {
     val user = createUser()

@@ -5,7 +5,7 @@ import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
 
 import scala.concurrent.Future
 
-trait MonthlyLimitRepository {
+trait PaymentLimitRepository {
 
   /**
     * Get monthly limit
@@ -68,5 +68,5 @@ trait BalanceRepository {
 
 }
 
-trait PaymentRepository extends MonthlyLimitRepository with PaymentAccountRepository with BalanceRepository {
+trait PaymentRepository extends PaymentLimitRepository with PaymentAccountRepository with BalanceRepository {
 }

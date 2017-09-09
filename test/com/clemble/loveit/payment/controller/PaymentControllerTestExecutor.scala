@@ -14,19 +14,19 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   val thankService = dependency[ThankTransactionService]
 
   override def charges(user: UserID): Seq[EOMCharge] = {
-    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/charge/my"))
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge"))
     val charges = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[EOMCharge])
     charges.toSeq()
   }
 
   override def payouts(user: UserID): Seq[EOMPayout] = {
-    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/payout/my"))
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/payout"))
     val charges = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[EOMPayout])
     charges.toSeq()
   }
 
   override def getChargeAccount(user: UserID): Option[ChargeAccount] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/charge/my/account"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/account"))
     val fRes = route(application, req).get
 
     val res = await(fRes)
@@ -37,14 +37,14 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount = {
-    val req = FakeRequest(POST, s"/api/v1/payment/charge/my/account").
+    val req = FakeRequest(POST, s"/api/v1/payment/my/charge/account").
       withJsonBody(JsString(token))
     val res = perform(user, req)
     res.body.dataStream.readJson[ChargeAccount].get
   }
 
   override def getMonthlyLimit(user: UserID): Option[Money] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/limit/month/my"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/limit"))
     val fRes = route(application, req).get
 
     val res = await(fRes)
@@ -55,7 +55,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def setMonthlyLimit(user: UserID, limit: Money): Money = {
-    val req = sign(user, FakeRequest(POST, s"/api/v1/payment/limit/month/my").withJsonBody(Json.toJson(limit)))
+    val req = sign(user, FakeRequest(POST, s"/api/v1/payment/my/limit").withJsonBody(Json.toJson(limit)))
     val res = await(route(application, req).get)
 
     res.body.dataStream.readJson[Money].get

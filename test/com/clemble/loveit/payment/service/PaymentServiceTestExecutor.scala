@@ -4,13 +4,13 @@ import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, Money, StripeCustomerToken, ThankTransaction}
-import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, MonthlyLimitRepository, PaymentRepository}
+import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, PaymentLimitRepository, PaymentRepository}
 
 trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
 
   val accService = dependency[PaymentAccountService]
   val thankService = dependency[ThankTransactionService]
-  val monLimRepo = dependency[MonthlyLimitRepository]
+  val monLimRepo = dependency[PaymentLimitRepository]
   val eomChargeRepo = dependency[EOMChargeRepository]
   val eomPayoutRepo = dependency[EOMPayoutRepository]
 

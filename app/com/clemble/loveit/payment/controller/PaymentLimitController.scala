@@ -4,14 +4,14 @@ import javax.inject.Inject
 
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.model.Money
-import com.clemble.loveit.payment.service.repository.MonthlyLimitRepository
+import com.clemble.loveit.payment.service.repository.PaymentLimitRepository
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
-class MonthlyLimitController @Inject()(
-                                        repo: MonthlyLimitRepository,
+class PaymentLimitController @Inject()(
+                                        repo: PaymentLimitRepository,
                                         silhouette: Silhouette[AuthEnv],
                                         implicit val ec: ExecutionContext
                                       ) extends Controller {

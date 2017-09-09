@@ -4,30 +4,24 @@ import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.payment.service.PaymentAccountService
-import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import com.mohiva.play.silhouette.api.Silhouette
+import play.api.libs.json.Json
 import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
-case class EOMChargeController @Inject()(
-                                          chargeRepo: EOMChargeRepository,
-                                          paymentAccService: PaymentAccountService,
-                                          silhouette: Silhouette[AuthEnv],
-                                          implicit val ec: ExecutionContext
+case class PaymentAccountController @Inject()(
+                                              paymentAccService: PaymentAccountService,
+                                              silhouette: Silhouette[AuthEnv],
+                                              implicit val ec: ExecutionContext
 ) extends Controller {
-
-  def listMy() = silhouette.SecuredAction(req => {
-    val charges = chargeRepo.findByUser(req.identity.id)
-    Ok.chunked(charges)
-  })
 
   def getMyAccount = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id
     paymentAccService.getChargeAccount(user).map(_ match {
       case Some(chAcc) => Ok(chAcc)
-      case None => NotFound
+      case None => Ok(Json.obj("notConnected" -> true))
     })
   })
 

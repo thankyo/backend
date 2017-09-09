@@ -2,6 +2,8 @@ package com.clemble.loveit.payment.controller
 
 import javax.inject.Inject
 
+import com.clemble.loveit.common.controller.ControllerUtils
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.model.Money
 import com.clemble.loveit.payment.service.repository.PaymentLimitRepository
@@ -16,9 +18,9 @@ class PaymentLimitController @Inject()(
                                         implicit val ec: ExecutionContext
                                       ) extends Controller {
 
-  def getMonthlyLimit = silhouette.SecuredAction.async(implicit req => {
-    val user = req.identity.id
-    repo.getMonthlyLimit(user).map(_ match {
+  def getMonthlyLimit(user: UserID) = silhouette.SecuredAction.async(implicit req => {
+    val userID = ControllerUtils.idOrMe(user)
+    repo.getMonthlyLimit(userID).map(_ match {
       case Some(limit) => Ok(limit)
       case None => NotFound
     })

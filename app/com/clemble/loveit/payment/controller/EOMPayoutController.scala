@@ -1,7 +1,5 @@
 package com.clemble.loveit.payment.controller
-
-import java.net.URI
-import javax.inject.{Inject, Named, Singleton}
+import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.model.UserID
@@ -12,7 +10,6 @@ import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import play.api.Configuration
 import play.api.mvc.{Controller, Request, Result}
-import play.utils.UriEncoding
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,7 +49,7 @@ case class EOMPayoutController @Inject()(
         case (Some(token), Some(user)) =>
           paymentAccService.
             updatePayoutAccount(user, token).
-            map(_ => Redirect("/my/integration"))
+            map(_ => Redirect("/creator/my"))
         case _ =>
           Future.successful(BadRequest)
       }
@@ -64,7 +61,7 @@ case class EOMPayoutController @Inject()(
     Ok.chunked(payouts)
   })
 
-  def connectMyAccount = silhouette.UnsecuredAction.async(implicit req => {
+  def connectMyAccount = silhouette.SecuredAction.async(implicit req => {
     val userOpt = CookieUtils.readUser(req)
     if (userOpt.isEmpty) {
       Future.successful(BadRequest("No user exists"))

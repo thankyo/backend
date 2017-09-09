@@ -28,7 +28,7 @@ GET         /thank/supported/:supporter              @com.clemble.loveit.thank.c
 
 # Payment related ENDPOINTS
 
-GET         /payment/my/pending                      @com.clemble.loveit.payment.controller.ThankTransactionController.listMy()
+GET         /payment/:user/pending                   @com.clemble.loveit.payment.controller.ThankTransactionController.list(user)
 GET         /payment/my/charge                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 GET         /payment/my/charge/account               @com.clemble.loveit.payment.controller.EOMChargeController.getMyAccount()
 POST        /payment/my/charge/account               @com.clemble.loveit.payment.controller.EOMChargeController.setMyAccount()
@@ -36,7 +36,7 @@ POST        /payment/my/charge/account               @com.clemble.loveit.payment
 GET         /payment/my/payout                       @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
 GET         /payment/my/payout/account               @com.clemble.loveit.payment.controller.EOMPayoutController.connectMyAccount()
 
-GET         /payment/my/limit                        @com.clemble.loveit.payment.controller.PaymentLimitController.getMonthlyLimit()
+GET         /payment/:user/limit                     @com.clemble.loveit.payment.controller.PaymentLimitController.getMonthlyLimit(user)
 POST        /payment/my/limit                        @com.clemble.loveit.payment.controller.PaymentLimitController.setMonthlyLimit()
 
 GET         /payment/admin/eom/*yom                  @com.clemble.loveit.payment.controller.AdminEOMController.getStatus(yom: java.time.YearMonth)

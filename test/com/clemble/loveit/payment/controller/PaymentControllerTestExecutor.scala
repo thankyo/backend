@@ -26,7 +26,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def getChargeAccount(user: UserID): Option[ChargeAccount] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/account"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/account"))
     val fRes = route(application, req).get
 
     val res = await(fRes)
@@ -37,7 +37,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount = {
-    val req = FakeRequest(POST, s"/api/v1/payment/my/charge/account").
+    val req = FakeRequest(POST, s"/api/v1/payment/my/account").
       withJsonBody(JsString(token))
     val res = perform(user, req)
     res.body.dataStream.readJson[ChargeAccount].get

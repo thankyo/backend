@@ -56,7 +56,8 @@ case class User(
       firstName = firstName.orElse(socialProfile.firstName),
       lastName = lastName.orElse(socialProfile.lastName),
       email = email.orElse(socialProfile.email),
-      thumbnail = thumbnail.orElse(socialProfile.avatarURL),
+      // following #60
+      thumbnail = socialProfile.avatarURL.orElse(thumbnail),
       profiles = profiles + socialProfile.loginInfo
     )
   }

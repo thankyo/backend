@@ -16,17 +16,23 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
     userRepo.findById(id)
   }
 
+  def updateExistingUser(user: User, profile: CommonSocialProfile): Future[User] = {
+    userRepo.save(user.link(profile))
+  }
+
   def createOrUpdateUser(profile: CommonSocialProfile): Future[Either[UserIdentity, UserIdentity]] = {
     for {
       existingUserOpt <- userRepo.retrieve(profile.loginInfo)
-      user <- existingUserOpt.
-        map(identity => Future.successful(identity)).
-        getOrElse(userRepo.save(User from profile).map(_.toIdentity()))
+      user <- existingUserOpt match {
+        case Some(user: User) => userRepo.save(user link profile)
+        case _ => userRepo.save(User from profile)
+      }
     } yield {
+      val identity = user.toIdentity();
       if (existingUserOpt.isDefined) {
-        Left(user)
+        Left(identity)
       } else {
-        Right(user)
+        Right(identity)
       }
     }
   }

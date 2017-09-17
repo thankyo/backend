@@ -29,7 +29,7 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
           // TODO this is not optimal additional call to DB, need to make it better
           userRepo.
             findById(identity.id).
-            flatMap(userOpt => userRepo.save(userOpt.get link profile))
+            flatMap(userOpt => userRepo.update(userOpt.get link profile))
         case _ => userRepo.save(User from profile)
       }
     } yield {

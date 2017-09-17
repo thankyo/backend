@@ -25,6 +25,11 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
       existingUserOpt <- userRepo.retrieve(profile.loginInfo)
       user <- existingUserOpt match {
         case Some(user: User) => userRepo.save(user link profile)
+        case Some(identity) =>
+          // TODO this is not optimal additional call to DB, need to make it better
+          userRepo.
+            findById(identity.id).
+            flatMap(userOpt => userRepo.save(userOpt.get link profile))
         case _ => userRepo.save(User from profile)
       }
     } yield {

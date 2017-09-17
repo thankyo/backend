@@ -1,5 +1,7 @@
 import play.sbt.routes.RoutesKeys
 
+import scala.io.Source
+
 name := "thank-backend"
 
 version := "1.0-SNAPSHOT"
@@ -40,6 +42,26 @@ libraryDependencies ++= Seq(
 )
 
 RoutesKeys.routesImport += "com.clemble.loveit.payment.controller._"
+
+def readProperties(fileName: String): Map[String, String] = {
+  val f = new File(fileName)
+  if (!f.exists()) {
+    return Map.empty[String, String]
+  }
+
+  Source.fromFile(f).
+    getLines().
+    map(_.trim()).
+    filterNot(_.isEmpty).
+    map(line => {
+      val parts = line.split("=")
+      (parts(0).trim(), parts(1).trim())
+    }).
+    toList.
+    toMap[String, String]
+}
+
+envVars ++= readProperties("./local.properties")
 
 testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxml")
 coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*;.*ReverseRoutes.*;.*Routes.*;.*Module.*;.*TestSocialProvider.*"""

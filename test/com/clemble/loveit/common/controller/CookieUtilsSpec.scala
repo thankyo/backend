@@ -6,7 +6,7 @@ import com.clemble.loveit.common.model.UserID
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import play.api.http.HttpEntity.Strict
-import play.api.mvc.{ResponseHeader, Result}
+import play.api.mvc.{Cookie, ResponseHeader, Result}
 import play.api.test.FakeRequest
 
 @RunWith(classOf[JUnitRunner])
@@ -17,10 +17,9 @@ class CookieUtilsSpec extends ThankSpecification {
     val res = Result(ResponseHeader(200), Strict(ByteString.empty, None))
     val resWithCookie = CookieUtils.setUser(res, user)
 
-    val userCookie = resWithCookie.header.headers.toSeq.head._2
-    val cookie = userCookie.substring(7, userCookie.indexOf(";"))
+    val userCookie = resWithCookie.newCookies.head
 
-    val req = FakeRequest().withHeaders("Cookie" -> s"userID=$cookie;")
+    val req = FakeRequest().withCookies(Cookie(userCookie.name, userCookie.value))
     val readUser = CookieUtils.readUser(req)
 
     readUser shouldEqual Some(user)

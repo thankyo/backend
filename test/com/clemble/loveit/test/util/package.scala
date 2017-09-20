@@ -1,6 +1,6 @@
 package com.clemble.loveit.test
 
-import java.time.YearMonth
+import java.time.{LocalDateTime, YearMonth}
 import java.util.Currency
 
 import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
@@ -13,8 +13,8 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomStringUtils.{random, randomAlphabetic, randomNumeric}
+
 import org.apache.commons.lang3.RandomUtils.{nextInt, nextLong}
-import org.joda.time.DateTime
 
 import scala.util.Random
 
@@ -37,7 +37,7 @@ package object util {
   implicit val eomStatGenerator: Generator[EOMStatistics] = EndOfMonthStatisticsGenerator
   implicit val eomProcGenerator: Generator[EOMStatus] = EOMStatusGenerator
   implicit val moneyGenerator: Generator[Money] = MoneyGenerator
-  implicit val dateTimeGenerator: Generator[DateTime] = DateTimeGenerator
+  implicit val dateTimeGenerator: Generator[LocalDateTime] = DateTimeGenerator
   implicit val yomGenerator: Generator[YearMonth] = YearMonthGenerator
   implicit val currencyGenerator: Generator[Currency] = CurrencyGenerator
 
@@ -47,8 +47,8 @@ package object util {
     val generate: Currency = LoveItCurrency.getInstance("USD")
   }
 
-  private object DateTimeGenerator extends Generator[DateTime] {
-    override def generate(): DateTime = new DateTime(Random.nextLong())
+  private object DateTimeGenerator extends Generator[LocalDateTime] {
+    override def generate(): LocalDateTime = LocalDateTime.now()
   }
 
   private object YearMonthGenerator extends Generator[YearMonth] {
@@ -74,7 +74,7 @@ package object util {
         someRandom[EOMStatistics],
         someRandom[EOMStatistics],
         None,
-        new DateTime(nextLong(0, Long.MaxValue))
+        someRandom[LocalDateTime]
       )
     }
   }
@@ -195,7 +195,7 @@ package object util {
   private object ThankTransactionGenerator extends Generator[ThankTransaction] {
 
     override def generate(): ThankTransaction = {
-      ThankTransaction(someRandom[UserID], someRandom[UserID], someRandom[Resource], new DateTime(nextLong(0, Long.MaxValue)))
+      ThankTransaction(someRandom[UserID], someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
     }
 
   }
@@ -218,7 +218,7 @@ package object util {
         total = 200L,
         chargeAccount = Some(someRandom[ChargeAccount]),
         thumbnail = Some(random(12)),
-        dateOfBirth = Some(new DateTime(nextLong(0, Long.MaxValue))),
+        dateOfBirth = Some(someRandom[LocalDateTime]),
         profiles = Set.empty[LoginInfo]
       )
     }

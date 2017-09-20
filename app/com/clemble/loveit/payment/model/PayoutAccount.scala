@@ -30,7 +30,7 @@ object PayoutAccount {
 
     override def reads(json: JsValue): JsResult[PayoutAccount] = (json \ "type") match {
       case JsDefined(STRIPE_TAG) => stripeJsonFormat.reads(json)
-      case unknown => JsError(__ \ "type", ValidationError(s"Invalid ChargeAccount value ${unknown}"))
+      case unknown => JsError(__ \ "type", JsonValidationError(s"Invalid ChargeAccount value ${unknown}"))
     }
 
     override def writes(o: PayoutAccount): JsValue = o match {

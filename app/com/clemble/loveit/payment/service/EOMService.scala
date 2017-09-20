@@ -1,6 +1,6 @@
 package com.clemble.loveit.payment.service
 
-import java.time.YearMonth
+import java.time.{LocalDateTime, YearMonth}
 import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
@@ -11,7 +11,6 @@ import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutAccount, PayoutStatus, UserPayment}
 import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, EOMStatusRepository, UserPaymentRepository}
-import org.joda.time.DateTime
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -65,7 +64,7 @@ case class SimpleEOMService @Inject()(
       applyCharges <- doApplyCharges(yom)
       createPayout <- doCreatePayout(yom)
       applyPayout <- doApplyPayout(yom)
-      update <- statusRepo.update(yom, createCharges = createCharges, applyCharges = applyCharges, createPayout = createPayout, applyPayout = applyPayout, finished = DateTime.now())
+      update <- statusRepo.update(yom, createCharges = createCharges, applyCharges = applyCharges, createPayout = createPayout, applyPayout = applyPayout, finished = LocalDateTime.now())
     } yield {
       update
     }

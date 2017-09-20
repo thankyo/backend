@@ -2,23 +2,25 @@ package com.clemble.loveit.common.util
 
 import java.util.concurrent.ConcurrentHashMap
 
+import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.mohiva.play.silhouette.api.util.{ExtractableRequest, HTTPLayer}
 import com.mohiva.play.silhouette.impl.providers._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContentAsJson, Result}
-import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 
 import scala.concurrent.Future
 
 case class TestSocialProvider(
-                               protected val httpLayer: HTTPLayer,
-                               protected val stateProvider: OAuth2StateProvider,
-                               val settings: OAuth2Settings)
-  extends OAuth2Provider
-    with CommonSocialProfileBuilder {
+                               httpLayer: HTTPLayer,
+                               stateProvider: SocialStateHandler,
+                               stateHandler: SocialStateHandler,
+                               settings: OAuth2Settings
+  ) extends OAuth2Provider with CommonSocialProfileBuilder {
 
   override type Content = JsValue
+
   override protected def urls: Map[String, String] = Map.empty
+
   override val id = "test"
   override type Self = TestSocialProvider
 
@@ -33,7 +35,7 @@ case class TestSocialProvider(
   }
 
   override def withSettings(f: (Settings) => Settings) = {
-    new TestSocialProvider(httpLayer, stateProvider, f(settings))
+    new TestSocialProvider(httpLayer, stateHandler, stateProvider, f(settings))
   }
 
   override protected def buildProfile(authInfo: OAuth2Info): Future[Profile] = {

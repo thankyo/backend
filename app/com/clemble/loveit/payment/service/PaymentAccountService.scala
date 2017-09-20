@@ -120,12 +120,12 @@ class StripeChargeAccountConverter(apiKey: String, clientKey: String, wsClient: 
   override def processPayoutToken(token: String): Future[_ <: PayoutAccount] = {
     // Step 1. Make a request to PayoutToken
     val fRes = wsClient.url("https://connect.stripe.com/oauth/token").
-      withQueryString(
+      addQueryStringParameters(
         "client_secret" -> apiKey,
         "grant_type" -> "authorization_code",
         "client_id" -> clientKey,
         "code" -> token
-      ).post(Results.EmptyContent())
+      ).post(Json.obj())
     // Step 2. Convert response to PayoutAccount
     fRes.map(res => {
       val json = Json.parse(res.body)

@@ -1,11 +1,10 @@
 package com.clemble.loveit.payment.model
 
-import java.time.YearMonth
+import java.time.{LocalDateTime, YearMonth}
 
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
-import org.joda.time.DateTime
 import play.api.libs.json._
 
 object ChargeStatus extends Enumeration {
@@ -31,7 +30,7 @@ case class EOMCharge(
                       amount: Money,
                       details: Option[JsValue],
                       transactions: List[ThankTransaction],
-                      created: DateTime = DateTime.now()
+                      created: LocalDateTime = LocalDateTime.now()
 ) extends Transaction with EOMAware
 
 object EOMCharge {

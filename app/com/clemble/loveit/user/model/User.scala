@@ -1,12 +1,13 @@
 package com.clemble.loveit.user.model
 
+import java.time.LocalDateTime
+
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, ThankTransaction, UserPayment}
 import com.clemble.loveit.thank.model.{ROVerification, UserResource}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 trait UserProfile {
@@ -14,7 +15,7 @@ trait UserProfile {
   val firstName: Option[String]
   val lastName: Option[String]
   val thumbnail: Option[String]
-  val dateOfBirth: Option[DateTime]
+  val dateOfBirth: Option[LocalDateTime]
 }
 
 /**
@@ -35,7 +36,7 @@ case class User(
                  email: Option[Email] = None,
                  thumbnail: Option[String] = None,
                  bio: Option[String] = None,
-                 dateOfBirth: Option[DateTime] = None,
+                 dateOfBirth: Option[LocalDateTime] = None,
                  balance: Amount = 0L,
                  pending: List[ThankTransaction] = List.empty,
                  total: Amount = 0L,
@@ -44,7 +45,7 @@ case class User(
                  payoutAccount: Option[PayoutAccount] = None,
                  monthlyLimit: Money = UserPayment.DEFAULT_LIMIT,
                  profiles: Set[LoginInfo] = Set.empty,
-                 created: DateTime = DateTime.now()
+                 created: LocalDateTime = LocalDateTime.now()
                ) extends Identity with UserProfile with CreatedAware with UserPayment with UserResource {
 
   def assignOwnership(resource: Resource): User = {
@@ -81,7 +82,6 @@ trait UserAware {
 object User {
 
   val DEFAULT_AMOUNT = 0L
-  val DEFAULT_DATE_OF_BIRTH = new DateTime(0)
 
   implicit val socialProfileJsonFormat = Json.format[CommonSocialProfile]
   implicit val jsonFormat = Json.format[User]

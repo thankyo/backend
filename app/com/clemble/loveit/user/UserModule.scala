@@ -52,7 +52,7 @@ class UserModule(env: Environment, conf: Configuration) extends ScalaModule {
     if (env.mode == Mode.Test) {
       TestSubscriptionManager
     } else {
-      val apiKey = conf.getString("email.mailgun.api.key").get
+      val apiKey = conf.get[String]("email.mailgun.api.key")
       MailgunSubscriptionManager(apiKey, ws, ec)
     }
   }

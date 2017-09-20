@@ -1,8 +1,9 @@
 package com.clemble.loveit.thank.model
 
+import java.time.LocalDateTime
+
 import com.clemble.loveit.common.model.{Amount, CreatedAware, Resource, UserID}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.Json
 
 /**
@@ -13,7 +14,7 @@ case class Thank(
                   owner: UserID,
                   given: Amount = 0L,
                   givers: Set[UserID] = Set.empty,
-                  created: DateTime = DateTime.now(DateTimeZone.UTC)
+                  created: LocalDateTime = LocalDateTime.now()
                 ) extends CreatedAware {
 
   def thankedBy(user: UserID) = givers.contains(user)

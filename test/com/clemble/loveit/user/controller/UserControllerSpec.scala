@@ -43,12 +43,11 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
       val res = await(route(application, req).get)
 
       ControllerSpec.setUser(res)
-      val setCookie = res.header.headers.get(SET_COOKIE)
+      val setCookie = res.newCookies
 
-      setCookie shouldNotEqual None
+      setCookie.size shouldEqual 1
 
-      val userCookie = setCookie.get
-      val userId = setCookie.get.substring(7, userCookie.indexOf(";"))
+      val userId = setCookie(0).value
       val expectedId = getMyUser(userId).id
       userId shouldEqual expectedId
     }

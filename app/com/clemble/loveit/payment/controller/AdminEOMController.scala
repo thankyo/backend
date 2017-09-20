@@ -4,9 +4,9 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.payment.service.{ EOMService}
+import com.clemble.loveit.payment.service.EOMService
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.mvc.{Controller}
+import play.api.mvc.{InjectedController}
 
 import scala.concurrent.ExecutionContext
 
@@ -14,7 +14,7 @@ class AdminEOMController @Inject()(
                                     service: EOMService,
                                     silhouette: Silhouette[AuthEnv],
                                     implicit val ec: ExecutionContext
-                                  ) extends Controller {
+                                  ) extends InjectedController {
 
   def getStatus(yom: YearMonth) = silhouette.SecuredAction.async(implicit req => {
     val fStatus = service.getStatus(yom)

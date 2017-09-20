@@ -1,7 +1,6 @@
 package com.clemble.loveit.payment.model
 
 import com.clemble.loveit.common.util.{WriteableUtils}
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
 /**
@@ -31,7 +30,7 @@ object ChargeAccount {
 
     override def reads(json: JsValue): JsResult[ChargeAccount] = (json \ "type") match {
       case JsDefined(STRIPE_TAG) => stripeJsonFormat.reads(json)
-      case unknown => JsError(__ \ "type", ValidationError(s"Invalid ChargeAccount value ${unknown}"))
+      case unknown => JsError(__ \ "type", JsonValidationError(s"Invalid ChargeAccount value ${unknown}"))
     }
 
     override def writes(o: ChargeAccount): JsValue = o match {

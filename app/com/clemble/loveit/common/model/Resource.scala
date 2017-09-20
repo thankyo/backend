@@ -54,7 +54,7 @@ object Resource {
       val uriOpt = (json \ "uri").asOpt[String]
       (json \ "type", uriOpt) match {
         case (JsDefined(HTTP_JSON), Some(uri)) => JsSuccess(HttpResource(uri))
-        case _ => JsError(__ \ "type", ValidationError(s"Invalid Resource value ${json}"))
+        case _ => JsError(__ \ "type", JsonValidationError(s"Invalid Resource value ${json}"))
       }
     }
 

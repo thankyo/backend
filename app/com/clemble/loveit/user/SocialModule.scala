@@ -8,17 +8,17 @@ import akka.actor.{ActorSystem, Props}
 import com.clemble.loveit.user.model.UserIdentity
 import com.clemble.loveit.user.service.{SubscriptionManager, SubscriptionOnSignUpManager, UserService}
 import com.google.inject.Provides
-import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder}
+import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder, Signer}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AuthenticatorService
 import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
+import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings, JcaSigner, JcaSignerSettings}
 import com.mohiva.play.silhouette.impl
 import com.mohiva.play.silhouette.impl.authenticators.{JWTAuthenticator, JWTAuthenticatorService, JWTAuthenticatorSettings}
 import com.mohiva.play.silhouette.impl.providers.oauth2.FacebookProvider
-import com.mohiva.play.silhouette.impl.providers.oauth2.state.DummyStateProvider
-import com.mohiva.play.silhouette.impl.providers.{OAuth2Settings, OAuth2StateProvider, SocialProviderRegistry}
+import com.mohiva.play.silhouette.impl.providers.state.{CsrfStateItemHandler, CsrfStateSettings}
+import com.mohiva.play.silhouette.impl.providers.{SocialStateHandler, _}
 import com.mohiva.play.silhouette.impl.util.SecureRandomIDGenerator
 import com.mohiva.play.silhouette.persistence.daos.InMemoryAuthInfoDAO
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
@@ -77,7 +77,7 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
   @Singleton
   def facebookProvider(
                         httpLayer: HTTPLayer,
-                        stateProvider: OAuth2StateProvider
+                        stateProvider: SocialStateHandler
                       ): FacebookProvider = {
     val facebookConfig = conf.underlying.as[OAuth2Settings]("silhouette.facebook")
     new FacebookProvider(httpLayer, stateProvider, facebookConfig)
@@ -87,15 +87,15 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
   @Singleton
   def testProvider(
                     httpLayer: HTTPLayer,
-                    stateProvider: OAuth2StateProvider
+                    stateHandler: SocialStateHandler,
+                    stateProvider: SocialStateHandler
                   ): TestSocialProvider = {
     val testConfig = new OAuth2Settings(
       accessTokenURL = "",
-      redirectURL = "",
       clientID = "",
       clientSecret = ""
     )
-    new TestSocialProvider(httpLayer, stateProvider, testConfig)
+    new TestSocialProvider(httpLayer, stateProvider, stateHandler, testConfig)
   }
 
   @Provides
@@ -120,6 +120,13 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
 
   @Provides
   @Singleton
+  def signer(): Signer = {
+    val config = conf.underlying.as[JcaSignerSettings]("silhouette.jwt.authenticator.crypter")
+    new JcaSigner(config)
+  }
+
+  @Provides
+  @Singleton
   def provideAuthenticatorService(
                                    crypter: Crypter,
                                    idGenerator: IDGenerator,
@@ -134,8 +141,14 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
 
   @Provides
   @Singleton
-  def oAuth2StateProvider(): OAuth2StateProvider = {
-    new DummyStateProvider()
+  def csrfStateSettings(): CsrfStateSettings = {
+    CsrfStateSettings()
+  }
+
+  @Provides
+  @Singleton
+  def oAuth2StateProvider(handler: CsrfStateItemHandler, signer: Signer): SocialStateHandler = {
+    new DefaultSocialStateHandler(Set(handler), signer)
   }
 
 }

@@ -1,11 +1,10 @@
 package com.clemble.loveit.payment.service.repository
 
-import java.time.YearMonth
+import java.time.{LocalDateTime, YearMonth}
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.payment.model.{EOMStatistics, EOMStatus}
-import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -49,7 +48,7 @@ class EOMStatusRepositorySpec extends RepositorySpec {
 
       await(repo.save(status))
 
-      val updatedStatus = someRandom[EOMStatus].copy(yom = status.yom, finished = Some(someRandom[DateTime]))
+      val updatedStatus = someRandom[EOMStatus].copy(yom = status.yom, finished = Some(someRandom[LocalDateTime]))
       await(repo.update(yom,
         createCharges = updatedStatus.createCharges,
         applyCharges = updatedStatus.applyCharges,

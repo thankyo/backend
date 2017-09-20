@@ -1,14 +1,13 @@
 package com.clemble.loveit.payment.service.repository.mongo
 
 import com.clemble.loveit.payment.model._
-import java.time.YearMonth
+import java.time.{LocalDateTime, YearMonth}
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.stream.Materializer
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.repository.EOMStatusRepository
-import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
@@ -30,7 +29,7 @@ case class MongoEOMStatusRepository @Inject()(@Named("eomStatus") collection: JS
     MongoSafeUtils.safe(status, collection.insert(Json.toJson(status).as[JsObject]))
   }
 
-  override def update(yom: YearMonth, createCharges: EOMStatistics, applyCharges: EOMStatistics, createPayout: EOMStatistics, applyPayout: EOMStatistics, finished: DateTime): Future[Boolean] = {
+  override def update(yom: YearMonth, createCharges: EOMStatistics, applyCharges: EOMStatistics, createPayout: EOMStatistics, applyPayout: EOMStatistics, finished: LocalDateTime): Future[Boolean] = {
     val selector = Json.obj("yom" -> yom)
     val update = Json.obj("$set" -> Json.obj(
       "createCharges" -> createCharges,

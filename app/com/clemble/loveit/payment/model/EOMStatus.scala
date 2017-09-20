@@ -1,10 +1,9 @@
 package com.clemble.loveit.payment.model
 
-import java.time.YearMonth
+import java.time.{LocalDateTime, YearMonth}
 
 import com.clemble.loveit.common.model.CreatedAware
 import com.clemble.loveit.common.util.WriteableUtils
-import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 /**
@@ -47,8 +46,8 @@ case class EOMStatus(
                              applyCharges: EOMStatistics = EOMStatistics(),
                              createPayout: EOMStatistics = EOMStatistics(),
                              applyPayout: EOMStatistics = EOMStatistics(),
-                             finished: Option[DateTime] = None,
-                             created: DateTime = DateTime.now()
+                             finished: Option[LocalDateTime] = None,
+                             created: LocalDateTime = LocalDateTime.now()
               ) extends CreatedAware with EOMAware{
 
   def isValid = createCharges.isValid &&

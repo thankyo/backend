@@ -8,7 +8,6 @@ import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.EOMCharge
 import com.clemble.loveit.user.service.repository.UserAwareRepository
-import org.joda.time.DateTime
 import play.api.libs.json.JsValue
 
 import scala.concurrent.Future

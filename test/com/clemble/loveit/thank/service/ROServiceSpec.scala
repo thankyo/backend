@@ -4,7 +4,6 @@ import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.{UserException}
 import com.clemble.loveit.common.model.Resource
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import org.apache.commons.lang3.RandomStringUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -28,11 +27,14 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       val social = someRandom[CommonSocialProfile]
       val user = createUser(social)
 
-      val resource = Resource from s"http://${RandomStringUtils.random(10)}.com"
+      val resource = Resource from s"http://${someRandom[String]}.com"
       assignOwnership(user, resource)
 
-      val expectedResources = List(resource)
-      eventually(listResources(user) shouldEqual expectedResources)
+      eventually(listResources(user).size shouldEqual 1)
+
+      val expectedResources = Set(resource)
+      val actualResources = listResources(user)
+      actualResources mustEqual expectedResources
     }
 
     "prohibit assigning same resource" in {

@@ -1,8 +1,9 @@
 package com.clemble.loveit.user.model
 
+import java.time.LocalDateTime
+
 import com.clemble.loveit.common.model.UserID
 import com.mohiva.play.silhouette.api.Identity
-import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 case class UserIdentity(
@@ -10,7 +11,7 @@ case class UserIdentity(
                          firstName: Option[String],
                          lastName: Option[String],
                          thumbnail: Option[String],
-                         dateOfBirth: Option[DateTime]
+                         dateOfBirth: Option[LocalDateTime]
                        ) extends UserProfile with Identity
 
 object UserIdentity {

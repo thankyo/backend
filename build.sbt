@@ -10,9 +10,10 @@ lazy val root = (project in file(".")).
   enablePlugins(PlayScala).
   enablePlugins(DockerPlugin)
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.12.3"
 
-val reactiveMongoVer = "0.12.3"
+val reactiveMongoVer = "0.12.6"
+val silhouetteVersion = "5.0.0"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
 
@@ -20,24 +21,25 @@ lazy val common = project
 
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % reactiveMongoVer,
-  "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVer,
+  "org.reactivemongo" %% "play2-reactivemongo" % s"${reactiveMongoVer}-play26",
   "org.reactivemongo" %% "reactivemongo-akkastream" % reactiveMongoVer,
 
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
-  "com.iheart" %% "ficus" % "1.4.1",
-  "com.mohiva" %% "play-silhouette" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-password-bcrypt" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
+  "com.iheart" %% "ficus" % "1.4.2",
+  "com.mohiva" %% "play-silhouette" % silhouetteVersion,
+  "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVersion,
+  "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
+  "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.4.0",
+  "io.sentry" % "sentry-logback" % "1.5.3",
 
-  "com.stripe" % "stripe-java" % "5.1.0",
+  "com.stripe" % "stripe-java" % "5.8.0",
 
   "com.atlassian.jwt" % "jwt-core" % "1.6.2",
   "com.atlassian.jwt" % "jwt-api" % "1.6.2",
 
+  "org.apache.commons" % "commons-text" % "1.1" % Test,
   specs2 % Test
 )
 

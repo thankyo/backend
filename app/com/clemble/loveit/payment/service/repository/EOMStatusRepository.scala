@@ -1,9 +1,8 @@
 package com.clemble.loveit.payment.service.repository
 
-import java.time.YearMonth
+import java.time.{LocalDateTime, YearMonth}
 
 import com.clemble.loveit.payment.model.{EOMStatistics, EOMStatus}
-import org.joda.time.DateTime
 
 import scala.concurrent.Future
 
@@ -27,6 +26,6 @@ trait EOMStatusRepository {
              applyCharges: EOMStatistics,
              createPayout: EOMStatistics,
              applyPayout: EOMStatistics,
-             finished: DateTime): Future[Boolean]
+             finished: LocalDateTime): Future[Boolean]
 
 }

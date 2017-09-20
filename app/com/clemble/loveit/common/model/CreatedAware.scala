@@ -1,7 +1,7 @@
 package com.clemble.loveit.common.model
 
-import org.joda.time.DateTime
+import java.time.LocalDateTime
 
 trait CreatedAware {
-  val created: DateTime
+  val created: LocalDateTime
 }

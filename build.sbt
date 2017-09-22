@@ -2,13 +2,9 @@ import play.sbt.routes.RoutesKeys
 
 import scala.io.Source
 
-name := "thank-backend"
+name := "backend"
 
 version := "1.0-SNAPSHOT"
-
-lazy val root = (project in file(".")).
-  enablePlugins(PlayScala).
-  enablePlugins(DockerPlugin)
 
 scalaVersion := "2.12.3"
 
@@ -17,7 +13,13 @@ val silhouetteVersion = "5.0.0"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
 
-lazy val common = project
+lazy val auth = project.enablePlugins(PlayScala)
+
+lazy val root = (project in file(".")).
+  enablePlugins(PlayScala).
+  enablePlugins(DockerPlugin).
+  dependsOn(auth)
+
 
 libraryDependencies ++= Seq(
   guice,
@@ -43,6 +45,8 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.1" % Test,
   specs2 % Test
 )
+
+TwirlKeys.templateImports := Seq()
 
 RoutesKeys.routesImport += "com.clemble.loveit.payment.controller._"
 

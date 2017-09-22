@@ -121,7 +121,7 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
   @Provides
   @Singleton
   def signer(): Signer = {
-    val config = conf.underlying.as[JcaSignerSettings]("silhouette.jwt.authenticator.crypter")
+    val config = conf.underlying.as[JcaSignerSettings]("silhouette.jwt.authenticator.signer")
     new JcaSigner(config)
   }
 
@@ -148,7 +148,7 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
   @Provides
   @Singleton
   def oAuth2StateProvider(handler: CsrfStateItemHandler, signer: Signer): SocialStateHandler = {
-    new DefaultSocialStateHandler(Set(handler), signer)
+    new DefaultSocialStateHandler(Set(), signer)
   }
 
 }

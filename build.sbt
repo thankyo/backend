@@ -20,6 +20,7 @@ resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/reposi
 lazy val common = project
 
 libraryDependencies ++= Seq(
+  guice,
   "org.reactivemongo" %% "reactivemongo" % reactiveMongoVer,
   "org.reactivemongo" %% "play2-reactivemongo" % s"${reactiveMongoVer}-play26",
   "org.reactivemongo" %% "reactivemongo-akkastream" % reactiveMongoVer,

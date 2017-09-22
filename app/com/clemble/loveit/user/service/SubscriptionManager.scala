@@ -1,6 +1,7 @@
 package com.clemble.loveit.user.service
 
 import javax.inject.{Inject, Singleton}
+
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api.Logger
 import play.api.libs.ws.WSAuthScheme.BASIC
@@ -19,7 +20,9 @@ sealed trait SubscriptionManager {
 
 case object TestSubscriptionManager extends SubscriptionManager {
   override def signedUpUser(user: User): Future[Boolean] = Future.successful(true)
+
   override def subscribeCreator(email: String): Future[Boolean] = Future.successful(true)
+
   override def subscribeContributor(email: String): Future[Boolean] = Future.successful(true)
 }
 
@@ -49,10 +52,14 @@ case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, im
           logger.error(s"Failed to add user, because of ${res.body}")
         isValid
       }).
-      recover({ case t => {
-        logger.error(s"Failed to add to ${list}", t)
-        false
-      }})
+      recover({
+        case alreadyExists if (alreadyExists.getMessage.contains("Address already exists")) =>
+          logger.info("Ignoring already exists error");
+          true
+        case t =>
+          logger.error(s"Failed to add to ${list}", t)
+          false
+      })
   }
 
   private def asMailgunEmailForm(user: User): Option[Map[String, Seq[String]]] = {

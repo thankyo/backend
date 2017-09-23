@@ -21,13 +21,6 @@ trait AuthTokenDAO {
   def find(id: UUID): Future[Option[AuthToken]]
 
   /**
-   * Finds expired tokens.
-   *
-   * @param dateTime The current date time.
-   */
-  def findExpired(dateTime: DateTime): Future[Seq[AuthToken]]
-
-  /**
    * Saves a token.
    *
    * @param token The token to save.

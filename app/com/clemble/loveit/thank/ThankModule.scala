@@ -8,8 +8,10 @@ import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.mohiva.play.silhouette.api.crypto.Crypter
+import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import net.codingwell.scalaguice.ScalaModule
-import play.api.{Configuration, Environment}
+import play.api.{ConfigLoader, Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -58,6 +60,15 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Named("stat")
   def statMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("stat", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
+  @Named("rovCrypter")
+  def rovCrypter(): Crypter = {
+    val key = conf.get[String]("thank.crypter.key")
+    val config = JcaCrypterSettings(key)
+    new JcaCrypter(config)
   }
 
 }

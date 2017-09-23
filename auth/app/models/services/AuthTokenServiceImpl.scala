@@ -31,11 +31,10 @@ class AuthTokenServiceImpl @Inject() (
    * Creates a new auth token and saves it in the backing store.
    *
    * @param userID The user ID for which the token should be created.
-   * @param expiry The duration a token expires.
    * @return The saved auth token.
    */
-  def create(userID: UUID, expiry: FiniteDuration = 5 minutes) = {
-    val token = AuthToken(UUID.randomUUID(), userID, clock.now.withZone(DateTimeZone.UTC).plusSeconds(expiry.toSeconds.toInt))
+  def create(userID: UUID) = {
+    val token = AuthToken(UUID.randomUUID(), userID)
     authTokenDAO.save(token)
   }
 
@@ -45,16 +44,8 @@ class AuthTokenServiceImpl @Inject() (
    * @param id The token ID to validate.
    * @return The token if it's valid, None otherwise.
    */
-  def validate(id: UUID): Future[Option[AuthToken]] = authTokenDAO.find(id)
-
-  /**
-   * Cleans expired tokens.
-   *
-   * @return The list of deleted tokens.
-   */
-  def clean: Future[Seq[AuthToken]] = authTokenDAO.findExpired(clock.now.withZone(DateTimeZone.UTC)).flatMap { tokens =>
-    Future.sequence(tokens.map { token =>
-      authTokenDAO.remove(token.id).map(_ => token)
-    })
+  def validate(id: UUID): Future[Option[AuthToken]] = {
+    authTokenDAO.find(id)
   }
+
 }

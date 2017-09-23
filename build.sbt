@@ -13,12 +13,17 @@ val silhouetteVersion = "5.0.0"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
 
-lazy val auth = project.enablePlugins(PlayScala)
+lazy val common = (project in file("./common"))
+
+lazy val auth = (project in file("./auth")).enablePlugins(PlayScala).
+    dependsOn(common)
 
 lazy val root = (project in file(".")).
   enablePlugins(PlayScala).
   enablePlugins(DockerPlugin).
-  dependsOn(auth)
+  aggregate(auth).
+  dependsOn(auth).
+  dependsOn(common)
 
 
 libraryDependencies ++= Seq(

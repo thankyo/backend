@@ -12,6 +12,8 @@ import javax.inject.{Named, Singleton}
 
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.Provides
+import com.mohiva.play.silhouette.api.crypto.Crypter
+import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
@@ -85,6 +87,15 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   @Named("thankTransactions")
   def thankTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("thankTransaction", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
+  @Named("paymentCrypter")
+  def paymentCrypter(): Crypter = {
+    val key = conf.get[String]("payment.crypter.key")
+    val config = JcaCrypterSettings(key)
+    new JcaCrypter(config)
   }
 
 }

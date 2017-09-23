@@ -1,5 +1,5 @@
 package com.clemble.loveit.payment.controller
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.model.UserID
@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class EOMPayoutController @Inject()(
                                           conf: Configuration,
-                                          crypter: Crypter,
+                                          @Named("paymentCrypter") crypter: Crypter,
                                           payoutRepo: EOMPayoutRepository,
                                           paymentAccService: PaymentAccountService,
                                           silhouette: Silhouette[AuthEnv],

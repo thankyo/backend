@@ -4,7 +4,8 @@
 @import org.webjars.play.WebJarsUtil
 @import controllers.AssetsFinder
 
-@(title: String, user: Option[models.User] = None)(content: Html)(implicit request: RequestHeader, messages: Messages, assets: AssetsFinder, webJarsUtil: WebJarsUtil)
+@import com.clemble.loveit.user.model.User
+@(title: String, user: Option[User] = None)(content: Html)(implicit request: RequestHeader, messages: Messages, assets: AssetsFinder, webJarsUtil: WebJarsUtil)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -45,9 +46,6 @@
                     <ul class="nav navbar-nav navbar-right">
                         @user.map { u =>
                             <li><a href="@controllers.routes.ApplicationController.index">@u.name</a></li>
-                            @if(u.loginInfo.providerID == com.mohiva.play.silhouette.impl.providers.CredentialsProvider.ID) {
-                                <li><a href="@controllers.routes.ChangePasswordController.view">@messages("change.password")</a></li>
-                            }
                             <li><a href="@controllers.routes.ApplicationController.signOut">@messages("sign.out")</a></li>
                         }.getOrElse {
                             <li><a href="@controllers.routes.SignInController.view">@messages("sign.in")</a></li>

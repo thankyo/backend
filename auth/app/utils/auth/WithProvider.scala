@@ -1,7 +1,7 @@
 package utils.auth
 
-import com.mohiva.play.silhouette.api.{ Authenticator, Authorization }
-import models.User
+import com.clemble.loveit.user.model.{User}
+import com.mohiva.play.silhouette.api.{Authenticator, Authorization}
 import play.api.mvc.Request
 
 import scala.concurrent.Future
@@ -27,6 +27,6 @@ case class WithProvider[A <: Authenticator](provider: String) extends Authorizat
     implicit
     request: Request[B]): Future[Boolean] = {
 
-    Future.successful(user.loginInfo.providerID == provider)
+    Future.successful(user.profiles.exists(loginInfo => loginInfo.providerID == provider))
   }
 }

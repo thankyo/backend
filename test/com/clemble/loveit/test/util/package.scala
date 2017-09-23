@@ -217,7 +217,7 @@ package object util {
         balance = 200L,
         total = 200L,
         chargeAccount = Some(someRandom[ChargeAccount]),
-        thumbnail = Some(random(12)),
+        avatarURL = Some(random(12)),
         dateOfBirth = Some(someRandom[LocalDateTime]),
         profiles = Set.empty[LoginInfo]
       )

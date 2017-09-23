@@ -2,23 +2,20 @@ package controllers
 
 import javax.inject.Inject
 
-import com.mohiva.play.silhouette.api.Authenticator.Implicits._
+import com.clemble.loveit.common.util.AuthEnv
+import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
-import com.mohiva.play.silhouette.api.util.{ Clock, Credentials }
+import com.mohiva.play.silhouette.api.util.{Clock, Credentials}
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignInForm
-import models.services.UserService
-import net.ceedubs.ficus.Ficus._
 import org.webjars.play.WebJarsUtil
 import play.api.Configuration
-import play.api.i18n.{ I18nSupport, Messages }
-import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
-import utils.auth.DefaultEnv
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 
-import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * The `Sign In` controller.
@@ -34,13 +31,13 @@ import scala.concurrent.{ ExecutionContext, Future }
  * @param assets                 The Play assets finder.
  */
 class SignInController @Inject() (
-  components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
-  userService: UserService,
-  credentialsProvider: CredentialsProvider,
-  socialProviderRegistry: SocialProviderRegistry,
-  configuration: Configuration,
-  clock: Clock
+                                   components: ControllerComponents,
+                                   silhouette: Silhouette[AuthEnv],
+                                   userService: UserService,
+                                   credentialsProvider: CredentialsProvider,
+                                   socialProviderRegistry: SocialProviderRegistry,
+                                   configuration: Configuration,
+                                   clock: Clock
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -74,20 +71,13 @@ class SignInController @Inject() (
               Future.successful(Ok(views.html.activateAccount(data.email)))
             case Some(user) =>
               val c = configuration.underlying
-              silhouette.env.authenticatorService.create(loginInfo).map {
-                case authenticator if data.rememberMe =>
-                  authenticator.copy(
-                    expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
-                    idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
-                    cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
-                  )
-                case authenticator => authenticator
-              }.flatMap { authenticator =>
-                silhouette.env.eventBus.publish(LoginEvent(user, request))
-                silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                  silhouette.env.authenticatorService.embed(v, result)
+              silhouette.env.authenticatorService.create(loginInfo).
+                flatMap { authenticator =>
+                  silhouette.env.eventBus.publish(LoginEvent(user, request))
+                  silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
+                    silhouette.env.authenticatorService.embed(v, result)
+                  }
                 }
-              }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
           }
         }.recover {

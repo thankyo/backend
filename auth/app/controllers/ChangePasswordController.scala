@@ -2,19 +2,20 @@ package controllers
 
 import javax.inject.Inject
 
+import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.{ Credentials, PasswordHasherRegistry, PasswordInfo }
+import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import forms.ChangePasswordForm
 import org.webjars.play.WebJarsUtil
-import play.api.i18n.{ I18nSupport, Messages }
-import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents }
-import utils.auth.{ DefaultEnv, WithProvider }
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{AbstractController, AnyContent, ControllerComponents}
+import utils.auth.{WithProvider}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * The `Change Password` controller.
@@ -29,11 +30,11 @@ import scala.concurrent.{ ExecutionContext, Future }
  * @param ex                     The execution context.
  */
 class ChangePasswordController @Inject() (
-  components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv],
-  credentialsProvider: CredentialsProvider,
-  authInfoRepository: AuthInfoRepository,
-  passwordHasherRegistry: PasswordHasherRegistry
+                                           components: ControllerComponents,
+                                           silhouette: Silhouette[AuthEnv],
+                                           credentialsProvider: CredentialsProvider,
+                                           authInfoRepository: AuthInfoRepository,
+                                           passwordHasherRegistry: PasswordHasherRegistry
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -46,8 +47,8 @@ class ChangePasswordController @Inject() (
    *
    * @return The result to display.
    */
-  def view = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)) {
-    implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
+  def view = silhouette.SecuredAction(WithProvider[AuthEnv#A](CredentialsProvider.ID)) {
+    implicit request: SecuredRequest[AuthEnv, AnyContent] =>
       Ok(views.html.changePassword(ChangePasswordForm.form, request.identity))
   }
 
@@ -56,8 +57,8 @@ class ChangePasswordController @Inject() (
    *
    * @return The result to display.
    */
-  def submit = silhouette.SecuredAction(WithProvider[DefaultEnv#A](CredentialsProvider.ID)).async {
-    implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
+  def submit = silhouette.SecuredAction(WithProvider[AuthEnv#A](CredentialsProvider.ID)).async {
+    implicit request: SecuredRequest[AuthEnv, AnyContent] =>
       ChangePasswordForm.form.bindFromRequest.fold(
         form => Future.successful(BadRequest(views.html.changePassword(form, request.identity))),
         password => {

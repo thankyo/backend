@@ -3,7 +3,8 @@
 @import org.webjars.play.WebJarsUtil
 @import controllers.AssetsFinder
 
-@(user: models.User)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil, assets: AssetsFinder)
+@import com.clemble.loveit.user.model.User
+@(user: User)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil, assets: AssetsFinder)
 
 @main(messages("home.title"), Some(user)) {
     <div class="user col-md-6 col-md-offset-3">
@@ -22,12 +23,6 @@
                 </div>
                 <div class="row">
                     <p class="col-md-6"><strong>@messages("last.name"):</strong></p><p class="col-md-6">@user.lastName.getOrElse("None")</p>
-                </div>
-                <div class="row">
-                    <p class="col-md-6"><strong>@messages("full.name"):</strong></p><p class="col-md-6">@user.fullName.getOrElse("None")</p>
-                </div>
-                <div class="row">
-                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@user.email.getOrElse("None")</p>
                 </div>
             </div>
         </div>

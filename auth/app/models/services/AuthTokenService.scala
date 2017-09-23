@@ -2,6 +2,7 @@ package models.services
 
 import java.util.UUID
 
+import com.clemble.loveit.common.model.UserID
 import models.AuthToken
 
 import scala.concurrent.Future
@@ -18,7 +19,7 @@ trait AuthTokenService {
    * @param userID The user ID for which the token should be created.
    * @return The saved auth token.
    */
-  def create(userID: UUID): Future[AuthToken]
+  def create(userID: UserID): Future[AuthToken]
 
   /**
    * Validates a token ID.

@@ -2,11 +2,10 @@ package com.clemble.loveit.common
 
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.service.ROService
-import com.clemble.loveit.user.controller.SocialAuthController
-import com.clemble.loveit.user.model.UserIdentity
 import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+import controllers.SocialAuthController
 
 trait ServiceSpec extends ThankSpecification {
 
@@ -16,7 +15,7 @@ trait ServiceSpec extends ThankSpecification {
 
   lazy val resService = dependency[ROService]
 
-  def someUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): UserIdentity = {
+  def someUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): User = {
     await(userService.createOrUpdateUser(socialProfile)) match {
       case Left(user) => user
       case Right(user) => user

@@ -15,8 +15,9 @@ resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/reposi
 
 lazy val common = (project in file("./common"))
 
-lazy val auth = (project in file("./auth")).enablePlugins(PlayScala).
-    dependsOn(common)
+lazy val auth = (project in file("./auth")).
+  enablePlugins(PlayScala).
+  dependsOn(common)
 
 lazy val root = (project in file(".")).
   enablePlugins(PlayScala).
@@ -28,14 +29,10 @@ lazy val root = (project in file(".")).
 
 libraryDependencies ++= Seq(
   guice,
-  "org.reactivemongo" %% "reactivemongo" % reactiveMongoVer,
-  "org.reactivemongo" %% "play2-reactivemongo" % s"${reactiveMongoVer}-play26",
-  "org.reactivemongo" %% "reactivemongo-akkastream" % reactiveMongoVer,
-
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
   "com.iheart" %% "ficus" % "1.4.2",
-  "com.mohiva" %% "play-silhouette" % silhouetteVersion,
+
   "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,

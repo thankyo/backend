@@ -3,12 +3,13 @@ package models.services
 import java.util.UUID
 import javax.inject.Inject
 
+import com.clemble.loveit.common.model.UserID
 import com.mohiva.play.silhouette.api.util.Clock
 import models.AuthToken
 import models.daos.AuthTokenDAO
 import org.joda.time.DateTimeZone
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -33,7 +34,7 @@ class AuthTokenServiceImpl @Inject() (
    * @param userID The user ID for which the token should be created.
    * @return The saved auth token.
    */
-  def create(userID: UUID) = {
+  def create(userID: UserID) = {
     val token = AuthToken(UUID.randomUUID(), userID)
     authTokenDAO.save(token)
   }

@@ -5,7 +5,7 @@ import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.Singleton
 
 import akka.actor.{ActorSystem, Props}
-import com.clemble.loveit.user.model.UserIdentity
+import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.{SubscriptionManager, SubscriptionOnSignUpManager, UserService}
 import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder, Signer}
@@ -57,13 +57,13 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
                    system: ActorSystem,
                    userService: UserService,
                    subscriptionManager: SubscriptionManager,
-                   userRepo: UserRepository,
+                   userRepo: UserService,
                    authenticatorService: AuthenticatorService[JWTAuthenticator],
                    eventBus: EventBus,
                    ec: ExecutionContext): Environment[AuthEnv] = {
 
     val signUpSubscription = system.actorOf(Props(SubscriptionOnSignUpManager(userService, subscriptionManager)))
-    eventBus.subscribe(signUpSubscription, classOf[SignUpEvent[UserIdentity]])
+    eventBus.subscribe(signUpSubscription, classOf[SignUpEvent[User]])
 
     Environment[AuthEnv](
       userRepo,
@@ -107,12 +107,6 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
 
   @Provides
   @Singleton
-  def idGenerator(ec: ExecutionContext): IDGenerator = {
-    new SecureRandomIDGenerator()(ec)
-  }
-
-  @Provides
-  @Singleton
   def crypter(): Crypter = {
     val config = conf.underlying.as[JcaCrypterSettings]("silhouette.jwt.authenticator.crypter")
     new JcaCrypter(config)
@@ -129,14 +123,13 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
   @Singleton
   def provideAuthenticatorService(
                                    crypter: Crypter,
-                                   idGenerator: IDGenerator,
                                    clock: Clock,
                                    ec: ExecutionContext): AuthenticatorService[JWTAuthenticator] = {
 
     val config = conf.underlying.as[JWTAuthenticatorSettings]("silhouette.jwt.authenticator.jwt")
     val encoder = new CrypterAuthenticatorEncoder(crypter)
 
-    new JWTAuthenticatorService(config, None, encoder, idGenerator, clock)(ec)
+    new JWTAuthenticatorService(config, None, encoder, new SecureRandomIDGenerator()(ec), clock)(ec)
   }
 
   @Provides

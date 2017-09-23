@@ -3,20 +3,10 @@ package com.clemble.loveit.user.model
 import java.time.LocalDateTime
 
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, ThankTransaction, UserPayment}
-import com.clemble.loveit.thank.model.{ROVerification, UserResource}
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import play.api.libs.json.Json
-
-trait UserProfile {
-  val id: UserID
-  val firstName: Option[String]
-  val lastName: Option[String]
-  val thumbnail: Option[String]
-  val dateOfBirth: Option[LocalDateTime]
-}
 
 /**
   * User abstraction
@@ -31,25 +21,27 @@ case class User(
                  id: UserID,
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
-                 owns: Set[Resource] = Set.empty,
-                 verification: Option[ROVerification[Resource]] = None,
                  email: Option[Email] = None,
-                 thumbnail: Option[String] = None,
+                 avatarURL: Option[String] = None,
                  bio: Option[String] = None,
                  dateOfBirth: Option[LocalDateTime] = None,
-                 balance: Amount = 0L,
-                 pending: List[ThankTransaction] = List.empty,
-                 total: Amount = 0L,
-                 supported: List[UserIdentity] = List.empty,
-                 chargeAccount: Option[ChargeAccount] = None,
-                 payoutAccount: Option[PayoutAccount] = None,
-                 monthlyLimit: Money = UserPayment.DEFAULT_LIMIT,
                  profiles: Set[LoginInfo] = Set.empty,
+                 activated: Boolean = false,
                  created: LocalDateTime = LocalDateTime.now()
-               ) extends Identity with UserProfile with CreatedAware with UserPayment with UserResource {
+               ) extends Identity with CreatedAware {
 
-  def assignOwnership(resource: Resource): User = {
-    copy(owns = owns + resource)
+  /**
+    * Tries to construct a name.
+    *
+    * @return Maybe a name.
+    */
+  def name = firstName -> lastName match {
+    case (Some(f), Some(l)) => Some(f + " " + l)
+    case (_, _) => firstName.orElse(lastName)
+  }
+
+  def hasProvider(providerID: String): Boolean = {
+    profiles.exists(_.providerID == providerID)
   }
 
   def link(socialProfile: CommonSocialProfile): User = {
@@ -58,18 +50,8 @@ case class User(
       lastName = lastName.orElse(socialProfile.lastName),
       email = email.orElse(socialProfile.email),
       // following #60
-      thumbnail = socialProfile.avatarURL.orElse(thumbnail),
+      avatarURL = socialProfile.avatarURL.orElse(avatarURL),
       profiles = profiles + socialProfile.loginInfo
-    )
-  }
-
-  def toIdentity(): UserIdentity = {
-    UserIdentity(
-      id,
-      firstName,
-      lastName,
-      thumbnail,
-      dateOfBirth
     )
   }
 

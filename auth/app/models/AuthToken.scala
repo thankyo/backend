@@ -2,7 +2,7 @@ package models
 
 import java.util.UUID
 
-import org.joda.time.DateTime
+import com.clemble.loveit.common.model.UserID
 
 /**
  * A token to authenticate a user against an endpoint for a short time period.
@@ -11,6 +11,6 @@ import org.joda.time.DateTime
  * @param userID The unique ID of the user the token is associated with.
  */
 case class AuthToken(
-  id: UUID,
-  userID: UUID
+                      id: UUID,
+                      userID: UserID
 )

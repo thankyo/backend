@@ -4,13 +4,13 @@ import javax.inject.Inject
 
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.thank.service.repository.UserSupportedProjectsRepo
-import com.clemble.loveit.user.model.UserIdentity
+import com.clemble.loveit.user.model.{User}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait UserSupportedProjectsService {
 
-  def getSupported(user: UserID): Future[List[UserIdentity]]
+  def getSupported(user: UserID): Future[List[User]]
 
   def markSupported(supporter: UserID, project: UserID): Future[Boolean]
 
@@ -21,7 +21,7 @@ class SimpleUserSupportedProjectsService @Inject()(
                                                   implicit val ec: ExecutionContext
                                                   )extends UserSupportedProjectsService {
 
-  override def getSupported(user: UserID): Future[List[UserIdentity]] = {
+  override def getSupported(user: UserID): Future[List[User]] = {
     repo.getSupported(user)
   }
 

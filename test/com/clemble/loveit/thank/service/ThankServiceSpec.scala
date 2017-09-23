@@ -121,7 +121,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       thank(giver.id, url)
 
       getSupported(owner.id) shouldEqual Nil
-      eventually(getSupported(giver.id) shouldEqual List(owner.toIdentity()))
+      eventually(getSupported(giver.id) shouldEqual List(owner))
     }
 
   }

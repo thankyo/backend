@@ -1,16 +1,25 @@
 package com.clemble.loveit.user.service
 
-import com.clemble.loveit.common.model.{UserID}
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Singleton}
 
+import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec: ExecutionContext) extends UserService {
+
+  override def save(user: User) = {
+    userRepo.save(user)
+  }
+
+  override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
+    userRepo.retrieve(loginInfo)
+  }
 
   override def findById(id: UserID): Future[Option[User]] = {
     userRepo.findById(id)
@@ -20,7 +29,7 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
     userRepo.save(user.link(profile))
   }
 
-  def createOrUpdateUser(profile: CommonSocialProfile): Future[Either[UserIdentity, UserIdentity]] = {
+  def createOrUpdateUser(profile: CommonSocialProfile): Future[Either[User, User]] = {
     for {
       existingUserOpt <- userRepo.retrieve(profile.loginInfo)
       user <- existingUserOpt match {
@@ -33,11 +42,10 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
         case _ => userRepo.save(User from profile)
       }
     } yield {
-      val identity = user.toIdentity();
       if (existingUserOpt.isDefined) {
-        Left(identity)
+        Left(user)
       } else {
-        Right(identity)
+        Right(user)
       }
     }
   }

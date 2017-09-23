@@ -2,12 +2,12 @@ package controllers
 
 import javax.inject.Inject
 
+import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import com.mohiva.play.silhouette.api.{ LogoutEvent, Silhouette }
+import com.mohiva.play.silhouette.api.{LogoutEvent, Silhouette}
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.I18nSupport
-import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents }
-import utils.auth.DefaultEnv
+import play.api.mvc.{AbstractController, AnyContent, ControllerComponents}
 
 import scala.concurrent.Future
 
@@ -21,7 +21,7 @@ import scala.concurrent.Future
  */
 class ApplicationController @Inject() (
   components: ControllerComponents,
-  silhouette: Silhouette[DefaultEnv]
+  silhouette: Silhouette[AuthEnv]
 )(
   implicit
   webJarsUtil: WebJarsUtil,
@@ -33,7 +33,7 @@ class ApplicationController @Inject() (
    *
    * @return The result to display.
    */
-  def index = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
+  def index = silhouette.SecuredAction.async { implicit request: SecuredRequest[AuthEnv, AnyContent] =>
     Future.successful(Ok(views.html.home(request.identity)))
   }
 
@@ -42,7 +42,7 @@ class ApplicationController @Inject() (
    *
    * @return The result to display.
    */
-  def signOut = silhouette.SecuredAction.async { implicit request: SecuredRequest[DefaultEnv, AnyContent] =>
+  def signOut = silhouette.SecuredAction.async { implicit request: SecuredRequest[AuthEnv, AnyContent] =>
     val result = Redirect(routes.ApplicationController.index())
     silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
     silhouette.env.authenticatorService.discard(request.authenticator, result)

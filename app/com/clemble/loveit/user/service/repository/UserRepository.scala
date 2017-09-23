@@ -1,17 +1,19 @@
 package com.clemble.loveit.user.service.repository
 
 import akka.stream.scaladsl.Source
-import com.clemble.loveit.common.error.{RepositoryException}
-import com.clemble.loveit.common.model.{UserID}
+import com.clemble.loveit.common.error.RepositoryException
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.user.model._
-import com.mohiva.play.silhouette.api.services.IdentityService
+import com.mohiva.play.silhouette.api.LoginInfo
 
 import scala.concurrent.Future
 
 /**
   * [[User]] repository
   */
-trait UserRepository extends IdentityService[UserIdentity] {
+trait UserRepository {
+
+  def retrieve(loginInfo: LoginInfo): Future[Option[User]]
 
   /**
     * Find [[User]] by ID

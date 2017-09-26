@@ -7,13 +7,14 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
+import com.mohiva.play.silhouette.api.util.{ PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import forms.ResetPasswordForm
+import forms.{ResetPasswordRequest}
 import models.services.AuthTokenService
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
+import play.api.libs.json.JsBoolean
+import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,8 +27,6 @@ import scala.concurrent.{ExecutionContext, Future}
  * @param authInfoRepository     The auth info repository.
  * @param passwordHasherRegistry The password hasher registry.
  * @param authTokenService       The auth token service implementation.
- * @param webJarsUtil            The webjar util.
- * @param assets                 The Play assets finder.
  * @param ex                     The execution context.
  */
 class ResetPasswordController @Inject() (
@@ -39,23 +38,9 @@ class ResetPasswordController @Inject() (
                                           authTokenService: AuthTokenService
 )(
   implicit
-  webJarsUtil: WebJarsUtil,
-  assets: AssetsFinder,
+  parser: PlayBodyParsers,
   ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport {
-
-  /**
-   * Views the `Reset Password` page.
-   *
-   * @param token The token to identify a user.
-   * @return The result to display.
-   */
-  def view(token: UUID) = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    authTokenService.validate(token).map {
-      case Some(_) => Ok(views.html.resetPassword(ResetPasswordForm.form, token))
-      case None => Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.reset.link"))
-    }
-  }
 
   /**
    * Resets the password.
@@ -63,22 +48,16 @@ class ResetPasswordController @Inject() (
    * @param token The token to identify a user.
    * @return The result to display.
    */
-  def submit(token: UUID) = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    authTokenService.validate(token).flatMap {
-      case Some(authToken) =>
-        ResetPasswordForm.form.bindFromRequest.fold(
-          form => Future.successful(BadRequest(views.html.resetPassword(form, token))),
-          password => userService.findById(authToken.userID).flatMap({
-            case Some(user) if user.profiles.exists(loginInfo => loginInfo.providerID == CredentialsProvider.ID) =>
-              val passwordInfo = passwordHasherRegistry.current.hash(password)
-              val loginInfo = user.profiles.find(_.providerID == CredentialsProvider.ID)
-              authInfoRepository.update[PasswordInfo](loginInfo.get, passwordInfo).map { _ =>
-                Redirect(routes.SignInController.view()).flashing("success" -> Messages("password.reset"))
-              }
-            case _ => Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.reset.link")))
-          })
-        )
-      case None => Future.successful(Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.reset.link")))
+  def submit(token: UUID) = silhouette.UnsecuredAction.async(parse.json[ResetPasswordRequest]) { implicit request =>
+    val passwordInfo = passwordHasherRegistry.current.hash(request.body.password)
+    for {
+      authTokenOpt <- authTokenService.validate(token)
+      authToken = authTokenOpt.get
+      userOpt <- userService.findById(authToken.userID)
+      loginInfoOpt = userOpt.flatMap(_.profiles.find(_.providerID == CredentialsProvider.ID))
+      _ <- authInfoRepository.update[PasswordInfo](loginInfoOpt.get, passwordInfo)
+    } yield {
+      Ok(JsBoolean(true))
     }
   }
 }

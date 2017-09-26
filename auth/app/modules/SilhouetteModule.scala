@@ -29,7 +29,6 @@ import net.codingwell.scalaguice.ScalaModule
 import play.api
 import play.api.Configuration
 import play.api.libs.ws.WSClient
-import utils.auth.{CustomSecuredErrorHandler, CustomUnsecuredErrorHandler}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,8 +45,6 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
    */
   def configure() {
     bind[Silhouette[AuthEnv]].to[SilhouetteProvider[AuthEnv]]
-    bind[UnsecuredErrorHandler].to[CustomUnsecuredErrorHandler]
-    bind[SecuredErrorHandler].to[CustomSecuredErrorHandler]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
     bind[EventBus].toInstance(EventBus())

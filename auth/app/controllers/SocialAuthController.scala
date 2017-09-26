@@ -24,10 +24,10 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 @Singleton
 class SocialAuthController @Inject() (
-                                       silhouette: Silhouette[AuthEnv],
                                        userService: UserService,
                                        authInfoRepository: AuthInfoRepository,
                                        socialProviderRegistry: SocialProviderRegistry,
+                                       implicit val silhouette: Silhouette[AuthEnv],
                                        implicit val ec: ExecutionContext
 ) extends Controller with Logger {
 
@@ -40,15 +40,11 @@ class SocialAuthController @Inject() (
   def authenticate(provider: String) = Action.async{ implicit req => {
 
     def createAuthResult(user: User, loginInfo: LoginInfo, authInfo: AuthInfo): Future[Result] = {
-      val userDetails = Some(Json.toJson(user).as[JsObject])
       for {
         _ <- authInfoRepository.save(loginInfo, authInfo)
-        authenticator <- silhouette.env.authenticatorService.create(loginInfo)
-        authenticatorWithClaim = authenticator.copy(customClaims = userDetails)
-        value <- silhouette.env.authenticatorService.init(authenticatorWithClaim)
-        result <- silhouette.env.authenticatorService.embed(value, Ok(JsString(value)))
+        res <- AuthUtils.authResponse(user, loginInfo)
       } yield {
-        CookieUtils.setUser(result, user.id)
+        res
       }
     }
 

@@ -44,11 +44,14 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val A = someRandom[User]
       val chAcc = someRandom[ChargeAccount]
 
-      await(userRepo.save(A))
-      await(balanceRepo.setChargeAccount(A.id, chAcc))
+      val matchResult = for {
+        _ <- balanceRepo.setChargeAccount(A.id, chAcc)
+        chargeAccount <- balanceRepo.getChargeAccount(A.id)
+      } yield {
+        chargeAccount must beEqualTo(Some(chAcc))
+      }
 
-      await(userRepo.findById(A.id)).get.chargeAccount must beEqualTo(Some(chAcc))
-      await(balanceRepo.getChargeAccount(A.id)) must beEqualTo(Some(chAcc))
+      matchResult.await
     }
 
   }
@@ -59,12 +62,11 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = someRandom[User]
 
       val matchResult = for {
-        savedUser <- userRepo.save(user)
+        balanceBefore <- balanceRepo.getBalance(user.id)
         _ <- balanceRepo.updateBalance(user.id, 10)
-        updatedUser <- userRepo.findById(user.id).map(_.get)
+        balanceAfter <- balanceRepo.getBalance(user.id)
       } yield {
-        savedUser.balance shouldEqual user.balance
-        updatedUser.balance shouldEqual user.balance + 10
+        balanceAfter shouldEqual balanceBefore + 10
       }
 
       matchResult.await
@@ -74,12 +76,11 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = someRandom[User]
 
       val matchResult = for {
-        savedUser <- userRepo.save(user)
+        balanceBefore <- balanceRepo.getBalance(user.id)
         _ <- balanceRepo.updateBalance(user.id, -10)
-        updatedUser <- userRepo.findById(user.id).map(_.get)
+        balanceAfter <- balanceRepo.getBalance(user.id)
       } yield {
-        savedUser.balance shouldEqual user.balance
-        updatedUser.balance shouldEqual user.balance -10
+        balanceAfter shouldEqual balanceBefore - 10
       }
 
       matchResult.await

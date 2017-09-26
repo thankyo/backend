@@ -21,7 +21,7 @@ case class User(
                  id: UserID,
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
-                 email: Option[Email] = None,
+                 email: Email,
                  avatarURL: Option[String] = None,
                  bio: Option[String] = None,
                  dateOfBirth: Option[LocalDateTime] = None,
@@ -48,7 +48,6 @@ case class User(
     this.copy(
       firstName = firstName.orElse(socialProfile.firstName),
       lastName = lastName.orElse(socialProfile.lastName),
-      email = email.orElse(socialProfile.email),
       // following #60
       avatarURL = socialProfile.avatarURL.orElse(avatarURL),
       profiles = profiles + socialProfile.loginInfo
@@ -71,7 +70,9 @@ object User {
   implicit val userWriteable = WriteableUtils.jsonToWriteable[User]
 
   def from(profile: CommonSocialProfile): User = {
-    User(IDGenerator.generate()).link(profile)
+    val email = profile.email.get
+    User(id = IDGenerator.generate(), email = email).
+      link(profile)
   }
 
 }

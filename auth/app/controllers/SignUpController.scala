@@ -88,7 +88,7 @@ class SignUpController @Inject() (
               id = IDGenerator.generate(),
               firstName = Some(data.firstName),
               lastName = Some(data.lastName),
-              email = Some(data.email),
+              email = data.email,
               avatarURL = None,
               profiles = Set(loginInfo)
             )

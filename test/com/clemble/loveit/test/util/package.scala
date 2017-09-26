@@ -213,18 +213,11 @@ package object util {
         id = random(10),
         firstName = Some(random(10)),
         lastName = Some(random(10)),
-        owns = Set.empty,
-        balance = 200L,
-        total = 200L,
-        chargeAccount = Some(someRandom[ChargeAccount]),
+        email = s"${someRandom[String]}@${someRandom[String]}.${someRandom[String]}",
         avatarURL = Some(random(12)),
         dateOfBirth = Some(someRandom[LocalDateTime]),
         profiles = Set.empty[LoginInfo]
       )
-    }
-
-    def generate(ownership: Resource): User = {
-      generate().copy(owns = Set(ownership))
     }
 
   }

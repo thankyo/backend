@@ -62,14 +62,12 @@ case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, im
       })
   }
 
-  private def asMailgunEmailForm(user: User): Option[Map[String, Seq[String]]] = {
-    user.email.map(address => {
-      Map(
-        "address" -> Seq(address),
-        "subscribed" -> Seq("true"),
-        "name" -> Seq(s"${user.firstName.getOrElse("")} ${user.lastName.getOrElse("")}".trim())
-      )
-    })
+  private def asMailgunEmailForm(user: User): Map[String, Seq[String]] = {
+    Map(
+      "address" -> Seq(user.email),
+      "subscribed" -> Seq("true"),
+      "name" -> Seq(s"${user.firstName.getOrElse("")} ${user.lastName.getOrElse("")}".trim())
+    )
   }
 
   private val USERS_LIST = "users"
@@ -77,14 +75,10 @@ case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, im
   private val CONTRIBUTOR_LIST = "contributorleads"
 
   override def signedUpUser(user: User): Future[Boolean] = {
-    asMailgunEmailForm(user) match {
-      case Some(emailForm) =>
-        subscribe(USERS_LIST, emailForm)
-        remove(CREATORS_LIST, user.email.get)
-        remove(CONTRIBUTOR_LIST, user.email.get)
-      case None =>
-        Future.successful(true)
-    }
+    val emailForm = asMailgunEmailForm(user)
+    subscribe(USERS_LIST, emailForm)
+    remove(CREATORS_LIST, user.email)
+    remove(CONTRIBUTOR_LIST, user.email)
   }
 
   override def subscribeCreator(email: String): Future[Boolean] = {

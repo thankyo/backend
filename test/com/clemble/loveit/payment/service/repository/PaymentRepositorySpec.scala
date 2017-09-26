@@ -6,6 +6,7 @@ import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.{PaymentException, RepositoryException}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
+import com.clemble.loveit.user.model.User
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -16,21 +17,20 @@ class PaymentRepositorySpec extends RepositorySpec {
 
   "get balance" in {
     val A = createUser()
-    await(repo.getBalance(A.id)) shouldEqual A.balance
+    await(repo.getBalance(A.id)) shouldEqual 0
   }
 
   "update balance" in {
     val A = createUser()
     await(repo.updateBalance(A.id, -100)  )
-    await(repo.getBalance(A.id)) shouldEqual A.balance -100
+    await(repo.getBalance(A.id)) shouldEqual -100
   }
 
   "PAYOUT ACCOUNT" should {
 
     "get" in {
       val A = createUser()
-
-      await(repo.getPayoutAccount(A.id)) shouldEqual A.payoutAccount
+      await(repo.getPayoutAccount(A.id)) shouldEqual None
     }
 
     "set same" in {
@@ -53,7 +53,7 @@ class PaymentRepositorySpec extends RepositorySpec {
     "get chargeAccount" in {
       val A = createUser()
 
-      await(repo.getChargeAccount(A.id)) shouldEqual A.chargeAccount
+      await(repo.getChargeAccount(A.id)) shouldEqual None
     }
 
     "set same ChargeAccount" in {

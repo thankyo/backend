@@ -6,6 +6,7 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
+import com.mohiva.play.silhouette.api.actions.{DefaultSecuredErrorHandler, DefaultUnsecuredErrorHandler, SecuredErrorHandler, UnsecuredErrorHandler}
 import com.mohiva.play.silhouette.api.crypto._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services._
@@ -31,7 +32,6 @@ import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import net.ceedubs.ficus.readers.EnumerationReader._
 
 /**
@@ -48,6 +48,9 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
     bind[EventBus].toInstance(EventBus())
     bind[Clock].toInstance(Clock())
+
+    bind[UnsecuredErrorHandler].to[DefaultUnsecuredErrorHandler]
+    bind[SecuredErrorHandler].to[DefaultSecuredErrorHandler]
 
     // Replace this with the bindings to your concrete DAOs
     bind[DelegableAuthInfoDAO[PasswordInfo]].toInstance(new InMemoryAuthInfoDAO[PasswordInfo])

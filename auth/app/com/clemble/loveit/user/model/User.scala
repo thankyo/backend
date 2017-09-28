@@ -2,10 +2,11 @@ package com.clemble.loveit.user.model
 
 import java.time.LocalDateTime
 
+import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, CredentialsProvider}
 import play.api.libs.json.Json
 
 /**
@@ -73,6 +74,18 @@ object User {
     val email = profile.email.get
     User(id = IDGenerator.generate(), email = email).
       link(profile)
+  }
+
+  def from(signUp: SignUpRequest): User = {
+    val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.email)
+    new User(
+      id = IDGenerator.generate(),
+      firstName = Some(signUp.firstName),
+      lastName = Some(signUp.lastName),
+      email = signUp.email,
+      avatarURL = None,
+      profiles = Set(loginInfo)
+    )
   }
 
 }

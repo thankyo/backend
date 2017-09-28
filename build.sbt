@@ -73,7 +73,7 @@ def readProperties(fileName: String): Map[String, String] = {
 envVars ++= readProperties("./local.properties")
 
 testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "console", "junitxml")
-coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*;.*ReverseRoutes.*;.*Routes.*;.*Module.*;.*TestSocialProvider.*"""
+coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*;.*ReverseRoutes.*;.*Routes.*;.*Module.*;"""
 
 javaOptions in Universal ++= Seq(
   "-Dpidfile.path=/dev/null"

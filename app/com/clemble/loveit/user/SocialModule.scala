@@ -1,7 +1,6 @@
 package com.clemble.loveit.user
 
-import com.clemble.loveit.common.util.{AuthEnv, TestSocialProvider}
-import com.clemble.loveit.user.service.repository.UserRepository
+import com.clemble.loveit.common.util.{AuthEnv}
 import javax.inject.Singleton
 
 import akka.actor.{ActorSystem, Props}
@@ -85,23 +84,8 @@ class SocialModule(env: api.Environment, conf: Configuration) extends ScalaModul
 
   @Provides
   @Singleton
-  def testProvider(
-                    httpLayer: HTTPLayer,
-                    stateHandler: SocialStateHandler,
-                    stateProvider: SocialStateHandler
-                  ): TestSocialProvider = {
-    val testConfig = new OAuth2Settings(
-      accessTokenURL = "",
-      clientID = "",
-      clientSecret = ""
-    )
-    new TestSocialProvider(httpLayer, stateProvider, stateHandler, testConfig)
-  }
-
-  @Provides
-  @Singleton
-  def socialProviderRegistry(fp: FacebookProvider, tp: TestSocialProvider): SocialProviderRegistry = {
-    val providers = if (env.mode == Mode.Prod) Seq(fp) else Seq(fp, tp)
+  def socialProviderRegistry(fp: FacebookProvider): SocialProviderRegistry = {
+    val providers = if (env.mode == Mode.Prod) Seq(fp) else Seq(fp)
     SocialProviderRegistry(providers)
   }
 

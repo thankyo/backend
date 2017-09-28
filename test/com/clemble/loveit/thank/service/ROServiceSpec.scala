@@ -1,7 +1,8 @@
 package com.clemble.loveit.thank.service
 
+import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.error.{UserException}
+import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.Resource
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.junit.runner.RunWith
@@ -24,8 +25,7 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
   "POST" should {
 
     "assign ownership" in {
-      val social = someRandom[CommonSocialProfile]
-      val user = createUser(social)
+      val user = createUser()
 
       val resource = Resource from s"http://${someRandom[String]}.com"
       assignOwnership(user, resource)

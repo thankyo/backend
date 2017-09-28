@@ -2,6 +2,7 @@ package com.clemble.loveit.payment.service
 
 import java.time.YearMonth
 
+import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.common.{ServiceSpec, ThankSpecification}
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{Resource, UserID}
@@ -30,7 +31,7 @@ trait GenericEOMServiceSpec extends ThankSpecification with PaymentTestExecutor 
 
   sequential
 
-  def createUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): UserID
+  def createUser(socialProfile: SignUpRequest = someRandom[SignUpRequest]): UserID
 
   def getStatus(yom: YearMonth): Option[EOMStatus]
   def run(yom: YearMonth): EOMStatus

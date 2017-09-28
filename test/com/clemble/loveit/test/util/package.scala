@@ -3,6 +3,7 @@ package com.clemble.loveit.test
 import java.time.{LocalDateTime, YearMonth}
 import java.util.Currency
 
+import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
@@ -13,7 +14,6 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomStringUtils.{random, randomAlphabetic, randomNumeric}
-
 import org.apache.commons.lang3.RandomUtils.{nextInt, nextLong}
 
 import scala.util.Random
@@ -22,6 +22,7 @@ package object util {
 
   implicit val resourceGenerator: Generator[Resource] = ResourceGenerator
   implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = CommonSocialProfileGenerator
+  implicit val signUpRequest: Generator[SignUpRequest] = SignUpRequestGenerator
   implicit val paymentTransactionGenerator: Generator[EOMCharge] = PaymentTransactionGenerator
   implicit val repositoryExceptionGenerator: Generator[RepositoryException] = RepositoryExceptionGenerator
   implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
@@ -121,6 +122,19 @@ package object util {
         loginInfo = LoginInfo("test", RandomStringUtils.random(10)),
         firstName = Some(random(10)),
         lastName = Some(random(10))
+      )
+    }
+
+  }
+
+  private object SignUpRequestGenerator extends Generator[SignUpRequest] {
+
+    override def generate(): SignUpRequest = {
+      SignUpRequest(
+        firstName = random(10),
+        lastName = random(10),
+        email = random(10),
+        password = random(10)
       )
     }
 

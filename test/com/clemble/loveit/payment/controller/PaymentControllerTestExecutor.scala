@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.controller
 
 
 import com.clemble.loveit.common.ControllerSpec
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, EOMStatus, Money, StripeCustomerToken, ThankTransaction}
 import com.clemble.loveit.payment.service.ThankTransactionService
@@ -12,6 +12,11 @@ import play.api.test.FakeRequest
 trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecutor {
 
   val thankService = dependency[ThankTransactionService]
+
+  override def getBalance(user: UserID): Amount = {
+    // TODO need a real implementation
+    0
+  }
 
   override def charges(user: UserID): Seq[EOMCharge] = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge"))

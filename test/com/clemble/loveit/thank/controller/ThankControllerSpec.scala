@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.controller
 
-import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model.HttpResource
+import com.clemble.loveit.payment.controller.PaymentControllerTestExecutor
 import com.clemble.loveit.user.model.ResourceSpec
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
@@ -11,7 +11,7 @@ import play.api.test.FakeRequest
 import scala.concurrent.Future
 
 @RunWith(classOf[JUnitRunner])
-class ThankControllerSpec extends ControllerSpec {
+class ThankControllerSpec extends PaymentControllerTestExecutor {
 
   "UPDATE" should {
 
@@ -20,7 +20,7 @@ class ThankControllerSpec extends ControllerSpec {
 
       val giver = createUser()
       val owner = createUser()
-      val ownerBalanceBefore = getMyUser(owner).balance
+      val ownerBalanceBefore = getBalance(owner)
 
       addOwnership(owner, HttpResource(masterUrl)) shouldNotEqual None
 
@@ -34,7 +34,7 @@ class ThankControllerSpec extends ControllerSpec {
       val updateReq = await(Future.sequence(thanks))
       updateReq.forall(_ == OK) should beTrue
 
-      getMyUser(owner).balance shouldEqual ownerBalanceBefore + 1
+      getBalance(owner) shouldEqual ownerBalanceBefore + 1
     }
 
     "create transaction" in {

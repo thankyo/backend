@@ -6,7 +6,6 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{Reads, Writes}
 import play.api.test.PlaySpecification
-import reactivemongo.api.MongoDriver
 
 import scala.collection.immutable
 import scala.reflect.ClassTag

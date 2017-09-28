@@ -1,31 +1,30 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
-import com.clemble.loveit.common.util.IDGenerator
+import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import com.clemble.loveit.user.model.User
-import com.clemble.loveit.user.service.repository.UserRepository
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
+class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
   val thankService = dependency[ThankService]
   val thankRepo = dependency[ThankRepository]
   val supportedProjectService = dependency[UserSupportedProjectsService]
-  val userRepo = dependency[UserRepository]
+  val roService = dependency[ROService]
 
   def createScene():(Resource, User, User) = {
     val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
     // TODO flow must be changed here to use ResourceOwnersip verification
-    val owner = await(userRepo.save(someRandom[User].assignOwnership(url)))
+    val owner = someUser()
+    await(roService.assignOwnership(owner.id, url))
     await(thankRepo.updateOwner(owner.id, url))
-    val giver = await(userRepo.save(someRandom[User]))
+    val giver = someUser()
 
     (url, owner, giver)
   }
@@ -36,10 +35,6 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   def getSupported(user: UserID) = {
     await(supportedProjectService.getSupported(user));
-  }
-
-  def getBalance(user: String): Amount = {
-    await(userRepo.findById(user).map(_.get)).balance
   }
 
   def getBalance(url: Resource): Amount = {
@@ -79,7 +74,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       thank(giver.id, url)
       eventually(getBalance(url) shouldEqual 1)
 
-      eventually(giver.balance - 1 shouldEqual getBalance(giver.id))
+      eventually(- 1 shouldEqual getBalance(giver.id))
     }
 
     "Increment for the owner" in {
@@ -88,14 +83,14 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       thank(giver.id, url)
       eventually(getBalance(url) shouldEqual 1)
 
-      eventually(owner.balance + 1 shouldEqual getBalance(owner.id))
+      eventually(1 shouldEqual getBalance(owner.id))
     }
 
     "Double thank has no effect" in {
       val (url, owner, giver) = createScene()
 
-      getBalance(owner.id) shouldEqual owner.balance
-      getBalance(giver.id) shouldEqual giver.balance
+      getBalance(owner.id) shouldEqual 0
+      getBalance(giver.id) shouldEqual 0
 
       // Double thank has no effect
       thank(giver.id, url)
@@ -104,8 +99,8 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       eventually(getBalance(url) shouldEqual 1)
 
       // Balance did not change
-      eventually(getBalance(owner.id) shouldEqual owner.balance + 1)
-      eventually(getBalance(giver.id) shouldEqual giver.balance - 1)
+      eventually(getBalance(owner.id) shouldEqual 1)
+      eventually(getBalance(giver.id) shouldEqual - 1)
     }
 
   }

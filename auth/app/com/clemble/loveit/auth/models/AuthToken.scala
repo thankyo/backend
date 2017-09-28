@@ -1,4 +1,4 @@
-package models
+package com.clemble.loveit.auth.models
 
 import java.util.UUID
 

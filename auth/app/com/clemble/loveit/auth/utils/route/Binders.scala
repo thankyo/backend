@@ -1,4 +1,4 @@
-package utils.route
+package com.clemble.loveit.auth.utils.route
 
 import java.util.UUID
 

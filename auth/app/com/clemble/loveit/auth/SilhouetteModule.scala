@@ -1,4 +1,4 @@
-package modules
+package com.clemble.loveit.auth
 
 import javax.inject.Singleton
 
@@ -6,7 +6,6 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
-import com.mohiva.play.silhouette.api.actions.{SecuredErrorHandler, UnsecuredErrorHandler}
 import com.mohiva.play.silhouette.api.crypto._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services._

@@ -1,4 +1,4 @@
-package forms
+package com.clemble.loveit.auth.models.requests
 
 import com.clemble.loveit.common.model.Email
 import com.mohiva.play.silhouette.api.LoginInfo

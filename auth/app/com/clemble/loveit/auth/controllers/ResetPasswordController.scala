@@ -1,4 +1,4 @@
-package controllers
+package com.clemble.loveit.auth.controllers
 
 import java.util.UUID
 import javax.inject.Inject
@@ -7,16 +7,15 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.{ PasswordHasherRegistry, PasswordInfo}
+import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import forms.{ResetPasswordRequest}
-import models.services.AuthTokenService
-import org.webjars.play.WebJarsUtil
-import play.api.i18n.{I18nSupport, Messages}
+import com.clemble.loveit.auth.models.requests.ResetPasswordRequest
+import com.clemble.loveit.auth.models.services.AuthTokenService
+import play.api.i18n.I18nSupport
 import play.api.libs.json.JsBoolean
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 /**
  * The `Reset Password` controller.

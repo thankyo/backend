@@ -1,4 +1,4 @@
-package utils
+package com.clemble.loveit.auth.utils
 
 import javax.inject.Inject
 

@@ -1,8 +1,8 @@
-package modules
+package com.clemble.loveit.auth
 
+import com.clemble.loveit.auth.models.daos.{AuthTokenDAO, AuthTokenDAOImpl}
+import com.clemble.loveit.auth.models.services.{AuthTokenService, AuthTokenServiceImpl}
 import com.google.inject.AbstractModule
-import models.daos.{ AuthTokenDAO, AuthTokenDAOImpl }
-import models.services.{ AuthTokenService, AuthTokenServiceImpl }
 import net.codingwell.scalaguice.ScalaModule
 
 /**

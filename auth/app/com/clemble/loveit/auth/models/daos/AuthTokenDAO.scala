@@ -1,8 +1,8 @@
-package models.daos
+package com.clemble.loveit.auth.models.daos
 
 import java.util.UUID
 
-import models.AuthToken
+import com.clemble.loveit.auth.models.AuthToken
 import org.joda.time.DateTime
 
 import scala.concurrent.Future

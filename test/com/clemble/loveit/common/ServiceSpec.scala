@@ -1,12 +1,12 @@
 package com.clemble.loveit.common
 
+import com.clemble.loveit.auth.controllers.SocialAuthController
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.service.ROService
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.user.service.repository.UserRepository
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import controllers.SocialAuthController
 
 trait ServiceSpec extends ThankSpecification {
 
@@ -30,6 +30,8 @@ trait ServiceSpec extends ThankSpecification {
       case Right(user) => user.id
     }
   }
+
+
 
   def assignOwnership(user: UserID, res: Resource) = await(resService.assignOwnership(user, res))
 }

@@ -1,9 +1,11 @@
 package com.clemble.loveit.payment
 
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, Money, StripeCustomerToken, ThankTransaction}
 
 trait PaymentTestExecutor extends TestStripeUtils {
+
+  def getBalance(user: UserID): Amount
 
   def charges(user: UserID): Seq[EOMCharge]
 

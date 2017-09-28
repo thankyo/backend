@@ -1,4 +1,4 @@
-package controllers
+package com.clemble.loveit.auth.controllers
 
 import javax.inject.Inject
 
@@ -8,12 +8,12 @@ import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
-import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasherRegistry}
+import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers._
-import forms.SignUpRequest
-import models.services.AuthTokenService
-import play.api.i18n.{I18nSupport, Messages}
-import play.api.libs.mailer.{Email, MailerClient}
+import com.clemble.loveit.auth.models.requests.SignUpRequest
+import com.clemble.loveit.auth.models.services.AuthTokenService
+import play.api.i18n.I18nSupport
+import play.api.libs.mailer.MailerClient
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,9 +1,9 @@
-package models.services
+package com.clemble.loveit.auth.models.services
 
 import java.util.UUID
 
+import com.clemble.loveit.auth.models.AuthToken
 import com.clemble.loveit.common.model.UserID
-import models.AuthToken
 
 import scala.concurrent.Future
 import scala.language.postfixOps

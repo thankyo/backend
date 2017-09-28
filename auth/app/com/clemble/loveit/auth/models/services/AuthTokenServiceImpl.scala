@@ -1,16 +1,14 @@
-package models.services
+package com.clemble.loveit.auth.models.services
 
 import java.util.UUID
 import javax.inject.Inject
 
+import com.clemble.loveit.auth.models.AuthToken
+import com.clemble.loveit.auth.models.daos.AuthTokenDAO
 import com.clemble.loveit.common.model.UserID
 import com.mohiva.play.silhouette.api.util.Clock
-import models.AuthToken
-import models.daos.AuthTokenDAO
-import org.joda.time.DateTimeZone
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 /**
@@ -21,8 +19,8 @@ import scala.language.postfixOps
  * @param ex           The execution context.
  */
 class AuthTokenServiceImpl @Inject() (
-  authTokenDAO: AuthTokenDAO,
-  clock: Clock
+                                       authTokenDAO: AuthTokenDAO,
+                                       clock: Clock
 )(
   implicit
   ex: ExecutionContext

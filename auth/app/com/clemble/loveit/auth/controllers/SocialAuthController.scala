@@ -1,16 +1,14 @@
-package controllers
+package com.clemble.loveit.auth.controllers
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.user.model.{User}
+import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
-import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}

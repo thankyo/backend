@@ -1,12 +1,14 @@
-package controllers
+package com.clemble.loveit.auth.controllers
 
 import javax.inject.Inject
 
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
-import forms.ForgotPasswordRequest
-import models.services.AuthTokenService
+import com.clemble.loveit.auth.models.requests.ForgotPasswordRequest
+import com.clemble.loveit.auth.models.services.AuthTokenService
+import com.clemble.loveit.auth.views.html.emails.resetPassword
+import com.clemble.loveit.auth.views.txt.emails
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.JsBoolean
 import play.api.libs.mailer.{Email, MailerClient}
@@ -59,8 +61,8 @@ class ForgotPasswordController @Inject()(
             subject = Messages("email.reset.password.subject"),
             from = Messages("email.from"),
             to = Seq(loginInfo.providerKey),
-            bodyText = Some(views.txt.emails.resetPassword(user, url).body),
-            bodyHtml = Some(views.html.emails.resetPassword(user, url).body)
+            bodyText = Some(emails.resetPassword(user, url).body),
+            bodyHtml = Some(resetPassword(user, url).body)
           ))
         Ok(JsBoolean(true))
       }

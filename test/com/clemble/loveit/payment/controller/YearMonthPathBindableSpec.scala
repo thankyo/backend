@@ -2,12 +2,12 @@ package com.clemble.loveit.payment.controller
 
 import java.time.YearMonth
 
-import com.clemble.loveit.common.ThankSpecification
+import com.clemble.loveit.common.{ControllerSpec, ThankSpecification}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class YearMonthPathBindableSpec extends ThankSpecification {
+class YearMonthPathBindableSpec extends ControllerSpec {
 
   "read from string" in {
     val yom = someRandom[YearMonth]

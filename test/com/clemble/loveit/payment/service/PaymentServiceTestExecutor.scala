@@ -1,18 +1,24 @@
 package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, Money, StripeCustomerToken, ThankTransaction}
-import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, PaymentLimitRepository, PaymentRepository}
+import com.clemble.loveit.payment.service.repository._
 
 trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
 
   val accService = dependency[PaymentAccountService]
+  val payRepo = dependency[UserPaymentRepository]
   val thankService = dependency[ThankTransactionService]
   val monLimRepo = dependency[PaymentLimitRepository]
   val eomChargeRepo = dependency[EOMChargeRepository]
   val eomPayoutRepo = dependency[EOMPayoutRepository]
+
+  def getBalance(user: UserID): Amount = {
+    val balanceOpt = await(payRepo.findById(user).map(_.map(_.balance)))
+    balanceOpt.get
+  }
 
   override def charges(user: UserID): Seq[EOMCharge] = {
     eomChargeRepo.findByUser(user).toSeq

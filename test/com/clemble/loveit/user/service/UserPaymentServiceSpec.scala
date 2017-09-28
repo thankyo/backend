@@ -1,26 +1,23 @@
 package com.clemble.loveit.user.service
 
-import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.error.{RepositoryException}
+import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{HttpResource, Resource}
 import com.clemble.loveit.user.model.User
-import com.clemble.loveit.payment.service.ThankTransactionService
+import com.clemble.loveit.payment.service.{PaymentServiceTestExecutor, ThankTransactionService}
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
-import scala.util.{Failure, Success}
-
 @RunWith(classOf[JUnitRunner])
-class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
+class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
   val service = dependency[UserService]
   val repo = dependency[UserRepository]
   val transactionService = dependency[ThankTransactionService]
 
-  val giver = someRandom[User].copy(balance = Int.MaxValue)
+  val giver = someRandom[User]
   await(repo.save(giver))
 
   "CREATE" should {
@@ -41,12 +38,16 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
   }
 
   def createUserWithOwnership(owns: Resource): User = {
-    val user = someRandom[User].
-      assignOwnership(owns).
-      copy(balance = 0)
+    val user = someRandom[User]
+//      assignOwnership(owns).
+//      copy(balance = 0)
     val savedUser = await(repo.save(user))
-    await(repo.findById(user.id)).get.balance shouldEqual 0
+    getBalance(user.id) shouldEqual 0
     savedUser
+  }
+
+  def thank(giver: User, owner: User, url: Resource) = {
+    await(transactionService.create(giver.id, owner.id, url))
   }
 
   "UPDATE OWNER BALANCE single hierarchy" should {
@@ -55,8 +56,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
     }
 
     "UNREALIZED url control" in {
@@ -64,8 +65,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
     }
 
     "IGNORE with PARTIAL control" in {
@@ -73,8 +74,8 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
 
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
     }
   }
 
@@ -86,9 +87,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
 
     "UNREALIZED url control" in {
@@ -98,9 +99,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
 
     "IGNORE with PARTIAL url control" in {
@@ -110,9 +111,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
   }
 
@@ -125,9 +126,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
 
     "UNREALIZED url control" in {
@@ -137,9 +138,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
 
     "PARTIAL url control" in {
@@ -149,9 +150,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
   }
 
@@ -163,9 +164,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
 
     "UNREALIZED url control" in {
@@ -175,9 +176,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
 
     "IGNORE with PARTIAL control" in {
@@ -187,9 +188,9 @@ class UserServiceSpec(implicit ee: ExecutionEnv) extends ServiceSpec {
       val parentUser = createUserWithOwnership(parentUrl)
       val user = createUserWithOwnership(url)
 
-      await(transactionService.create(giver.id, user.id, url))
-      await(repo.findById(user.id)).get.balance shouldEqual 1
-      await(repo.findById(parentUser.id)).get.balance shouldEqual 0
+      thank(giver, user, url)
+      getBalance(user.id) shouldEqual 1
+      getBalance(parentUser.id) shouldEqual 0
     }
   }
 }

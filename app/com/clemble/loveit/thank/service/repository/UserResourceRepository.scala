@@ -7,6 +7,8 @@ import scala.concurrent.Future
 
 trait UserResourceRepository {
 
+  def save(uRes: UserResource): Future[Boolean]
+
   def find(user: UserID): Future[Option[UserResource]]
 
 }

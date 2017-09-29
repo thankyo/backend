@@ -6,9 +6,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.user.model.Invitation
 import com.clemble.loveit.user.service.repository.InvitationRepository
-import play.api.libs.json.{JsObject, Json}
 import reactivemongo.play.json.collection.JSONCollection
-import reactivemongo.play.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,8 +17,7 @@ class MongoInvitationRepository @Inject()(
                                          ) extends InvitationRepository {
 
   override def save(inv: Invitation): Future[Invitation] = {
-    val invJson = Json.toJson[Invitation](inv).as[JsObject]
-    val fInsert = collection.insert(invJson)
+    val fInsert = collection.insert(inv)
     MongoSafeUtils.safe(inv, fInsert)
   }
 

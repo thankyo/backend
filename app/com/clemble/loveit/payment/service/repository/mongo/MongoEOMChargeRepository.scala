@@ -11,7 +11,7 @@ import javax.inject.{Inject, Named, Singleton}
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import reactivemongo.api.ReadPreference
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,8 +55,7 @@ case class MongoEOMChargeRepository @Inject()(
   }
 
   override def save(charge: EOMCharge): Future[EOMCharge] = {
-    val json = Json.toJson(charge).as[JsObject]
-    MongoSafeUtils.safe(charge, collection.insert(json))
+    MongoSafeUtils.safe(charge, collection.insert(charge))
   }
 
 }

@@ -25,7 +25,7 @@ object UserPayment {
 
   val DEFAULT_LIMIT = Money(BigDecimal(10), LoveItCurrency.getInstance("USD"))
 
-  implicit val jsonFormat = Json.format[UserPayment]
+  implicit val jsonFormat: OFormat[UserPayment] = Json.format[UserPayment]
 
   def from(user: User): UserPayment = {
     UserPayment(user.id)

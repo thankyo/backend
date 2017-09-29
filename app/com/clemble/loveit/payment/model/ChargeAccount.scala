@@ -19,7 +19,7 @@ object ChargeAccount {
   /**
     * JSON format for [[StripeChargeAccount]]
     */
-  private val stripeJsonFormat = Json.format[StripeChargeAccount]
+  private val stripeJsonFormat: OFormat[StripeChargeAccount] = Json.format[StripeChargeAccount]
 
   /**
     * JSON format for [[ChargeAccount]]

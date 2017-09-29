@@ -8,7 +8,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.repository.EOMStatusRepository
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{Json}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
@@ -26,7 +26,7 @@ case class MongoEOMStatusRepository @Inject()(@Named("eomStatus") collection: JS
   }
 
   override def save(status: EOMStatus): Future[EOMStatus] = {
-    MongoSafeUtils.safe(status, collection.insert(Json.toJson(status).as[JsObject]))
+    MongoSafeUtils.safe(status, collection.insert(status))
   }
 
   override def update(yom: YearMonth, createCharges: EOMStatistics, applyCharges: EOMStatistics, createPayout: EOMStatistics, applyPayout: EOMStatistics, finished: LocalDateTime): Future[Boolean] = {

@@ -28,6 +28,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
     bind[BalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[UserPaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()

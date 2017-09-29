@@ -41,7 +41,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "set ChargeAccount" in {
-      val A = someRandom[User]
+      val A = createUser()
       val chAcc = someRandom[ChargeAccount]
 
       val matchResult = for {
@@ -59,7 +59,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   "CHANGE balance" should {
 
     "increase when positive" in {
-      val user = someRandom[User]
+      val user = createUser()
 
       val matchResult = for {
         balanceBefore <- balanceRepo.getBalance(user.id)
@@ -73,7 +73,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "decrease when negative" in {
-      val user = someRandom[User]
+      val user = createUser()
 
       val matchResult = for {
         balanceBefore <- balanceRepo.getBalance(user.id)

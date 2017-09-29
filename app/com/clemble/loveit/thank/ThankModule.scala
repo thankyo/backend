@@ -57,6 +57,13 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
   @Provides
   @Singleton
+  @Named("userResource")
+  def userResourceCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("userResource", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
   @Named("stat")
   def statMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("stat", mongoApi, ec, env)

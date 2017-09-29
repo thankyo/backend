@@ -1,7 +1,8 @@
 package com.clemble.loveit.payment.service.repository
 
+import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Amount, UserID}
-import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, UserPayment}
 
 import scala.concurrent.Future
 
@@ -68,5 +69,15 @@ trait BalanceRepository {
 
 }
 
-trait PaymentRepository extends PaymentLimitRepository with PaymentAccountRepository with BalanceRepository {
+trait UserPaymentRepository {
+
+  def save(userPayment: UserPayment): Future[Boolean]
+
+  def findById(id: UserID): Future[Option[UserPayment]]
+
+  def find(): Source[UserPayment, _]
+
+}
+
+trait PaymentRepository extends PaymentLimitRepository with PaymentAccountRepository with BalanceRepository with UserPaymentRepository {
 }

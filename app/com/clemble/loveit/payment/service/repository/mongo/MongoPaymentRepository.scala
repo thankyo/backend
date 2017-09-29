@@ -3,27 +3,50 @@ package com.clemble.loveit.payment.service.repository.mongo
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.stream.Materializer
+import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
+import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, UserPayment}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONString}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.akkastream.cursorProducer
+import reactivemongo.api.ReadPreference
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 case class MongoPaymentRepository @Inject()(
-                                             @Named("user") collection: JSONCollection,
+                                             @Named("userPayment") collection: JSONCollection,
                                              implicit val ec: ExecutionContext,
                                              implicit val m: Materializer
                                            ) extends PaymentRepository {
 
   MongoPaymentRepository.ensureMeta(collection)
+
+  override def save(userPayment: UserPayment) = {
+    val saveRes = collection.insert(userPayment)
+    MongoSafeUtils.safeSingleUpdate(saveRes)
+  }
+
+  override def findById(id: UserID): Future[Option[UserPayment]] = {
+    val selector = Json.obj("_id" -> id)
+    collection.
+      find(selector).
+      one[UserPayment]
+  }
+
+  override def find(): Source[UserPayment, _] = {
+    val selector = Json.obj()
+    collection.
+      find(selector).
+      cursor[UserPayment](ReadPreference.nearest).
+      documentSource()
+  }
 
   override def getBalance(user: UserID): Future[Amount] = {
     val selector = Json.obj("_id" -> user)

@@ -9,7 +9,7 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class UserPaymentRepositorySpec extends RepositorySpec {
 
-  val repo = dependency[UserPaymentRepository]
+  val repo = dependency[PaymentRepository]
 
   "find all" in {
     val A = createUser()

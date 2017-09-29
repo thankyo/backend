@@ -32,13 +32,14 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[PaymentLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
+    bind[UserPaymentService].to[SimpleUserPaymentService].asEagerSingleton()
+
     bind[EOMService].to[SimpleEOMService].asEagerSingleton()
     bind[EOMChargeService].toInstance(StripeEOMChargeService)
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
     bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
 
     bind[PaymentAccountService].to[SimplePaymentAccountService].asEagerSingleton()
-    bind[UserPaymentRepository].to[MongoUserPaymentRepository].asEagerSingleton()
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
@@ -50,8 +51,8 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   @Provides
   @Singleton
   def chargeAccountService(wsClient: WSClient, ec: ExecutionContext): ChargeAccountConverter = {
-    val apiKey = conf.getString("payment.stripe.apiKey").get
-    val clientId = conf.getString("payment.stripe.clientId").get
+    val apiKey = conf.get[String]("payment.stripe.apiKey")
+    val clientId = conf.get[String]("payment.stripe.clientId")
     new StripeChargeAccountConverter(apiKey, clientId, wsClient, ec)
   }
 
@@ -81,6 +82,14 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   def eomStatusMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("eomStatus", mongoApi, ec, env)
   }
+
+  @Provides
+  @Singleton
+  @Named("userPayment")
+  def userPaymentCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("userPayment", mongoApi, ec, env)
+  }
+
 
   @Provides
   @Singleton

@@ -23,7 +23,7 @@ case class EOMPayoutController @Inject()(
                                           implicit val ec: ExecutionContext
                                    ) extends Controller {
 
-  private val clientId = conf.getString("payment.stripe.clientId").get
+  private val clientId = conf.get[String]("payment.stripe.clientId")
 
   private def toStripeUrl(user: UserID) = {
     s"https://connect.stripe.com/oauth/authorize?" +

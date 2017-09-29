@@ -10,7 +10,7 @@ import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutAccount, PayoutStatus, UserPayment}
-import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository, EOMStatusRepository, UserPaymentRepository}
+import com.clemble.loveit.payment.service.repository._
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,7 +41,7 @@ case class SimpleEOMService @Inject()(
                                        payoutService: EOMPayoutService,
                                        paymentAccService: PaymentAccountService,
                                        thankService: ThankTransactionService,
-                                       paymentRepo: UserPaymentRepository,
+                                       paymentRepo: PaymentRepository,
                                        exchangeService: ExchangeService,
                                        implicit val ec: ExecutionContext,
                                        implicit val m: Materializer
@@ -78,7 +78,7 @@ case class SimpleEOMService @Inject()(
           val thanks = exchangeService.toThanks(user.monthlyLimit)
           val (satisfied, _) = user.pending.splitAt(thanks.toInt)
           val amount = exchangeService.toAmountWithClientFee(satisfied.size)
-          EOMCharge(user.id, yom, bd, ChargeStatus.Pending, amount, None, satisfied)
+          EOMCharge(user._id, yom, bd, ChargeStatus.Pending, amount, None, satisfied)
         })
     }
 

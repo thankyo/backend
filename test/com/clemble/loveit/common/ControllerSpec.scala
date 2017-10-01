@@ -39,6 +39,9 @@ trait ControllerSpec extends FunctionalThankSpecification {
     val fRes = route(application, req).get
 
     val res = await(fRes)
+    if (res.header.status != 200)
+      throw new Exception()
+
     val user = ControllerSpec.setUser(res)
     user
   }

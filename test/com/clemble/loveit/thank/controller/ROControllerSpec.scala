@@ -10,7 +10,7 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 
 @RunWith(classOf[JUnitRunner])
-class ResourceOwnershipControllerSpec extends ControllerSpec {
+class ROControllerSpec extends ControllerSpec {
 
   def listResources(user: String): UserResource = {
     val req = sign(user, FakeRequest(GET, s"/api/v1/thank/my/resource"))
@@ -26,8 +26,7 @@ class ResourceOwnershipControllerSpec extends ControllerSpec {
       val user = createUser()
 
       val resources = listResources(user)
-      val expectedUserRes = Json.toJson(getMyUser(user)).as[UserResource]
-      resources shouldEqual expectedUserRes
+      resources shouldEqual UserResource(user)
     }
 
   }

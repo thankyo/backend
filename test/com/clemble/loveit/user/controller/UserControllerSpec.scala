@@ -26,22 +26,16 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
       savedUser.email must beEqualTo(profile.email)
     }
 
-    "Return same user on the same authentication" in {
+    "Forbids double authentication" in {
       val profile = someRandom[SignUpRequest]
-      val firstUser = createUser(profile)
-      val firstAuth = ControllerSpec.getUser(firstUser)
 
-      val secondUser = createUser(profile)
-      val secondAuth = ControllerSpec.getUser(secondUser)
-
-      firstAuth shouldNotEqual secondAuth
-      secondUser shouldEqual firstUser
+      createUser(profile)
+      createUser(profile) must throwA[Exception]()
     }
 
     "sets a userId as a cookie" in {
-      val json = Json.toJson(someRandom[CommonSocialProfile])
-      val req = FakeRequest(POST, "/api/v1/auth/authenticate/test").
-        withJsonBody(json)
+      val signUpReq = Json.toJson(someRandom[SignUpRequest])
+      val req = FakeRequest(POST, "/api/v1/auth/signUp").withJsonBody(signUpReq)
       val res = await(route(application, req).get)
 
       ControllerSpec.setUser(res)

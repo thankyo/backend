@@ -15,8 +15,9 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   val thankService = dependency[ThankTransactionService]
 
   override def getBalance(user: UserID): Amount = {
-    // TODO need a real implementation
-    0
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/balance"))
+    val amountOpt = res.body.dataStream.readJson[Amount]()
+    amountOpt.get
   }
 
   override def charges(user: UserID): Seq[EOMCharge] = {

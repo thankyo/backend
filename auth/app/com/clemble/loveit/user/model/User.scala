@@ -27,7 +27,6 @@ case class User(
                  bio: Option[String] = None,
                  dateOfBirth: Option[LocalDateTime] = None,
                  profiles: Set[LoginInfo] = Set.empty,
-                 activated: Boolean = false,
                  created: LocalDateTime = LocalDateTime.now()
                ) extends Identity with CreatedAware {
 

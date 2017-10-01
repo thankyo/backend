@@ -28,6 +28,8 @@ GET         /thank/:supporter/supported              @com.clemble.loveit.thank.c
 GET         /payment/:user/pending                   @com.clemble.loveit.payment.controller.ThankTransactionController.list(user)
 GET         /payment/my/charge                       @com.clemble.loveit.payment.controller.EOMChangeController.listMy()
 
+GET         /payment/:user/balance                   @com.clemble.loveit.payment.controller.UserBalanceController.getBalance(user)
+
 GET         /payment/my/account                      @com.clemble.loveit.payment.controller.PaymentAccountController.getMyAccount()
 POST        /payment/my/account                      @com.clemble.loveit.payment.controller.PaymentAccountController.setMyAccount()
 

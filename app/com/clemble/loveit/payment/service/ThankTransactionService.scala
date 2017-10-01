@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.service
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.ThankTransaction
-import com.clemble.loveit.payment.service.repository.{BalanceRepository, ThankTransactionRepository}
+import com.clemble.loveit.payment.service.repository.{UserBalanceRepository, ThankTransactionRepository}
 import javax.inject.{Inject, Singleton}
 
 import com.mohiva.play.silhouette.api.Logger
@@ -20,7 +20,7 @@ trait ThankTransactionService {
 }
 
 @Singleton
-case class SimpleThankTransactionService @Inject()(ownershipService: BalanceRepository, repository: ThankTransactionRepository, implicit val ec: ExecutionContext) extends ThankTransactionService with Logger {
+case class SimpleThankTransactionService @Inject()(ownershipService: UserBalanceRepository, repository: ThankTransactionRepository, implicit val ec: ExecutionContext) extends ThankTransactionService with Logger {
 
   override def list(user: UserID): Source[ThankTransaction, _] = {
     repository.findByUser(user)

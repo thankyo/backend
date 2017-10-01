@@ -1,7 +1,7 @@
 package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.payment.service.repository.BalanceRepository
+import com.clemble.loveit.payment.service.repository.UserBalanceRepository
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -14,7 +14,7 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentServ
 
   val thankTransService = dependency[ThankTransactionService]
   val userRepo = dependency[UserRepository]
-  val balanceRepo = dependency[BalanceRepository]
+  val balanceRepo = dependency[UserBalanceRepository]
 
   "PAYMENT" should {
 

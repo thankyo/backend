@@ -4,7 +4,7 @@ import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.model.ChargeAccount
-import com.clemble.loveit.payment.service.repository.{BalanceRepository, _}
+import com.clemble.loveit.payment.service.repository.{UserBalanceRepository, _}
 import com.clemble.loveit.payment.service.repository.mongo._
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
@@ -27,7 +27,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   override def configure() = {
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
-    bind[BalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[UserBalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentLimitRepository].to[MongoPaymentRepository].asEagerSingleton()

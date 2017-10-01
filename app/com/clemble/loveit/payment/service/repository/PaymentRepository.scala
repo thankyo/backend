@@ -53,7 +53,7 @@ trait PaymentAccountRepository {
   def setPayoutAccount(user: UserID, payoutAccount: PayoutAccount): Future[Boolean]
 }
 
-trait BalanceRepository {
+trait UserBalanceRepository {
 
   /**
     * @return 0 if user is missing, or has no activity, otherwise returns current user balance
@@ -79,5 +79,5 @@ trait UserPaymentRepository {
 
 }
 
-trait PaymentRepository extends PaymentLimitRepository with PaymentAccountRepository with BalanceRepository with UserPaymentRepository {
+trait PaymentRepository extends PaymentLimitRepository with PaymentAccountRepository with UserBalanceRepository with UserPaymentRepository {
 }

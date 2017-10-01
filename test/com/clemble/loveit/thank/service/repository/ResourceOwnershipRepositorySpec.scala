@@ -9,13 +9,13 @@ import org.specs2.runner.JUnitRunner
 import org.apache.commons.lang3.RandomStringUtils._
 
 @RunWith(classOf[JUnitRunner])
-class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
+class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
 
-  lazy val resRepo = dependency[ResourceRepository]
+  lazy val resOwnRepo = dependency[ResourceOwnershipRepository]
 
-  def assignOwnership(user: UserID, res: Resource) = await(resRepo.assignOwnership(user, res))
-  def listOwned(user: UserID) = await(resRepo.listOwned(user))
-  def findOwner(res: Resource) = await(resRepo.findOwner(res))
+  def assignOwnership(user: UserID, res: Resource) = await(resOwnRepo.assignOwnership(user, res))
+  def listOwned(user: UserID) = await(resOwnRepo.listOwned(user))
+  def findOwner(res: Resource) = await(resOwnRepo.findOwner(res))
 
   "LIST" should {
 
@@ -57,6 +57,10 @@ class ResourceRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySp
     "override ownership" in {
       val A = createUser().id
       val B = createUser().id
+
+      listOwned(A) shouldEqual Set.empty[Resource]
+      listOwned(B) shouldEqual Set.empty[Resource]
+
       val res = someRandom[Resource]
 
       assignOwnership(A, res) shouldEqual true

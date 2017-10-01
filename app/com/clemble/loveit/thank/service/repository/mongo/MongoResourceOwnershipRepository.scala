@@ -6,7 +6,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.common.error.{RepositoryException}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.thank.service.repository.ResourceRepository
+import com.clemble.loveit.thank.service.repository.ResourceOwnershipRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
@@ -14,9 +14,9 @@ import reactivemongo.play.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class MongoResourceRepository @Inject() (@Named("user") collection: JSONCollection, implicit val m: Materializer, implicit val ec: ExecutionContext) extends ResourceRepository{
+case class MongoResourceOwnershipRepository @Inject()(@Named("userResource") collection: JSONCollection, implicit val m: Materializer, implicit val ec: ExecutionContext) extends ResourceOwnershipRepository{
 
-  MongoResourceRepository.ensureMeta(collection)
+  MongoResourceOwnershipRepository.ensureMeta(collection)
 
   override def findOwner(res: Resource): Future[Option[String]] = {
     val query = Json.obj("owns" -> res)
@@ -71,7 +71,7 @@ case class MongoResourceRepository @Inject() (@Named("user") collection: JSONCol
 
 }
 
-object MongoResourceRepository {
+object MongoResourceOwnershipRepository {
 
   def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     ensureIndexes(collection)

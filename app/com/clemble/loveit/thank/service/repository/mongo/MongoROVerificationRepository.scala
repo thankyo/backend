@@ -15,7 +15,7 @@ import reactivemongo.play.json.collection.JSONCollection
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class MongoROVerificationRepository @Inject()(@Named("user") collection: JSONCollection,
+case class MongoROVerificationRepository @Inject()(@Named("userResource") collection: JSONCollection,
                                                    implicit val m: Materializer,
                                                    implicit val ec: ExecutionContext
                                           ) extends ROVerificationRepository {

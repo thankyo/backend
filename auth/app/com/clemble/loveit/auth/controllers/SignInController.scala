@@ -53,7 +53,7 @@ class SignInController @Inject()(
     credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
       userService.retrieve(loginInfo).flatMap {
         case Some(user) =>
-          AuthUtils.authResponse(user, loginInfo)
+          AuthUtils.authResponse(Left(user), loginInfo)
         case None =>
           Future.failed(new IdentityNotFoundException("Couldn't find user"))
       }

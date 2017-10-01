@@ -51,8 +51,8 @@ class SignUpController @Inject()(
     *
     * @return The result to display.
     */
-  def submit = silhouette.UnsecuredAction.async(parse.json[SignUpRequest]) { implicit request: Request[SignUpRequest] =>
-    val signUp = request.body
+  def submit = silhouette.UnsecuredAction.async(parse.json[SignUpRequest]) { implicit req: Request[SignUpRequest] =>
+    val signUp = req.body
     val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.email)
     userService.retrieve(loginInfo).flatMap {
       case Some(_) =>
@@ -64,8 +64,9 @@ class SignUpController @Inject()(
           avatar <- avatarService.retrieveURL(signUp.email)
           user <- userService.save(user.copy(avatarURL = avatar))
           _ <- authInfoRepository.add(loginInfo, authInfo)
-          res <- AuthUtils.authResponse(user, loginInfo)
+          res <- AuthUtils.authResponse(Right(user), loginInfo)
         } yield {
+          silhouette.env.eventBus.publish(SignUpEvent(user, req))
           res
         }
     }

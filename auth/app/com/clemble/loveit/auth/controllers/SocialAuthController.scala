@@ -37,29 +37,13 @@ class SocialAuthController @Inject() (
     */
   def authenticate(provider: String) = Action.async{ implicit req => {
 
-    def createAuthResult(user: User, loginInfo: LoginInfo, authInfo: AuthInfo): Future[Result] = {
-      for {
-        _ <- authInfoRepository.save(loginInfo, authInfo)
-        res <- AuthUtils.authResponse(user, loginInfo)
-      } yield {
-        res
-      }
-    }
-
     def processProviderResponse(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A): Future[Result] = {
       for {
         profile <- p.retrieveProfile(authInfo)
         eitherUser <- userService.createOrUpdateUser(profile)
-        user = eitherUser match {
-          case Left(user) => user
-          case Right(user) => user
-        }
-        result <- createAuthResult(user, profile.loginInfo, authInfo)
+        _ <- authInfoRepository.save(profile.loginInfo, authInfo)
+        result <- AuthUtils.authResponse(eitherUser, profile.loginInfo)
       } yield {
-        if (eitherUser.isRight) {
-          silhouette.env.eventBus.publish(SignUpEvent(user, req))
-        }
-        silhouette.env.eventBus.publish(LoginEvent(user, req))
         result
       }
     }

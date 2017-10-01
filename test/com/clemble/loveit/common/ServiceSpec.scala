@@ -10,7 +10,7 @@ import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.user.service.repository.UserRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait ServiceSpec extends ThankSpecification {
+trait ServiceSpec extends FunctionalThankSpecification {
 
   lazy val authController = dependency[SocialAuthController]
   lazy val userService = dependency[UserService]
@@ -20,7 +20,7 @@ trait ServiceSpec extends ThankSpecification {
 
   lazy val roService = dependency[ROService]
 
-  def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
+  override def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
     val fUserID = for {
       user <- userService.save(User from signUp)
       _ <- userPayService.createAndSave(user)

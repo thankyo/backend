@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 
-trait ControllerSpec extends ThankSpecification {
+trait ControllerSpec extends FunctionalThankSpecification {
 
   implicit val ec = dependency[ExecutionContext]
 
@@ -34,7 +34,7 @@ trait ControllerSpec extends ThankSpecification {
     def readJson[T]()(implicit reader: Reads[T]): Option[T] = Json.parse(read()).asOpt[T]
   }
 
-  def createUser(profile: SignUpRequest = someRandom[SignUpRequest]): String = {
+  override def createUser(profile: SignUpRequest = someRandom[SignUpRequest]): UserID = {
     val req = FakeRequest(POST, "/api/v1/auth/signUp").withJsonBody(Json.toJson(profile))
     val fRes = route(application, req).get
 

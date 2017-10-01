@@ -10,13 +10,13 @@ import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait RepositorySpec extends ThankSpecification {
+trait RepositorySpec extends FunctionalThankSpecification {
 
   lazy val userRepo = dependency[UserRepository]
   lazy val payRepo = dependency[UserPaymentRepository]
   lazy val resRepo = dependency[UserResourceRepository]
 
-  def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
+  override def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
     val fUserID = for {
       user <- userRepo.save(User from signUp)
       _ <- payRepo.save(UserPayment from user)

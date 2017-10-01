@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.service
 import java.time.YearMonth
 
 import com.clemble.loveit.auth.models.requests.SignUpRequest
-import com.clemble.loveit.common.{ServiceSpec, ThankSpecification}
+import com.clemble.loveit.common.{FunctionalThankSpecification, ServiceSpec, ThankSpecification}
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.PaymentTestExecutor
@@ -27,11 +27,9 @@ class EOMServiceSpec extends GenericEOMServiceSpec with PaymentServiceTestExecut
 
 }
 
-trait GenericEOMServiceSpec extends ThankSpecification with PaymentTestExecutor {
+trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTestExecutor {
 
   sequential
-
-  def createUser(socialProfile: SignUpRequest = someRandom[SignUpRequest]): UserID
 
   def getStatus(yom: YearMonth): Option[EOMStatus]
   def run(yom: YearMonth): EOMStatus

@@ -11,6 +11,7 @@ class PaymentLimitControllerSpec extends PaymentControllerTestExecutor {
     val user = createUser()
     val limit = someRandom[Money]
 
+    eventually(getMonthlyLimit(user) mustNotEqual None)
     val limitBefore = getMonthlyLimit(user)
     val updatedLimit = Some(setMonthlyLimit(user, limit))
 
@@ -19,7 +20,5 @@ class PaymentLimitControllerSpec extends PaymentControllerTestExecutor {
     limitAfter shouldEqual updatedLimit
     limitBefore shouldNotEqual limitAfter
   }
-
-
 
 }

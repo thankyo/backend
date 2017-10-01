@@ -8,7 +8,6 @@ import javax.inject.{Named, Singleton}
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.Provides
 import net.codingwell.scalaguice.ScalaModule
-import org.joda.time.DateTimeZone
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment, Mode}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -22,8 +21,6 @@ import scala.concurrent.ExecutionContext
 class UserModule(env: Environment, conf: Configuration) extends ScalaModule {
 
   override def configure(): Unit = {
-    DateTimeZone.setDefault(DateTimeZone.UTC)
-
     bind(classOf[UserService]).to(classOf[SimpleUserService])
     bind(classOf[UserRepository]).to(classOf[MongoUserRepository])
 

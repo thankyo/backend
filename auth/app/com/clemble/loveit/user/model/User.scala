@@ -23,7 +23,7 @@ case class User(
                  firstName: Option[String] = None,
                  lastName: Option[String] = None,
                  email: Email,
-                 avatarURL: Option[String] = None,
+                 avatar: Option[String] = None,
                  bio: Option[String] = None,
                  dateOfBirth: Option[LocalDateTime] = None,
                  profiles: Set[LoginInfo] = Set.empty,
@@ -49,7 +49,7 @@ case class User(
       firstName = firstName.orElse(socialProfile.firstName),
       lastName = lastName.orElse(socialProfile.lastName),
       // following #60
-      avatarURL = socialProfile.avatarURL.orElse(avatarURL),
+      avatar = socialProfile.avatarURL.orElse(avatar),
       profiles = profiles + socialProfile.loginInfo
     )
   }
@@ -82,7 +82,7 @@ object User {
       firstName = Some(signUp.firstName),
       lastName = Some(signUp.lastName),
       email = signUp.email,
-      avatarURL = None,
+      avatar = None,
       profiles = Set(loginInfo)
     )
   }

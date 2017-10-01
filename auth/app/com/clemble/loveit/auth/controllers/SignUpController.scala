@@ -62,7 +62,7 @@ class SignUpController @Inject()(
         val user = User from signUp
         for {
           avatar <- avatarService.retrieveURL(signUp.email)
-          user <- userService.save(user.copy(avatarURL = avatar))
+          user <- userService.save(user.copy(avatar = avatar))
           _ <- authInfoRepository.save(loginInfo, authInfo)
           res <- AuthUtils.authResponse(Right(user), loginInfo)
         } yield {

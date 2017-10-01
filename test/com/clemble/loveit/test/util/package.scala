@@ -228,7 +228,7 @@ package object util {
         firstName = Some(random(10)),
         lastName = Some(random(10)),
         email = s"${someRandom[String]}@${someRandom[String]}.${someRandom[String]}",
-        avatarURL = Some(random(12)),
+        avatar = Some(random(12)),
         dateOfBirth = Some(someRandom[LocalDateTime]),
         profiles = Set.empty[LoginInfo]
       )

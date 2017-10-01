@@ -7,7 +7,7 @@ import scala.concurrent.Future
 /**
   * Resource ownership repository
   */
-trait ResourceOwnershipRepository {
+trait RORepository {
 
   /**
     * Find possible resource owner

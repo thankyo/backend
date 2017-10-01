@@ -14,8 +14,7 @@ class UserResourceRepositorySpec(implicit val ee: ExecutionEnv) extends Reposito
 
   "GET" in {
     val user = createUser()
-    val expectedUserRes = Json.toJson(user).asOpt[UserResource]
-    await(repo.find(user.id)) shouldEqual expectedUserRes
+    await(repo.find(user)) shouldNotEqual None
   }
 
 }

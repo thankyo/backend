@@ -9,9 +9,9 @@ import org.specs2.runner.JUnitRunner
 import org.apache.commons.lang3.RandomStringUtils._
 
 @RunWith(classOf[JUnitRunner])
-class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
+class RORepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
 
-  lazy val resOwnRepo = dependency[ResourceOwnershipRepository]
+  lazy val resOwnRepo = dependency[RORepository]
 
   def assignOwnership(user: UserID, res: Resource) = await(resOwnRepo.assignOwnership(user, res))
   def listOwned(user: UserID) = await(resOwnRepo.listOwned(user))
@@ -20,7 +20,7 @@ class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends Rep
   "LIST" should {
 
     "return empty on new user" in {
-      val user = createUser().id
+      val user = createUser()
 
       listOwned(user) shouldEqual Set.empty
     }
@@ -36,7 +36,7 @@ class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends Rep
   "ASSIGN OWNERSHIP" should {
 
     "create ownership" in {
-      val user = createUser().id
+      val user = createUser()
       val res = someRandom[Resource]
 
       assignOwnership(user, res) shouldEqual true
@@ -45,7 +45,7 @@ class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends Rep
     }
 
     "ignore multiple assignments to the same user" in {
-      val user = createUser().id
+      val user = createUser()
       val res = someRandom[Resource]
 
       assignOwnership(user, res) shouldEqual true
@@ -55,8 +55,8 @@ class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends Rep
     }
 
     "override ownership" in {
-      val A = createUser().id
-      val B = createUser().id
+      val A = createUser()
+      val B = createUser()
 
       listOwned(A) shouldEqual Set.empty[Resource]
       listOwned(B) shouldEqual Set.empty[Resource]
@@ -75,7 +75,7 @@ class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends Rep
   "FIND OWNERSHIP" should {
 
     "find exact owner" in {
-      val owner = createUser().id
+      val owner = createUser()
       val res = someRandom[Resource]
 
       assignOwnership(owner, res) shouldEqual true
@@ -84,7 +84,7 @@ class ResourceOwnershipRepositorySpec(implicit val ee: ExecutionEnv) extends Rep
     }
 
     "find parent owner" in {
-      val owner = createUser().id
+      val owner = createUser()
 
       val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(4)}/"
       val parentRes = HttpResource(parentUri)

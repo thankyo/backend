@@ -1,6 +1,5 @@
 package com.clemble.loveit.dev
 
-
 import com.clemble.loveit.dev.service.{DevUserDataService, SimpleDevUserDataService}
 import net.codingwell.scalaguice.ScalaModule
 import play.api

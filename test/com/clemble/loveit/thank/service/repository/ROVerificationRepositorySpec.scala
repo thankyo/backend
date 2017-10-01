@@ -20,7 +20,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
   def getVerification(user: UserID) = await(verificationRepo.get(user))
 
   "GETS" in {
-    val user = createUser().id
+    val user = createUser()
 
     val verification = createVerification(user)
 
@@ -29,7 +29,7 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
   }
 
   "SAVES" in {
-    val user = createUser().id
+    val user = createUser()
 
     val verification = createVerification(user)
 
@@ -41,30 +41,30 @@ class ROVerificationRepositorySpec(implicit val ee: ExecutionEnv) extends Reposi
     val B = createUser()
     val req = someRandom[ROVerification[Resource]]
 
-    await(verificationRepo.save(A.id, req)) shouldNotEqual None
-    await(verificationRepo.save(B.id, req)) should throwA[RepositoryException]
+    await(verificationRepo.save(A, req)) shouldNotEqual None
+    await(verificationRepo.save(B, req)) should throwA[RepositoryException]
 
-    getVerification(A.id) shouldEqual Some(req)
-    getVerification(B.id) shouldEqual None
+    getVerification(A) shouldEqual Some(req)
+    getVerification(B) shouldEqual None
   }
 
   "UPDATE STATUS" in {
     val user = createUser()
-    val verif = await(verificationRepo.save(user.id, someRandom[ROVerification[Resource]]))
-    val updated = await(verificationRepo.update(user.id, verif.resource, Verified))
+    val verif = await(verificationRepo.save(user, someRandom[ROVerification[Resource]]))
+    val updated = await(verificationRepo.update(user, verif.resource, Verified))
 
     updated shouldEqual true
 
     val expected = verif.copy(status = Verified)
-    getVerification(user.id) shouldEqual Some(expected)
+    getVerification(user) shouldEqual Some(expected)
   }
 
   "REMOVES" in {
     val user = createUser()
-    val ownership = createVerification(user.id)
-    val removed = await(verificationRepo.delete(user.id))
+    val ownership = createVerification(user)
+    val removed = await(verificationRepo.delete(user))
     removed shouldEqual true
-    getVerification(user.id) shouldEqual None
+    getVerification(user) shouldEqual None
   }
 
 

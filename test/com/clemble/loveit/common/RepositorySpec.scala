@@ -1,11 +1,14 @@
 package com.clemble.loveit.common
 
+import com.clemble.loveit.auth.models.requests.SignUpRequest
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.UserPaymentRepository
 import com.clemble.loveit.thank.model.UserResource
 import com.clemble.loveit.thank.service.repository.UserResourceRepository
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait RepositorySpec extends ThankSpecification {
 
@@ -13,12 +16,16 @@ trait RepositorySpec extends ThankSpecification {
   lazy val payRepo = dependency[UserPaymentRepository]
   lazy val resRepo = dependency[UserResourceRepository]
 
-  def createUser() = {
-    val user = someRandom[User]
-    await(userRepo.save(someRandom[User]))
-    await(payRepo.save(UserPayment from user))
-    await(resRepo.save(UserResource from user))
-    user
+  def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
+    val fUserID = for {
+      user <- userRepo.save(User from signUp)
+      _ <- payRepo.save(UserPayment from user)
+      _ <- resRepo.save(UserResource from user)
+    } yield {
+      user.id
+    }
+
+    await(fUserID)
   }
 
 }

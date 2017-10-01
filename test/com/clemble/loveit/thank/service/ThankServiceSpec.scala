@@ -16,25 +16,20 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
   val thankService = dependency[ThankService]
   val thankRepo = dependency[ThankRepository]
   val supportedProjectService = dependency[UserSupportedProjectsService]
-  val roService = dependency[ROService]
 
-  def createScene():(Resource, User, User) = {
+  def createScene():(Resource, UserID, UserID) = {
     val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
     // TODO flow must be changed here to use ResourceOwnersip verification
-    val owner = someUser()
-    await(roService.assignOwnership(owner.id, url))
-    await(thankRepo.updateOwner(owner.id, url))
-    val giver = someUser()
+    val owner = createUser()
+    await(roService.assignOwnership(owner, url))
+    await(thankRepo.updateOwner(owner, url))
+    val giver = createUser()
 
     (url, owner, giver)
   }
 
   def thank(user: UserID, url: Resource) = {
     await(thankService.thank(user, url))
-  }
-
-  def getSupported(user: UserID) = {
-    await(supportedProjectService.getSupported(user));
   }
 
   def getBalance(url: Resource): Amount = {
@@ -53,14 +48,14 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
     "return false on not thanked res" in {
       val (res, _, giver) = createScene()
 
-      await(thankService.hasThanked(giver.id, res)) shouldEqual false
+      await(thankService.hasThanked(giver, res)) shouldEqual false
     }
 
     "return true if thanked" in {
       val (res, _, giver) = createScene()
 
-      await(thankService.thank(giver.id, res))
-      await(thankService.hasThanked(giver.id, res)) shouldEqual true
+      await(thankService.thank(giver, res))
+      await(thankService.hasThanked(giver, res)) shouldEqual true
     }
 
   }
@@ -71,52 +66,36 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
     "Decrement for the giver" in {
       val (url, _, giver) = createScene()
 
-      thank(giver.id, url)
+      thank(giver, url)
       eventually(getBalance(url) shouldEqual 1)
 
-      eventually(- 1 shouldEqual getBalance(giver.id))
+      eventually(- 1 shouldEqual getBalance(giver))
     }
 
     "Increment for the owner" in {
       val (url, owner, giver) = createScene()
 
-      thank(giver.id, url)
+      thank(giver, url)
       eventually(getBalance(url) shouldEqual 1)
 
-      eventually(1 shouldEqual getBalance(owner.id))
+      eventually(1 shouldEqual getBalance(owner))
     }
 
     "Double thank has no effect" in {
       val (url, owner, giver) = createScene()
 
-      getBalance(owner.id) shouldEqual 0
-      getBalance(giver.id) shouldEqual 0
+      getBalance(owner) shouldEqual 0
+      getBalance(giver) shouldEqual 0
 
       // Double thank has no effect
-      thank(giver.id, url)
-      thank(giver.id, url)
-      thank(giver.id, url)
+      thank(giver, url)
+      thank(giver, url)
+      thank(giver, url)
       eventually(getBalance(url) shouldEqual 1)
 
       // Balance did not change
-      eventually(getBalance(owner.id) shouldEqual 1)
-      eventually(getBalance(giver.id) shouldEqual - 1)
-    }
-
-  }
-
-  "Supported projects " should {
-
-    "be initialized on Thank" in {
-      val (url, owner, giver) = createScene()
-
-      getSupported(giver.id) shouldEqual Nil
-      getSupported(owner.id) shouldEqual Nil
-
-      thank(giver.id, url)
-
-      getSupported(owner.id) shouldEqual Nil
-      eventually(getSupported(giver.id) shouldEqual List(owner))
+      eventually(getBalance(owner) shouldEqual 1)
+      eventually(getBalance(giver) shouldEqual - 1)
     }
 
   }

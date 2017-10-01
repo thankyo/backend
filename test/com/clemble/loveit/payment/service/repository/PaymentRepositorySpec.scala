@@ -17,20 +17,20 @@ class PaymentRepositorySpec extends RepositorySpec {
 
   "get balance" in {
     val A = createUser()
-    await(repo.getBalance(A.id)) shouldEqual 0
+    await(repo.getBalance(A)) shouldEqual 0
   }
 
   "update balance" in {
     val A = createUser()
-    await(repo.updateBalance(A.id, -100)  )
-    await(repo.getBalance(A.id)) shouldEqual -100
+    await(repo.updateBalance(A, -100)  )
+    await(repo.getBalance(A)) shouldEqual -100
   }
 
   "PAYOUT ACCOUNT" should {
 
     "get" in {
       val A = createUser()
-      await(repo.getPayoutAccount(A.id)) shouldEqual None
+      await(repo.getPayoutAccount(A)) shouldEqual None
     }
 
     "set same" in {
@@ -38,11 +38,11 @@ class PaymentRepositorySpec extends RepositorySpec {
       val B = createUser()
       val ptAcc = someRandom[PayoutAccount]
 
-      await(repo.setPayoutAccount(A.id, ptAcc)) shouldEqual true
-      await(repo.setPayoutAccount(B.id, ptAcc)) should throwA[RepositoryException]
+      await(repo.setPayoutAccount(A, ptAcc)) shouldEqual true
+      await(repo.setPayoutAccount(B, ptAcc)) should throwA[RepositoryException]
 
-      await(repo.getPayoutAccount(A.id)) shouldEqual Some(ptAcc)
-      await(repo.getPayoutAccount(B.id)) shouldNotEqual Some(ptAcc)
+      await(repo.getPayoutAccount(A)) shouldEqual Some(ptAcc)
+      await(repo.getPayoutAccount(B)) shouldNotEqual Some(ptAcc)
     }
 
   }
@@ -53,7 +53,7 @@ class PaymentRepositorySpec extends RepositorySpec {
     "get chargeAccount" in {
       val A = createUser()
 
-      await(repo.getChargeAccount(A.id)) shouldEqual None
+      await(repo.getChargeAccount(A)) shouldEqual None
     }
 
     "set same ChargeAccount" in {
@@ -61,11 +61,11 @@ class PaymentRepositorySpec extends RepositorySpec {
       val B = createUser()
       val chAcc = someRandom[ChargeAccount]
 
-      await(repo.setChargeAccount(A.id, chAcc)) shouldEqual true
-      await(repo.setChargeAccount(B.id, chAcc)) should throwA[RepositoryException]
+      await(repo.setChargeAccount(A, chAcc)) shouldEqual true
+      await(repo.setChargeAccount(B, chAcc)) should throwA[RepositoryException]
 
-      await(repo.getChargeAccount(A.id)) shouldEqual Some(chAcc)
-      await(repo.getChargeAccount(B.id)) shouldNotEqual Some(chAcc)
+      await(repo.getChargeAccount(A)) shouldEqual Some(chAcc)
+      await(repo.getChargeAccount(B)) shouldNotEqual Some(chAcc)
     }
 
   }
@@ -73,14 +73,14 @@ class PaymentRepositorySpec extends RepositorySpec {
   "LIMIT" should {
 
     "throw Exception" in {
-      val user = createUser().id
+      val user = createUser()
       val negativeLimit = Money(-100, someRandom[Currency])
 
       await(repo.setMonthlyLimit(user, negativeLimit)) should throwA[PaymentException]
     }
 
     "update limit" in {
-      val user = createUser().id
+      val user = createUser()
       val limit = Money(100, someRandom[Currency])
 
       await(repo.setMonthlyLimit(user, limit)) shouldEqual true

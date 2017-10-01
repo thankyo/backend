@@ -1,10 +1,8 @@
 package com.clemble.loveit.user.service
 
-import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.common.model.{HttpResource, Resource}
-import com.clemble.loveit.user.model.User
+import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.{PaymentServiceTestExecutor, ThankTransactionService}
-import com.clemble.loveit.user.service.repository.UserRepository
+import com.clemble.loveit.thank.service.repository.RORepository
 import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -14,40 +12,15 @@ import org.specs2.runner.JUnitRunner
 class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
   val service = dependency[UserService]
-  val repo = dependency[UserRepository]
+  val roRepo = dependency[RORepository]
   val transactionService = dependency[ThankTransactionService]
 
-  val giver = someRandom[User]
-  await(repo.save(giver))
+  val giver = createUser()
 
-  "CREATE" should {
-
-    "create user" in {
-      val user = someRandom[User]
-      val createAndGet = repo.save(user).flatMap(_ => repo.findById(user.id))
-      createAndGet must await(beEqualTo(Some(user)))
-    }
-
-    "return exception on creating the same" in {
-      val user = someRandom[User]
-      val createAndCreate = repo.save(user).flatMap(_ => repo.save(user)).flatMap(_ => repo.save(user))
-
-      await(createAndCreate) should throwA[RepositoryException]
-    }
-
-  }
-
-  def createUserWithOwnership(owns: Resource): User = {
-    val user = someRandom[User]
-//      assignOwnership(owns).
-//      copy(balance = 0)
-    val savedUser = await(repo.save(user))
-    getBalance(user.id) shouldEqual 0
-    savedUser
-  }
-
-  def thank(giver: User, owner: User, url: Resource) = {
-    await(transactionService.create(giver.id, owner.id, url))
+  def createUserWithOwnership(res: Resource): UserID = {
+    val user = createUser()
+    await(roRepo.assignOwnership(user, res)) shouldEqual true
+    user
   }
 
   "UPDATE OWNER BALANCE single hierarchy" should {
@@ -57,7 +30,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
+      getBalance(user) shouldEqual 1
     }
 
     "UNREALIZED url control" in {
@@ -66,7 +39,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
+      getBalance(user) shouldEqual 1
     }
 
     "IGNORE with PARTIAL control" in {
@@ -75,7 +48,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
+      getBalance(user) shouldEqual 1
     }
   }
 
@@ -88,8 +61,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
 
     "UNREALIZED url control" in {
@@ -100,8 +73,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
 
     "IGNORE with PARTIAL url control" in {
@@ -112,8 +85,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
   }
 
@@ -127,8 +100,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
 
     "UNREALIZED url control" in {
@@ -139,8 +112,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
 
     "PARTIAL url control" in {
@@ -151,8 +124,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
   }
 
@@ -165,8 +138,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
 
     "UNREALIZED url control" in {
@@ -177,8 +150,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
 
     "IGNORE with PARTIAL control" in {
@@ -189,8 +162,8 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
       val user = createUserWithOwnership(url)
 
       thank(giver, user, url)
-      getBalance(user.id) shouldEqual 1
-      getBalance(parentUser.id) shouldEqual 0
+      getBalance(user) shouldEqual 1
+      getBalance(parentUser) shouldEqual 0
     }
   }
 }

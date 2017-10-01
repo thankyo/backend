@@ -3,33 +3,34 @@ package com.clemble.loveit.common
 import com.clemble.loveit.auth.controllers.SocialAuthController
 import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.service.ROService
+import com.clemble.loveit.payment.service.UserPaymentService
+import com.clemble.loveit.thank.service.{ROService, UserResourceService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.user.service.repository.UserRepository
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait ServiceSpec extends ThankSpecification {
 
   lazy val authController = dependency[SocialAuthController]
   lazy val userService = dependency[UserService]
+  lazy val userPayService = dependency[UserPaymentService]
+  lazy val userResService = dependency[UserResourceService]
   lazy val userRep = dependency[UserRepository]
 
-  lazy val resService = dependency[ROService]
-
-  def someUser(socialProfile: CommonSocialProfile = someRandom[CommonSocialProfile]): User = {
-    await(userService.createOrUpdateUser(socialProfile)) match {
-      case Left(user) => user
-      case Right(user) => user
-    }
-  }
+  lazy val roService = dependency[ROService]
 
   def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
-    val user = await(userService.save(User from signUp))
-    user.id
+    val fUserID = for {
+      user <- userService.save(User from signUp)
+      _ <- userPayService.createAndSave(user)
+      _ <- userResService.createAndSave(user)
+    } yield {
+      user.id
+    }
+    await(fUserID)
   }
 
+  def assignOwnership(user: UserID, res: Resource) = await(roService.assignOwnership(user, res))
 
-
-  def assignOwnership(user: UserID, res: Resource) = await(resService.assignOwnership(user, res))
 }

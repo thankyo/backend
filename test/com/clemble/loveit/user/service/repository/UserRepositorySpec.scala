@@ -18,6 +18,19 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   "CREATE" should {
 
+    "create user" in {
+      val user = someRandom[User]
+      val createAndGet = userRepo.save(user).flatMap(_ => userRepo.findById(user.id))
+      createAndGet must await(beEqualTo(Some(user)))
+    }
+
+    "return exception on creating the same" in {
+      val user = someRandom[User]
+      val createAndCreate = userRepo.save(user).flatMap(_ => userRepo.save(user)).flatMap(_ => userRepo.save(user))
+
+      await(createAndCreate) should throwA[RepositoryException]
+    }
+
     "support single create" in {
       val user = someRandom[User]
       val fCreate: Future[User] = userRepo.save(user)
@@ -45,8 +58,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val chAcc = someRandom[ChargeAccount]
 
       val matchResult = for {
-        _ <- balanceRepo.setChargeAccount(A.id, chAcc)
-        chargeAccount <- balanceRepo.getChargeAccount(A.id)
+        _ <- balanceRepo.setChargeAccount(A, chAcc)
+        chargeAccount <- balanceRepo.getChargeAccount(A)
       } yield {
         chargeAccount must beEqualTo(Some(chAcc))
       }
@@ -62,9 +75,9 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = createUser()
 
       val matchResult = for {
-        balanceBefore <- balanceRepo.getBalance(user.id)
-        _ <- balanceRepo.updateBalance(user.id, 10)
-        balanceAfter <- balanceRepo.getBalance(user.id)
+        balanceBefore <- balanceRepo.getBalance(user)
+        _ <- balanceRepo.updateBalance(user, 10)
+        balanceAfter <- balanceRepo.getBalance(user)
       } yield {
         balanceAfter shouldEqual balanceBefore + 10
       }
@@ -76,9 +89,9 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val user = createUser()
 
       val matchResult = for {
-        balanceBefore <- balanceRepo.getBalance(user.id)
-        _ <- balanceRepo.updateBalance(user.id, -10)
-        balanceAfter <- balanceRepo.getBalance(user.id)
+        balanceBefore <- balanceRepo.getBalance(user)
+        _ <- balanceRepo.updateBalance(user, -10)
+        balanceAfter <- balanceRepo.getBalance(user)
       } yield {
         balanceAfter shouldEqual balanceBefore - 10
       }

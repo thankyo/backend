@@ -17,7 +17,7 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
   "CREATE" should {
 
     "same resource transactions saved only once" in {
-      val user = createUser().id
+      val user = createUser()
       val res = someRandom[Resource]
       val A = ThankTransaction(user, someRandom[UserID], res)
       val B = ThankTransaction(user, someRandom[UserID], res)
@@ -30,7 +30,7 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
     }
 
     "save all payments for the user" in {
-      val user = createUser().id
+      val user = createUser()
       val A = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
       val B = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
 
@@ -42,7 +42,7 @@ class ThankTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposito
     }
 
     "remove specified" in {
-      val user = createUser().id
+      val user = createUser()
       val A = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
       val B = ThankTransaction(user, someRandom[UserID], someRandom[Resource])
 

@@ -15,12 +15,10 @@ import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, Silhou
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings, JcaSigner, JcaSignerSettings}
 import com.mohiva.play.silhouette.impl.authenticators._
 import com.mohiva.play.silhouette.impl.providers.{SocialStateHandler, _}
-import com.mohiva.play.silhouette.impl.providers.oauth1.secrets.{CookieSecretProvider, CookieSecretSettings}
 import com.mohiva.play.silhouette.impl.providers.oauth2._
-import com.mohiva.play.silhouette.impl.providers.state.{CsrfStateItemHandler, CsrfStateSettings}
 import com.mohiva.play.silhouette.impl.services._
 import com.mohiva.play.silhouette.impl.util._
-import com.mohiva.play.silhouette.password.{BCryptPasswordHasher, BCryptSha256PasswordHasher}
+import com.mohiva.play.silhouette.password.{BCryptSha256PasswordHasher}
 import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
 import net.ceedubs.ficus.Ficus._
@@ -54,9 +52,7 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
 
     // Replace this with the bindings to your concrete DAOs
     bind[DelegableAuthInfoDAO[PasswordInfo]].toInstance(new InMemoryAuthInfoDAO[PasswordInfo])
-    bind[DelegableAuthInfoDAO[OAuth1Info]].toInstance(new InMemoryAuthInfoDAO[OAuth1Info])
     bind[DelegableAuthInfoDAO[OAuth2Info]].toInstance(new InMemoryAuthInfoDAO[OAuth2Info])
-    bind[DelegableAuthInfoDAO[OpenIDInfo]].toInstance(new InMemoryAuthInfoDAO[OpenIDInfo])
   }
 
   @Provides
@@ -133,32 +129,6 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   }
 
   /**
-   * Provides the signer for the OAuth1 token secret provider.
-   *
-   * @param configuration The Play configuration.
-   * @return The signer for the OAuth1 token secret provider.
-   */
-  @Provides @Named("oauth1-token-secret-signer")
-  def provideOAuth1TokenSecretSigner(configuration: Configuration): Signer = {
-    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.oauth1TokenSecretProvider.signer")
-
-    new JcaSigner(config)
-  }
-
-  /**
-   * Provides the crypter for the OAuth1 token secret provider.
-   *
-   * @param configuration The Play configuration.
-   * @return The crypter for the OAuth1 token secret provider.
-   */
-  @Provides @Named("oauth1-token-secret-crypter")
-  def provideOAuth1TokenSecretCrypter(configuration: Configuration): Crypter = {
-    val config = configuration.underlying.as[JcaCrypterSettings]("silhouette.oauth1TokenSecretProvider.crypter")
-
-    new JcaCrypter(config)
-  }
-
-  /**
    * Provides the signer for the CSRF state item handler.
    *
    * @param configuration The Play configuration.
@@ -188,19 +158,15 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
    * Provides the auth info repository.
    *
    * @param passwordInfoDAO The implementation of the delegable password auth info DAO.
-   * @param oauth1InfoDAO The implementation of the delegable OAuth1 auth info DAO.
    * @param oauth2InfoDAO The implementation of the delegable OAuth2 auth info DAO.
-   * @param openIDInfoDAO The implementation of the delegable OpenID auth info DAO.
    * @return The auth info repository instance.
    */
   @Provides
   def provideAuthInfoRepository(
     passwordInfoDAO: DelegableAuthInfoDAO[PasswordInfo],
-    oauth1InfoDAO: DelegableAuthInfoDAO[OAuth1Info],
-    oauth2InfoDAO: DelegableAuthInfoDAO[OAuth2Info],
-    openIDInfoDAO: DelegableAuthInfoDAO[OpenIDInfo]): AuthInfoRepository = {
+    oauth2InfoDAO: DelegableAuthInfoDAO[OAuth2Info]): AuthInfoRepository = {
 
-    new DelegableAuthInfoRepository(passwordInfoDAO, oauth1InfoDAO, oauth2InfoDAO, openIDInfoDAO)
+    new DelegableAuthInfoRepository(passwordInfoDAO, oauth2InfoDAO)
   }
 
   /**
@@ -211,26 +177,6 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
    */
   @Provides
   def provideAvatarService(httpLayer: HTTPLayer): AvatarService = new GravatarService(httpLayer)
-
-  /**
-   * Provides the OAuth1 token secret provider.
-   *
-   * @param signer The signer implementation.
-   * @param crypter The crypter implementation.
-   * @param configuration The Play configuration.
-   * @param clock The clock instance.
-   * @return The OAuth1 token secret provider implementation.
-   */
-  @Provides
-  def provideOAuth1TokenSecretProvider(
-    @Named("oauth1-token-secret-signer") signer: Signer,
-    @Named("oauth1-token-secret-crypter") crypter: Crypter,
-    configuration: Configuration,
-    clock: Clock): OAuth1TokenSecretProvider = {
-
-    val settings = configuration.underlying.as[CookieSecretSettings]("silhouette.oauth1TokenSecretProvider")
-    new CookieSecretProvider(settings, signer, crypter, clock)
-  }
 
   /**
    * Provides the password hasher registry.
@@ -253,13 +199,12 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   def provideCredentialsProvider(
     authInfoRepository: AuthInfoRepository,
     passwordHasherRegistry: PasswordHasherRegistry): CredentialsProvider = {
-
     new CredentialsProvider(authInfoRepository, passwordHasherRegistry)
   }
 
 
   @Provides
-  def socialStateHandler(signer: Signer):SocialStateHandler = {
+  def provideSocialStateHandler(signer: Signer):SocialStateHandler = {
     new DefaultSocialStateHandler(Set.empty, signer)
   }
 

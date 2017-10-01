@@ -9,7 +9,7 @@ version := "1.0-SNAPSHOT"
 scalaVersion := "2.12.3"
 
 val reactiveMongoVer = "0.12.6"
-val silhouetteVersion = "5.0.0"
+val silhouetteVersion = "5.0.1"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
 
@@ -39,10 +39,7 @@ libraryDependencies ++= Seq(
 
   "io.sentry" % "sentry-logback" % "1.5.3",
 
-  "com.stripe" % "stripe-java" % "5.8.0",
-
-  "com.atlassian.jwt" % "jwt-core" % "1.6.2",
-  "com.atlassian.jwt" % "jwt-api" % "1.6.2",
+  "com.stripe" % "stripe-java" % "5.9.0",
 
   "org.apache.commons" % "commons-text" % "1.1" % Test,
   specs2 % Test

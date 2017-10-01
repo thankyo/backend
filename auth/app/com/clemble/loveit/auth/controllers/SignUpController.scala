@@ -8,7 +8,7 @@ import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
-import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
+import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers._
 import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.auth.models.services.AuthTokenService
@@ -54,7 +54,7 @@ class SignUpController @Inject()(
   def submit = silhouette.UnsecuredAction.async(parse.json[SignUpRequest]) { implicit req: Request[SignUpRequest] =>
     val signUp = req.body
     val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.email)
-    authInfoRepository.find(loginInfo).flatMap {
+    authInfoRepository.find[PasswordInfo](loginInfo).flatMap {
       case Some(_) =>
         Future.successful(BadRequest("Email already signedUp"))
       case None =>

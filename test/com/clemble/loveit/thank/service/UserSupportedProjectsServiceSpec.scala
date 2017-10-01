@@ -9,7 +9,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class UserSupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
+class UserSupportedProjectsServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
   val thankService = dependency[ThankService]
   val thankRepo = dependency[ThankRepository]
@@ -45,7 +45,7 @@ class UserSupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Pay
       thank(giver, url)
 
       getSupported(owner) shouldEqual Nil
-      eventually(getSupported(giver) shouldEqual List(owner))
+      eventually(getSupported(giver) shouldEqual List(getUser(owner).get))
     }
 
   }

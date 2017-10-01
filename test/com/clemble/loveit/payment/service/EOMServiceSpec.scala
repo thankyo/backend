@@ -2,14 +2,11 @@ package com.clemble.loveit.payment.service
 
 import java.time.YearMonth
 
-import com.clemble.loveit.auth.models.requests.SignUpRequest
-import com.clemble.loveit.common.{FunctionalThankSpecification, ServiceSpec, ThankSpecification}
+import com.clemble.loveit.common.{FunctionalThankSpecification}
 import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Resource}
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model._
-import com.clemble.loveit.payment.service.repository.{EOMChargeRepository, EOMPayoutRepository}
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 
 import scala.concurrent.duration._
 

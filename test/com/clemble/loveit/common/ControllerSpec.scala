@@ -46,6 +46,16 @@ trait ControllerSpec extends FunctionalThankSpecification {
     user
   }
 
+  override def getUser(user: UserID): Option[User] = {
+    val req = FakeRequest(GET, s"/api/v1/user/${user}/profile")
+    val res = await(route(application, req).get)
+
+    res.header.status match {
+      case NOT_FOUND => None
+      case OK => res.body.dataStream.readJson[User]
+    }
+  }
+
   def sign[A](user: UserID, req: FakeRequest[A]) = {
     val userAuth = ControllerSpec.getUser(user)
     req.withHeaders(userAuth:_*)
@@ -62,16 +72,13 @@ trait ControllerSpec extends FunctionalThankSpecification {
   }
 
   def getMyUser(user: UserID): User = {
-    getUser(user).get
-  }
-
-  def getUser(id: UserID): Option[User] = {
-    val readReq = sign(id, FakeRequest(GET, s"/api/v1/user/my/profile"))
+    val readReq = sign(user, FakeRequest(GET, s"/api/v1/user/my/profile"))
     val resp = await(route(application, readReq).get)
-    resp.header.status match {
+    val userOpt = resp.header.status match {
       case NOT_FOUND => None
       case OK => Json.parse(await(resp.body.consumeData).utf8String).asOpt[User]
     }
+    userOpt.get
   }
 
   def getMyPayments(user: String): Seq[ThankTransaction] = {

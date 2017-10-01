@@ -28,7 +28,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[UserResourceService]).to(classOf[SimpleUserResourceService]).asEagerSingleton()
 
     bind(classOf[UserSupportedProjectsService]).to(classOf[SimpleUserSupportedProjectsService])
-    bind(classOf[UserSupportedProjectsRepo]).to(classOf[MongoUserSupportedProjectsRepo])
+    bind(classOf[UserSupportedProjectsRepo]).to(classOf[MongoUserSupportedProjectsRepository])
 
     bind(classOf[UserResourceRepository]).to(classOf[MongoUserResourceRepository])
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
@@ -61,6 +61,13 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Named("userResource")
   def userResourceCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("userResource", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
+  @Named("userSupported")
+  def userSupportedCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("userSupported", mongoApi, ec, env)
   }
 
   @Provides

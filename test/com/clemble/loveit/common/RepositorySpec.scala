@@ -28,4 +28,8 @@ trait RepositorySpec extends FunctionalThankSpecification {
     await(fUserID)
   }
 
+  override def getUser(user: UserID): Option[User] = {
+    await(userRepo.findById(user))
+  }
+
 }

@@ -31,6 +31,10 @@ trait ServiceSpec extends FunctionalThankSpecification {
     await(fUserID)
   }
 
+  override def getUser(user: UserID): Option[User] = {
+    await(userService.findById(user))
+  }
+
   def assignOwnership(user: UserID, res: Resource) = await(roService.assignOwnership(user, res))
 
 }

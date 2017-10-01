@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 
 import com.clemble.loveit.common.controller.ControllerUtils._
 
-class UserSupportedProjectController @Inject()(
+class UserSupportedProjectsController @Inject()(
                                                 supportedProjectsService: UserSupportedProjectsService,
                                                 silhouette: Silhouette[AuthEnv],
                                                 implicit val ec: ExecutionContext

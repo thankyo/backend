@@ -21,7 +21,7 @@ DELETE      /thank/my/resource/verification          @com.clemble.loveit.thank.c
 GET         /thank/http/*url                         @com.clemble.loveit.thank.controller.ThankController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /thank/http/*url                         @com.clemble.loveit.thank.controller.ThankController.thank(url: com.clemble.loveit.common.model.Resource)
 
-GET         /thank/:supporter/supported              @com.clemble.loveit.thank.controller.UserSupportedProjectController.getSupported(supporter)
+GET         /thank/:supporter/supported              @com.clemble.loveit.thank.controller.UserSupportedProjectsController.getSupported(supporter)
 
 # Payment related ENDPOINTS
 

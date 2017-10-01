@@ -11,21 +11,15 @@ import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
 import scala.concurrent.{ExecutionContext, Future}
 
-class MongoUserSupportedProjectsRepo @Inject()(
-                                                @Named("user") collection: JSONCollection,
+class MongoUserSupportedProjectsRepository @Inject()(
+                                                @Named("userSupported") collection: JSONCollection,
                                                 implicit val ec: ExecutionContext
                                               ) extends UserSupportedProjectsRepo {
-
-  override def getRef(project: UserID): Future[Option[User]] = {
-    val selector = Json.obj("_id" -> project)
-    val projection = Json.obj("id" -> 1, "firstName" -> 1, "lastName" -> 1, "thumbnail" -> 1, "dateOfBirth" -> 1)
-    MongoSafeUtils.safe(collection.find(selector, projection).one[User])
-  }
 
   override def markSupported(supporter: UserID, project: User): Future[Boolean] = {
     val selector = Json.obj("_id" -> supporter)
     val update = Json.obj("$addToSet" -> Json.obj("supported" -> project))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update, upsert = true))
   }
 
   override def getSupported(supporter: UserID): Future[List[User]] = {

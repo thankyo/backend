@@ -40,9 +40,8 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
     await(monLimRepo.getMonthlyLimit(user))
   }
 
-  override def setMonthlyLimit(user: UserID, limit: Money): Money = {
+  override def setMonthlyLimit(user: UserID, limit: Money): Boolean = {
     await(monLimRepo.setMonthlyLimit(user, limit))
-    await(monLimRepo.getMonthlyLimit(user)).get
   }
 
   override def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction = {

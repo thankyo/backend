@@ -2,17 +2,13 @@ package com.clemble.loveit.common
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
-import com.clemble.loveit.auth.models.requests.SignUpRequest
-import com.clemble.loveit.common.model.UserID
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
-trait FunctionalThankSpecification extends ThankSpecification {
-
-  def createUser(profile: SignUpRequest = someRandom[SignUpRequest]): UserID
+trait FunctionalThankSpecification extends ThankSpecification with ThankExecutor {
 
   implicit lazy val application = FunctionalThankSpecification.application
 

@@ -6,10 +6,11 @@ import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, EOMStatus, Money, StripeCustomerToken, ThankTransaction}
 import com.clemble.loveit.payment.service.ThankTransactionService
+import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 
-trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecutor {
+trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecutor with PaymentLimitExecutor {
 
   val thankService = dependency[ThankTransactionService]
 
@@ -59,11 +60,11 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
     }
   }
 
-  override def setMonthlyLimit(user: UserID, limit: Money): Money = {
+  override def setMonthlyLimit(user: UserID, limit: Money): Boolean = {
     val req = sign(user, FakeRequest(POST, s"/api/v1/payment/my/limit").withJsonBody(Json.toJson(limit)))
     val res = await(route(application, req).get)
 
-    res.body.dataStream.readJson[Money].get
+    res.body.dataStream.readJson[Money].isDefined
   }
 
   override def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction = {

@@ -2,8 +2,9 @@ package com.clemble.loveit.payment
 
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, Money, StripeCustomerToken, ThankTransaction}
+import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor
 
-trait PaymentTestExecutor extends TestStripeUtils {
+trait PaymentTestExecutor extends TestStripeUtils with PaymentLimitExecutor {
 
   def getBalance(user: UserID): Amount
 
@@ -14,10 +15,6 @@ trait PaymentTestExecutor extends TestStripeUtils {
   def getChargeAccount(user: UserID): Option[ChargeAccount]
 
   def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount
-
-  def getMonthlyLimit(user: UserID): Option[Money]
-
-  def setMonthlyLimit(user: UserID, limit: Money): Money
 
   def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction
 

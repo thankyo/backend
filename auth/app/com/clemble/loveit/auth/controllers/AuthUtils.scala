@@ -11,6 +11,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object AuthUtils {
 
+
+
   def authResponse(eitherUser: Either[User, User], loginInfo: LoginInfo)(implicit req: RequestHeader, ec: ExecutionContext, silhouette: Silhouette[AuthEnv]): Future[Result] = {
     val user = eitherUser match {
       case Left(user) => user

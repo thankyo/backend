@@ -62,7 +62,7 @@ class SocialAuthController @Inject() (
     }).recover {
       case e: ProviderException =>
         logger.error("Unexpected provider error", e)
-        Redirect("/join")
+        Redirect("/")
     }
   }}
 

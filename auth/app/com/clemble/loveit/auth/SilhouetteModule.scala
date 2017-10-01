@@ -14,7 +14,7 @@ import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings, JcaSigner, JcaSignerSettings}
 import com.mohiva.play.silhouette.impl.authenticators._
-import com.mohiva.play.silhouette.impl.providers._
+import com.mohiva.play.silhouette.impl.providers.{SocialStateHandler, _}
 import com.mohiva.play.silhouette.impl.providers.oauth1.secrets.{CookieSecretProvider, CookieSecretSettings}
 import com.mohiva.play.silhouette.impl.providers.oauth2._
 import com.mohiva.play.silhouette.impl.providers.state.{CsrfStateItemHandler, CsrfStateSettings}
@@ -233,44 +233,13 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   }
 
   /**
-   * Provides the CSRF state item handler.
-   *
-   * @param idGenerator The ID generator implementation.
-   * @param signer The signer implementation.
-   * @param configuration The Play configuration.
-   * @return The CSRF state item implementation.
-   */
-  @Provides
-  def provideCsrfStateItemHandler(
-    idGenerator: IDGenerator,
-    @Named("csrf-state-item-signer") signer: Signer,
-    configuration: Configuration): CsrfStateItemHandler = {
-    val settings = configuration.underlying.as[CsrfStateSettings]("silhouette.csrfStateItemHandler")
-    new CsrfStateItemHandler(settings, idGenerator, signer)
-  }
-
-  /**
-   * Provides the social state handler.
-   *
-   * @param signer The signer implementation.
-   * @return The social state handler implementation.
-   */
-  @Provides
-  def provideSocialStateHandler(
-    @Named("social-state-signer") signer: Signer,
-    csrfStateItemHandler: CsrfStateItemHandler): SocialStateHandler = {
-
-    new DefaultSocialStateHandler(Set(csrfStateItemHandler), signer)
-  }
-
-  /**
    * Provides the password hasher registry.
    *
    * @return The password hasher registry.
    */
   @Provides
   def providePasswordHasherRegistry(): PasswordHasherRegistry = {
-    PasswordHasherRegistry(new BCryptSha256PasswordHasher(), Seq(new BCryptPasswordHasher()))
+    PasswordHasherRegistry(new BCryptSha256PasswordHasher(), Seq())
   }
 
   /**
@@ -286,6 +255,12 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
     passwordHasherRegistry: PasswordHasherRegistry): CredentialsProvider = {
 
     new CredentialsProvider(authInfoRepository, passwordHasherRegistry)
+  }
+
+
+  @Provides
+  def socialStateHandler(signer: Signer):SocialStateHandler = {
+    new DefaultSocialStateHandler(Set.empty, signer)
   }
 
   /**

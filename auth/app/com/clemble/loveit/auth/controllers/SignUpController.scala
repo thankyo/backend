@@ -54,7 +54,7 @@ class SignUpController @Inject()(
   def submit = silhouette.UnsecuredAction.async(parse.json[SignUpRequest]) { implicit req: Request[SignUpRequest] =>
     val signUp = req.body
     val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.email)
-    userService.retrieve(loginInfo).flatMap {
+    authInfoRepository.find(loginInfo).flatMap {
       case Some(_) =>
         Future.successful(BadRequest("Email already signedUp"))
       case None =>
@@ -63,10 +63,9 @@ class SignUpController @Inject()(
         for {
           avatar <- avatarService.retrieveURL(signUp.email)
           user <- userService.save(user.copy(avatarURL = avatar))
-          _ <- authInfoRepository.add(loginInfo, authInfo)
+          _ <- authInfoRepository.save(loginInfo, authInfo)
           res <- AuthUtils.authResponse(Right(user), loginInfo)
         } yield {
-          silhouette.env.eventBus.publish(SignUpEvent(user, req))
           res
         }
     }

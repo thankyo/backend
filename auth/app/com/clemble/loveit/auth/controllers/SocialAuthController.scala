@@ -3,7 +3,6 @@ package com.clemble.loveit.auth.controllers
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
@@ -22,12 +21,15 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 @Singleton
 class SocialAuthController @Inject() (
+                                       components: ControllerComponents,
                                        userService: UserService,
                                        authInfoRepository: AuthInfoRepository,
-                                       socialProviderRegistry: SocialProviderRegistry,
-                                       implicit val silhouette: Silhouette[AuthEnv],
-                                       implicit val ec: ExecutionContext
-) extends Controller with Logger {
+                                       socialProviderRegistry: SocialProviderRegistry)
+                                      (
+                                       implicit
+                                       silhouette: Silhouette[AuthEnv],
+                                       ec: ExecutionContext)
+  extends AbstractController(components) with Logger {
 
   /**
     * Authenticates a user against a social provider.

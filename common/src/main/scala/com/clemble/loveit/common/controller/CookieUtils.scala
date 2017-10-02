@@ -18,4 +18,8 @@ object CookieUtils {
     res.withCookies(Cookie(COOKIE_NAME, userID, maxAge = COOKIE_MAX_AGE))
   }
 
+  def removeUser(): Cookie = {
+    Cookie(COOKIE_NAME, "bue", maxAge = Some(0))
+  }
+
 }

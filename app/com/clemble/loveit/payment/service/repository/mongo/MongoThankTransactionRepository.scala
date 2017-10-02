@@ -16,7 +16,7 @@ import reactivemongo.play.json._
 
 @Singleton
 case class MongoThankTransactionRepository @Inject()(
-                                                      @Named("user") collection: JSONCollection,
+                                                      @Named("userPayment") collection: JSONCollection,
                                                       implicit val m: Materializer,
                                                       implicit val ec: ExecutionContext)
   extends ThankTransactionRepository {

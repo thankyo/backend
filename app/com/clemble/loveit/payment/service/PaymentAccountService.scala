@@ -88,8 +88,9 @@ sealed trait ChargeAccountConverter {
   * Stripe processing service
   */
 @Singleton
-class StripeChargeAccountConverter(apiKey: String, clientKey: String, wsClient: WSClient, implicit val ec: ExecutionContext) extends ChargeAccountConverter {
+class StripeChargeAccountConverter(apiKey: String, clientId: String, wsClient: WSClient, implicit val ec: ExecutionContext) extends ChargeAccountConverter {
   Stripe.apiKey = apiKey
+  Stripe.clientId = clientId
 
   import com.stripe.model.Customer
 
@@ -123,7 +124,7 @@ class StripeChargeAccountConverter(apiKey: String, clientKey: String, wsClient: 
       addQueryStringParameters(
         "client_secret" -> apiKey,
         "grant_type" -> "authorization_code",
-        "client_id" -> clientKey,
+        "client_id" -> clientId,
         "code" -> token
       ).post(Json.obj())
     // Step 2. Convert response to PayoutAccount

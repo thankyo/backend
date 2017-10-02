@@ -14,6 +14,8 @@ import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
+import com.stripe.net.RequestOptions
+import com.stripe.net.RequestOptions.RequestOptionsBuilder
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
@@ -36,7 +38,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[UserPaymentService].to[SimpleUserPaymentService].asEagerSingleton()
 
     bind[EOMService].to[SimpleEOMService].asEagerSingleton()
-    bind[EOMChargeService].toInstance(StripeEOMChargeService)
+    bind[EOMChargeService].to(classOf[StripeEOMChargeService])
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
     bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
 
@@ -47,6 +49,14 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
     bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService])
     bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
+  }
+
+  @Provides
+  @Singleton
+  def requestOptions(): RequestOptions = {
+    (new RequestOptionsBuilder()).
+      setApiKey(conf.get[String]("payment.stripe.apiKey")).
+      build()
   }
 
   @Provides

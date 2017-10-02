@@ -2,11 +2,13 @@ package com.clemble.loveit.payment.service
 
 import java.time.YearMonth
 
-import com.clemble.loveit.common.{FunctionalThankSpecification}
+import com.clemble.loveit.common.FunctionalThankSpecification
 import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.common.model.{Resource}
+import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model._
+import play.api.libs.json.JsUndefined
 
 import scala.concurrent.duration._
 
@@ -56,7 +58,27 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
     }
   }
 
-  "CHARGES" should {
+  "CHARGES NO CHARGE ACCOUNT" should {
+
+    "EOM creates charges" in {
+      val yom = someRandom[YearMonth]
+      val user = createUser()
+      val owner = createUser()
+
+      1 to 30 map (_ => thank(user, owner, someRandom[Resource]))
+
+      runAndWait(yom)
+
+      eventually(40, 1 second)(charges(user) shouldNotEqual Nil)
+      val chargesAfterYom = charges(user)
+      chargesAfterYom.size should beGreaterThan(0)
+      chargesAfterYom.map(_.yom) should contain(yom)
+      chargesAfterYom(0).amount shouldEqual Money(3.3, LoveItCurrency.DEFAULT)
+    }
+
+  }
+
+  "CHARGES WITH CHARGE ACCOUNT" should {
 
     "EOM creates charges" in {
       val yom = someRandom[YearMonth]
@@ -77,7 +99,6 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
       chargesAfterYom.map(_.yom) should contain(yom)
     }
 
-
     "EOM charge Success on positive amount" in {
       val yom = someRandom[YearMonth]
 
@@ -93,8 +114,13 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
       val chargeOpt = charges(giver).find(_.yom == yom)
       chargeOpt shouldNotEqual None
 
-      chargeOpt.get.status shouldEqual ChargeStatus.Success
-      chargeOpt.get.transactions shouldEqual expectedTransactions
+      val yomCharge = chargeOpt.get
+
+      if (yomCharge.status == ChargeStatus.Failed) {
+        yomCharge.details.get \ "error" shouldEqual JsUndefined
+      }
+      yomCharge.status shouldEqual ChargeStatus.Success
+      yomCharge.transactions shouldEqual expectedTransactions
       // If success there should be no pending transactions left
       pendingThanks(giver) shouldEqual List.empty
     }
@@ -121,7 +147,7 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
     }
   }
 
-  "PAYOUT" should {
+  "PAYOUT WITH BANK ACCOUNT" should {
 
     "EOM should generate Payout" in {
       val yom = someRandom[YearMonth]

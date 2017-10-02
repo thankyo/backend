@@ -54,7 +54,7 @@ case class SimpleEOMService @Inject()(
   override def run(yom: YearMonth): Future[EOMStatus] = {
     val status = EOMStatus(yom)
     val fSaved = statusRepo.save(status)
-    fSaved.onSuccess({ case _ => doRun(yom)})
+    fSaved.onSuccess({ case _ => doRun(yom) })
     fSaved
   }
 
@@ -71,29 +71,27 @@ case class SimpleEOMService @Inject()(
   }
 
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
-    def toCharge(user: UserPayment): Option[EOMCharge] = {
-      user.
-        chargeAccount.
-        map(bd => {
-          val thanks = exchangeService.toThanks(user.monthlyLimit)
-          val (satisfied, _) = user.pending.splitAt(thanks.toInt)
-          val amount = exchangeService.toAmountWithClientFee(satisfied.size)
-          EOMCharge(user._id, yom, bd, ChargeStatus.Pending, amount, None, satisfied)
-        })
-    }
-
-    def createCharge(user: UserPayment): Future[Option[EOMCharge]] = {
-      toCharge(user) match {
-        case Some(charge) => chargeRepo.save(charge).map(Some(_))
-        case None => Future.successful(None)
-      }
-    }
-
-    def updateStatistics(stat: EOMStatistics, res: Option[EOMCharge]): EOMStatistics = {
-      res match {
-        case Some(_) => stat.incSuccess()
+    def updateStatistics(stat: EOMStatistics, res: EOMCharge): EOMStatistics = {
+      res.status match {
+        case ChargeStatus.Pending => stat.incSuccess()
         case _ => stat.incFailure()
       }
+    }
+
+    def toCharge(user: UserPayment): EOMCharge = {
+      val status = user.chargeAccount match {
+        case Some(_) => ChargeStatus.Pending
+        case None => ChargeStatus.NoBankDetails
+      }
+      val thanks = exchangeService.toThanks(user.monthlyLimit)
+      val (satisfied, _) = user.pending.splitAt(thanks.toInt)
+      val amount = exchangeService.toAmountWithClientFee(satisfied.size)
+      EOMCharge(user._id, yom, user.chargeAccount, status, amount, None, satisfied)
+    }
+
+    def createCharge(user: UserPayment): Future[EOMCharge] = {
+      val charge = toCharge(user)
+      chargeRepo.save(charge)
     }
 
     // TODO 2 - is a dark blood magic number it should be configured, based on system preferences
@@ -154,11 +152,13 @@ case class SimpleEOMService @Inject()(
       }
       Future.sequence(fSavedPayouts)
     }
+
     def updateStatus(stat: EOMStatistics, payouts: Iterable[Boolean]) = {
       payouts.foldLeft(stat)((stat, success) => {
         if (success) stat.incSuccess() else stat.incFailure()
       })
     }
+
     chargeRepo.
       listSuccessful(yom).
       map(toPayoutMap).

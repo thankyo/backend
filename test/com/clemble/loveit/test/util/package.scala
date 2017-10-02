@@ -20,6 +20,9 @@ import scala.util.Random
 
 package object util {
 
+  implicit val booleanGenerator: Generator[Boolean] = new Generator[Boolean] {
+    override def generate(): Boolean = Random.nextBoolean()
+  }
   implicit val resourceGenerator: Generator[Resource] = ResourceGenerator
   implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = CommonSocialProfileGenerator
   implicit val signUpRequest: Generator[SignUpRequest] = SignUpRequestGenerator
@@ -41,6 +44,14 @@ package object util {
   implicit val dateTimeGenerator: Generator[LocalDateTime] = DateTimeGenerator
   implicit val yomGenerator: Generator[YearMonth] = YearMonthGenerator
   implicit val currencyGenerator: Generator[Currency] = CurrencyGenerator
+
+  def optionRandom[T](implicit get: Generator[T]) = {
+    if (someRandom[Boolean]) {
+      Some(get.generate())
+    } else {
+      None
+    }
+  }
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
 
@@ -95,7 +106,7 @@ package object util {
     override def generate(): EOMPayout = EOMPayout(
       someRandom[UserID],
       someRandom[YearMonth],
-      Some(someRandom[PayoutAccount]),
+      optionRandom[PayoutAccount],
       someRandom[Money],
       PayoutStatus.Pending
     )
@@ -146,7 +157,7 @@ package object util {
       EOMCharge(
         someRandom[UserID],
         someRandom[YearMonth],
-        someRandom[ChargeAccount],
+        optionRandom[ChargeAccount],
         ChargeStatus.Pending,
         someRandom[Money],
         None,
@@ -225,11 +236,11 @@ package object util {
     override def generate(): User = {
       User(
         id = random(10),
-        firstName = Some(random(10)),
-        lastName = Some(random(10)),
+        firstName = optionRandom[String],
+        lastName = optionRandom[String],
         email = s"${someRandom[String]}@${someRandom[String]}.${someRandom[String]}",
-        avatar = Some(random(12)),
-        dateOfBirth = Some(someRandom[LocalDateTime]),
+        avatar = optionRandom[String],
+        dateOfBirth = optionRandom[LocalDateTime],
         profiles = Set.empty[LoginInfo]
       )
     }

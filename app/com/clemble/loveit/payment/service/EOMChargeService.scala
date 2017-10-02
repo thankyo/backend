@@ -1,5 +1,7 @@
 package com.clemble.loveit.payment.service
 
+import javax.inject.{Inject, Singleton}
+
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model._
@@ -25,7 +27,10 @@ object EOMChargeService {
 
 }
 
-case object StripeEOMChargeService extends EOMChargeService {
+import com.stripe.net.RequestOptions
+
+@Singleton
+case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOMChargeService {
 
 
   /**
@@ -41,12 +46,14 @@ case object StripeEOMChargeService extends EOMChargeService {
     chargeParams.put("amount", stripeAmount.toString)
     chargeParams.put("currency", amount.currency.getCurrencyCode.toLowerCase())
     chargeParams.put("customer", chAcc.customer)
-    StripeCharge.create(chargeParams)
+    StripeCharge.create(chargeParams, options)
   }
 
   private def doCharge(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     val res = Try({
-      chargeStripe(charge.account.asInstanceOf[StripeChargeAccount], charge.amount)
+      charge.account match {
+        case Some(acc: StripeChargeAccount) => chargeStripe(acc, charge.amount)
+      }
     }) match {
       case Success(charge) =>
         val details = Json.parse(charge.toJson())

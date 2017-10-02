@@ -1,5 +1,7 @@
 scalaVersion := "2.12.3"
 
+resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
+
 libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette" % "5.0.1",
 

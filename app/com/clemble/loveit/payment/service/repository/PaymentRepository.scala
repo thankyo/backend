@@ -2,6 +2,7 @@ package com.clemble.loveit.payment.service.repository
 
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.payment.controller.PayoutAccountController
 import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, UserPayment}
 
 import scala.concurrent.Future
@@ -22,7 +23,7 @@ trait PaymentLimitRepository {
 
 }
 
-trait PaymentAccountRepository {
+trait ChargeAccountRepository {
 
   /**
     * Get user bank details
@@ -36,12 +37,14 @@ trait PaymentAccountRepository {
   /**
     * Set user bank details
     *
-    * @param user user identifier
+    * @param user          user identifier
     * @param chargeAccount new [[ChargeAccount]]
     * @return true, if updated was successful, false otherwise
     */
   def setChargeAccount(user: UserID, chargeAccount: ChargeAccount): Future[Boolean]
+}
 
+trait PayoutAccountRepository {
   /**
     * Retrieve [[PayoutAccount]]
     */
@@ -79,5 +82,5 @@ trait UserPaymentRepository {
 
 }
 
-trait PaymentRepository extends PaymentLimitRepository with PaymentAccountRepository with UserBalanceRepository with UserPaymentRepository {
+trait PaymentRepository extends PaymentLimitRepository with ChargeAccountRepository with PayoutAccountRepository with UserBalanceRepository with UserPaymentRepository {
 }

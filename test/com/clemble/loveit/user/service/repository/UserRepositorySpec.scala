@@ -4,7 +4,7 @@ import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.payment.model.ChargeAccount
-import com.clemble.loveit.payment.service.repository.{UserBalanceRepository, PaymentAccountRepository}
+import com.clemble.loveit.payment.service.repository.{ChargeAccountRepository, UserBalanceRepository}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -14,7 +14,8 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  lazy val balanceRepo = dependency[PaymentAccountRepository with UserBalanceRepository]
+  lazy val balanceRepo = dependency[UserBalanceRepository]
+  lazy val chargeAccRepo = dependency[ChargeAccountRepository]
 
   "CREATE" should {
 
@@ -58,8 +59,8 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val chAcc = someRandom[ChargeAccount]
 
       val matchResult = for {
-        _ <- balanceRepo.setChargeAccount(A, chAcc)
-        chargeAccount <- balanceRepo.getChargeAccount(A)
+        _ <- chargeAccRepo.setChargeAccount(A, chAcc)
+        chargeAccount <- chargeAccRepo.getChargeAccount(A)
       } yield {
         chargeAccount must beEqualTo(Some(chAcc))
       }

@@ -39,7 +39,8 @@ case class SimpleEOMService @Inject()(
                                        payoutRepo: EOMPayoutRepository,
                                        chargeService: EOMChargeService,
                                        payoutService: EOMPayoutService,
-                                       paymentAccService: PaymentAccountService,
+                                       chargeAccService: ChargeAccountService,
+                                       payoutAccService: PayoutAccountService,
                                        thankService: ThankTransactionService,
                                        paymentRepo: PaymentRepository,
                                        exchangeService: ExchangeService,
@@ -144,7 +145,7 @@ case class SimpleEOMService @Inject()(
         (user, payout) <- payoutMap
       } yield {
         for {
-          ptAcc <- paymentAccService.getPayoutAccount(user)
+          ptAcc <- payoutAccService.getPayoutAccount(user)
           saved <- payoutRepo.save(toPayout(user, ptAcc, payout))
         } yield {
           saved

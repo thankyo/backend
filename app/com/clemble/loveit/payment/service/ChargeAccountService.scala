@@ -5,13 +5,12 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.{ChargeAccount, PayoutAccount, StripeChargeAccount, StripeCustomerToken, StripePayoutAccount}
-import com.clemble.loveit.payment.service.repository.PaymentAccountRepository
+import com.clemble.loveit.payment.service.repository.{ChargeAccountRepository}
 import com.google.common.collect.ImmutableMap
 import com.stripe.Stripe
 import com.stripe.model.Card
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import play.api.mvc.Results
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,20 +18,16 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * [[ChargeAccount]] integration service
   */
-trait PaymentAccountService {
+trait ChargeAccountService {
 
   def getChargeAccount(user: UserID): Future[Option[ChargeAccount]]
 
   def updateChargeAccount(user: UserID, token: StripeCustomerToken): Future[ChargeAccount]
 
-  def getPayoutAccount(user: UserID): Future[Option[PayoutAccount]]
-
-  def updatePayoutAccount(user: UserID, token: String): Future[PayoutAccount]
-
 }
 
 @Singleton
-case class SimplePaymentAccountService @Inject()(repo: PaymentAccountRepository, chAccService: ChargeAccountConverter, implicit val ec: ExecutionContext) extends PaymentAccountService {
+case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, chAccService: ChargeAccountConverter, implicit val ec: ExecutionContext) extends ChargeAccountService {
 
 
   override def getChargeAccount(user: UserID): Future[Option[ChargeAccount]] = {
@@ -49,20 +44,6 @@ case class SimplePaymentAccountService @Inject()(repo: PaymentAccountRepository,
     }
   }
 
-  override def getPayoutAccount(user: UserID): Future[Option[PayoutAccount]] = {
-    repo.getPayoutAccount(user)
-  }
-
-  override def updatePayoutAccount(user: UserID, token: String): Future[PayoutAccount] = {
-    for {
-      ptAcc <- chAccService.processPayoutToken(token)
-      updated <- repo.setPayoutAccount(user, ptAcc)
-    } yield {
-      if (!updated) throw PaymentException.failedToLinkChargeAccount(user)
-      ptAcc
-    }
-  }
-
 }
 
 
@@ -76,11 +57,6 @@ sealed trait ChargeAccountConverter {
     */
   def processChargeToken(token: String): Future[_ <: ChargeAccount]
 
-  /**
-    * Converts payout token to [[PayoutAccount]]
-    */
-  def processPayoutToken(token: String): Future[_ <: PayoutAccount]
-
 }
 
 
@@ -88,10 +64,7 @@ sealed trait ChargeAccountConverter {
   * Stripe processing service
   */
 @Singleton
-class StripeChargeAccountConverter(apiKey: String, clientId: String, wsClient: WSClient, implicit val ec: ExecutionContext) extends ChargeAccountConverter {
-  Stripe.apiKey = apiKey
-  Stripe.clientId = clientId
-
+class StripeChargeAccountConverter @Inject() (wsClient: WSClient, implicit val ec: ExecutionContext) extends ChargeAccountConverter {
   import com.stripe.model.Customer
 
   private def toInternalChargeAccount(customer: Customer): StripeChargeAccount = {
@@ -115,25 +88,4 @@ class StripeChargeAccountConverter(apiKey: String, clientId: String, wsClient: W
     Future.successful(chargeAccount)
   }
 
-  /**
-    * Converts payout token to [[PayoutAccount]]
-    */
-  override def processPayoutToken(token: String): Future[_ <: PayoutAccount] = {
-    // Step 1. Make a request to PayoutToken
-    val fRes = wsClient.url("https://connect.stripe.com/oauth/token").
-      addQueryStringParameters(
-        "client_secret" -> apiKey,
-        "grant_type" -> "authorization_code",
-        "client_id" -> clientId,
-        "code" -> token
-      ).post(Json.obj())
-    // Step 2. Convert response to PayoutAccount
-    fRes.map(res => {
-      val json = Json.parse(res.body)
-      val accountId = (json \ "stripe_user_id").as[String]
-      val refreshToken = (json \ "refresh_token").as[String]
-      val accessToken = (json \ "access_token").as[String]
-      StripePayoutAccount(accountId, refreshToken, accessToken)
-    })
-  }
 }

@@ -14,6 +14,7 @@ import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
+import com.stripe.Stripe
 import com.stripe.net.RequestOptions
 import com.stripe.net.RequestOptions.RequestOptionsBuilder
 import net.codingwell.scalaguice.ScalaModule
@@ -27,11 +28,25 @@ import scala.concurrent.ExecutionContext
 case class PaymentModule(env: Environment, conf: Configuration) extends ScalaModule {
 
   override def configure() = {
+    val apiKey = conf.get[String]("payment.stripe.apiKey")
+    val clientId = conf.get[String]("payment.stripe.clientId")
+    Stripe.apiKey = apiKey
+    Stripe.clientId = clientId
+
+
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
     bind[UserBalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
-    bind[PaymentAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
+
+    bind[ChargeAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[ChargeAccountConverter].to[StripeChargeAccountConverter].asEagerSingleton()
+    bind[ChargeAccountService].to[SimpleChargeAccountService].asEagerSingleton()
+
+    bind[PayoutAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
+    bind[PayoutAccountConverter].to[StripePayoutAccountConverter].asEagerSingleton()
+    bind[PayoutAccountService].to[SimplePayoutAccountService].asEagerSingleton()
+
     bind[PaymentLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[PaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
@@ -42,7 +57,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
     bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
 
-    bind[PaymentAccountService].to[SimplePaymentAccountService].asEagerSingleton()
+    bind[ChargeAccountService].to[SimpleChargeAccountService].asEagerSingleton()
 
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
@@ -57,14 +72,6 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     (new RequestOptionsBuilder()).
       setApiKey(conf.get[String]("payment.stripe.apiKey")).
       build()
-  }
-
-  @Provides
-  @Singleton
-  def chargeAccountService(wsClient: WSClient, ec: ExecutionContext): ChargeAccountConverter = {
-    val apiKey = conf.get[String]("payment.stripe.apiKey")
-    val clientId = conf.get[String]("payment.stripe.clientId")
-    new StripeChargeAccountConverter(apiKey, clientId, wsClient, ec)
   }
 
   @Provides

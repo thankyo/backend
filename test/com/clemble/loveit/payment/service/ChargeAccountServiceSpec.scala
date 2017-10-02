@@ -1,11 +1,11 @@
 package com.clemble.loveit.payment.service
 
-import com.clemble.loveit.payment.service.repository.PaymentAccountRepository
+import com.clemble.loveit.payment.service.repository.{ChargeAccountRepository}
 
 class ChargeAccountServiceSpec extends PaymentServiceTestExecutor {
 
-  val service = dependency[PaymentAccountService]
-  val repo = dependency[PaymentAccountRepository]
+  val service = dependency[ChargeAccountService]
+  val repo = dependency[ChargeAccountRepository]
 
   "STRIPE" should {
 

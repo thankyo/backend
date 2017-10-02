@@ -1,6 +1,6 @@
 package com.clemble.loveit.payment.controller
 
-class PaymentAccountControllerSpec extends PaymentControllerTestExecutor {
+class ChargeAccountControllerSpec extends PaymentControllerTestExecutor {
 
   "Update ChargeAccount" in {
     val user = createUser()

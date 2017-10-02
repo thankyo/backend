@@ -8,7 +8,7 @@ import com.clemble.loveit.payment.service.repository._
 
 trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
 
-  val accService = dependency[PaymentAccountService]
+  val accService = dependency[ChargeAccountService]
   val payRepo = dependency[PaymentRepository]
   val thankTransactionService = dependency[ThankTransactionService]
   val monLimRepo = dependency[PaymentLimitRepository]

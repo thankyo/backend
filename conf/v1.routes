@@ -26,15 +26,15 @@ GET         /thank/:supporter/supported              @com.clemble.loveit.thank.c
 # Payment related ENDPOINTS
 
 GET         /payment/:user/pending                   @com.clemble.loveit.payment.controller.ThankTransactionController.list(user)
-GET         /payment/my/charge                       @com.clemble.loveit.payment.controller.EOMChangeController.listMy()
+GET         /payment/my/charge                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 
 GET         /payment/:user/balance                   @com.clemble.loveit.payment.controller.UserBalanceController.getBalance(user)
 
-GET         /payment/my/account                      @com.clemble.loveit.payment.controller.PaymentAccountController.getMyAccount()
-POST        /payment/my/account                      @com.clemble.loveit.payment.controller.PaymentAccountController.setMyAccount()
+GET         /payment/my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.getMyAccount()
+POST        /payment/my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.setMyAccount()
 
 GET         /payment/my/payout                       @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
-GET         /payment/my/payout/account               @com.clemble.loveit.payment.controller.EOMPayoutController.connectMyAccount()
+GET         /payment/my/payout/account               @com.clemble.loveit.payment.controller.PayoutAccountController.connectMyAccount()
 
 GET         /payment/:user/limit                     @com.clemble.loveit.payment.controller.PaymentLimitController.getMonthlyLimit(user)
 POST        /payment/my/limit                        @com.clemble.loveit.payment.controller.PaymentLimitController.setMonthlyLimit()

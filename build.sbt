@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.5.3",
+  "io.sentry" % "sentry-logback" % "1.5.4",
 
   "com.stripe" % "stripe-java" % "5.9.0",
 

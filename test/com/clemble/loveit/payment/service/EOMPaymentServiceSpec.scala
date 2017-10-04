@@ -12,9 +12,9 @@ import play.api.libs.json.JsUndefined
 
 import scala.concurrent.duration._
 
-class EOMServiceSpec extends GenericEOMServiceSpec with PaymentServiceTestExecutor {
+class EOMPaymentServiceSpec extends GenericEOMPaymentServiceSpec with PaymentServiceTestExecutor {
 
-  val service = dependency[EOMService]
+  val service = dependency[EOMPaymentService]
 
   override def getStatus(yom: YearMonth) = {
     await(service.getStatus(yom))
@@ -26,7 +26,7 @@ class EOMServiceSpec extends GenericEOMServiceSpec with PaymentServiceTestExecut
 
 }
 
-trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTestExecutor {
+trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with PaymentTestExecutor {
 
   sequential
 
@@ -34,7 +34,11 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
   def run(yom: YearMonth): EOMStatus
   def runAndWait(yom: YearMonth): EOMStatus = {
     run(yom)
-    eventually(400, 100.millis)(getStatus(yom).get.finished shouldNotEqual None)
+    eventually(getStatus(yom).flatMap(_.createCharges) shouldNotEqual None)
+    eventually(getStatus(yom).flatMap(_.applyCharges) shouldNotEqual None)
+    eventually(getStatus(yom).flatMap(_.createPayout) shouldNotEqual None)
+    eventually(getStatus(yom).flatMap(_.applyPayout) shouldNotEqual None)
+    eventually(getStatus(yom).flatMap(_.finished) shouldNotEqual None)
     getStatus(yom).get
   }
 
@@ -47,7 +51,7 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
       val status = run(yom)
       status.finished shouldEqual None
 
-      eventually(40, 1 second)(getStatus(yom).get.finished shouldNotEqual None)
+      eventually(getStatus(yom).flatMap(_.finished) shouldNotEqual None)
     }
 
     "EOM can't be run twice" in {
@@ -69,7 +73,7 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
 
       runAndWait(yom)
 
-      eventually(40, 1 second)(charges(user) shouldNotEqual Nil)
+      eventually(charges(user) shouldNotEqual Nil)
       val chargesAfterYom = charges(user)
       chargesAfterYom.size should beGreaterThan(0)
       chargesAfterYom.map(_.yom) should contain(yom)
@@ -90,8 +94,8 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
       runAndWait(yom)
 
       val statusAfter = getStatus(yom)
-      statusAfter.get.createCharges.success should beGreaterThan(0L)
-      statusAfter.get.createCharges.total should beGreaterThan(0L)
+      statusAfter.get.createCharges.get.success should beGreaterThan(0L)
+      statusAfter.get.createCharges.get.total should beGreaterThan(0L)
 
       eventually(40, 1 second)(charges(user) shouldNotEqual Nil)
       val chargesAfterYom = charges(user)
@@ -165,7 +169,7 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
 
       val finalStatus = runAndWait(yom)
 
-      finalStatus.createPayout.success shouldEqual 1
+      finalStatus.createPayout.get.success shouldEqual 1
       val ownerPayouts = payouts(owner)
       ownerPayouts.size shouldEqual 1
       ownerPayouts(0).amount shouldEqual new Money(5.4, "USD")

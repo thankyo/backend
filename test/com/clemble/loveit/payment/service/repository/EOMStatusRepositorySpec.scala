@@ -42,6 +42,7 @@ class EOMStatusRepositorySpec extends RepositorySpec {
   }
 
   "UPDATE" should {
+
     "update" in {
       val yom = someRandom[YearMonth]
       val status = someRandom[EOMStatus].copy(yom = yom)
@@ -49,15 +50,26 @@ class EOMStatusRepositorySpec extends RepositorySpec {
       await(repo.save(status))
 
       val updatedStatus = someRandom[EOMStatus].copy(yom = status.yom, finished = Some(someRandom[LocalDateTime]))
-      await(repo.update(yom,
-        createCharges = updatedStatus.createCharges,
-        applyCharges = updatedStatus.applyCharges,
-        createPayout = updatedStatus.createPayout,
-        applyPayout = updatedStatus.applyPayout,
-        finished = updatedStatus.finished.get
-      ))
 
-      await(repo.get(yom)) shouldEqual Some(updatedStatus.copy(created = status.created))
+      val applyCharges = someRandom[EOMStatistics]
+      await(repo.updateApplyCharges(yom, applyCharges))
+      await(repo.get(yom)).flatMap(_.applyCharges) shouldEqual Some(applyCharges)
+
+      val createCharges = someRandom[EOMStatistics]
+      await(repo.updateCreateCharges(yom, createCharges))
+      await(repo.get(yom)).flatMap(_.createCharges) shouldEqual Some(createCharges)
+
+      val createPayout = someRandom[EOMStatistics]
+      await(repo.updateCreatePayout(yom, createPayout))
+      await(repo.get(yom)).flatMap(_.createPayout) shouldEqual Some(createPayout)
+
+      val applyPayout = someRandom[EOMStatistics]
+      await(repo.updateApplyPayout(yom, applyPayout))
+      await(repo.get(yom)).flatMap(_.applyPayout) shouldEqual Some(applyPayout)
+
+      val finished = someRandom[LocalDateTime]
+      await(repo.updateFinished(yom, finished))
+      await(repo.get(yom)).flatMap(_.finished) shouldEqual Some(finished)
     }
 
   }

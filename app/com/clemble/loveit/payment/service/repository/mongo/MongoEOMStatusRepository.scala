@@ -8,7 +8,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.repository.EOMStatusRepository
-import play.api.libs.json.{Json}
+import play.api.libs.json.{Json, Writes}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
@@ -29,14 +29,30 @@ case class MongoEOMStatusRepository @Inject()(@Named("eomStatus") collection: JS
     MongoSafeUtils.safe(status, collection.insert(status))
   }
 
-  override def update(yom: YearMonth, createCharges: EOMStatistics, applyCharges: EOMStatistics, createPayout: EOMStatistics, applyPayout: EOMStatistics, finished: LocalDateTime): Future[Boolean] = {
+  override def updateCreateCharges(yom: YearMonth, createCharges: EOMStatistics) = {
+    updateField(yom, "createCharges", createCharges)
+  }
+
+  override def updateApplyCharges(yom: YearMonth, applyCharges: EOMStatistics) = {
+    updateField(yom, "applyCharges", applyCharges)
+  }
+
+  override def updateCreatePayout(yom: YearMonth, createPayout: EOMStatistics) = {
+    updateField(yom, "createPayout", createPayout)
+  }
+
+  override def updateApplyPayout(yom: YearMonth, applyPayout: EOMStatistics) = {
+    updateField(yom, "applyPayout", applyPayout)
+  }
+
+  override def updateFinished(yom: YearMonth, finished: LocalDateTime) = {
+    updateField(yom, "finished", finished)
+  }
+
+  private def updateField[T](yom: YearMonth, field: String, value: T)(implicit writes: Writes[T]) = {
     val selector = Json.obj("yom" -> yom)
     val update = Json.obj("$set" -> Json.obj(
-      "createCharges" -> createCharges,
-      "applyCharges" -> applyCharges,
-      "createPayout" -> createPayout,
-      "applyPayout" -> applyPayout,
-      "finished" -> finished
+      field -> value
     ))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }

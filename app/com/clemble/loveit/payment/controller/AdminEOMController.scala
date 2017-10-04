@@ -4,14 +4,14 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.payment.service.EOMService
+import com.clemble.loveit.payment.service.EOMPaymentService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.{InjectedController}
 
 import scala.concurrent.ExecutionContext
 
 class AdminEOMController @Inject()(
-                                    service: EOMService,
+                                    service: EOMPaymentService,
                                     silhouette: Silhouette[AuthEnv],
                                     implicit val ec: ExecutionContext
                                   ) extends InjectedController {

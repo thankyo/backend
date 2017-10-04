@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * EOMService update EOM Service
   */
-trait EOMService {
+trait EOMPaymentService {
 
   /**
     * Simple wrap of repo access
@@ -33,7 +33,7 @@ trait EOMService {
 }
 
 @Singleton
-case class SimpleEOMService @Inject()(
+case class SimpleEOMPaymentService @Inject()(
                                        statusRepo: EOMStatusRepository,
                                        chargeRepo: EOMChargeRepository,
                                        payoutRepo: EOMPayoutRepository,
@@ -46,7 +46,7 @@ case class SimpleEOMService @Inject()(
                                        exchangeService: ExchangeService,
                                        implicit val ec: ExecutionContext,
                                        implicit val m: Materializer
-                                     ) extends EOMService {
+                                     ) extends EOMPaymentService {
 
   override def getStatus(yom: YearMonth): Future[Option[EOMStatus]] = {
     statusRepo.get(yom)
@@ -55,17 +55,21 @@ case class SimpleEOMService @Inject()(
   override def run(yom: YearMonth): Future[EOMStatus] = {
     val status = EOMStatus(yom)
     val fSaved = statusRepo.save(status)
-    fSaved.onSuccess({ case _ => doRun(yom) })
+    fSaved.flatMap(_ => doRun(yom))
     fSaved
   }
 
   private def doRun(yom: YearMonth) = {
     for {
       createCharges <- doCreateCharges(yom)
+      _ <- statusRepo.updateCreateCharges(yom, createCharges)
       applyCharges <- doApplyCharges(yom)
+      _ <- statusRepo.updateApplyCharges(yom, applyCharges)
       createPayout <- doCreatePayout(yom)
+      _ <- statusRepo.updateCreatePayout(yom, createPayout)
       applyPayout <- doApplyPayout(yom)
-      update <- statusRepo.update(yom, createCharges = createCharges, applyCharges = applyCharges, createPayout = createPayout, applyPayout = applyPayout, finished = LocalDateTime.now())
+      _ <- statusRepo.updateApplyPayout(yom, applyPayout)
+      update <- statusRepo.updateFinished(yom, LocalDateTime.now())
     } yield {
       update
     }

@@ -8,24 +8,18 @@ import scala.concurrent.Future
 
 trait EOMStatusRepository {
 
-  /**
-    * @return optional EOMStatus
-    */
   def get(yom: YearMonth): Future[Option[EOMStatus]]
 
-  /**
-    * Saves EOM status, if there were no previous EOMStatus created
-    */
   def save(status: EOMStatus): Future[EOMStatus]
 
-  /**
-    * Update fields all at once for EOMStatus
-    */
-  def update(yom: YearMonth,
-             createCharges: EOMStatistics,
-             applyCharges: EOMStatistics,
-             createPayout: EOMStatistics,
-             applyPayout: EOMStatistics,
-             finished: LocalDateTime): Future[Boolean]
+  def updateCreateCharges(yom: YearMonth, createCharges: EOMStatistics): Future[Boolean]
+
+  def updateApplyCharges(yom: YearMonth, applyCharges: EOMStatistics): Future[Boolean]
+
+  def updateCreatePayout(yom: YearMonth, createPayout: EOMStatistics): Future[Boolean]
+
+  def updateApplyPayout(yom: YearMonth, applyPayout: EOMStatistics): Future[Boolean]
+
+  def updateFinished(yom: YearMonth, finished: LocalDateTime): Future[Boolean]
 
 }

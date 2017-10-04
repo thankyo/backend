@@ -42,18 +42,18 @@ object EOMStatistics {
   */
 case class EOMStatus(
                              yom: YearMonth,
-                             createCharges: EOMStatistics = EOMStatistics(),
-                             applyCharges: EOMStatistics = EOMStatistics(),
-                             createPayout: EOMStatistics = EOMStatistics(),
-                             applyPayout: EOMStatistics = EOMStatistics(),
+                             createCharges: Option[EOMStatistics] = None,
+                             applyCharges: Option[EOMStatistics] = None,
+                             createPayout: Option[EOMStatistics] = None,
+                             applyPayout: Option[EOMStatistics] = None,
                              finished: Option[LocalDateTime] = None,
                              created: LocalDateTime = LocalDateTime.now()
               ) extends CreatedAware with EOMAware{
 
-  def isValid = createCharges.isValid &&
-    applyCharges.isValid &&
-    createPayout.isValid &&
-    applyPayout.isValid
+  def isValid = createCharges.map(_.isValid).getOrElse(false) &&
+    applyCharges.map(_.isValid).getOrElse(false) &&
+    createPayout.map(_.isValid).getOrElse(false) &&
+    applyPayout.map(_.isValid).getOrElse(false)
 
 }
 

@@ -81,11 +81,11 @@ package object util {
     override def generate(): EOMStatus = {
       EOMStatus(
         someRandom[YearMonth],
-        someRandom[EOMStatistics],
-        someRandom[EOMStatistics],
-        someRandom[EOMStatistics],
-        someRandom[EOMStatistics],
-        None,
+        optionRandom[EOMStatistics],
+        optionRandom[EOMStatistics],
+        optionRandom[EOMStatistics],
+        optionRandom[EOMStatistics],
+        optionRandom[LocalDateTime],
         someRandom[LocalDateTime]
       )
     }

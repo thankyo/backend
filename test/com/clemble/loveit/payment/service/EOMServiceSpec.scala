@@ -34,7 +34,7 @@ trait GenericEOMServiceSpec extends FunctionalThankSpecification with PaymentTes
   def run(yom: YearMonth): EOMStatus
   def runAndWait(yom: YearMonth): EOMStatus = {
     run(yom)
-    eventually(getStatus(yom).get.finished shouldNotEqual None)
+    eventually(400, 100.millis)(getStatus(yom).get.finished shouldNotEqual None)
     getStatus(yom).get
   }
 

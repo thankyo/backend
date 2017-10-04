@@ -18,6 +18,14 @@ import scala.concurrent.Future
 trait EOMChargeRepository extends UserAwareRepository[EOMCharge] {
 
   /**
+    * Saves charge for future processing
+    *
+    * @param charge charge to process
+    * @return saved EOMCharge
+    */
+  def save(charge: EOMCharge): Future[EOMCharge]
+
+  /**
     * Lists success charges
     *
     * @param yom
@@ -49,12 +57,5 @@ trait EOMChargeRepository extends UserAwareRepository[EOMCharge] {
   @throws[RepositoryException]
   def updatePending(user: UserID, yom: YearMonth, status: ChargeStatus, details: JsValue): Future[Boolean]
 
-  /**
-    * Saves charge for future processing
-    *
-    * @param charge charge to process
-    * @return saved EOMCharge
-    */
-  def save(charge: EOMCharge): Future[EOMCharge]
 
 }

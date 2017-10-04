@@ -4,7 +4,7 @@ import java.time.{LocalDateTime, YearMonth}
 import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Sink, Source}
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
@@ -12,7 +12,6 @@ import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutAccount, PayoutStatus, UserPayment}
 import com.clemble.loveit.payment.service.repository._
 
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -75,15 +74,16 @@ case class SimpleEOMPaymentService @Inject()(
     }
   }
 
-  private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
-    def updateStatistics(stat: EOMStatistics, res: EOMCharge): EOMStatistics = {
-      res.status match {
-        case ChargeStatus.Pending => stat.incSuccess()
-        case _ => stat.incFailure()
-      }
+  def successIfStatusIs[T](success: T)(stat: EOMStatistics, value: T): EOMStatistics = {
+    if (value == success) {
+      stat.incSuccess()
+    } else {
+      stat.incFailure()
     }
+  }
 
-    def toCharge(user: UserPayment): EOMCharge = {
+  private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
+    def createCharge(user: UserPayment): Future[ChargeStatus] = {
       val status = user.chargeAccount match {
         case Some(_) => ChargeStatus.Pending
         case None => ChargeStatus.NoBankDetails
@@ -91,29 +91,25 @@ case class SimpleEOMPaymentService @Inject()(
       val thanks = exchangeService.toThanks(user.monthlyLimit)
       val (satisfied, _) = user.pending.splitAt(thanks.toInt)
       val amount = exchangeService.toAmountWithClientFee(satisfied.size)
-      EOMCharge(user._id, yom, user.chargeAccount, status, amount, None, satisfied)
+      val charge = EOMCharge(user._id, yom, user.chargeAccount, status, amount, None, satisfied)
+      chargeRepo.
+        save(charge).
+        map(_.status).
+        recover({
+          case _ => ChargeStatus.FailedToCreate
+        })
     }
 
-    def createCharge(user: UserPayment): Future[EOMCharge] = {
-      val charge = toCharge(user)
-      chargeRepo.save(charge)
-    }
+    val updateStat: (EOMStatistics, ChargeStatus) => EOMStatistics =  successIfStatusIs(ChargeStatus.Pending)
 
     // TODO 2 - is a dark blood magic number it should be configured, based on system preferences
     paymentRepo.
       find().
       mapAsync(1)(createCharge).
-      runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
+      runWith(Sink.fold(EOMStatistics())(updateStat))
   }
 
   private def doApplyCharges(yom: YearMonth): Future[EOMStatistics] = {
-    def updateStatistics(stat: EOMStatistics, status: ChargeStatus): EOMStatistics = {
-      status match {
-        case ChargeStatus.Success => stat.incSuccess()
-        case _ => stat.incFailure()
-      }
-    }
-
     def applyCharge(charge: EOMCharge): Future[ChargeStatus] = {
       for {
         (status, details) <- chargeService.process(charge)
@@ -124,10 +120,12 @@ case class SimpleEOMPaymentService @Inject()(
       }
     }
 
+    val updateStat: (EOMStatistics, ChargeStatus) => EOMStatistics =  successIfStatusIs(ChargeStatus.Success)
+
     chargeRepo.
       listPending(yom).
       mapAsync(1)(applyCharge).
-      runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
+      runWith(Sink.fold(EOMStatistics())(updateStat))
   }
 
   private def doCreatePayout(yom: YearMonth): Future[EOMStatistics] = {
@@ -144,41 +142,30 @@ case class SimpleEOMPaymentService @Inject()(
       EOMPayout(user, yom, ptAcc, amount, PayoutStatus.Pending)
     }
 
-    def savePayouts(payoutMap: Map[UserID, Int]): Future[immutable.Iterable[Boolean]] = {
-      val fSavedPayouts = for {
-        (user, payout) <- payoutMap
+    def savePayouts(payoutMap: (UserID, Int)): Future[Boolean] = {
+      val (user, payout) = payoutMap
+      for {
+        ptAcc <- payoutAccService.getPayoutAccount(user)
+        saved <- payoutRepo.save(toPayout(user, ptAcc, payout))
       } yield {
-        for {
-          ptAcc <- payoutAccService.getPayoutAccount(user)
-          saved <- payoutRepo.save(toPayout(user, ptAcc, payout))
-        } yield {
-          saved
-        }
+        saved
       }
-      Future.sequence(fSavedPayouts)
     }
 
-    def updateStatus(stat: EOMStatistics, payouts: Iterable[Boolean]) = {
-      payouts.foldLeft(stat)((stat, success) => {
-        if (success) stat.incSuccess() else stat.incFailure()
-      })
-    }
+    val updateStat: (EOMStatistics, Boolean) => EOMStatistics = successIfStatusIs(true)
 
     chargeRepo.
       listSuccessful(yom).
       map(toPayoutMap).
       runWith(Sink.fold(Map.empty[UserID, Int])((agg, ch) => combinePayoutMaps(agg, ch))).
-      flatMap(payoutMap => savePayouts(payoutMap)).map(updateStatus(EOMStatistics(), _))
+      flatMap(payoutMap => {
+        Source(payoutMap).
+          mapAsync(1)(savePayouts).
+          runWith(Sink.fold(EOMStatistics())(updateStat))
+      })
   }
 
   private def doApplyPayout(yom: YearMonth): Future[EOMStatistics] = {
-    def updateStatistics(stat: EOMStatistics, status: PayoutStatus): EOMStatistics = {
-      status match {
-        case PayoutStatus.Success => stat.incSuccess()
-        case _ => stat.incFailure()
-      }
-    }
-
     def applyPayout(payout: EOMPayout): Future[PayoutStatus] = {
       for {
         (status, details) <- payoutService.process(payout)
@@ -188,10 +175,12 @@ case class SimpleEOMPaymentService @Inject()(
       }
     }
 
+    val updateStat: (EOMStatistics, PayoutStatus) => EOMStatistics =  successIfStatusIs(PayoutStatus.Success)
+
     payoutRepo.
       listPending(yom).
       mapAsync(1)(applyPayout).
-      runWith(Sink.fold(EOMStatistics())((stat, res) => updateStatistics(stat, res)))
+      runWith(Sink.fold(EOMStatistics())(updateStat))
   }
 
 }

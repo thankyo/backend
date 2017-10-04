@@ -32,6 +32,10 @@ case class MongoEOMChargeRepository @Inject()(
 
   override implicit val format = EOMCharge.jsonFormat
 
+  override def save(charge: EOMCharge): Future[EOMCharge] = {
+    MongoSafeUtils.safe(charge, collection.insert(charge))
+  }
+
   override def listSuccessful(yom: YearMonth): Source[EOMCharge, _] = {
     val selector = Json.obj("yom" -> yom, "status" -> ChargeStatus.Success)
     collection.
@@ -52,10 +56,6 @@ case class MongoEOMChargeRepository @Inject()(
     val selector = Json.obj("user" -> user, "yom" -> yom, "status" -> ChargeStatus.Pending)
     val update = Json.obj("$set" -> Json.obj("status" -> status, "details" -> details))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
-  }
-
-  override def save(charge: EOMCharge): Future[EOMCharge] = {
-    MongoSafeUtils.safe(charge, collection.insert(charge))
   }
 
 }

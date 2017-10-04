@@ -11,9 +11,9 @@ dependencies:
     - sudo service mongod stop
     - docker-compose up -d
   cache_directories:
-    - ".sbt"
-    - ".ivy2/cache"
-    - ".m2"
+    - "~/.sbt"
+    - "~/.ivy2/cache"
+    - "~/.m2"
 
 
 test:

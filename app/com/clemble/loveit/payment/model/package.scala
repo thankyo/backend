@@ -7,9 +7,6 @@ import com.clemble.loveit.common.model.Resource.from
 import play.api.libs.json._
 import play.api.mvc.PathBindable
 
-/**
-  * Created by mavarazy on 6/9/17.
-  */
 package object model {
 
   type StripeCustomerToken = String

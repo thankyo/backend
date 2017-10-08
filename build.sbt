@@ -14,7 +14,7 @@ val silhouetteVersion = "5.0.1"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
 
-lazy val common = (project in file("./common"))
+lazy val common = project in file("./common")
 
 lazy val auth = (project in file("./auth")).
   enablePlugins(PlayScala).
@@ -80,8 +80,8 @@ javaOptions in Universal ++= Seq(
 javaOptions in Test ++= Seq("-Dconfig.resource=application.test.conf")
 
 version in Docker := "latest"
-maintainer in Docker := "antono@clemble.com"
+maintainer in Docker := "antono@loveit.tips"
 dockerBaseImage := "openjdk:8u131-jre"
-dockerRepository := Some("mavarazy")
+dockerRepository := Some("loveit")
 dockerExposedPorts := Seq(9000, 9443)
 

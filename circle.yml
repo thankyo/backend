@@ -33,4 +33,4 @@ deployment:
       - sbt coveralls
       # Docker publish
       - sbt docker:publishLocal
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS; docker push mavarazy/thank-backend
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS; docker push loveit/backend

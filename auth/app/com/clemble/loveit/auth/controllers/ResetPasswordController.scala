@@ -37,7 +37,6 @@ class ResetPasswordController @Inject() (
                                           authTokenService: AuthTokenService
 )(
   implicit
-  parser: PlayBodyParsers,
   ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport {
 

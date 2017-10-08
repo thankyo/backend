@@ -4,12 +4,16 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.user.service.SubscriptionManager
 import play.api.libs.json.{JsBoolean, JsDefined, JsObject, JsString}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscriptionController @Inject() (subManager: SubscriptionManager, implicit val ec: ExecutionContext) extends Controller {
+case class SubscriptionController @Inject()(
+                                             subManager: SubscriptionManager,
+                                             components: ControllerComponents,
+                                             implicit val ec: ExecutionContext
+                                           ) extends AbstractController(components) {
 
   def subscribeCreator() = Action.async(parse.json[JsObject].map(_ \ "email"))(implicit req => {
     req.body match {

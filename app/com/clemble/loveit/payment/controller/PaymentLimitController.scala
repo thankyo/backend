@@ -8,15 +8,16 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.model.Money
 import com.clemble.loveit.payment.service.repository.PaymentLimitRepository
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.mvc.Controller
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
 class PaymentLimitController @Inject()(
                                         repo: PaymentLimitRepository,
+                                        components: ControllerComponents,
                                         silhouette: Silhouette[AuthEnv],
                                         implicit val ec: ExecutionContext
-                                      ) extends Controller {
+                                      ) extends AbstractController(components) {
 
   def getMonthlyLimit(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     val userID = ControllerUtils.idOrMe(user)

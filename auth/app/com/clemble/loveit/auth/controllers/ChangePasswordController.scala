@@ -32,7 +32,6 @@ class ChangePasswordController @Inject()(
                                           passwordHasherRegistry: PasswordHasherRegistry
                                         )(
                                           implicit
-                                          parser: PlayBodyParsers,
                                           ex: ExecutionContext
                                         ) extends AbstractController(components) with I18nSupport {
 
@@ -41,7 +40,7 @@ class ChangePasswordController @Inject()(
     *
     * @return The result to display.
     */
-  def submit = silhouette.SecuredAction.async(parser.json[ChangePasswordRequest])({
+  def submit = silhouette.SecuredAction.async(parse.json[ChangePasswordRequest])({
     request => {
       val (currentPassword, newPassword) = ChangePasswordRequest.unapply(request.body).get
       val credentials = Credentials(request.identity.email, currentPassword)

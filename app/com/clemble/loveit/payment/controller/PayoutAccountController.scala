@@ -9,7 +9,7 @@ import com.clemble.loveit.payment.service.{ChargeAccountService, PayoutAccountSe
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import play.api.Configuration
-import play.api.mvc.{Controller, Request, Result}
+import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -18,9 +18,10 @@ class PayoutAccountController @Inject()(
                                          conf: Configuration,
                                          @Named("paymentCrypter") crypter: Crypter,
                                          payoutAccService: PayoutAccountService,
+                                         components: ControllerComponents,
                                          silhouette: Silhouette[AuthEnv],
                                          implicit val ec: ExecutionContext
-                                   ) extends Controller {
+                                   ) extends AbstractController(components) {
 
   private val clientId = conf.get[String]("payment.stripe.clientId")
 

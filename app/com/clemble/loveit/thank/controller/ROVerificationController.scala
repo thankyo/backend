@@ -7,15 +7,16 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.service.ROVerificationService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
-import play.api.mvc.Controller
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
 case class ROVerificationController @Inject()(
                                                service: ROVerificationService,
+                                               components: ControllerComponents,
                                                silhouette: Silhouette[AuthEnv],
                                                implicit val ec: ExecutionContext
-                                                    ) extends Controller {
+                                             ) extends AbstractController(components) {
 
   def removeMy() = silhouette.SecuredAction.async(implicit req => {
     val fRemove = service.remove(req.identity.id)

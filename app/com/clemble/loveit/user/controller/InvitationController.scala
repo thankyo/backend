@@ -9,7 +9,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.{Logger, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import play.api.libs.json._
-import play.api.mvc.Controller
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,8 +19,9 @@ case class InvitationController @Inject()(
                                            silhouette: Silhouette[AuthEnv],
                                            authInfoRepository: AuthInfoRepository,
                                            socialProviderRegistry: SocialProviderRegistry,
+                                           components: ControllerComponents,
                                            implicit val ec: ExecutionContext
-                                         ) extends Controller with Logger {
+                                         ) extends AbstractController(components) with Logger {
 
   def invite() = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "linkOrEmail"))(implicit req => {
     req.body match {

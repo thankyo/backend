@@ -11,7 +11,7 @@ import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.ThankTransaction
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
-import play.api.mvc.Controller
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
@@ -19,9 +19,10 @@ import scala.concurrent.ExecutionContext
 case class ThankTransactionController @Inject()(
                                                  transactionService: ThankTransactionService,
                                                  silhouette: Silhouette[AuthEnv],
+                                                 components: ControllerComponents,
                                                  implicit val m: Materializer,
                                                  implicit val ec: ExecutionContext
-) extends Controller {
+) extends AbstractController(components) {
 
   def list(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     val userID = ControllerUtils.idOrMe(user)

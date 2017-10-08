@@ -34,7 +34,6 @@ class ForgotPasswordController @Inject()(
                                           mailerClient: MailerClient
                                         )(
                                           implicit
-                                          parser: PlayBodyParsers,
                                           ex: ExecutionContext
                                         ) extends AbstractController(components) with I18nSupport {
 

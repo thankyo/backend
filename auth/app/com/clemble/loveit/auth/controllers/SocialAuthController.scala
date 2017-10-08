@@ -15,21 +15,20 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * The social auth controller.
   *
-  * @param silhouette The Silhouette stack.
-  * @param authInfoRepository The auth info service implementation.
+  * @param silhouette             The Silhouette stack.
+  * @param authInfoRepository     The auth info service implementation.
   * @param socialProviderRegistry The social provider registry.
   */
 @Singleton
-class SocialAuthController @Inject() (
-                                       components: ControllerComponents,
-                                       userService: UserService,
-                                       authInfoRepository: AuthInfoRepository,
-                                       socialProviderRegistry: SocialProviderRegistry)
-                                      (
-                                       implicit
-                                       silhouette: Silhouette[AuthEnv],
-                                       ec: ExecutionContext)
-  extends AbstractController(components) with Logger {
+class SocialAuthController @Inject()(
+                                      userService: UserService,
+                                      authInfoRepository: AuthInfoRepository,
+                                      socialProviderRegistry: SocialProviderRegistry,
+                                      components: ControllerComponents,
+                                    )(implicit
+                                      ec: ExecutionContext,
+                                      silhouette: Silhouette[AuthEnv]
+                                    ) extends AbstractController(components) with Logger {
 
   /**
     * Authenticates a user against a social provider.
@@ -37,7 +36,7 @@ class SocialAuthController @Inject() (
     * @param provider The ID of the provider to authenticate against.
     * @return The result to display.
     */
-  def authenticate(provider: String) = Action.async{ implicit req => {
+  def authenticate(provider: String) = Action.async { implicit req => {
 
     def processProviderResponse(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A): Future[Result] = {
       for {
@@ -66,6 +65,7 @@ class SocialAuthController @Inject() (
         logger.error("Unexpected provider error", e)
         Redirect("/")
     }
-  }}
+  }
+  }
 
 }

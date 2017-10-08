@@ -9,8 +9,7 @@ import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.error.ResourceException._
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.mvc.{Controller, Result}
-
+import play.api.mvc.{AbstractController, ControllerComponents, Result}
 import com.clemble.loveit.thank.controller.html.hasNotThanked
 import com.clemble.loveit.thank.controller.html.ownerMissing
 import com.clemble.loveit.thank.controller.html.hasThanked
@@ -21,8 +20,9 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ThankController @Inject()(
                                       service: ThankService,
                                       silhouette: Silhouette[AuthEnv],
+                                      components: ControllerComponents,
                                       implicit val ec: ExecutionContext
-                                    ) extends Controller {
+                                    ) extends AbstractController(components) {
 
   private def getJson(res: Resource): Future[Result] = {
     service.getOrCreate(res).map(Ok(_))

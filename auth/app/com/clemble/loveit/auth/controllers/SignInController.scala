@@ -27,11 +27,11 @@ import scala.concurrent.{ExecutionContext, Future}
   * @param clock                  The clock instance.
   */
 class SignInController @Inject()(
-                                  components: ControllerComponents,
                                   userService: UserService,
                                   credentialsProvider: CredentialsProvider,
                                   socialProviderRegistry: SocialProviderRegistry,
                                   configuration: Configuration,
+                                  components: ControllerComponents,
                                   clock: Clock
                                 )(
                                   implicit

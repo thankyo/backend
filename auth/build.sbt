@@ -1,5 +1,7 @@
 scalaVersion := "2.12.3"
 
+scalacOptions ++= Seq("-unchecked", "-deprecation")
+
 libraryDependencies ++= Seq(
 
   "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",

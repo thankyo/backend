@@ -42,7 +42,6 @@ class SignUpController @Inject()(
                                 )(
                                   implicit
                                   silhouette: Silhouette[AuthEnv],
-                                  parse: PlayBodyParsers,
                                   ex: ExecutionContext
                                 ) extends AbstractController(components) with I18nSupport {
 

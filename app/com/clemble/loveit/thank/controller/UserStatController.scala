@@ -9,15 +9,16 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.service.repository.UserStatRepo
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
-import play.api.mvc.Controller
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
 class UserStatController @Inject()(
                                     statRepo: UserStatRepo,
                                     silhouette: Silhouette[AuthEnv],
+                                    components: ControllerComponents,
                                     implicit val ec: ExecutionContext
-                                  ) extends Controller {
+                                  ) extends AbstractController(components) {
 
   def get(supporter: UserID, year: Int, month: Int) = silhouette.SecuredAction.async(implicit req => {
     val user = idOrMe(supporter)

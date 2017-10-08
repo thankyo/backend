@@ -7,6 +7,7 @@ name := "backend"
 version := "1.0-SNAPSHOT"
 
 scalaVersion := "2.12.3"
+scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 val reactiveMongoVer = "0.12.6"
 val silhouetteVersion = "5.0.1"

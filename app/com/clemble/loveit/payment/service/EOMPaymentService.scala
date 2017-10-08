@@ -11,6 +11,7 @@ import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutAccount, PayoutStatus, UserPayment}
 import com.clemble.loveit.payment.service.repository._
+import play.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -75,14 +76,22 @@ case class SimpleEOMPaymentService @Inject()(
   }
 
   private def applyToAll[S, T](source: Source[S, _], process: (S) => Future[T], success: T): Future[EOMStatistics] = {
-    def updateStat(stat: EOMStatistics, value: T) = {
-      if (value == success) {
+    def updateStat(stat: EOMStatistics, value: Option[T]) = {
+      if (value.contains(success)) {
         stat.incSuccess()
       } else {
         stat.incFailure()
       }
     }
-    source.mapAsync(3)(process).runWith(Sink.fold(EOMStatistics())(updateStat))
+    source.
+      mapAsync(3)(process).
+      map(t => Some(t)).
+      recover({
+        case t: Throwable =>
+          Logger.error("Failure on EOM payment", t)
+          None
+      }).
+      runWith(Sink.fold(EOMStatistics())(updateStat))
   }
 
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {

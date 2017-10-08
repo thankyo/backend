@@ -128,7 +128,7 @@ package object util {
     )
   }
   implicit val moneyGenerator: Generator[Money] = () => {
-    Money(nextLong(0, Long.MaxValue), someRandom[Currency])
+    Money(nextInt(0, 1000), someRandom[Currency])
   }
   implicit val dateTimeGenerator: Generator[LocalDateTime] = () => {
     LocalDateTime.now()

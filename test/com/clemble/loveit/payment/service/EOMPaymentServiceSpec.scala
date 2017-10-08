@@ -35,7 +35,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
   def runAndWait(yom: YearMonth): EOMStatus = {
     val status = run(yom)
     status.yom shouldEqual yom
-    eventually(100, 100.millis)(getStatus(yom).flatMap(_.createCharges) shouldNotEqual None)
+    eventually(getStatus(yom).flatMap(_.createCharges) shouldNotEqual None)
     eventually(getStatus(yom).flatMap(_.applyCharges) shouldNotEqual None)
     eventually(getStatus(yom).flatMap(_.createPayout) shouldNotEqual None)
     eventually(getStatus(yom).flatMap(_.applyPayout) shouldNotEqual None)
@@ -97,7 +97,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       statusAfter.get.createCharges.get.success should beGreaterThan(0L)
       statusAfter.get.createCharges.get.total should beGreaterThan(0L)
 
-      eventually(40, 1 second)(charges(user) shouldNotEqual Nil)
+      eventually(charges(user) shouldNotEqual Nil)
       val chargesAfterYom = charges(user)
       chargesAfterYom.size should beGreaterThan(0)
       chargesAfterYom.map(_.yom) should contain(yom)

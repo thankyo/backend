@@ -3,7 +3,7 @@ scalaVersion := "2.12.3"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 libraryDependencies ++= Seq(
-
+  ws,
   "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",
   "com.mohiva" %% "play-silhouette-persistence" % "5.0.1",
   "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",

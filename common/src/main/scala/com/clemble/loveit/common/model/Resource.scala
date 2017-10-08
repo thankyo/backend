@@ -1,7 +1,6 @@
 package com.clemble.loveit.common.model
 
 import com.clemble.loveit.common.util.WriteableUtils
-import play.api.data.validation.ValidationError
 import play.api.http.Writeable
 import play.api.libs.json._
 import play.api.mvc.PathBindable

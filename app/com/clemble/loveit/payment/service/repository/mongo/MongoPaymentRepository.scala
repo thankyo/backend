@@ -7,7 +7,6 @@ import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.common.util.LoggerAware
 import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, UserPayment}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
@@ -22,7 +21,7 @@ case class MongoPaymentRepository @Inject()(
                                              @Named("userPayment") collection: JSONCollection,
                                              implicit val ec: ExecutionContext,
                                              implicit val m: Materializer
-                                           ) extends PaymentRepository with LoggerAware {
+                                           ) extends PaymentRepository {
 
   MongoPaymentRepository.ensureMeta(collection)
 

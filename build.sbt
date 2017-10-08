@@ -30,6 +30,7 @@ lazy val root = (project in file(".")).
 
 libraryDependencies ++= Seq(
   guice,
+  ws,
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
   "com.iheart" %% "ficus" % "1.4.2",

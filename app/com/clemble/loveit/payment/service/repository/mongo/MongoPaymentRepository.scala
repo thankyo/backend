@@ -7,6 +7,7 @@ import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
+import com.clemble.loveit.common.util.LoggerAware
 import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, UserPayment}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
@@ -15,7 +16,7 @@ import reactivemongo.bson.{BSONDocument, BSONString}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.akkastream.cursorProducer
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{Cursor, ReadPreference}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,11 +25,11 @@ case class MongoPaymentRepository @Inject()(
                                              @Named("userPayment") collection: JSONCollection,
                                              implicit val ec: ExecutionContext,
                                              implicit val m: Materializer
-                                           ) extends PaymentRepository {
+                                           ) extends PaymentRepository with LoggerAware {
 
   MongoPaymentRepository.ensureMeta(collection)
 
-  override def save(userPayment: UserPayment) = {
+  override def save(userPayment: UserPayment): Future[Boolean] = {
     val saveRes = collection.insert(userPayment)
     MongoSafeUtils.safeSingleUpdate(saveRes)
   }
@@ -42,10 +43,7 @@ case class MongoPaymentRepository @Inject()(
 
   override def find(): Source[UserPayment, _] = {
     val selector = Json.obj()
-    collection.
-      find(selector).
-      cursor[UserPayment](ReadPreference.nearest).
-      documentSource()
+    MongoSafeUtils.findAll[UserPayment](collection, selector)
   }
 
   override def getBalance(user: UserID): Future[Amount] = {

@@ -14,13 +14,13 @@ import scala.concurrent.duration._
 
 class EOMPaymentServiceSpec extends GenericEOMPaymentServiceSpec with PaymentServiceTestExecutor {
 
-  val service = dependency[EOMPaymentService]
+  private val service = dependency[EOMPaymentService]
 
-  override def getStatus(yom: YearMonth) = {
+  override def getStatus(yom: YearMonth): Option[EOMStatus] = {
     await(service.getStatus(yom))
   }
 
-  override def run(yom: YearMonth) = {
+  override def run(yom: YearMonth): EOMStatus = {
     await(service.run(yom))
   }
 
@@ -33,7 +33,8 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
   def getStatus(yom: YearMonth): Option[EOMStatus]
   def run(yom: YearMonth): EOMStatus
   def runAndWait(yom: YearMonth): EOMStatus = {
-    run(yom)
+    val status = run(yom)
+    status.yom shouldEqual yom
     eventually(getStatus(yom).flatMap(_.createCharges) shouldNotEqual None)
     eventually(getStatus(yom).flatMap(_.applyCharges) shouldNotEqual None)
     eventually(getStatus(yom).flatMap(_.createPayout) shouldNotEqual None)
@@ -48,8 +49,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
     "EOM run set's finished" in {
       val yom = someRandom[YearMonth]
 
-      val status = run(yom)
-      status.finished shouldEqual None
+      runAndWait(yom)
 
       eventually(getStatus(yom).flatMap(_.finished) shouldNotEqual None)
     }
@@ -57,8 +57,8 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
     "EOM can't be run twice" in {
       val yom = someRandom[YearMonth]
 
-      run(yom)
-      run(yom) should throwA[RepositoryException]
+      runAndWait(yom)
+      runAndWait(yom) should throwA[RepositoryException]
     }
   }
 
@@ -77,7 +77,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val chargesAfterYom = charges(user)
       chargesAfterYom.size should beGreaterThan(0)
       chargesAfterYom.map(_.yom) should contain(yom)
-      chargesAfterYom(0).amount shouldEqual Money(3.3, LoveItCurrency.DEFAULT)
+      chargesAfterYom.head.amount shouldEqual Money(3.3, LoveItCurrency.DEFAULT)
     }
 
   }
@@ -164,15 +164,15 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val giverB = createUser()
       addChargeAccount(giverB)
 
-      1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]));
-      1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]));
+      1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]))
+      1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]))
 
       val finalStatus = runAndWait(yom)
 
       finalStatus.createPayout.get.success shouldEqual 1
       val ownerPayouts = payouts(owner)
       ownerPayouts.size shouldEqual 1
-      ownerPayouts(0).amount shouldEqual new Money(5.4, "USD")
+      ownerPayouts.head.amount shouldEqual new Money(5.4, "USD")
     }
 
   }

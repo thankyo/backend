@@ -34,7 +34,11 @@ trait MongoUserAwareRepository[T <: UserAware] extends UserAwareRepository[T] {
   )
 
   override def findByUser(user: UserID): Source[T, _] = {
-    collection.find(Json.obj("user" -> user)).sort(Json.obj("created" -> 1)).cursor[T](ReadPreference.nearest).documentSource()
+    collection.
+      find(Json.obj("user" -> user)).
+      sort(Json.obj("created" -> 1)).
+      cursor[T](ReadPreference.nearest).
+      documentSource()
   }
 
 

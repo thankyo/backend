@@ -61,7 +61,7 @@ case class MongoUserRepository @Inject()(
   }
 
   override def find(): Source[User, _] = {
-    collection.find(Json.obj()).cursor[User]().documentSource()
+    MongoSafeUtils.findAll[User](collection, Json.obj())
   }
 
   override def count(): Future[Int] = {
@@ -118,20 +118,20 @@ object MongoUserRepository {
     val selector = Json.obj("ownRequests" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("ownRequests" -> JsArray()))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
-    fUpdate.foreach(res => if (!res.ok) System.exit(2));
+    fUpdate.foreach(res => if (!res.ok) System.exit(2))
   }
 
   private def addMonthlyLimit(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("monthlyLimit" -> Json.obj("$exists" -> false))
     val update = Json.obj("$set" -> Json.obj("monthlyLimit" -> UserPayment.DEFAULT_LIMIT))
     val fUpdate = collection.update(selector, update, upsert = false, multi = true)
-    fUpdate.foreach(res => if (!res.ok) System.exit(2));
+    fUpdate.foreach(res => if (!res.ok) System.exit(2))
   }
 
   private def changeOwner(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val selector = Json.obj("owns.ownershipType" -> Json.obj("$exists" -> true))
     val projection = Json.obj("owns" -> 1)
-    val source = collection.find(selector, projection).cursor[JsObject](ReadPreference.primary).documentSource()
+    val source = MongoSafeUtils.findAll[JsObject](collection, selector, projection)
     source.runWith(Sink.foreach((json) => {
       val id = (json \ "_id").as[String]
       val owns = (json \ "owns").as[JsArray]

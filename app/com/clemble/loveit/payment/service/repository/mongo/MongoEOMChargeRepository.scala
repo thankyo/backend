@@ -11,7 +11,7 @@ import javax.inject.{Inject, Named, Singleton}
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import reactivemongo.api.ReadPreference
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,7 +30,7 @@ case class MongoEOMChargeRepository @Inject()(
 
   MongoEOMChargeRepository.ensureMeta(collection)
 
-  override implicit val format = EOMCharge.jsonFormat
+  override implicit val format: OFormat[EOMCharge] = EOMCharge.jsonFormat
 
   override def save(charge: EOMCharge): Future[EOMCharge] = {
     MongoSafeUtils.safe(charge, collection.insert(charge))
@@ -38,18 +38,12 @@ case class MongoEOMChargeRepository @Inject()(
 
   override def listSuccessful(yom: YearMonth): Source[EOMCharge, _] = {
     val selector = Json.obj("yom" -> yom, "status" -> ChargeStatus.Success)
-    collection.
-      find(selector).
-      cursor[EOMCharge](ReadPreference.nearest).
-      documentSource()
+    MongoSafeUtils.findAll[EOMCharge](collection, selector)
   }
 
   override def listPending(yom: YearMonth): Source[EOMCharge, _] = {
     val selector = Json.obj("yom" -> yom, "status" -> ChargeStatus.Pending)
-    collection.
-      find(selector).
-      cursor[EOMCharge](ReadPreference.nearest).
-      documentSource()
+    MongoSafeUtils.findAll[EOMCharge](collection, selector)
   }
 
   override def updatePending(user: UserID, yom: YearMonth, status: ChargeStatus, details: JsValue): Future[Boolean] = {

@@ -1,10 +1,12 @@
 package com.clemble.loveit.common.mongo
 
 import akka.stream.Materializer
+import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.{RepositoryException, ThankException}
-import play.api.libs.json.JsObject
-import reactivemongo.akkastream.cursorProducer
-import reactivemongo.api.ReadPreference
+import play.api.Logger
+import play.api.libs.json.{JsObject, Json, Reads}
+import reactivemongo.akkastream.{State, cursorProducer}
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.commands.{WriteError, WriteResult}
 import reactivemongo.api.indexes.Index
 import reactivemongo.core.errors.DatabaseException
@@ -15,10 +17,23 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object MongoSafeUtils {
 
+  private def ignoreErrorHandler[T](collectionName: String, query: JsObject) = {
+    Cursor.ContOnError[T]((_, thr) =>
+      Logger.error(s"Mongo[${collectionName}] failed to query with ${query}", thr)
+    )
+  }
+
+  def findAll[T](collection: JSONCollection, selector: JsObject, projection: JsObject = Json.obj())(implicit reads: Reads[T], ec: ExecutionContext, m: Materializer): Source[T, Future[State]] = {
+    collection.
+      find(selector, projection).
+      cursor[T](ReadPreference.nearest).
+      documentSource(err = ignoreErrorHandler(collection.name, selector))
+  }
+
   def toException(code: Int, msg: String): RepositoryException = {
     code match {
       case 11000 => RepositoryException.duplicateKey(msg)
-      case _ => RepositoryException(code.toString(), msg)
+      case _ => RepositoryException(code.toString, msg)
     }
   }
 

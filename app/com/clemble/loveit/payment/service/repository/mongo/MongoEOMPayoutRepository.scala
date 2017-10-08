@@ -10,7 +10,7 @@ import com.clemble.loveit.common.mongo.{MongoSafeUtils, MongoUserAwareRepository
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, PayoutStatus}
 import com.clemble.loveit.payment.service.repository.EOMPayoutRepository
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
@@ -23,16 +23,13 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class MongoEOMPayoutRepository @Inject()(@Named("eomPayout") collection: JSONCollection, implicit val ec: ExecutionContext, implicit val m: Materializer) extends EOMPayoutRepository with MongoUserAwareRepository[EOMPayout] {
 
-  override implicit val format = EOMPayout.jsonFormat
+  override implicit val format: OFormat[EOMPayout] = EOMPayout.jsonFormat
 
   MongoEOMPayoutRepository.ensureMeta(collection)
 
   override def listPending(yom: YearMonth): Source[EOMPayout, _] = {
     val selector = Json.obj("yom" -> yom, "status" -> PayoutStatus.Pending)
-    collection.
-      find(selector).
-      cursor[EOMPayout](ReadPreference.nearest).
-      documentSource()
+    MongoSafeUtils.findAll[EOMPayout](collection, selector)
   }
 
   override def updatePending(user: UserID, yom: YearMonth, status: PayoutStatus, details: JsValue): Future[Boolean] = {

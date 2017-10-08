@@ -30,7 +30,7 @@ case class SimpleResourceOwnershipService @Inject() (userRepo: RORepository, tha
     val fUpdate = for {
       ownerOpt <- userRepo.findOwner(res)
     } yield {
-      if (ownerOpt.map(_ != user).getOrElse(false))
+      if (ownerOpt.exists(_ != user))
         throw UserException.resourceAlreadyOwned(ownerOpt.get)
       for {
         updThanks <- thankRepo.updateOwner(user, res) if(updThanks)

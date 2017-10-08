@@ -18,6 +18,7 @@ case object PayoutStatus extends Enumeration {
 
     override def reads(json: JsValue): JsResult[PayoutStatus] = json match {
       case JsString(str) => JsSuccess(PayoutStatus.withName(str))
+      case json => JsError(s"Not a PayoutStatus ${json}")
     }
   }
 }

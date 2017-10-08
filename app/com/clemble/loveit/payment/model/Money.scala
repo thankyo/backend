@@ -30,7 +30,7 @@ object Money {
 
   implicit val currencyFormat = new Format[Currency] {
 
-    override def writes(o: Currency): JsValue = JsString(o.getCurrencyCode())
+    override def writes(o: Currency): JsValue = JsString(o.getCurrencyCode)
 
     override def reads(json: JsValue): JsResult[Currency] = json match {
       case JsString(currencyCode) => JsSuccess(LoveItCurrency.getInstance(currencyCode))

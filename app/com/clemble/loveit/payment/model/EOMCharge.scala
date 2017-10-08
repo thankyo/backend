@@ -18,6 +18,7 @@ object ChargeStatus extends Enumeration {
 
     override def reads(json: JsValue): JsResult[ChargeStatus] = json match {
       case JsString(str) => JsSuccess(ChargeStatus.withName(str))
+      case json => JsError(s"Not ChargeStatus ${json}")
     }
   }
 }

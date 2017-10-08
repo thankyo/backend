@@ -21,8 +21,8 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
       val user = createUser(profile)
 
       val savedUser = getMyUser(user)
-      savedUser.firstName must beEqualTo(Some(profile.firstName))
-      savedUser.lastName must beEqualTo(Some(profile.lastName))
+      savedUser.firstName must beSome(profile.firstName)
+      savedUser.lastName must beSome(profile.lastName)
       savedUser.email must beEqualTo(profile.email)
     }
 
@@ -43,7 +43,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
       setCookie.size shouldEqual 1
 
-      val userId = setCookie(0).value
+      val userId = setCookie.head.value
       val expectedId = getMyUser(userId).id
       userId shouldEqual expectedId
     }

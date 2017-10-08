@@ -40,7 +40,7 @@ libraryDependencies ++= Seq(
 
   "io.sentry" % "sentry-logback" % "1.5.4",
 
-  "com.stripe" % "stripe-java" % "5.9.0",
+  "com.stripe" % "stripe-java" % "5.10.0",
 
   "org.apache.commons" % "commons-text" % "1.1" % Test,
   specs2 % Test

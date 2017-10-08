@@ -27,9 +27,6 @@ trait EOMChargeRepository extends UserAwareRepository[EOMCharge] {
 
   /**
     * Lists success charges
-    *
-    * @param yom
-    * @return
     */
   def listSuccessful(yom: YearMonth): Source[EOMCharge, _]
 

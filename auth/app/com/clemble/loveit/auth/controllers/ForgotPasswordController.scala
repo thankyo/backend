@@ -47,7 +47,7 @@ class ForgotPasswordController @Inject()(
     */
   def submit = silhouette.UnsecuredAction.async(parse.json[ForgotPasswordRequest])({
     implicit request => {
-      val loginInfo = request.body.toLoginInfo()
+      val loginInfo = request.body.toLoginInfo
 
       for {
         userOpt <- userService.retrieve(loginInfo) if (userOpt.isDefined)

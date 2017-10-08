@@ -29,7 +29,7 @@ case class MongoThankRepository @Inject()(
     val projection = Json.obj("givers" -> 1)
     collection.find(query, projection).
       one[JsObject].
-      map(_.flatMap(json => (json \ "givers").asOpt[JsArray].map(_.value.size > 0)))
+      map(_.flatMap(json => (json \ "givers").asOpt[JsArray].map(_.value.nonEmpty)))
   }
 
   override def save(thank: Thank): Future[Boolean] = {

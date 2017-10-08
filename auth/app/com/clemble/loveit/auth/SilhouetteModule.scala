@@ -157,8 +157,8 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   /**
    * Provides the auth info repository.
    *
-   * @param passwordInfoDAO The implementation of the delegable password auth info DAO.
-   * @param oauth2InfoDAO The implementation of the delegable OAuth2 auth info DAO.
+   * @param passwordInfoDAO The implementation of the deletable password auth info DAO.
+   * @param oauth2InfoDAO The implementation of the deletable OAuth2 auth info DAO.
    * @return The auth info repository instance.
    */
   @Provides

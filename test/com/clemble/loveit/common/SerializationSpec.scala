@@ -17,7 +17,7 @@ abstract class SerializationSpec[T](implicit jsonFormat: Format[T], generator: G
     "deserialize" in {
       val presentation = Json.toJson(value)(jsonFormat)
       val readValue = Json.fromJson[T](presentation)(jsonFormat).asOpt
-      readValue must (beEqualTo(Some(value)))
+      readValue must (beSome(value))
     }
   }
 
@@ -32,7 +32,7 @@ abstract class SerializationSpec[T](implicit jsonFormat: Format[T], generator: G
       "deserialize" in {
         val presentation = Json.toJson(value)(jsonFormat)
         val readValue = Json.fromJson[T](presentation)(jsonFormat).asOpt
-        readValue must (beEqualTo(Some(value)))
+        readValue must (beSome(value))
       }
     }
   }

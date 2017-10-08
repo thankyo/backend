@@ -7,9 +7,10 @@ import play.api.libs.json.Json
 
 case class ForgotPasswordRequest(email: Email) {
 
-  def toLoginInfo() = {
+  def toLoginInfo = {
     LoginInfo(CredentialsProvider.ID, email)
   }
+
 }
 
 object ForgotPasswordRequest {

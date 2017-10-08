@@ -50,10 +50,10 @@ case class EOMStatus(
                              created: LocalDateTime = LocalDateTime.now()
               ) extends CreatedAware with EOMAware{
 
-  def isValid = createCharges.map(_.isValid).getOrElse(false) &&
-    applyCharges.map(_.isValid).getOrElse(false) &&
-    createPayout.map(_.isValid).getOrElse(false) &&
-    applyPayout.map(_.isValid).getOrElse(false)
+  def isValid = createCharges.exists(_.isValid) &&
+    applyCharges.exists(_.isValid) &&
+    createPayout.exists(_.isValid) &&
+    applyPayout.exists(_.isValid)
 
 }
 

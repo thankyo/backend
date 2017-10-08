@@ -41,7 +41,7 @@ case object StripeEOMPayoutService extends EOMPayoutService {
       }
     }) match {
       case Success(transfer) =>
-        val details = Json.parse(transfer.toJson())
+        val details = Json.parse(transfer.toJson)
         (PayoutStatus.Success, details)
       case Failure(t) =>
         (PayoutStatus.Failed, Json.obj("error" -> t.getMessage))

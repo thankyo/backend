@@ -56,7 +56,7 @@ case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOM
       }
     }) match {
       case Success(charge) =>
-        val details = Json.parse(charge.toJson())
+        val details = Json.parse(charge.toJson)
         charge.getStatus
         (ChargeStatus.Success, details)
       case Failure(t) =>

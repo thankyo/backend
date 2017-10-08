@@ -22,7 +22,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     "create user" in {
       val user = someRandom[User]
       val createAndGet = userRepo.save(user).flatMap(_ => userRepo.findById(user.id))
-      createAndGet must await(beEqualTo(Some(user)))
+      await(createAndGet) must beSome(user)
     }
 
     "return exception on creating the same" in {
@@ -37,7 +37,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val fCreate: Future[User] = userRepo.save(user)
       fCreate must await(beEqualTo(user))
 
-      eventually(await(userRepo.findById(user.id)) must beEqualTo(Some(user)))
+      eventually(await(userRepo.findById(user.id)) must beSome(user))
     }
 
     "throw Exception on multiple creation" in {
@@ -62,7 +62,7 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
         _ <- chargeAccRepo.setChargeAccount(A, chAcc)
         chargeAccount <- chargeAccRepo.getChargeAccount(A)
       } yield {
-        chargeAccount must beEqualTo(Some(chAcc))
+        chargeAccount must beSome(chAcc)
       }
 
       matchResult.await

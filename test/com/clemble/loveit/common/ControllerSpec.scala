@@ -99,7 +99,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
 
 object ControllerSpec {
 
-  var userToAuth: ConcurrentHashMap[UserID, Seq[(String, String)]] = new ConcurrentHashMap[String, Seq[(String, String)]]
+  val userToAuth: ConcurrentHashMap[UserID, Seq[(String, String)]] = new ConcurrentHashMap[String, Seq[(String, String)]]
 
   def setUser(res: Result)(implicit m: Materializer): String = {
     val bodyStr = Json.parse(Await.result(res.body.consumeData, 30 second).utf8String).as[String]

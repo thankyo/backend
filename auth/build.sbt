@@ -16,3 +16,5 @@ libraryDependencies ++= Seq(
 
   "com.mohiva" %% "play-silhouette-testkit" % "5.0.1" % Test
 )
+
+coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*;.*ReverseRoutes.*;.*Routes.*;.*Module.*;"""

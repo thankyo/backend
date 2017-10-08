@@ -12,11 +12,8 @@ import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, Us
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONString}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
-import reactivemongo.akkastream.cursorProducer
-import reactivemongo.api.{Cursor, ReadPreference}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -116,23 +113,16 @@ object MongoPaymentRepository {
       collection,
       Index(
         key = Seq("payoutAccount.accountId" -> IndexType.Ascending),
-        name = Some("stripe_payout_uniquer"),
+        name = Some("payout_account_uniquer"),
         unique = true,
-        partialFilter = Some(BSONDocument("payoutAccount.type" -> BSONString("stripe")))
+        sparse = true
       ),
       Index(
-        key = Seq("chargeAccount.type" -> IndexType.Ascending, "chargeAccount.customer" -> IndexType.Ascending),
-        name = Some("stripe_customer_uniquer"),
+        key = Seq("chargeAccount.customer" -> IndexType.Ascending),
+        name = Some("charge_customer_uniquer"),
         unique = true,
-        partialFilter = Some(BSONDocument("chargeAccount.type" -> BSONString("stripe")))
-      ),
-      Index(
-        key = Seq("chargeAccount.type" -> IndexType.Ascending, "chargeAccount.email" -> IndexType.Ascending),
-        name = Some("paypal_email_unique"),
-        unique = true,
-        partialFilter = Some(BSONDocument("chargeAccount.type" -> BSONString("payPal")))
+        sparse = true
       )
-
     )
   }
 

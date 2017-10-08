@@ -74,12 +74,15 @@ case class SimpleEOMPaymentService @Inject()(
     }
   }
 
-  def successIfStatusIs[T](success: T)(stat: EOMStatistics, value: T): EOMStatistics = {
-    if (value == success) {
-      stat.incSuccess()
-    } else {
-      stat.incFailure()
+  private def applyToAll[S, T](source: Source[S, _], process: (S) => Future[T], success: T): Future[EOMStatistics] = {
+    def updateStat(stat: EOMStatistics, value: T) = {
+      if (value == success) {
+        stat.incSuccess()
+      } else {
+        stat.incFailure()
+      }
     }
+    source.mapAsync(3)(process).runWith(Sink.fold(EOMStatistics())(updateStat))
   }
 
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
@@ -100,13 +103,7 @@ case class SimpleEOMPaymentService @Inject()(
         })
     }
 
-    val updateStat: (EOMStatistics, ChargeStatus) => EOMStatistics =  successIfStatusIs(ChargeStatus.Pending)
-
-    // TODO 2 - is a dark blood magic number it should be configured, based on system preferences
-    paymentRepo.
-      find().
-      mapAsync(1)(createCharge).
-      runWith(Sink.fold(EOMStatistics())(updateStat))
+    applyToAll(paymentRepo.find(), createCharge, ChargeStatus.Pending)
   }
 
   private def doApplyCharges(yom: YearMonth): Future[EOMStatistics] = {
@@ -120,12 +117,7 @@ case class SimpleEOMPaymentService @Inject()(
       }
     }
 
-    val updateStat: (EOMStatistics, ChargeStatus) => EOMStatistics =  successIfStatusIs(ChargeStatus.Success)
-
-    chargeRepo.
-      listPending(yom).
-      mapAsync(1)(applyCharge).
-      runWith(Sink.fold(EOMStatistics())(updateStat))
+    applyToAll(chargeRepo.listPending(yom), applyCharge, ChargeStatus.Success)
   }
 
   private def doCreatePayout(yom: YearMonth): Future[EOMStatistics] = {
@@ -152,17 +144,11 @@ case class SimpleEOMPaymentService @Inject()(
       }
     }
 
-    val updateStat: (EOMStatistics, Boolean) => EOMStatistics = successIfStatusIs(true)
-
     chargeRepo.
       listSuccessful(yom).
       map(toPayoutMap).
       runWith(Sink.fold(Map.empty[UserID, Int])((agg, ch) => combinePayoutMaps(agg, ch))).
-      flatMap(payoutMap => {
-        Source(payoutMap).
-          mapAsync(1)(savePayouts).
-          runWith(Sink.fold(EOMStatistics())(updateStat))
-      })
+      flatMap(payoutMap => applyToAll(Source(payoutMap), savePayouts, true))
   }
 
   private def doApplyPayout(yom: YearMonth): Future[EOMStatistics] = {
@@ -175,12 +161,7 @@ case class SimpleEOMPaymentService @Inject()(
       }
     }
 
-    val updateStat: (EOMStatistics, PayoutStatus) => EOMStatistics =  successIfStatusIs(PayoutStatus.Success)
-
-    payoutRepo.
-      listPending(yom).
-      mapAsync(1)(applyPayout).
-      runWith(Sink.fold(EOMStatistics())(updateStat))
+    applyToAll(payoutRepo.listPending(yom), applyPayout, PayoutStatus.Success)
   }
 
 }

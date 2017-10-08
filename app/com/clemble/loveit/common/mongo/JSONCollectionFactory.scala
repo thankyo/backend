@@ -18,7 +18,7 @@ object JSONCollectionFactory extends Logger {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.
       map(_.collection[JSONCollection](collectionName, FailoverStrategy.default))
-    fCollection.onFailure({ case err =>
+    fCollection.failed.foreach({ case err =>
       logger.error(s"Failed to create ${collectionName}", err);
       Thread.sleep(60000)
       System.exit(1)

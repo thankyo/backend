@@ -2,13 +2,13 @@ package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.payment.TestStripeUtils
-import com.clemble.loveit.payment.model.StripeChargeAccount
+import com.clemble.loveit.payment.model.ChargeAccount
 
 import scala.util.Try
 
-class StripeChargeAccountConverterSpec extends ServiceSpec with TestStripeUtils{
+class ChargeAccountConverterSpec extends ServiceSpec with TestStripeUtils{
 
-  val service = dependency[ChargeAccountConverter]
+  val service: ChargeAccountConverter = dependency[ChargeAccountConverter]
 
   "STRIPE" should {
 
@@ -23,7 +23,7 @@ class StripeChargeAccountConverterSpec extends ServiceSpec with TestStripeUtils{
     "specify card brand  and last4 digits" in {
       val token = someValidStripeToken()
 
-      val chAcc = await(service.processChargeToken(token)).asInstanceOf[StripeChargeAccount]
+      val chAcc = await(service.processChargeToken(token))
 
       chAcc.last4 shouldNotEqual None
       chAcc.brand shouldNotEqual None

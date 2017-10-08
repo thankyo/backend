@@ -32,7 +32,6 @@ import com.stripe.net.RequestOptions
 @Singleton
 case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOMChargeService {
 
-
   /**
     * Charges customer with specified charge
     *
@@ -40,7 +39,7 @@ case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOM
     * @param amount amount to charge
     * @return StripeCharge
     */
-  private def chargeStripe(chAcc: StripeChargeAccount, amount: Money): StripeCharge = {
+  private def chargeStripe(chAcc: ChargeAccount, amount: Money): StripeCharge = {
     val chargeParams = Maps.newHashMap[String, Object]()
     val stripeAmount = (amount.amount * 100).toInt
     chargeParams.put("amount", stripeAmount.toString)
@@ -52,7 +51,8 @@ case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOM
   private def doCharge(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     val res = Try({
       charge.account match {
-        case Some(acc: StripeChargeAccount) => chargeStripe(acc, charge.amount)
+        case Some(acc: ChargeAccount) => chargeStripe(acc, charge.amount)
+        case None => throw new IllegalArgumentException("No ChargeAccount specified for the user")
       }
     }) match {
       case Success(charge) =>

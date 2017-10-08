@@ -23,7 +23,7 @@ case class ChargeAccountController @Inject()(
     val user = req.identity.id
     chargeAccService.getChargeAccount(user).map(_ match {
       case Some(chAcc) => Ok(chAcc)
-      case None => Ok(ChargeAccount.DEFAULT)
+      case None => NotFound
     })
   })
 

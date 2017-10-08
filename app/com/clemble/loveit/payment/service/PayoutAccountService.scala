@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{PayoutAccount, StripePayoutAccount}
+import com.clemble.loveit.payment.model.{PayoutAccount}
 import com.clemble.loveit.payment.service.repository.PayoutAccountRepository
 import com.stripe.Stripe
 import play.api.libs.json.Json
@@ -79,7 +79,7 @@ class StripePayoutAccountConverter @Inject() (wsClient: WSClient, implicit val e
       val accountId = (json \ "stripe_user_id").as[String]
       val refreshToken = (json \ "refresh_token").as[String]
       val accessToken = (json \ "access_token").as[String]
-      StripePayoutAccount(accountId, refreshToken, accessToken)
+      PayoutAccount(accountId, refreshToken, accessToken)
     })
   }
 }

@@ -1,43 +1,20 @@
 package com.clemble.loveit.payment.model
 
 import com.clemble.loveit.common.util.WriteableUtils
-import play.api.data.validation.ValidationError
+import play.api.http.Writeable
 import play.api.libs.json._
-
-/**
-  * Simple abstraction over payout account
-  */
-trait PayoutAccount extends PaymentAccount
 
 /**
   * Stripe account credentials
   */
-case class StripePayoutAccount(accountId: String, refreshToken: String, accessToken: String) extends PayoutAccount
+case class PayoutAccount(accountId: String, refreshToken: String, accessToken: String) extends PaymentAccount
 
 object PayoutAccount {
 
   /**
-    * JSON format for [[StripePayoutAccount]]
-    */
-  private val stripeJsonFormat = Json.format[StripePayoutAccount]
-
-  /**
     * JSON format for [[PayoutAccount]]
     */
-  implicit val jsonFormat = new Format[PayoutAccount] {
-
-    val STRIPE_TAG = JsString("stripe")
-
-    override def reads(json: JsValue): JsResult[PayoutAccount] = (json \ "type") match {
-      case JsDefined(STRIPE_TAG) => stripeJsonFormat.reads(json)
-      case unknown => JsError(__ \ "type", JsonValidationError(s"Invalid ChargeAccount value ${unknown}"))
-    }
-
-    override def writes(o: PayoutAccount): JsValue = o match {
-      case s: StripePayoutAccount => stripeJsonFormat.writes(s) + ("type" -> STRIPE_TAG)
-    }
-  }
-
-  implicit val chargeAccountWriteable = WriteableUtils.jsonToWriteable[PayoutAccount]
+  implicit val jsonFormat: OFormat[PayoutAccount] = Json.format[PayoutAccount]
+  implicit val chargeAccountWriteable: Writeable[PayoutAccount] = WriteableUtils.jsonToWriteable[PayoutAccount]
 
 }

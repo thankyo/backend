@@ -20,30 +20,125 @@ import scala.util.Random
 
 package object util {
 
-  implicit val booleanGenerator: Generator[Boolean] = new Generator[Boolean] {
-    override def generate(): Boolean = Random.nextBoolean()
+  implicit val booleanGenerator: Generator[Boolean] = () => Random.nextBoolean()
+  implicit val resourceGenerator: Generator[Resource] = () => {
+    HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
   }
-  implicit val resourceGenerator: Generator[Resource] = ResourceGenerator
-  implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = CommonSocialProfileGenerator
-  implicit val signUpRequest: Generator[SignUpRequest] = SignUpRequestGenerator
-  implicit val paymentTransactionGenerator: Generator[EOMCharge] = PaymentTransactionGenerator
-  implicit val repositoryExceptionGenerator: Generator[RepositoryException] = RepositoryExceptionGenerator
-  implicit val thankExceptionGenerator: Generator[ThankException] = ThankExceptionGenerator
-  implicit val userExceptionGenerator: Generator[UserException] = UserExceptionGenerator
-  implicit val chargeAccountGenerator: Generator[ChargeAccount] = ChargeAccountGenerator
-  implicit val payoutAccountGenerator: Generator[PayoutAccount] = PayoutAccountGenerator
-  implicit val thankTransactionGenerator: Generator[ThankTransaction] = ThankTransactionGenerator
-  implicit val verificationGenerator: Generator[ROVerification[Resource]] = ROVerificationGenerator
-  implicit val thankGenerator: Generator[Thank] = ThankGenerator
-  implicit val userGenerator: Generator[User] = UserGenerator
-  implicit val userIDGenerator: Generator[UserID] = UserIDGenerator
-  implicit val payoutGenerator: Generator[EOMPayout] = EOMPayoutGenerator
-  implicit val eomStatGenerator: Generator[EOMStatistics] = EndOfMonthStatisticsGenerator
-  implicit val eomProcGenerator: Generator[EOMStatus] = EOMStatusGenerator
-  implicit val moneyGenerator: Generator[Money] = MoneyGenerator
-  implicit val dateTimeGenerator: Generator[LocalDateTime] = DateTimeGenerator
-  implicit val yomGenerator: Generator[YearMonth] = YearMonthGenerator
-  implicit val currencyGenerator: Generator[Currency] = CurrencyGenerator
+  implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = () => {
+    CommonSocialProfile(
+      loginInfo = LoginInfo("test", RandomStringUtils.random(10)),
+      firstName = Some(random(10)),
+      lastName = Some(random(10))
+    )
+  }
+  implicit val signUpRequest: Generator[SignUpRequest] = () => {
+    SignUpRequest(
+      firstName = random(10),
+      lastName = random(10),
+      email = random(10),
+      password = random(10)
+    )
+  }
+  implicit val paymentTransactionGenerator: Generator[EOMCharge] = () => {
+    EOMCharge(
+      someRandom[UserID],
+      someRandom[YearMonth],
+      optionRandom[ChargeAccount],
+      ChargeStatus.Pending,
+      someRandom[Money],
+      None,
+      List(someRandom[ThankTransaction])
+    )
+  }
+  implicit val repositoryExceptionGenerator: Generator[RepositoryException] = () => {
+    new RepositoryException(RandomStringUtils.randomNumeric(10), RandomStringUtils.randomNumeric(30))
+  }
+  implicit val thankExceptionGenerator: Generator[ThankException] = () => {
+    if (Random.nextBoolean())
+      someRandom[RepositoryException]
+    else
+      someRandom[UserException]
+  }
+
+  implicit val userExceptionGenerator: Generator[UserException] = () => {
+    UserException.notEnoughFunds()
+  }
+  implicit val chargeAccountGenerator: Generator[ChargeAccount] = () => {
+    ChargeAccount(randomNumeric(10), Some(randomNumeric(4)), Some(randomNumeric(4)))
+  }
+  implicit val payoutAccountGenerator: Generator[PayoutAccount] = () => {
+    PayoutAccount(randomNumeric(10), randomNumeric(4), randomNumeric(4))
+  }
+  implicit val thankTransactionGenerator: Generator[ThankTransaction] = () => {
+    ThankTransaction(someRandom[UserID], someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
+  }
+  implicit val verificationGenerator: Generator[ROVerification[Resource]] = () => {
+    val resource = someRandom[Resource]
+    ROVerification(
+      Pending,
+      resource,
+      RandomStringUtils.randomNumeric(10)
+    )
+  }
+  implicit val thankGenerator: Generator[Thank] = () => {
+    Thank(
+      someRandom[Resource],
+      IDGenerator.generate(),
+      nextLong(0, Long.MaxValue)
+    )
+  }
+  implicit val userGenerator: Generator[User] = () => {
+    User(
+      id = random(10),
+      firstName = optionRandom[String],
+      lastName = optionRandom[String],
+      email = s"${someRandom[String]}@${someRandom[String]}.${someRandom[String]}",
+      avatar = optionRandom[String],
+      dateOfBirth = optionRandom[LocalDateTime],
+      profiles = Set.empty[LoginInfo]
+    )
+  }
+  implicit val userIDGenerator: Generator[UserID] = () => IDGenerator.generate()
+  implicit val payoutGenerator: Generator[EOMPayout] = () => {
+    EOMPayout(
+      someRandom[UserID],
+      someRandom[YearMonth],
+      optionRandom[PayoutAccount],
+      someRandom[Money],
+      PayoutStatus.Pending
+    )
+  }
+  implicit val eomStatGenerator: Generator[EOMStatistics] = () => {
+    EOMStatistics(
+      nextLong(0, Long.MaxValue),
+      nextLong(0, Long.MaxValue),
+      nextLong(0, Long.MaxValue),
+      nextLong(0, Long.MaxValue)
+    )
+  }
+  implicit val eomProcGenerator: Generator[EOMStatus] = () => {
+    EOMStatus(
+      someRandom[YearMonth],
+      optionRandom[EOMStatistics],
+      optionRandom[EOMStatistics],
+      optionRandom[EOMStatistics],
+      optionRandom[EOMStatistics],
+      optionRandom[LocalDateTime],
+      someRandom[LocalDateTime]
+    )
+  }
+  implicit val moneyGenerator: Generator[Money] = () => {
+    Money(nextLong(0, Long.MaxValue), someRandom[Currency])
+  }
+  implicit val dateTimeGenerator: Generator[LocalDateTime] = () => {
+    LocalDateTime.now()
+  }
+  implicit val yomGenerator: Generator[YearMonth] = () => {
+    YearMonth.of(nextInt(1000, 3000), nextInt(1, 13))
+  }
+  implicit val currencyGenerator: Generator[Currency] = () => {
+    LoveItCurrency.getInstance("USD")
+  }
 
   def optionRandom[T](implicit get: Generator[T]) = {
     if (someRandom[Boolean]) {
@@ -54,197 +149,5 @@ package object util {
   }
 
   def someRandom[T](implicit gen: Generator[T]) = gen.generate()
-
-  private object CurrencyGenerator extends Generator[Currency] {
-    val generate: Currency = LoveItCurrency.getInstance("USD")
-  }
-
-  private object DateTimeGenerator extends Generator[LocalDateTime] {
-    override def generate(): LocalDateTime = LocalDateTime.now()
-  }
-
-  private object YearMonthGenerator extends Generator[YearMonth] {
-    override def generate(): YearMonth = YearMonth.of(nextInt(1000, 3000), nextInt(1, 13))
-  }
-
-  private object UserIDGenerator extends Generator[UserID] {
-    override def generate(): UserID = IDGenerator.generate()
-  }
-
-  private object MoneyGenerator extends Generator[Money] {
-    override def generate(): Money = {
-      Money(nextLong(0, Long.MaxValue), someRandom[Currency])
-    }
-  }
-
-  private object EOMStatusGenerator extends Generator[EOMStatus] {
-    override def generate(): EOMStatus = {
-      EOMStatus(
-        someRandom[YearMonth],
-        optionRandom[EOMStatistics],
-        optionRandom[EOMStatistics],
-        optionRandom[EOMStatistics],
-        optionRandom[EOMStatistics],
-        optionRandom[LocalDateTime],
-        someRandom[LocalDateTime]
-      )
-    }
-  }
-
-  private object EndOfMonthStatisticsGenerator extends Generator[EOMStatistics] {
-    override def generate(): EOMStatistics = {
-      EOMStatistics(
-        nextLong(0, Long.MaxValue),
-        nextLong(0, Long.MaxValue),
-        nextLong(0, Long.MaxValue),
-        nextLong(0, Long.MaxValue)
-      )
-    }
-  }
-
-  private object EOMPayoutGenerator extends Generator[EOMPayout] {
-    override def generate(): EOMPayout = EOMPayout(
-      someRandom[UserID],
-      someRandom[YearMonth],
-      optionRandom[PayoutAccount],
-      someRandom[Money],
-      PayoutStatus.Pending
-    )
-  }
-
-  private object ChargeAccountGenerator extends Generator[ChargeAccount] {
-
-    override def generate(): ChargeAccount = {
-        StripeChargeAccount(randomNumeric(10), Some(randomNumeric(4)), Some(randomNumeric(4)))
-    }
-
-  }
-
-  private object PayoutAccountGenerator extends Generator[PayoutAccount] {
-    override def generate(): PayoutAccount = {
-      StripePayoutAccount(randomNumeric(10), randomNumeric(4), randomNumeric(4))
-    }
-  }
-
-  private object CommonSocialProfileGenerator extends Generator[CommonSocialProfile] {
-
-    override def generate(): CommonSocialProfile = {
-      CommonSocialProfile(
-        loginInfo = LoginInfo("test", RandomStringUtils.random(10)),
-        firstName = Some(random(10)),
-        lastName = Some(random(10))
-      )
-    }
-
-  }
-
-  private object SignUpRequestGenerator extends Generator[SignUpRequest] {
-
-    override def generate(): SignUpRequest = {
-      SignUpRequest(
-        firstName = random(10),
-        lastName = random(10),
-        email = random(10),
-        password = random(10)
-      )
-    }
-
-  }
-
-  private object PaymentTransactionGenerator extends Generator[EOMCharge] {
-
-    override def generate(): EOMCharge = {
-      EOMCharge(
-        someRandom[UserID],
-        someRandom[YearMonth],
-        optionRandom[ChargeAccount],
-        ChargeStatus.Pending,
-        someRandom[Money],
-        None,
-        List(someRandom[ThankTransaction])
-      )
-    }
-
-  }
-
-  private object RepositoryExceptionGenerator extends Generator[RepositoryException] {
-
-    override def generate(): RepositoryException = new RepositoryException(RandomStringUtils.randomNumeric(10), RandomStringUtils.randomNumeric(30))
-
-  }
-
-  private object ResourceGenerator extends Generator[Resource] {
-
-    override def generate(): Resource = {
-      HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
-    }
-
-  }
-
-  private object ROVerificationGenerator extends Generator[ROVerification[Resource]] {
-
-    override def generate(): ROVerification[Resource] = {
-      val resource = someRandom[Resource]
-      ROVerification(
-        Pending,
-        resource,
-        RandomStringUtils.randomNumeric(10)
-      )
-    }
-
-  }
-
-  private object ThankExceptionGenerator extends Generator[ThankException] {
-
-    override def generate(): ThankException = {
-      if (Random.nextBoolean())
-        someRandom[RepositoryException]
-      else
-        someRandom[UserException]
-    }
-
-  }
-
-  private object ThankGenerator extends Generator[Thank] {
-
-    override def generate(): Thank = {
-      Thank(
-        someRandom[Resource],
-        IDGenerator.generate(),
-        nextLong(0, Long.MaxValue)
-      )
-    }
-
-  }
-
-  private object ThankTransactionGenerator extends Generator[ThankTransaction] {
-
-    override def generate(): ThankTransaction = {
-      ThankTransaction(someRandom[UserID], someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
-    }
-
-  }
-
-  private object UserExceptionGenerator extends Generator[UserException] {
-
-    override def generate(): UserException = UserException.notEnoughFunds()
-
-  }
-
-  private object UserGenerator extends Generator[User] {
-
-    override def generate(): User = {
-      User(
-        id = random(10),
-        firstName = optionRandom[String],
-        lastName = optionRandom[String],
-        email = s"${someRandom[String]}@${someRandom[String]}.${someRandom[String]}",
-        avatar = optionRandom[String],
-        dateOfBirth = optionRandom[LocalDateTime],
-        profiles = Set.empty[LoginInfo]
-      )
-    }
-
-  }
 
 }

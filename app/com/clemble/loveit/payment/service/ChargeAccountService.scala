@@ -4,15 +4,13 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{ChargeAccount, PayoutAccount, StripeChargeAccount, StripeCustomerToken, StripePayoutAccount}
-import com.clemble.loveit.payment.service.repository.{ChargeAccountRepository}
+import com.clemble.loveit.payment.model.{ChargeAccount, StripeCustomerToken}
+import com.clemble.loveit.payment.service.repository.ChargeAccountRepository
 import com.google.common.collect.ImmutableMap
-import com.stripe.Stripe
 import com.stripe.model.Card
-import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -67,17 +65,14 @@ sealed trait ChargeAccountConverter {
 class StripeChargeAccountConverter @Inject() (wsClient: WSClient, implicit val ec: ExecutionContext) extends ChargeAccountConverter {
   import com.stripe.model.Customer
 
-  private def toInternalChargeAccount(customer: Customer): StripeChargeAccount = {
-    val (brand, last4) = customer.
-      getSources.
-      getData().
-      to[List].
+  private def toInternalChargeAccount(customer: Customer): ChargeAccount = {
+    val (brand, last4) = asScalaBuffer(customer.getSources.getData).
       collectFirst({ case card: Card => (Option(card.getBrand), Option(card.getLast4))}).
       getOrElse(None -> None)
-    StripeChargeAccount(customer.getId, brand, last4)
+    ChargeAccount(customer.getId, brand, last4)
   }
 
-  override def processChargeToken(token: String): Future[StripeChargeAccount] = {
+  override def processChargeToken(token: String): Future[ChargeAccount] = {
     // Step 1. Generating customer params
     val customerParams = ImmutableMap.of[String, Object]("source", token)
     // Step 2. Generating customer

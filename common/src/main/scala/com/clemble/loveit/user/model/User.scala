@@ -2,12 +2,12 @@ package com.clemble.loveit.user.model
 
 import java.time.LocalDateTime
 
-import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
+import com.clemble.loveit.common.util.WriteableUtils
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, CredentialsProvider}
-import play.api.libs.json.Json
+import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+import play.api.http.Writeable
+import play.api.libs.json.{Json, OFormat}
 
 /**
   * User abstraction
@@ -35,7 +35,7 @@ case class User(
     *
     * @return Maybe a name.
     */
-  def name = firstName -> lastName match {
+  def name: Option[String] = firstName -> lastName match {
     case (Some(f), Some(l)) => Some(f + " " + l)
     case (_, _) => firstName.orElse(lastName)
   }
@@ -62,29 +62,9 @@ trait UserAware {
 
 object User {
 
-  val DEFAULT_AMOUNT = 0L
+  implicit val socialProfileJsonFormat: OFormat[CommonSocialProfile] = Json.format[CommonSocialProfile]
+  implicit val jsonFormat: OFormat[User] = Json.format[User]
 
-  implicit val socialProfileJsonFormat = Json.format[CommonSocialProfile]
-  implicit val jsonFormat = Json.format[User]
-
-  implicit val userWriteable = WriteableUtils.jsonToWriteable[User]
-
-  def from(profile: CommonSocialProfile): User = {
-    val email = profile.email.get
-    User(id = IDGenerator.generate(), email = email).
-      link(profile)
-  }
-
-  def from(signUp: SignUpRequest): User = {
-    val loginInfo = LoginInfo(CredentialsProvider.ID, signUp.email)
-    new User(
-      id = IDGenerator.generate(),
-      firstName = Some(signUp.firstName),
-      lastName = Some(signUp.lastName),
-      email = signUp.email,
-      avatar = None,
-      profiles = Set(loginInfo)
-    )
-  }
+  implicit val userWriteable: Writeable[User] = WriteableUtils.jsonToWriteable[User]
 
 }

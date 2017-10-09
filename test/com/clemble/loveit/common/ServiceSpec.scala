@@ -12,17 +12,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait ServiceSpec extends FunctionalThankSpecification {
 
-  lazy val authController = dependency[SocialAuthController]
-  lazy val userService = dependency[UserService]
-  lazy val userPayService = dependency[UserPaymentService]
-  lazy val userResService = dependency[UserResourceService]
-  lazy val userRep = dependency[UserRepository]
+  lazy val authController: SocialAuthController = dependency[SocialAuthController]
+  lazy val userService: UserService = dependency[UserService]
+  lazy val userPayService: UserPaymentService = dependency[UserPaymentService]
+  lazy val userResService: UserResourceService = dependency[UserResourceService]
+  lazy val userRep: UserRepository = dependency[UserRepository]
 
   lazy val roService = dependency[ROService]
 
   override def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
     val fUserID = for {
-      user <- userService.save(User from signUp)
+      user <- userService.save(signUp.toUser())
       _ <- userPayService.createAndSave(user)
       _ <- userResService.createAndSave(user)
     } yield {

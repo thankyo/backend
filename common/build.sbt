@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
 
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
-  "com.typesafe.play" %% "play" % "2.6.6",
+  "com.typesafe.play" %% "play" % "2.6.6" % "provided",
 
   "org.reactivemongo" %% "reactivemongo" % "0.12.6",
   "org.reactivemongo" %% "play2-reactivemongo" % "0.12.6-play26",

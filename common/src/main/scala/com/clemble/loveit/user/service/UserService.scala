@@ -1,7 +1,7 @@
 package com.clemble.loveit.user.service
 
 import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.user.model.{User, _}
+import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.services.IdentityService
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile

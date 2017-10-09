@@ -2,5 +2,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 ->         /api/v1/auth                             auth.Routes
+->         /api/v1/payment                          payment.Routes
 ->         /api/v1                                  v1.Routes
 

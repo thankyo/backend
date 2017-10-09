@@ -18,7 +18,7 @@ dependencies:
 
 test:
   override:
-    - sbt clean coverage test coverageReport
+    - sbt clean coverage test coverageReport && sbt coverageAggregate
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/*/target/test-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -28,8 +28,6 @@ deployment:
     branch: master
     commands:
       # Coverall publish
-      - sbt coverage coverageReport
-      - sbt coverageAggregate
       - sbt coveralls
       # Docker publish
       - sbt docker:publishLocal

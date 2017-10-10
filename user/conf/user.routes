@@ -1,0 +1,9 @@
+# Test Endpoint for creating users, this won't work in production
+GET         /:user/profile                      @com.clemble.loveit.user.controller.UserController.get(user)
+
+POST        /subscribe/creator                  @com.clemble.loveit.user.controller.SubscriptionController.subscribeCreator()
+POST        /subscribe/contributor              @com.clemble.loveit.user.controller.SubscriptionController.subscribeContributor()
+
+POST        /invite                             @com.clemble.loveit.user.controller.InvitationController.invite()
+
+GET         /stat/count                         @com.clemble.loveit.user.controller.AdminUserController.count()

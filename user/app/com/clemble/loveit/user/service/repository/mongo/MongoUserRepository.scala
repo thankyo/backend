@@ -2,19 +2,16 @@ package com.clemble.loveit.user.service.repository.mongo
 
 import akka.stream.Materializer
 import com.clemble.loveit.user.model._
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
+import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.{ChargeAccount, UserPayment}
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Named, Singleton}
 
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.Source
 import com.mohiva.play.silhouette.api.LoginInfo
 import play.api.libs.json._
 import reactivemongo.play.json._
-import reactivemongo.api.ReadPreference
 import reactivemongo.play.json.collection.JSONCollection
-import reactivemongo.akkastream.cursorProducer
 
 import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.api.indexes.{Index, IndexType}

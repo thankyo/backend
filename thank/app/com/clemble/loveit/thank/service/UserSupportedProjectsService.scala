@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import akka.actor.{Actor, ActorSystem, Props}
 import com.clemble.loveit.common.model.{ThankTransaction, UserID}
@@ -25,6 +25,7 @@ case class SupportedProjectsThankListener(service: UserSupportedProjectsService)
   }
 }
 
+@Singleton
 class SimpleUserSupportedProjectsService @Inject()(
                                                     actorSystem: ActorSystem,
                                                     thankEventBus: ThankEventBus,

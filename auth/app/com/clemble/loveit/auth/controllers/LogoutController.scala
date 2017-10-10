@@ -12,7 +12,7 @@ class LogoutController @Inject() (
                                    components: ControllerComponents
                                  ) extends AbstractController(components) {
 
-  def logout() = silhouette.UnsecuredAction(req => {
+  def logout() = silhouette.UnsecuredAction(_ => {
     Redirect("/").withCookies(CookieUtils.removeUser())
   })
 

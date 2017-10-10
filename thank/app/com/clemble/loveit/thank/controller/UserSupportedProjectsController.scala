@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.controller
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
@@ -12,6 +12,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import scala.concurrent.ExecutionContext
 import com.clemble.loveit.common.controller.ControllerUtils._
 
+@Singleton
 class UserSupportedProjectsController @Inject()(
                                                 supportedProjectsService: UserSupportedProjectsService,
                                                 silhouette: Silhouette[AuthEnv],

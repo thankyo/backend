@@ -16,15 +16,8 @@ resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/reposi
 
 lazy val common = project in file("./common")
 
-lazy val payment = (project in file("./payment")).
-  enablePlugins(PlayScala).
-  dependsOn(common)
 
 lazy val auth = (project in file("./auth")).
-  enablePlugins(PlayScala).
-  dependsOn(common)
-
-lazy val thank = (project in file("./thank")).
   enablePlugins(PlayScala).
   dependsOn(common)
 
@@ -32,13 +25,17 @@ lazy val user = (project in file("./user")).
   enablePlugins(PlayScala).
   dependsOn(common)
 
+lazy val thank = (project in file("./thank")).
+  enablePlugins(PlayScala).
+  dependsOn(common)
+
+lazy val payment = (project in file("./payment")).
+  enablePlugins(PlayScala).
+  dependsOn(common)
+
 lazy val root = (project in file(".")).
   enablePlugins(PlayScala).
   enablePlugins(DockerPlugin).
-  aggregate(auth).
-  aggregate(payment).
-  aggregate(thank).
-  aggregate(user).
   dependsOn(common).
   dependsOn(auth).
   dependsOn(payment).

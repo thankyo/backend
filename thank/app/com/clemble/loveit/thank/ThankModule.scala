@@ -31,6 +31,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[UserSupportedProjectsRepo]).to(classOf[MongoUserSupportedProjectsRepository])
 
     bind(classOf[UserResourceRepository]).to(classOf[MongoUserResourceRepository])
+    bind(classOf[UserStatService]).to(classOf[SimpleUserStatService]).asEagerSingleton()
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
 
     ownershipVerification()

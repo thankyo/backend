@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 trait UserStatRepo {
 
-  def record(thank: Thank): Future[Boolean]
+  def increase(owner: UserID): Future[Boolean]
 
   def get(user: UserID, yearMonth: YearMonth): Future[UserStat]
 

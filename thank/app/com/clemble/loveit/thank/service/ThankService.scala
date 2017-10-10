@@ -23,7 +23,6 @@ trait ThankService {
 case class SimpleThankService @Inject()(
                                          thankEventBus: ThankEventBus,
                                          thankRepo: ThankRepository,
-                                         userStatRepo: UserStatRepo,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
 
@@ -65,7 +64,6 @@ case class SimpleThankService @Inject()(
     } yield {
       if (increased) {
         thankEventBus.publish(ThankTransaction(giver, thank.owner, res))
-        userStatRepo.record(thank)
       }
       thank
     }

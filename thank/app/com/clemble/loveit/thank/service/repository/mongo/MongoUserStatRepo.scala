@@ -24,8 +24,7 @@ class MongoUserStatRepo @Inject()(
     (yearStr -> monthStr)
   }
 
-  override def record(thank: Thank): Future[Boolean] = {
-    val userID = thank.owner
+  override def increase(userID: UserID): Future[Boolean] = {
     val (yearStr, monthStr) = toStr(YearMonth.now())
 
     val selector = Json.obj("_id" -> userID)

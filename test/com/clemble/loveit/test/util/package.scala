@@ -5,7 +5,7 @@ import java.util.Currency
 
 import com.clemble.loveit.auth.models.requests.SignUpRequest
 import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
-import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 import com.clemble.loveit.payment.model._
 import com.clemble.loveit.thank.model.{Pending, ROVerification, Thank}
@@ -139,6 +139,8 @@ package object util {
   implicit val currencyGenerator: Generator[Currency] = () => {
     LoveItCurrency.getInstance("USD")
   }
+
+  implicit val longGenerator: Generator[Long] = () => nextLong(0, Long.MaxValue)
 
   def optionRandom[T](implicit get: Generator[T]) = {
     if (someRandom[Boolean]) {

@@ -3,6 +3,7 @@ package com.clemble.loveit.payment.model
 import java.util.Currency
 
 import com.clemble.loveit.common.SerializationSpec
+import com.clemble.loveit.common.model.Money
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 

@@ -2,6 +2,7 @@ package com.clemble.loveit.payment.service
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.model.Money
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model._

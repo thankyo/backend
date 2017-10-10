@@ -1,7 +1,6 @@
 package com.clemble.loveit.common.error
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Money, Resource, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
-import com.clemble.loveit.payment.model.Money
 import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException

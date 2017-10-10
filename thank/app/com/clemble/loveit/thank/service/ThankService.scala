@@ -1,7 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.payment.service.ThankTransactionService
+import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
 import com.clemble.loveit.thank.model.Thank
 import com.clemble.loveit.thank.service.repository.{ThankRepository, UserStatRepo}
 import javax.inject.{Inject, Singleton}
@@ -22,10 +21,9 @@ trait ThankService {
 
 @Singleton
 case class SimpleThankService @Inject()(
-                                         transactionService: ThankTransactionService,
+                                         thankEventBus: ThankEventBus,
                                          thankRepo: ThankRepository,
                                          userStatRepo: UserStatRepo,
-                                         supportedProjectsService: UserSupportedProjectsService,
                                          implicit val ec: ExecutionContext
 ) extends ThankService {
 
@@ -61,20 +59,14 @@ case class SimpleThankService @Inject()(
   }
 
   override def thank(giver: UserID, res: Resource): Future[Thank] = {
-    val fThank = getOrCreate(res)
-    val fTransaction = fThank.
-      filter(t => !t.thankedBy(giver)).
-      flatMap(t => {
-        supportedProjectsService.markSupported(giver, t.owner)
-        thankRepo.increase(giver, t.resource).
-          filter(_ == true).
-          flatMap(_ => transactionService.create(giver, t.owner, t.resource))
-      }).recover({ case _ => List.empty})
     for {
-      thank <- fThank // Ensure Thank exists
-      _ <- fTransaction
+      thank <- getOrCreate(res) // Ensure Thank exists
+      increased <- thankRepo.increase(giver, res)
     } yield {
-      userStatRepo.record(thank)
+      if (increased) {
+        thankEventBus.publish(ThankTransaction(giver, thank.owner, res))
+        userStatRepo.record(thank)
+      }
       thank
     }
   }

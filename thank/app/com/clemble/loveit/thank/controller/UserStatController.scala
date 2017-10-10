@@ -6,7 +6,7 @@ import javax.inject.Inject
 import com.clemble.loveit.common.controller.ControllerUtils._
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.service.repository.UserStatRepo
+import com.clemble.loveit.thank.service.UserStatService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -14,7 +14,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import scala.concurrent.ExecutionContext
 
 class UserStatController @Inject()(
-                                    statRepo: UserStatRepo,
+                                    statRepo: UserStatService,
                                     silhouette: Silhouette[AuthEnv],
                                     components: ControllerComponents,
                                     implicit val ec: ExecutionContext

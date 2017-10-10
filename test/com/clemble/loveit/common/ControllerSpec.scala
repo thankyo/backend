@@ -6,8 +6,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.clemble.loveit.auth.models.requests.SignUpRequest
-import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.payment.model.ThankTransaction
+import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
 import com.clemble.loveit.thank.service.ROService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._

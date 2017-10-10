@@ -1,4 +1,4 @@
-package com.clemble.loveit.payment.model
+package com.clemble.loveit.common.model
 
 import java.util.Currency
 

@@ -3,9 +3,8 @@ package com.clemble.loveit.payment.controller
 import javax.inject.Inject
 
 import com.clemble.loveit.common.controller.ControllerUtils
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Money, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.payment.model.Money
 import com.clemble.loveit.payment.service.repository.PaymentLimitRepository
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.{AbstractController, ControllerComponents}

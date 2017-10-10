@@ -2,9 +2,9 @@ package com.clemble.loveit.payment.controller
 
 
 import com.clemble.loveit.common.ControllerSpec
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.payment.PaymentTestExecutor
-import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, EOMStatus, Money, StripeCustomerToken, ThankTransaction}
+import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, EOMStatus, StripeCustomerToken}
 import com.clemble.loveit.payment.service.ThankTransactionService
 import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor
 import play.api.libs.json.{JsString, Json}

@@ -4,8 +4,8 @@ import java.util.Currency
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.{PaymentException, RepositoryException}
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount}
+import com.clemble.loveit.common.model.{Money, UserID}
+import com.clemble.loveit.payment.model.{ChargeAccount, PayoutAccount}
 import com.clemble.loveit.user.model.User
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

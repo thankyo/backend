@@ -1,9 +1,9 @@
 package com.clemble.loveit.payment.service.repository
 
 import akka.stream.scaladsl.Source
-import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.common.model.{Amount, Money, UserID}
 import com.clemble.loveit.payment.controller.PayoutAccountController
-import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, UserPayment}
+import com.clemble.loveit.payment.model.{ChargeAccount, PayoutAccount, UserPayment}
 
 import scala.concurrent.Future
 

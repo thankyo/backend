@@ -1,8 +1,8 @@
 package com.clemble.loveit.payment.service.repository
 
 import com.clemble.loveit.common.{RepositorySpec, ThankExecutor, ThankScenario, ThankSpecification}
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.{Money, UserPayment}
+import com.clemble.loveit.common.model.{Money, UserID}
+import com.clemble.loveit.payment.model.UserPayment
 
 class PaymentLimitRepositorySpec extends RepositorySpec
   with PaymentLimitScenario

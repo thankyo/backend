@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.model
 
 import java.time.{LocalDateTime, YearMonth}
 
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Money, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import play.api.http.Writeable

@@ -2,8 +2,7 @@ package com.clemble.loveit.payment.service
 
 import java.util.Currency
 
-import com.clemble.loveit.common.model.Amount
-import com.clemble.loveit.payment.model.Money
+import com.clemble.loveit.common.model.{Amount, Money}
 import javax.inject.Singleton
 
 import com.clemble.loveit.common.util.LoveItCurrency

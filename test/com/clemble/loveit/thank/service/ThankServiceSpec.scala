@@ -4,8 +4,6 @@ import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.service.repository.ThankRepository
-import com.clemble.loveit.user.model.User
-import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -18,7 +16,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
   val supportedProjectService = dependency[UserSupportedProjectsService]
 
   def createScene():(Resource, UserID, UserID) = {
-    val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
+    val url = HttpResource(s"example.com/some/${someRandom[Long]}")
     // TODO flow must be changed here to use ResourceOwnersip verification
     val owner = createUser()
     await(roService.assignOwnership(owner, url))
@@ -69,7 +67,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
       thank(giver, url)
       eventually(getBalance(url) shouldEqual 1)
 
-      eventually(- 1 shouldEqual getBalance(giver))
+      eventually(getBalance(giver) shouldEqual -1)
     }
 
     "Increment for the owner" in {
@@ -78,7 +76,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
       thank(giver, url)
       eventually(getBalance(url) shouldEqual 1)
 
-      eventually(1 shouldEqual getBalance(owner))
+      eventually(getBalance(owner) shouldEqual 1)
     }
 
     "Double thank has no effect" in {

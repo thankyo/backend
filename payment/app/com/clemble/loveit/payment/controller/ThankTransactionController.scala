@@ -7,8 +7,7 @@ import javax.inject.{Inject, Singleton}
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.clemble.loveit.common.controller.ControllerUtils
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.payment.model.ThankTransaction
+import com.clemble.loveit.common.model.{ThankTransaction, UserID}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}

@@ -1,9 +1,9 @@
 package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.payment.PaymentTestExecutor
-import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, Money, StripeCustomerToken, ThankTransaction}
+import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository._
 
 trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {

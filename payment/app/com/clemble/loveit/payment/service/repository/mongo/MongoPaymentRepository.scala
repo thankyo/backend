@@ -5,9 +5,9 @@ import javax.inject.{Inject, Named, Singleton}
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.PaymentException
-import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.common.model.{Amount, Money, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.payment.model.{ChargeAccount, Money, PayoutAccount, UserPayment}
+import com.clemble.loveit.payment.model.{ChargeAccount, PayoutAccount, UserPayment}
 import com.clemble.loveit.payment.service.repository.PaymentRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.api.indexes.{Index, IndexType}

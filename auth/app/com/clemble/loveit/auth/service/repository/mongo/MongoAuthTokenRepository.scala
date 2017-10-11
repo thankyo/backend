@@ -1,26 +1,38 @@
 package com.clemble.loveit.auth.service.repository.mongo
 
 import java.util.UUID
+import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.auth.model.AuthToken
 import com.clemble.loveit.auth.service.repository.AuthTokenRepository
-import com.clemble.loveit.auth.service.repository.mongo.MongoAuthTokenRepository._
+import com.clemble.loveit.common.mongo.MongoSafeUtils
 
-import scala.collection.mutable
-import scala.concurrent.Future
+import play.api.libs.json._
+import reactivemongo.play.json._
+
+import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson.{BSONDocument, BSONElement, BSONInteger}
+import reactivemongo.play.json.collection.JSONCollection
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Give access to the [[AuthToken]] object.
  */
-class MongoAuthTokenRepository extends AuthTokenRepository {
+@Singleton
+case class MongoAuthTokenRepository @Inject()(@Named("authToken") collection: JSONCollection)(implicit ec: ExecutionContext) extends AuthTokenRepository {
+
+  MongoAuthTokenRepository.ensureMeta(collection)
 
   /**
    * Finds a token by its ID.
    *
-   * @param id The unique token ID.
+   * @param token The unique token ID.
    * @return The found token or None if no token for the given ID could be found.
    */
-  def find(id: UUID) = Future.successful(tokens.get(id))
+  def find(token: UUID): Future[Option[AuthToken]] = {
+    val selector = Json.obj("token" -> token)
+    collection.find(selector).one[AuthToken]
+  }
 
   /**
    * Saves a token.
@@ -28,21 +40,21 @@ class MongoAuthTokenRepository extends AuthTokenRepository {
    * @param token The token to save.
    * @return The saved token.
    */
-  def save(token: AuthToken) = {
-    tokens += (token.id -> token)
-    Future.successful(token)
+  def save(token: AuthToken): Future[AuthToken] = {
+    MongoSafeUtils.safe(token, collection.insert[AuthToken](token))
   }
 
   /**
    * Removes the token for the given ID.
    *
-   * @param id The ID for which the token should be removed.
+   * @param token The ID for which the token should be removed.
    * @return A future to wait for the process to be completed.
    */
-  def remove(id: UUID) = {
-    tokens -= id
-    Future.successful(())
+  def remove(token: UUID): Future[Boolean] = {
+    val selector = Json.obj("token" -> token)
+    MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
   }
+
 }
 
 /**
@@ -50,8 +62,18 @@ class MongoAuthTokenRepository extends AuthTokenRepository {
  */
 object MongoAuthTokenRepository {
 
-  /**
-   * The list of tokens.
-   */
-  val tokens: mutable.HashMap[UUID, AuthToken] = mutable.HashMap()
+  def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
+    ensureIndexes(collection)
+  }
+
+  private def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
+    MongoSafeUtils.ensureIndexes(
+      collection,
+      Index(
+        key = Seq("created" -> IndexType.Ascending),
+        name = Some("created_expire"),
+        options = BSONDocument(BSONElement("expireAfterSeconds", BSONInteger(3600)))
+      )
+    )
+  }
 }

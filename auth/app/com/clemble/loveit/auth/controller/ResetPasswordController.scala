@@ -51,7 +51,7 @@ class ResetPasswordController @Inject() (
     for {
       authTokenOpt <- authTokenService.validate(token)
       authToken = authTokenOpt.get
-      userOpt <- userService.findById(authToken.userID)
+      userOpt <- userService.findById(authToken.user)
       loginInfoOpt = userOpt.flatMap(_.profiles.find(_.providerID == CredentialsProvider.ID))
       _ <- authInfoRepository.update[PasswordInfo](loginInfoOpt.get, passwordInfo)
     } yield {

@@ -32,5 +32,5 @@ trait AuthTokenRepository {
    * @param id The ID for which the token should be removed.
    * @return A future to wait for the process to be completed.
    */
-  def remove(id: UUID): Future[Unit]
+  def remove(id: UUID): Future[Boolean]
 }

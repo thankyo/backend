@@ -7,8 +7,8 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import com.mohiva.play.silhouette.api.{AuthInfo, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.{OAuth1Info, OAuth2Info, OpenIDInfo}
-import play.api.libs.json._
 import reactivemongo.api.indexes.{Index, IndexType}
+import play.api.libs.json._
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 

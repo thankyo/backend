@@ -54,7 +54,7 @@ class ForgotPasswordController @Inject()(
         user = userOpt.get
         authToken <- authTokenService.create(user.id)
       } yield {
-        val url = s"https://loveit.tips/password/${authToken.id}"
+        val url = s"https://loveit.tips/password/${authToken.token}"
         mailerClient.send(
           Email(
             subject = Messages("email.reset.password.subject"),

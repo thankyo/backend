@@ -1,9 +1,10 @@
-package com.clemble.loveit.auth.models.daos
+package com.clemble.loveit.auth.service.repository.mongo
 
 import java.util.UUID
 
-import com.clemble.loveit.auth.models.AuthToken
-import AuthTokenDAOImpl._
+import com.clemble.loveit.auth.model.AuthToken
+import com.clemble.loveit.auth.service.repository.AuthTokenRepository
+import com.clemble.loveit.auth.service.repository.mongo.MongoAuthTokenRepository._
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -11,7 +12,7 @@ import scala.concurrent.Future
 /**
  * Give access to the [[AuthToken]] object.
  */
-class AuthTokenDAOImpl extends AuthTokenDAO {
+class MongoAuthTokenRepository extends AuthTokenRepository {
 
   /**
    * Finds a token by its ID.
@@ -47,7 +48,7 @@ class AuthTokenDAOImpl extends AuthTokenDAO {
 /**
  * The companion object.
  */
-object AuthTokenDAOImpl {
+object MongoAuthTokenRepository {
 
   /**
    * The list of tokens.

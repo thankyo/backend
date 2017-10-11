@@ -1,7 +1,8 @@
 package com.clemble.loveit.auth
 
-import com.clemble.loveit.auth.models.daos.{AuthTokenDAO, AuthTokenDAOImpl}
-import com.clemble.loveit.auth.models.services.{AuthTokenService, AuthTokenServiceImpl}
+import com.clemble.loveit.auth.service.repository.AuthTokenRepository
+import com.clemble.loveit.auth.service.repository.mongo.MongoAuthTokenRepository
+import com.clemble.loveit.auth.service.{AuthTokenService, SimpleAuthTokenService}
 import com.google.inject.AbstractModule
 import net.codingwell.scalaguice.ScalaModule
 
@@ -14,7 +15,7 @@ class AuthValidationModule extends AbstractModule with ScalaModule {
    * Configures the module.
    */
   def configure(): Unit = {
-    bind[AuthTokenDAO].to[AuthTokenDAOImpl]
-    bind[AuthTokenService].to[AuthTokenServiceImpl]
+    bind[AuthTokenRepository].to[MongoAuthTokenRepository]
+    bind[AuthTokenService].to[SimpleAuthTokenService]
   }
 }

@@ -1,4 +1,4 @@
-package com.clemble.loveit.auth.controllers
+package com.clemble.loveit.auth.controller
 
 import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.util.AuthEnv

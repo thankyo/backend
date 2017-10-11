@@ -3,7 +3,7 @@ package com.clemble.loveit.test
 import java.time.{LocalDateTime, YearMonth}
 import java.util.Currency
 
-import com.clemble.loveit.auth.models.requests.SignUpRequest
+import com.clemble.loveit.auth.model.requests.SignUpRequest
 import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}

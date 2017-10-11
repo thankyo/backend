@@ -80,12 +80,6 @@ object MongoUserRepository {
       Index(
         key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
         name = Some("user_profiles")
-      ),
-      Index(
-        key = Seq("owns.resource.uri" -> IndexType.Ascending, "owns.resource.type" -> IndexType.Ascending),
-        name = Some("user_owns_unique"),
-        unique = true,
-        sparse = true
       )
     )
   }

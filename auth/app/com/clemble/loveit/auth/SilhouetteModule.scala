@@ -2,6 +2,8 @@ package com.clemble.loveit.auth
 
 import javax.inject.Singleton
 
+import com.clemble.loveit.auth.service.repository.mongo.MongoAuthInfoRepository
+import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
 import com.google.inject.name.Named
@@ -18,9 +20,7 @@ import com.mohiva.play.silhouette.impl.providers.{SocialStateHandler, _}
 import com.mohiva.play.silhouette.impl.providers.oauth2._
 import com.mohiva.play.silhouette.impl.services._
 import com.mohiva.play.silhouette.impl.util._
-import com.mohiva.play.silhouette.password.{BCryptSha256PasswordHasher}
-import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
-import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
+import com.mohiva.play.silhouette.password.BCryptSha256PasswordHasher
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
@@ -31,6 +31,7 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import net.ceedubs.ficus.readers.EnumerationReader._
+import play.modules.reactivemongo.ReactiveMongoApi
 
 /**
  * The Guice module which wires all Silhouette dependencies.
@@ -51,8 +52,14 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
     bind[SecuredErrorHandler].to[DefaultSecuredErrorHandler]
 
     // Replace this with the bindings to your concrete DAOs
-    bind[DelegableAuthInfoDAO[PasswordInfo]].toInstance(new InMemoryAuthInfoDAO[PasswordInfo])
-    bind[DelegableAuthInfoDAO[OAuth2Info]].toInstance(new InMemoryAuthInfoDAO[OAuth2Info])
+    bind[AuthInfoRepository].to(classOf[MongoAuthInfoRepository])
+  }
+
+  @Provides
+  @Singleton
+  @Named("authInfo")
+  def authInfoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext) = {
+    JSONCollectionFactory.create("authInfo", mongoApi, ec, env)
   }
 
   @Provides
@@ -152,21 +159,6 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
     val config = configuration.underlying.as[JcaSignerSettings]("silhouette.socialStateHandler.signer")
 
     new JcaSigner(config)
-  }
-
-  /**
-   * Provides the auth info repository.
-   *
-   * @param passwordInfoDAO The implementation of the deletable password auth info DAO.
-   * @param oauth2InfoDAO The implementation of the deletable OAuth2 auth info DAO.
-   * @return The auth info repository instance.
-   */
-  @Provides
-  def provideAuthInfoRepository(
-    passwordInfoDAO: DelegableAuthInfoDAO[PasswordInfo],
-    oauth2InfoDAO: DelegableAuthInfoDAO[OAuth2Info]): AuthInfoRepository = {
-
-    new DelegableAuthInfoRepository(passwordInfoDAO, oauth2InfoDAO)
   }
 
   /**

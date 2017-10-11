@@ -1,4 +1,4 @@
-package com.clemble.loveit.auth.controllers
+package com.clemble.loveit.auth.controller
 
 import javax.inject.{Inject, Singleton}
 

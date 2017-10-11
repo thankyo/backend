@@ -1,6 +1,6 @@
 package com.clemble.loveit.user.controller
 
-import com.clemble.loveit.auth.models.requests.SignUpRequest
+import com.clemble.loveit.auth.model.requests.SignUpRequest
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile

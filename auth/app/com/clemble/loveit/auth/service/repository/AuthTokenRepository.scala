@@ -1,14 +1,14 @@
-package com.clemble.loveit.auth.models.daos
+package com.clemble.loveit.auth.service.repository
 
 import java.util.UUID
 
-import com.clemble.loveit.auth.models.AuthToken
+import com.clemble.loveit.auth.model.AuthToken
 import scala.concurrent.Future
 
 /**
  * Give access to the [[AuthToken]] object.
  */
-trait AuthTokenDAO {
+trait AuthTokenRepository {
 
   /**
    * Finds a token by its ID.

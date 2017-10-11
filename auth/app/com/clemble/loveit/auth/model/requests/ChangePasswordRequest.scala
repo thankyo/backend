@@ -1,4 +1,4 @@
-package com.clemble.loveit.auth.models.requests
+package com.clemble.loveit.auth.model.requests
 
 import play.api.libs.json.Json
 

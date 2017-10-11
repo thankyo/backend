@@ -1,10 +1,10 @@
-package com.clemble.loveit.auth.models.services
+package com.clemble.loveit.auth.service
 
 import java.util.UUID
 import javax.inject.Inject
 
-import com.clemble.loveit.auth.models.AuthToken
-import com.clemble.loveit.auth.models.daos.AuthTokenDAO
+import com.clemble.loveit.auth.model.AuthToken
+import com.clemble.loveit.auth.service.repository.AuthTokenRepository
 import com.clemble.loveit.common.model.UserID
 import com.mohiva.play.silhouette.api.util.Clock
 
@@ -14,13 +14,13 @@ import scala.language.postfixOps
 /**
  * Handles actions to auth tokens.
  *
- * @param authTokenDAO The auth token DAO implementation.
+ * @param repo The auth token Repository implementation.
  * @param clock        The clock instance.
  * @param ex           The execution context.
  */
-class AuthTokenServiceImpl @Inject() (
-                                       authTokenDAO: AuthTokenDAO,
-                                       clock: Clock
+class SimpleAuthTokenService @Inject()(
+                                        repo: AuthTokenRepository,
+                                        clock: Clock
 )(
   implicit
   ex: ExecutionContext
@@ -34,7 +34,7 @@ class AuthTokenServiceImpl @Inject() (
    */
   def create(userID: UserID) = {
     val token = AuthToken(UUID.randomUUID(), userID)
-    authTokenDAO.save(token)
+    repo.save(token)
   }
 
   /**
@@ -44,7 +44,7 @@ class AuthTokenServiceImpl @Inject() (
    * @return The token if it's valid, None otherwise.
    */
   def validate(id: UUID): Future[Option[AuthToken]] = {
-    authTokenDAO.find(id)
+    repo.find(id)
   }
 
 }

@@ -4,7 +4,7 @@ import java.util.UUID
 import play.api.mvc.PathBindable
 
 
-package object controllers {
+package object controller {
 
   /**
     * A `java.util.UUID` bindable.

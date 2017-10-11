@@ -1,6 +1,6 @@
 package com.clemble.loveit.common
 
-import com.clemble.loveit.auth.models.requests.SignUpRequest
+import com.clemble.loveit.auth.model.requests.SignUpRequest
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.UserPaymentRepository

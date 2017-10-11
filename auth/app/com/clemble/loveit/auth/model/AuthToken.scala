@@ -1,8 +1,9 @@
-package com.clemble.loveit.auth.models
+package com.clemble.loveit.auth.model
 
+import java.time.{LocalDateTime}
 import java.util.UUID
 
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{CreatedAware, UserID}
 
 /**
  * A token to authenticate a user against an endpoint for a short time period.
@@ -12,5 +13,6 @@ import com.clemble.loveit.common.model.UserID
  */
 case class AuthToken(
                       id: UUID,
-                      userID: UserID
-)
+                      userID: UserID,
+                      created: LocalDateTime = LocalDateTime.now()
+) extends CreatedAware

@@ -1,4 +1,4 @@
-package com.clemble.loveit.auth.controllers
+package com.clemble.loveit.auth.controller
 
 import javax.inject.Inject
 
@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import com.clemble.loveit.auth.models.requests.ChangePasswordRequest
+import com.clemble.loveit.auth.model.requests.ChangePasswordRequest
 import play.api.i18n.I18nSupport
 import play.api.libs.json.JsBoolean
 import play.api.mvc.{AbstractController, ControllerComponents, PlayBodyParsers}

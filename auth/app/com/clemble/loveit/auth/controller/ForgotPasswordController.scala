@@ -1,12 +1,12 @@
-package com.clemble.loveit.auth.controllers
+package com.clemble.loveit.auth.controller
 
 import javax.inject.Inject
 
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
-import com.clemble.loveit.auth.models.requests.ForgotPasswordRequest
-import com.clemble.loveit.auth.models.services.AuthTokenService
+import com.clemble.loveit.auth.model.requests.ForgotPasswordRequest
+import com.clemble.loveit.auth.service.AuthTokenService
 import com.clemble.loveit.auth.views.html.emails.resetPassword
 import com.clemble.loveit.auth.views.txt.emails
 import play.api.i18n.{I18nSupport, Messages}

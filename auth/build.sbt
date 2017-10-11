@@ -19,6 +19,6 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-testkit" % "5.0.1" % Test
 )
 
-RoutesKeys.routesImport += "com.clemble.loveit.auth.controllers._"
+RoutesKeys.routesImport += "com.clemble.loveit.auth.controller._"
 
 coverageExcludedFiles := """.*\.template\.scala;.*JavaScriptReverseRoutes.*;.*ReverseRoutes.*;.*Routes.*;.*Module.*;"""

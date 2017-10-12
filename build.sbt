@@ -36,11 +36,8 @@ lazy val payment = (project in file("./payment")).
 lazy val root = (project in file(".")).
   enablePlugins(PlayScala).
   enablePlugins(DockerPlugin).
-  dependsOn(common).
-  dependsOn(auth).
-  dependsOn(payment).
-  dependsOn(thank).
-  dependsOn(user)
+  dependsOn(common, auth, payment, thank, user).
+  aggregate(common, auth, payment, thank, user)
 
 
 libraryDependencies ++= Seq(

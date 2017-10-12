@@ -10,7 +10,7 @@ import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers._
 import play.api.Configuration
 import play.api.i18n.I18nSupport
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * @param configuration          The Play configuration.
   * @param clock                  The clock instance.
   */
-class SignInController @Inject()(
+class LogInController @Inject()(
                                   userService: UserService,
                                   credentialsProvider: CredentialsProvider,
                                   socialProviderRegistry: SocialProviderRegistry,
@@ -41,14 +41,14 @@ class SignInController @Inject()(
                                 ) extends AbstractController(components) with I18nSupport {
 
 
-  implicit val credentialsJson = Json.format[Credentials]
+  implicit val credentialsJson: OFormat[Credentials] = Json.format[Credentials]
 
   /**
     * Handles the submitted form.
     *
     * @return The result to display.
     */
-  def submit = silhouette.UnsecuredAction.async(parse.json[Credentials]) { implicit req: Request[Credentials] =>
+  def submit: Action[Credentials] = silhouette.UnsecuredAction.async(parse.json[Credentials]) { implicit req: Request[Credentials] =>
     val credentials = req.body
     credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
       userService.retrieve(loginInfo).flatMap {

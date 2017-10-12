@@ -1,10 +1,10 @@
-GET         /social/:provider                com.clemble.loveit.auth.controller.SocialAuthController.authenticate(provider)
-
 POST        /signUp                          com.clemble.loveit.auth.controller.SignUpController.submit
-POST        /signIn                          com.clemble.loveit.auth.controller.SignInController.submit
+POST        /logIn                           com.clemble.loveit.auth.controller.LogInController.submit
 
 POST        /password/forgot                 com.clemble.loveit.auth.controller.ForgotPasswordController.submit
 POST        /password/reset/:token           com.clemble.loveit.auth.controller.ResetPasswordController.submit(token: java.util.UUID)
 POST        /password/change                 com.clemble.loveit.auth.controller.ChangePasswordController.submit
 
 GET         /logout                          com.clemble.loveit.auth.controller.LogoutController.logout()
+
+GET         /social/:provider                com.clemble.loveit.auth.controller.SocialAuthController.authenticate(provider)

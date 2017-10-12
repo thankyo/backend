@@ -2,8 +2,7 @@ package com.clemble.loveit.auth.controller
 
 import javax.inject.Inject
 
-import com.clemble.loveit.common.util.{AuthEnv, IDGenerator}
-import com.clemble.loveit.user.model.User
+import com.clemble.loveit.common.util.{AuthEnv}
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository

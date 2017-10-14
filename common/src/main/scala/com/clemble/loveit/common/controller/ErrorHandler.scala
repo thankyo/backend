@@ -2,7 +2,8 @@ package com.clemble.loveit.common.controller
 
 import javax.inject.{Inject, Provider, Singleton}
 
-import com.clemble.loveit.common.error.{FieldValidationError}
+import com.clemble.loveit.common.error.FieldValidationError
+import com.mohiva.play.silhouette.impl.exceptions.{IdentityNotFoundException, InvalidPasswordException}
 import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -23,6 +24,10 @@ class ErrorHandler @Inject() (
     exception match {
       case fv: FieldValidationError =>
         Future.successful(BadRequest(fv))
+      case t: Throwable if (t.isInstanceOf[InvalidPasswordException]) =>
+        Future.successful(BadRequest(FieldValidationError("email", "Email or Password does not match")))
+      case t: Throwable if (t.isInstanceOf[IdentityNotFoundException]) =>
+        Future.successful(BadRequest(FieldValidationError("email", "This email was not registered")))
       case exc =>
         super.onServerError(request, exc)
     }

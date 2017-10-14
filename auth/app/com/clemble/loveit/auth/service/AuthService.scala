@@ -11,7 +11,7 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
-import com.mohiva.play.silhouette.impl.exceptions.InvalidPasswordException
+import com.mohiva.play.silhouette.impl.exceptions.{IdentityNotFoundException, InvalidPasswordException}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, CredentialsProvider, SocialProvider, SocialProviderRegistry}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -58,6 +58,8 @@ case class AuthService @Inject()(
     } recoverWith( {
       case t: Throwable if (t.isInstanceOf[InvalidPasswordException]) =>
         Future.failed(FieldValidationError("email", "Email or Password does not match"))
+      case t: Throwable if (t.isInstanceOf[IdentityNotFoundException]) =>
+        Future.failed(FieldValidationError("email", "This email was not registered"))
     })
   }
 

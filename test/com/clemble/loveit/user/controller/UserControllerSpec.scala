@@ -1,6 +1,6 @@
 package com.clemble.loveit.user.controller
 
-import com.clemble.loveit.auth.model.requests.SignUpRequest
+import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
@@ -17,7 +17,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
   "CREATE" should {
 
     "Support single create" in {
-      val profile = someRandom[SignUpRequest]
+      val profile = someRandom[RegisterRequest]
       val user = createUser(profile)
 
       val savedUser = getMyUser(user)
@@ -27,15 +27,15 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
     }
 
     "Forbids double authentication" in {
-      val profile = someRandom[SignUpRequest]
+      val profile = someRandom[RegisterRequest]
 
       createUser(profile)
       createUser(profile) must throwA[Exception]()
     }
 
     "sets a userId as a cookie" in {
-      val signUpReq = Json.toJson(someRandom[SignUpRequest])
-      val req = FakeRequest(POST, "/api/v1/auth/signUp").withJsonBody(signUpReq)
+      val registerReq = Json.toJson(someRandom[RegisterRequest])
+      val req = FakeRequest(POST, "/api/v1/auth/signUp").withJsonBody(registerReq)
       val res = await(route(application, req).get)
 
       ControllerSpec.setUser(res)

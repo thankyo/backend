@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.auth.model.requests.SignUpRequest
+import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.Resource

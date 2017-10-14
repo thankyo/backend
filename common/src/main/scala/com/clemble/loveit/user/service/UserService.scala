@@ -1,6 +1,6 @@
 package com.clemble.loveit.user.service
 
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Email, UserID}
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.services.IdentityService
@@ -21,6 +21,8 @@ trait UserService extends IdentityService[User] {
   def retrieve(loginInfo: LoginInfo): Future[Option[User]]
 
   def findById(userId: UserID): Future[Option[User]]
+
+  def findByEmail(email: Email): Future[Option[User]]
 
   /**
     *

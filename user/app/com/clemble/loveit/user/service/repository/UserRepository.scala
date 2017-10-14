@@ -2,7 +2,7 @@ package com.clemble.loveit.user.service.repository
 
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Email, UserID}
 import com.clemble.loveit.user.model._
 import com.mohiva.play.silhouette.api.LoginInfo
 
@@ -19,6 +19,11 @@ trait UserRepository {
     * Find [[User]] by ID
     */
   def findById(id: UserID): Future[Option[User]]
+
+  /**
+    * Find user by email
+    */
+  def findByEmail(email: Email): Future[Option[User]]
 
   /**
     * Create a new user in the system

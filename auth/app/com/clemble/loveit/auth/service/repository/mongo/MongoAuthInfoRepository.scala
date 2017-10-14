@@ -25,27 +25,29 @@ object MongoAuthInfo {
   implicit val passwordFormat: OFormat[PasswordInfo] = Json.format[PasswordInfo]
   implicit val oauth2InfoFormat: OFormat[OAuth2Info] = Json.format[OAuth2Info]
   implicit val oauth1InfoFormat: OFormat[OAuth1Info] = Json.format[OAuth1Info]
-  implicit val opendIDInfoFormat: OFormat[OpenIDInfo] = Json.format[OpenIDInfo]
+  implicit val openIDInfoFormat: OFormat[OpenIDInfo] = Json.format[OpenIDInfo]
 
   implicit val authInfoFormat: OFormat[AuthInfo] = new OFormat[AuthInfo] {
     val PASSWORD = JsString("password")
     val OAUTH1 = JsString("oauth1")
     val OAUTH2 = JsString("oauth2")
-    val OPEND_ID = JsString("openID")
+    val OPEN_ID = JsString("openID")
 
     override def writes(o: AuthInfo) = o match {
       case password: PasswordInfo => passwordFormat.writes(password) + ("type" -> PASSWORD)
       case oauth1: OAuth1Info => oauth1InfoFormat.writes(oauth1) + ("type" -> OAUTH1)
       case oauth2: OAuth2Info => oauth2InfoFormat.writes(oauth2) + ("type" -> OAUTH2)
-      case openID: OpenIDInfo => opendIDInfoFormat.writes(openID) + ("type" -> OPEND_ID)
+      case openID: OpenIDInfo => openIDInfoFormat.writes(openID) + ("type" -> OPEN_ID)
     }
 
-    override def reads(json: JsValue) = (json \ "type").get match {
-      case PASSWORD => passwordFormat.reads(json)
-      case OAUTH1 => oauth1InfoFormat.reads(json)
-      case OAUTH2 => oauth2InfoFormat.reads(json)
-      case OPEND_ID => opendIDInfoFormat.reads(json)
-    }
+    override def reads(json: JsValue) = (json \ "type").
+      toOption.
+      collect({
+        case PASSWORD => passwordFormat.reads (json)
+        case OAUTH1 => oauth1InfoFormat.reads (json)
+        case OAUTH2 => oauth2InfoFormat.reads (json)
+        case OPEN_ID => openIDInfoFormat.reads (json)
+      }).getOrElse(JsError(s"Can't parse ${json} as AuthInfo"))
   }
 
   implicit val jsonFormat: OFormat[MongoAuthInfo] = Json.format[MongoAuthInfo]

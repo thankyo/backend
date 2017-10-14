@@ -2,7 +2,7 @@ package com.clemble.loveit.user.service.repository.mongo
 
 import akka.stream.Materializer
 import com.clemble.loveit.user.model._
-import com.clemble.loveit.common.model.{UserID}
+import com.clemble.loveit.common.model.{Email, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Named, Singleton}
@@ -45,6 +45,12 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(fUser)
   }
 
+  override def findByEmail(email: Email): Future[Option[User]] = {
+    val query = Json.obj("email" -> email)
+    val fUser = collection.find(query).one[User]
+    MongoSafeUtils.safe(fUser)
+  }
+
   override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
     val query = Json.obj("profiles.providerID" -> loginInfo.providerID, "profiles.providerKey" -> loginInfo.providerKey)
     val fUser = collection.find(query).one[User]
@@ -79,7 +85,13 @@ object MongoUserRepository {
       collection,
       Index(
         key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
-        name = Some("user_profiles")
+        name = Some("user_profiles"),
+        unique = true
+      ),
+      Index(
+        key = Seq("email" -> IndexType.Ascending),
+        name = Some("user_profiles"),
+        unique = true
       )
     )
   }

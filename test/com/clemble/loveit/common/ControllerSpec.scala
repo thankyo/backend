@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
-import com.clemble.loveit.auth.model.requests.SignUpRequest
+import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
 import com.clemble.loveit.thank.service.ROService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
@@ -33,8 +33,8 @@ trait ControllerSpec extends FunctionalThankSpecification {
     def readJson[T]()(implicit reader: Reads[T]): Option[T] = Json.parse(read()).asOpt[T]
   }
 
-  override def createUser(profile: SignUpRequest = someRandom[SignUpRequest]): UserID = {
-    val req = FakeRequest(POST, "/api/v1/auth/signUp").withJsonBody(Json.toJson(profile))
+  override def createUser(profile: RegisterRequest = someRandom[RegisterRequest]): UserID = {
+    val req = FakeRequest(POST, "/api/v1/auth/register").withJsonBody(Json.toJson(profile))
     val fRes = route(application, req).get
 
     val res = await(fRes)

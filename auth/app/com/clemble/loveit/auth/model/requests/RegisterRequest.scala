@@ -4,10 +4,11 @@ import com.clemble.loveit.common.model.Email
 import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api.LoginInfo
+import com.mohiva.play.silhouette.api.util.Credentials
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import play.api.libs.json.{Json, OFormat}
 
-case class SignUpRequest(
+case class RegisterRequest(
                           firstName: String,
                           lastName: String,
                           email: Email,
@@ -25,10 +26,14 @@ case class SignUpRequest(
       profiles = Set(loginInfo)
     )
   }
+
+  def toCredentials(): Credentials = {
+    Credentials(email, password)
+  }
 }
 
-object SignUpRequest {
+object RegisterRequest {
 
-  implicit val json: OFormat[SignUpRequest] = Json.format[SignUpRequest]
+  implicit val json: OFormat[RegisterRequest] = Json.format[RegisterRequest]
 
 }

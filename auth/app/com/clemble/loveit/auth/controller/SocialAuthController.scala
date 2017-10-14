@@ -2,8 +2,8 @@ package com.clemble.loveit.auth.controller
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.auth.service.AuthService
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 @Singleton
 class SocialAuthController @Inject()(
-                                      userService: UserService,
+                                      authService: AuthService,
                                       authInfoRepository: AuthInfoRepository,
                                       socialProviderRegistry: SocialProviderRegistry,
                                       components: ControllerComponents,
@@ -37,25 +37,13 @@ class SocialAuthController @Inject()(
     * @return The result to display.
     */
   def authenticate(provider: String) = Action.async { implicit req => {
-
-    def processProviderResponse(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A): Future[Result] = {
-      for {
-        profile <- p.retrieveProfile(authInfo)
-        eitherUser <- userService.createOrUpdateUser(profile)
-        _ <- authInfoRepository.save(profile.loginInfo, authInfo)
-        result <- AuthUtils.authResponse(eitherUser, profile.loginInfo)
-      } yield {
-        result
-      }
-    }
-
     (socialProviderRegistry.get[SocialProvider](provider) match {
       case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
         p.authenticate().flatMap {
           case Left(redirect) =>
             Future.successful(redirect)
           case Right(authInfo) =>
-            processProviderResponse(p)(authInfo)
+            authService.registerSocial(p)(authInfo).flatMap(AuthUtils.authResponse)
         }
       case _ => {
         Future.failed(new ProviderException(s"Cannot authenticate with unexpected social provider $provider"))
@@ -65,7 +53,6 @@ class SocialAuthController @Inject()(
         logger.error("Unexpected provider error", e)
         Redirect("/")
     }
-  }
-  }
+  }}
 
 }

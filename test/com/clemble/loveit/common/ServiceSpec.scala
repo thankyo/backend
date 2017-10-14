@@ -1,7 +1,7 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.auth.controller.SocialAuthController
-import com.clemble.loveit.auth.model.requests.SignUpRequest
+import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.service.UserPaymentService
 import com.clemble.loveit.thank.service.{ROService, UserResourceService}
@@ -20,9 +20,9 @@ trait ServiceSpec extends FunctionalThankSpecification {
 
   lazy val roService = dependency[ROService]
 
-  override def createUser(signUp: SignUpRequest = someRandom[SignUpRequest]): UserID = {
+  override def createUser(register: RegisterRequest = someRandom[RegisterRequest]): UserID = {
     val fUserID = for {
-      user <- userService.save(signUp.toUser())
+      user <- userService.save(register.toUser())
       _ <- userPayService.createAndSave(user)
       _ <- userResService.createAndSave(user)
     } yield {

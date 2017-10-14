@@ -1,4 +1,4 @@
-POST        /signUp                          com.clemble.loveit.auth.controller.SignUpController.submit
+POST        /register                        com.clemble.loveit.auth.controller.RegisterController.submit
 POST        /logIn                           com.clemble.loveit.auth.controller.LogInController.submit
 
 POST        /password/forgot                 com.clemble.loveit.auth.controller.ForgotPasswordController.submit

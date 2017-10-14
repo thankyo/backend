@@ -1,6 +1,6 @@
 package com.clemble.loveit.user.service
 
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Email, UserID}
 import com.clemble.loveit.user.model._
 import com.clemble.loveit.user.service.repository.UserRepository
 import javax.inject.{Inject, Singleton}
@@ -24,6 +24,10 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
 
   override def findById(id: UserID): Future[Option[User]] = {
     userRepo.findById(id)
+  }
+
+  override def findByEmail(email: Email): Future[Option[User]] = {
+    userRepo.findByEmail(email)
   }
 
   def updateExistingUser(user: User, profile: CommonSocialProfile): Future[User] = {

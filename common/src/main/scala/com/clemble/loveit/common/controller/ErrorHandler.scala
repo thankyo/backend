@@ -2,7 +2,7 @@ package com.clemble.loveit.common.controller
 
 import javax.inject.{Inject, Provider, Singleton}
 
-import com.clemble.loveit.common.error.ThankException
+import com.clemble.loveit.common.error.{FieldValidationError}
 import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -21,8 +21,8 @@ class ErrorHandler @Inject() (
 
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     exception match {
-      case te: ThankException =>
-        Future.successful(BadRequest(te))
+      case fv: FieldValidationError =>
+        Future.successful(BadRequest(fv))
       case exc =>
         super.onServerError(request, exc)
     }

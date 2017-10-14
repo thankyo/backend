@@ -27,8 +27,8 @@ case class RegisterRequest(
     )
   }
 
-  def toCredentials(): Credentials = {
-    Credentials(email, password)
+  def toLogIn(): LogInRequest = {
+    LogInRequest(email, password)
   }
 }
 

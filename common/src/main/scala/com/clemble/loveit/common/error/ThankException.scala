@@ -1,9 +1,12 @@
 package com.clemble.loveit.common.error
 import com.clemble.loveit.common.model.{Money, Resource, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
+import play.api.http.Writeable
 import play.api.libs.json._
 
 sealed trait ThankException extends RuntimeException
+
+case class FieldValidationError(field: String, error: String) extends ThankException
 
 case class RepositoryException(code: String, message: String) extends RuntimeException(message) with ThankException
 case class UserException(code: String, message: String) extends RuntimeException(message) with ThankException
@@ -49,6 +52,7 @@ object ThankException {
   implicit val userExcJsonFormat = Json.format[UserException]
   implicit val paymentExcJsonFormat = Json.format[PaymentException]
   implicit val resourceExcJsonFormat = Json.format[ResourceException]
+  implicit val fieldValidationErrorFormat = Json.format[FieldValidationError]
 
   implicit val jsonFormat = new Format[ThankException] {
 
@@ -56,24 +60,26 @@ object ThankException {
     val USER = JsString("user")
     val PAYMENT = JsString("payment")
     val RESOURCE = JsString("resource")
+    val FIELD = JsString("field")
 
-    override def reads(json: JsValue): JsResult[ThankException] = (json \ "type") match {
-      case JsDefined(REPO) => repoExcJsonFormat.reads(json)
-      case JsDefined(USER) => userExcJsonFormat.reads(json)
-      case JsDefined(PAYMENT) => paymentExcJsonFormat.reads(json)
-      case JsDefined(RESOURCE) => resourceExcJsonFormat.reads(json)
-      case _ => JsError(s"Can't parse ${json}")
-    }
+    override def reads(json: JsValue): JsResult[ThankException] = (json \ "type").toOption collect {
+      case REPO => repoExcJsonFormat.reads(json)
+      case USER => userExcJsonFormat.reads(json)
+      case PAYMENT => paymentExcJsonFormat.reads(json)
+      case RESOURCE => resourceExcJsonFormat.reads(json)
+      case FIELD => fieldValidationErrorFormat.reads(json)
+    } getOrElse JsError(s"Can't parse ${json}")
 
     override def writes(o: ThankException): JsValue = o match {
-      case re: RepositoryException => repoExcJsonFormat.writes(re).as[JsObject] + ("type" -> REPO)
-      case ue: UserException => userExcJsonFormat.writes(ue).as[JsObject] + ("type" -> USER)
-      case pe: PaymentException => paymentExcJsonFormat.writes(pe).as[JsObject] + ("type" -> PAYMENT)
-      case re: ResourceException => resourceExcJsonFormat.writes(re).as[JsObject] + ("type" -> RESOURCE)
+      case re: RepositoryException => repoExcJsonFormat.writes(re) + ("type" -> REPO)
+      case ue: UserException => userExcJsonFormat.writes(ue) + ("type" -> USER)
+      case pe: PaymentException => paymentExcJsonFormat.writes(pe) + ("type" -> PAYMENT)
+      case re: ResourceException => resourceExcJsonFormat.writes(re) + ("type" -> RESOURCE)
+      case fv: FieldValidationError => fieldValidationErrorFormat.writes(fv) + ("type" -> FIELD)
     }
 
   }
 
-  implicit val thankExceptionWriteable = WriteableUtils.jsonToWriteable[ThankException]
+  implicit val thankExceptionWriteable: Writeable[ThankException] = WriteableUtils.jsonToWriteable[ThankException]
 
 }

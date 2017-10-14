@@ -2,6 +2,7 @@ package com.clemble.loveit.auth.controller
 
 import javax.inject.Inject
 
+import com.clemble.loveit.auth.model.requests.LogInRequest
 import com.clemble.loveit.auth.service.AuthService
 import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
@@ -35,11 +36,11 @@ class LogInController @Inject()(
     *
     * @return The result to display.
     */
-  def submit: Action[Credentials] = silhouette.UnsecuredAction.async(parse.json[Credentials]) { implicit req: Request[Credentials] =>
-    authService.
-      login(req.body).
-      flatMap(AuthUtils.authResponse).
-      recover({ case t: Throwable => BadRequest(t.getMessage) })
+  def submit: Action[LogInRequest] = silhouette.UnsecuredAction.async(parse.json[LogInRequest]) {
+    implicit req: Request[LogInRequest] =>
+      authService.
+        login(req.body).
+        flatMap(AuthUtils.authResponse)
   }
 
 }

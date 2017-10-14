@@ -35,9 +35,6 @@ class RegisterController @Inject()(
   def submit: Action[RegisterRequest] = silhouette.UnsecuredAction.async(parse.json[RegisterRequest]) { implicit req: Request[RegisterRequest] =>
     authService.
       register(req.body).
-      flatMap(AuthUtils.authResponse).
-      recover({
-        case t: Throwable => BadRequest(t.getMessage)
-      })
+      flatMap(AuthUtils.authResponse)
   }
 }

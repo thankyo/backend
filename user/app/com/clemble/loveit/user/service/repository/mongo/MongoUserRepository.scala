@@ -27,14 +27,14 @@ case class MongoUserRepository @Inject()(
   MongoUserRepository.ensureMeta(collection)
 
   override def save(user: User): Future[User] = {
-    val userJson = Json.toJson[User](user).as[JsObject] + ("_id" -> JsString(user.id))
+    val userJson = User.jsonFormat.writes(user) + ("_id" -> JsString(user.id))
     val fInsert = collection.insert(userJson)
     MongoSafeUtils.safe(user, fInsert)
   }
 
   override def update(user: User): Future[User] = {
     val selector = Json.obj("_id" -> JsString(user.id))
-    val update = Json.toJson(user).as[JsObject]
+    val update = User.jsonFormat.writes(user)
     val fUpdate = collection.update(selector, update)
     MongoSafeUtils.safe(user, fUpdate)
   }

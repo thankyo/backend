@@ -2,13 +2,16 @@ package com.clemble.loveit.auth.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.{LogInRequest, RegisterRequest}
+import com.clemble.loveit.common.error.FieldValidationError
+import com.clemble.loveit.common.model.Email
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
-import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasherRegistry, PasswordInfo}
+import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
+import com.mohiva.play.silhouette.impl.exceptions.InvalidPasswordException
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, CredentialsProvider, SocialProvider, SocialProviderRegistry}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,28 +37,39 @@ case class AuthService @Inject()(
                                   implicit ec: ExecutionContext
                                 ) {
 
-  def login(credentials: Credentials): Future[AuthServiceResult] = {
-    credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-      userService.retrieve(loginInfo).map {
-        case Some(user) =>
-          UserLoggedIn(user, loginInfo)
-        case None =>
-          throw new IllegalArgumentException("Couldn't find user")
-      }
+  private def checkUserExists(email: Email): Future[Boolean] = {
+    userService.findByEmail(email).flatMap {
+      case Some(user) =>
+        Future.failed(FieldValidationError("email", s"registered through social ${user.profiles.map(_.providerID)}"))
+      case None =>
+        Future.successful(false)
     }
+  }
+
+  def login(logIn: LogInRequest): Future[AuthServiceResult] = {
+    credentialsProvider.authenticate(logIn.toCredentials()).flatMap { loginInfo =>
+      userService.retrieve(loginInfo).flatMap {
+        case Some(user) =>
+          Future.successful(UserLoggedIn(user, loginInfo))
+        case None =>
+          checkUserExists(logIn.email).
+            map(_ => throw FieldValidationError("email", "Email or Password is wrong"))
+      }
+    } recoverWith( {
+      case t: Throwable if (t.isInstanceOf[InvalidPasswordException]) =>
+        Future.failed(FieldValidationError("email", "Email or Password does not match"))
+    })
   }
 
   def register(register: RegisterRequest): Future[AuthServiceResult] = {
     val loginInfo = LoginInfo(CredentialsProvider.ID, register.email)
     authInfoRepository.find[PasswordInfo](loginInfo).flatMap {
       case Some(_) =>
-        login(register.toCredentials()).
-          recoverWith({ case _ => Future.failed(new IllegalArgumentException("Email already signedUp with a different password")) })
+        login(register.toLogIn()).
+          recoverWith({ case _ => Future.failed(FieldValidationError("email", "already used")) })
       case None =>
-        userService.findByEmail(register.email).flatMap {
-          case Some(user) =>
-            Future.failed(new IllegalArgumentException(s"Email registered through social ${user.profiles.map(_.providerID)}"))
-          case None =>
+        checkUserExists(register.email).
+          flatMap(_ => {
             val authInfo = passwordHasherRegistry.current.hash(register.password)
             val user = register.toUser()
             for {
@@ -65,7 +79,7 @@ case class AuthService @Inject()(
             } yield {
               UserRegister(user, loginInfo)
             }
-        }
+          })
     }
   }
 

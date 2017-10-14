@@ -168,7 +168,9 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
    * @return The avatar service implementation.
    */
   @Provides
-  def provideAvatarService(httpLayer: HTTPLayer): AvatarService = new GravatarService(httpLayer)
+  def provideAvatarService(httpLayer: HTTPLayer): AvatarService = {
+    new GravatarService(httpLayer, GravatarServiceSettings(true, Map("s" -> "200", "d" -> "identicon")))
+  }
 
   /**
    * Provides the password hasher registry.

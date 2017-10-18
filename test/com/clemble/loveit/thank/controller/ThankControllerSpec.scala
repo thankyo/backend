@@ -3,7 +3,6 @@ package com.clemble.loveit.thank.controller
 import com.clemble.loveit.common.model.HttpResource
 import com.clemble.loveit.payment.controller.PaymentControllerTestExecutor
 import com.clemble.loveit.user.model.ResourceSpec
-import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import play.api.test.FakeRequest
@@ -16,7 +15,7 @@ class ThankControllerSpec extends PaymentControllerTestExecutor {
   "UPDATE" should {
 
     "support different format types for FULL" in {
-      val masterUrl = s"${randomNumeric(20)}.com/${randomNumeric(10)}/${randomNumeric(10)}"
+      val masterUrl = s"${someRandom[Long]}.com/${someRandom[Long]}/${someRandom[Long]}"
 
       val giver = createUser()
       val owner = createUser()
@@ -38,7 +37,7 @@ class ThankControllerSpec extends PaymentControllerTestExecutor {
     }
 
     "create transaction" in {
-      val masterUrl = s"${randomNumeric(10)}.com/${randomNumeric(10)}/${randomNumeric(10)}"
+      val masterUrl = s"${someRandom[Long]}.com/${someRandom[Long]}/${someRandom[Long]}"
 
       val giver = createUser()
       val owner = createUser()

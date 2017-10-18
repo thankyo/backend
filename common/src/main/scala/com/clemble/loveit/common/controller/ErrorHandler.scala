@@ -24,9 +24,9 @@ class ErrorHandler @Inject() (
     exception match {
       case fv: FieldValidationError =>
         Future.successful(BadRequest(fv))
-      case t: Throwable if (t.isInstanceOf[InvalidPasswordException]) =>
+      case _: InvalidPasswordException =>
         Future.successful(BadRequest(FieldValidationError("email", "Email or Password does not match")))
-      case t: Throwable if (t.isInstanceOf[IdentityNotFoundException]) =>
+      case _: IdentityNotFoundException =>
         Future.successful(BadRequest(FieldValidationError("email", "This email was not registered")))
       case exc =>
         super.onServerError(request, exc)

@@ -2,10 +2,7 @@ package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.HttpResource
-import org.apache.commons.lang3.RandomStringUtils
-import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
-import org.specs2.runner.JUnitRunner
 
 class MetaTagReaderSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
@@ -19,7 +16,7 @@ class MetaTagReaderSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
   }
 
   "IGNORE broken url" in {
-    val brokenRes = HttpResource(s"http://${RandomStringUtils.randomAlphabetic(10)}.com/")
+    val brokenRes = someRandom[HttpResource]
     await(tagReader.read(brokenRes)) shouldEqual None
   }
 

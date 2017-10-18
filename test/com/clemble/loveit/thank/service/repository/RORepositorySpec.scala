@@ -6,7 +6,6 @@ import com.clemble.loveit.common.util.IDGenerator
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
-import org.apache.commons.lang3.RandomStringUtils._
 
 @RunWith(classOf[JUnitRunner])
 class RORepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
@@ -86,11 +85,10 @@ class RORepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
     "find parent owner" in {
       val owner = createUser()
 
-      val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(4)}/"
-      val parentRes = HttpResource(parentUri)
+      val parentRes = someRandom[HttpResource]
       assignOwnership(owner, parentRes) shouldEqual true
 
-      val childRes = HttpResource(s"${parentUri}/${randomNumeric(10)}")
+      val childRes = HttpResource(s"${parentRes.uri}/${someRandom[Long]}")
       findOwner(childRes) shouldEqual Some(owner)
     }
 

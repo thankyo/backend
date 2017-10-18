@@ -8,7 +8,6 @@ import com.clemble.loveit.thank.service.ThankService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
-import org.apache.commons.lang3.RandomStringUtils._
 
 import scala.concurrent.Future
 
@@ -136,9 +135,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val A = IDGenerator.generate()
       val B = IDGenerator.generate()
 
-      val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(2)}"
-      val parent = HttpResource(parentUri)
-      val child = HttpResource(s"${parentUri}/${randomNumeric(3)}")
+      val parent = someRandom[HttpResource]
+      val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
       await(repo.save(Thank(parent, A))) shouldEqual true
       await(repo.save(Thank(child, A))) shouldEqual true
@@ -153,9 +151,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val A = IDGenerator.generate()
       val B = IDGenerator.generate()
 
-      val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(2)}"
-      val parent = HttpResource(parentUri)
-      val difParent = HttpResource(s"${parentUri}${randomNumeric(3)}")
+      val parent = someRandom[HttpResource]
+      val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
 
       await(repo.save(Thank(parent, A))) shouldEqual true
       await(repo.save(Thank(difParent, A))) shouldEqual true
@@ -170,9 +167,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val original = IDGenerator.generate()
       val B = IDGenerator.generate()
 
-      val parentUri = s"${randomNumeric(10)}.com/${randomNumeric(2)}"
-      val parent = HttpResource(parentUri)
-      val child = HttpResource(s"${parentUri}/${randomNumeric(3)}")
+      val parent = someRandom[HttpResource]
+      val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
       await(repo.save(Thank(parent, original))) shouldEqual true
       await(repo.save(Thank(child, original))) shouldEqual true

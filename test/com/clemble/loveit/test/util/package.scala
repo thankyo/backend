@@ -24,6 +24,9 @@ package object util {
   implicit val resourceGenerator: Generator[Resource] = () => {
     HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
   }
+  implicit val httpResourceGenerator: Generator[HttpResource] = () => {
+    HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
+  }
   implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = () => {
     CommonSocialProfile(
       loginInfo = LoginInfo("test", RandomStringUtils.random(10)),

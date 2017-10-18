@@ -30,12 +30,12 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
       val profile = someRandom[RegisterRequest]
 
       createUser(profile)
-      createUser(profile) must throwA[Exception]()
+      createUser(profile.copy(password = someRandom[String])) must throwA[Exception]()
     }
 
     "sets a userId as a cookie" in {
       val registerReq = Json.toJson(someRandom[RegisterRequest])
-      val req = FakeRequest(POST, "/api/v1/auth/signUp").withJsonBody(registerReq)
+      val req = FakeRequest(POST, "/api/v1/auth/register").withJsonBody(registerReq)
       val res = await(route(application, req).get)
 
       ControllerSpec.setUser(res)

@@ -3,7 +3,6 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.service.repository.ThankRepository
-import org.apache.commons.lang3.RandomStringUtils._
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -16,7 +15,7 @@ class UserSupportedProjectsServiceSpec(implicit val ee: ExecutionEnv) extends Pa
   val supportedProjectService = dependency[UserSupportedProjectsService]
 
   def createScene():(Resource, UserID, UserID) = {
-    val url = HttpResource(s"example.com/some/${randomNumeric(10)}")
+    val url = HttpResource(s"example.com/some/${someRandom[Long]}")
     // TODO flow must be changed here to use ResourceOwnersip verification
     val owner = createUser()
     await(roService.assignOwnership(owner, url))

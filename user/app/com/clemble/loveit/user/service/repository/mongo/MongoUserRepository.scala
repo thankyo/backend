@@ -86,12 +86,13 @@ object MongoUserRepository {
       Index(
         key = Seq("profiles.providerID" -> IndexType.Ascending, "profiles.providerKey" -> IndexType.Ascending),
         name = Some("user_profiles"),
-        unique = true
+        unique = true,
+        sparse = true
       ),
       Index(
         key = Seq("email" -> IndexType.Ascending),
         name = Some("user_profiles"),
-        unique = true
+        unique = true,
       )
     )
   }

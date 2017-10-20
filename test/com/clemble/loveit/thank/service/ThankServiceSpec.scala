@@ -13,7 +13,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
 
   val thankService = dependency[ThankService]
   val thankRepo = dependency[ThankRepository]
-  val supportedProjectService = dependency[UserSupportedProjectsService]
+  val supportedProjectService = dependency[SupportedProjectService]
 
   def createScene():(Resource, UserID, UserID) = {
     val url = HttpResource(s"example.com/some/${someRandom[Long]}")

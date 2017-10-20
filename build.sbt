@@ -1,5 +1,5 @@
 import play.sbt.routes.RoutesKeys
-import sbt.Keys.libraryDependencies
+import sbt.Keys.{libraryDependencies, resolvers}
 
 import scala.io.Source
 
@@ -13,9 +13,6 @@ scalacOptions ++= Seq("-unchecked", "-deprecation")
 val reactiveMongoVer = "0.12.6"
 val silhouetteVersion = "5.0.1"
 
-resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
-resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
-
 val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.12.3"
 )
@@ -23,6 +20,9 @@ val commonSettings: Seq[Setting[_]] = Seq(
 
 lazy val common = (project in file("./common")).
   settings(commonSettings).
+  settings(
+    resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
+  ).
   settings(
     libraryDependencies ++= Seq(
       "com.mohiva" %% "play-silhouette" % "5.0.1" excludeAll (
@@ -44,6 +44,7 @@ lazy val auth = (project in file("./auth")).
   enablePlugins(PlayScala).
   dependsOn(common).
   settings(commonSettings).
+
   settings(
     libraryDependencies ++= Seq(
       ws,

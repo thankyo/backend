@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.service.UserSupportedProjectsService
+import com.clemble.loveit.thank.service.SupportedProjectService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -13,11 +13,11 @@ import scala.concurrent.ExecutionContext
 import com.clemble.loveit.common.controller.ControllerUtils._
 
 @Singleton
-class UserSupportedProjectsController @Inject()(
-                                                supportedProjectsService: UserSupportedProjectsService,
-                                                silhouette: Silhouette[AuthEnv],
-                                                components: ControllerComponents,
-                                                implicit val ec: ExecutionContext
+class SupportedProjectController @Inject()(
+                                            supportedProjectsService: SupportedProjectService,
+                                            silhouette: Silhouette[AuthEnv],
+                                            components: ControllerComponents,
+                                            implicit val ec: ExecutionContext
                                               ) extends AbstractController(components) {
 
   def getSupported(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {

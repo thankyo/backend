@@ -8,11 +8,11 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class UserSupportedProjectsServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
+class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
   val thankService = dependency[ThankService]
   val thankRepo = dependency[ThankRepository]
-  val supportedProjectService = dependency[UserSupportedProjectsService]
+  val supportedProjectService = dependency[SupportedProjectService]
 
   def createScene():(Resource, UserID, UserID) = {
     val url = HttpResource(s"example.com/some/${someRandom[Long]}")

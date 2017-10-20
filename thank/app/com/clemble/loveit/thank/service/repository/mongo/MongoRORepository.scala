@@ -61,7 +61,7 @@ case class MongoRORepository @Inject()(@Named("userResource") collection: JSONCo
       recoverWith[Boolean]({
         case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
           for {
-            cleaned <- cleanPreviousOwner(resource)
+            cleaned <- cleanPreviousOwner(resource).recover({ case _ => throw new IllegalArgumentException("Can't remove previous owner")})
             retry <- doAssignOwnership() if (cleaned)
           } yield {
             retry

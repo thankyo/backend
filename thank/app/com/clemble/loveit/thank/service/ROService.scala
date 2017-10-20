@@ -33,9 +33,12 @@ case class SimpleResourceOwnershipService @Inject() (userRepo: RORepository, tha
       if (ownerOpt.exists(_ != user))
         throw UserException.resourceAlreadyOwned(ownerOpt.get)
       for {
-        updThanks <- thankRepo.updateOwner(user, res) if(updThanks)
-        updRes <- userRepo.assignOwnership(user, res) if(updRes)
+        updThanks <- thankRepo.updateOwner(user, res)
+        continue = if (updThanks) true else throw new IllegalArgumentException("Can't update owner for Thank")
+        updRes <- userRepo.assignOwnership(user, res) if(continue)
       } yield {
+        if (!updRes)
+          throw new IllegalArgumentException("Can't assign ownership")
         res
       }
     }

@@ -9,10 +9,9 @@ import com.clemble.loveit.thank.service.{ROService, ThankService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Random
+import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.duration._
 
 case class DevSignUpEventListener(resources: List[Resource], thankService: ThankService) extends Actor {
 
@@ -27,9 +26,9 @@ case class DevSignUpEventListener(resources: List[Resource], thankService: Thank
   }
 
   override def receive: Receive = {
-    case SignUpEvent(user : User, _) =>
+    case SignUpEvent(user: User, _) =>
       runThanks(user.id)
-    case LoginEvent(user : User, _) =>
+    case LoginEvent(user: User, _) =>
       runThanks(user.id)
   }
 }
@@ -50,14 +49,14 @@ case class SimpleDevUserDataService @Inject()(
                                                actorSystem: ActorSystem,
                                                env: Environment[AuthEnv],
                                                implicit val ec: ExecutionContext
-) extends DevUserDataService {
+                                             ) extends DevUserDataService {
 
   val resMap = Map(
     User(
       id = IDGenerator.generate(),
       firstName = Some("Gavin"),
       lastName = Some("Than"),
-      email = s"${Random.nextString(10)}@${Random.nextString(3)}.${Random.nextString(2)}",
+      email = "gavin.than@example.com",
       profiles = Set(LoginInfo("patreon", "zenpencil")),
       avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
       link = Some("https://zenpencils.com")
@@ -68,14 +67,20 @@ case class SimpleDevUserDataService @Inject()(
 
 
   override def enable(resMap: Map[User, Resource]): Future[Boolean] = {
-    for {
+    (for {
       creatorsToRes <- ensureCreators(resMap)
       resources <- assignOwnership(creatorsToRes)
     } yield {
       val subscriber = actorSystem.actorOf(Props(DevSignUpEventListener(resources, thankService)))
       env.eventBus.subscribe(subscriber, classOf[SignUpEvent[User]])
       env.eventBus.subscribe(subscriber, classOf[LoginEvent[User]])
-    }
+    }).recover({
+      case t: Throwable => {
+        print(t)
+        System.exit(1)
+        false
+      }
+    })
   }
 
   private def ensureCreators(resMap: Map[User, Resource]): Future[Map[User, Resource]] = {
@@ -86,7 +91,12 @@ case class SimpleDevUserDataService @Inject()(
         findByEmail(creator.email).
         flatMap({
           case Some(user) => Future.successful(user -> resources)
-          case None => userService.save(creator).map(creator => creator -> resources)
+          case None => {
+            userService.save(creator).map(creator => {
+              env.eventBus.publish(SignUpEvent(creator, null))
+              creator -> resources
+            })
+          }
         })
     }
     Future.sequence(fCreators).map(_.toMap)
@@ -96,8 +106,17 @@ case class SimpleDevUserDataService @Inject()(
     val resources = for {
       (creator, resource) <- creatorToRes
     } yield {
-      roService.assignOwnership(creator.id, resource).
-        map(res => (1 to 200).map(i => HttpResource(s"${res.uri}/comics/${i}")))
+      val ownershipTask = roService.
+        assignOwnership(creator.id, resource).
+        recoverWith({
+          case _: Throwable =>
+            Thread.sleep(10000)
+            roService.assignOwnership(creator.id, resource)
+          }
+        )
+      ownershipTask.
+        map(res => (1 to 200).
+        map(i => HttpResource(s"${res.uri}/comics/${i}")))
     }
     Future.sequence(resources).map(_.flatten.toList)
   }

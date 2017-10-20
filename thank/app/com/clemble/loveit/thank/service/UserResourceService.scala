@@ -23,14 +23,18 @@ trait UserResourceService {
 case class UserResourceSignUpListener @Inject()(uPayS: UserResourceService) extends Actor {
 
   override def receive: Receive = {
-    case SignUpEvent(user : User, _) =>
+    case SignUpEvent(user: User, _) =>
       uPayS.createAndSave(user)
   }
 
 }
 
 @Singleton
-class SimpleUserResourceService @Inject()(actorSystem: ActorSystem, env: Environment[AuthEnv], repo: UserResourceRepository) extends UserResourceService {
+class SimpleUserResourceService @Inject()(
+                                           actorSystem: ActorSystem,
+                                           env: Environment[AuthEnv],
+                                           repo: UserResourceRepository
+                                         ) extends UserResourceService {
 
   {
     val subscriber = actorSystem.actorOf(Props(UserResourceSignUpListener(this)))

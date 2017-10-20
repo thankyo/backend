@@ -2,6 +2,7 @@ package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
+import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -44,7 +45,7 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
       thank(giver, url)
 
       getSupported(owner) shouldEqual Nil
-      eventually(getSupported(giver) shouldEqual List(getUser(owner).get))
+      eventually(getSupported(giver) shouldEqual List(SupportedProject from getUser(owner).get))
     }
 
   }

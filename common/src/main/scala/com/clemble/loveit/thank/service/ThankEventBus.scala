@@ -5,7 +5,7 @@ import javax.inject.Singleton
 import akka.actor.ActorRef
 import akka.event.{ActorEventBus, SubchannelClassification}
 import akka.util.Subclassification
-import com.clemble.loveit.common.model.ThankTransaction
+import com.clemble.loveit.common.model.ThankEvent
 
 @Singleton
 class ThankEventBus extends ActorEventBus with SubchannelClassification {
@@ -16,15 +16,15 @@ class ThankEventBus extends ActorEventBus with SubchannelClassification {
     def isSubclass(x: Classifier, y: Classifier): Boolean = y.isAssignableFrom(x)
   }
 
-  override def classify(event: ThankTransaction): Classifier = {
+  override def classify(event: ThankEvent): Classifier = {
     event.getClass
   }
 
-  override def publish(event: ThankTransaction, subscriber: ActorRef): Unit = {
+  override def publish(event: ThankEvent, subscriber: ActorRef): Unit = {
     subscriber ! event
   }
 
-  override type Event = ThankTransaction
-  override type Classifier = Class[_ <: ThankTransaction]
+  override type Event = ThankEvent
+  override type Classifier = Class[_ <: ThankEvent]
 
 }

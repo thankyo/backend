@@ -1,6 +1,6 @@
 # Payment related ENDPOINTS
 
-GET         /:user/pending                   @com.clemble.loveit.payment.controller.ThankTransactionController.list(user)
+GET         /:user/pending                   @com.clemble.loveit.payment.controller.PendingTransactionController.list(user)
 GET         /my/charge                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 
 GET         /:user/balance                   @com.clemble.loveit.payment.controller.UserBalanceController.getBalance(user)

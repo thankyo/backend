@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import akka.actor.{Actor, ActorSystem, Props}
 import akka.stream.scaladsl.Source
-import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
+import com.clemble.loveit.common.model.{Resource, ThankEvent, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
 import com.clemble.loveit.payment.service.repository.{PendingTransactionRepository, UserBalanceRepository}
 import com.clemble.loveit.thank.service.ThankEventBus
@@ -23,7 +23,7 @@ trait PendingTransactionService {
 
 case class PaymentThankListener(service: PendingTransactionService) extends Actor {
   override def receive = {
-    case ThankTransaction(giver, owner, res, _) =>
+    case ThankEvent(giver, owner, res, _) =>
       service.create(giver, owner, res)
   }
 }
@@ -39,7 +39,7 @@ case class SimplePendingTransactionService @Inject()(
 
   {
     val subscriber = actorSystem.actorOf(Props(PaymentThankListener(this)))
-    thankEventBus.subscribe(subscriber, classOf[ThankTransaction])
+    thankEventBus.subscribe(subscriber, classOf[ThankEvent])
   }
 
   override def list(user: UserID): Source[PendingTransaction, _] = {

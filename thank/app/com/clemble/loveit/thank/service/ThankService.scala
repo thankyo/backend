@@ -1,8 +1,8 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
+import com.clemble.loveit.common.model.{Resource, ThankEvent, UserID}
 import com.clemble.loveit.thank.model.Thank
-import com.clemble.loveit.thank.service.repository.{ThankRepository, UserStatRepo}
+import com.clemble.loveit.thank.service.repository.{ThankRepository}
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.ResourceException
@@ -63,7 +63,7 @@ case class SimpleThankService @Inject()(
       increased <- thankRepo.increase(giver, res)
     } yield {
       if (increased) {
-        thankEventBus.publish(ThankTransaction(giver, thank.owner, res))
+        thankEventBus.publish(ThankEvent(giver, thank.owner, res))
       }
       thank
     }

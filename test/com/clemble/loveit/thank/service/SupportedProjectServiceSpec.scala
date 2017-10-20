@@ -16,7 +16,7 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
 
   def createScene():(Resource, UserID, UserID) = {
     val url = HttpResource(s"example.com/some/${someRandom[Long]}")
-    // TODO flow must be changed here to use ResourceOwnersip verification
+    // TODO flow must be changed here to use ResourceOwnership verification
     val owner = createUser()
     await(roService.assignOwnership(owner, url))
     await(thankRepo.updateOwner(owner, url))
@@ -30,7 +30,7 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
   }
 
   def getSupported(user: UserID) = {
-    await(supportedProjectService.getSupported(user));
+    await(supportedProjectService.getSupported(user))
   }
 
   "Supported projects " should {

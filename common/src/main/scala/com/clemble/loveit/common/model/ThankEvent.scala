@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import com.clemble.loveit.user.model.UserAware
 
-case class ThankTransaction(
+case class ThankEvent(
                              user: UserID,
                              destination: UserID,
                              resource: Resource,

@@ -1,13 +1,13 @@
 package com.clemble.loveit.payment.service.repository
 
 import akka.stream.scaladsl.Source
-import com.clemble.loveit.common.model.{ThankTransaction, UserID}
+import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
 
 import scala.concurrent.Future
 
 /**
-  * [[ThankTransaction]] repository
+  * [[PendingTransaction]] repository
   */
 trait PendingTransactionRepository {
 

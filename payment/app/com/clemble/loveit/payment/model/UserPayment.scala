@@ -1,6 +1,6 @@
 package com.clemble.loveit.payment.model
 
-import com.clemble.loveit.common.model.{Amount, Money, ThankTransaction, UserID}
+import com.clemble.loveit.common.model.{Amount, Money, UserID}
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.user.model.{User, UserAware}
 import play.api.libs.json._

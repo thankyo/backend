@@ -72,8 +72,8 @@ package object util {
   implicit val payoutAccountGenerator: Generator[PayoutAccount] = () => {
     PayoutAccount(randomNumeric(10), randomNumeric(4), randomNumeric(4))
   }
-  implicit val thankTransactionGenerator: Generator[ThankTransaction] = () => {
-    ThankTransaction(someRandom[UserID], someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
+  implicit val thankTransactionGenerator: Generator[ThankEvent] = () => {
+    ThankEvent(someRandom[UserID], someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
   }
   implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
     PendingTransaction(someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])

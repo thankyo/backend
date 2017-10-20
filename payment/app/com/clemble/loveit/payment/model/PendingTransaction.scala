@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.model
 
 import java.time.LocalDateTime
 
-import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
+import com.clemble.loveit.common.model.{Resource, ThankEvent, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
 import play.api.http.Writeable
 import play.api.libs.json.Json
@@ -15,7 +15,7 @@ case class PendingTransaction(
 
 object PendingTransaction {
 
-  def from(thank: ThankTransaction): PendingTransaction = {
+  def from(thank: ThankEvent): PendingTransaction = {
     PendingTransaction(thank.destination, thank.resource, thank.created)
   }
 

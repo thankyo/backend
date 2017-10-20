@@ -16,7 +16,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-case class ThankTransactionController @Inject()(
+case class PendingTransactionController @Inject()(
                                                  pendindTransactionService: PendingTransactionService,
                                                  silhouette: Silhouette[AuthEnv],
                                                  components: ControllerComponents,

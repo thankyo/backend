@@ -39,7 +39,9 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
   @Provides
   @Singleton
   def mailgun(): Mailgun = {
-    new Mailgun(conf.get[String]("EMAIL_MAILGUN_DOMAIN"), conf.get[String]("EMAIL_MAILGUN_API_KEY"))
+    val apiKey = conf.get[String]("email.mailgun.api.key")
+    val domain = conf.get[String]("email.mailgun.domain")
+    new Mailgun(domain, apiKey)
   }
 
 }

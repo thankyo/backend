@@ -5,22 +5,23 @@ import javax.inject.{Inject, Singleton}
 import akka.actor.{Actor, ActorSystem, Props}
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
-import com.clemble.loveit.payment.service.repository.{ThankTransactionRepository, UserBalanceRepository}
-import com.clemble.loveit.thank.service.{ThankEventBus}
+import com.clemble.loveit.payment.model.PendingTransaction
+import com.clemble.loveit.payment.service.repository.{PendingTransactionRepository, UserBalanceRepository}
+import com.clemble.loveit.thank.service.ThankEventBus
 import com.mohiva.play.silhouette.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ThankTransactionService {
+trait PendingTransactionService {
 
-  def list(user: UserID): Source[ThankTransaction, _]
+  def list(user: UserID): Source[PendingTransaction, _]
 
-  def create(giver: UserID, owner: UserID, url: Resource): Future[ThankTransaction]
+  def create(giver: UserID, owner: UserID, url: Resource): Future[PendingTransaction]
 
-  def removeAll(thank: Seq[ThankTransaction]): Future[Boolean]
+  def removeAll(user: UserID, thank: Seq[PendingTransaction]): Future[Boolean]
 }
 
-case class PaymentThankListener(service: ThankTransactionService) extends Actor {
+case class PaymentThankListener(service: PendingTransactionService) extends Actor {
   override def receive = {
     case ThankTransaction(giver, owner, res, _) =>
       service.create(giver, owner, res)
@@ -28,27 +29,27 @@ case class PaymentThankListener(service: ThankTransactionService) extends Actor 
 }
 
 @Singleton
-case class SimpleThankTransactionService @Inject()(
+case class SimplePendingTransactionService @Inject()(
                                                     actorSystem: ActorSystem,
                                                     thankEventBus: ThankEventBus,
                                                     balanceRepo: UserBalanceRepository,
-                                                    repository: ThankTransactionRepository,
+                                                    repository: PendingTransactionRepository,
                                                     implicit val ec: ExecutionContext
-                                                  ) extends ThankTransactionService with Logger {
+                                                  ) extends PendingTransactionService with Logger {
 
   {
     val subscriber = actorSystem.actorOf(Props(PaymentThankListener(this)))
     thankEventBus.subscribe(subscriber, classOf[ThankTransaction])
   }
 
-  override def list(user: UserID): Source[ThankTransaction, _] = {
+  override def list(user: UserID): Source[PendingTransaction, _] = {
     repository.findByUser(user)
   }
 
-  override def create(giver: UserID, owner: UserID, url: Resource): Future[ThankTransaction] = {
-    val transaction = ThankTransaction(giver, owner, url)
+  override def create(giver: UserID, owner: UserID, url: Resource): Future[PendingTransaction] = {
+    val transaction = PendingTransaction(owner, url)
     for {
-      savedInRepo <- repository.save(transaction)
+      savedInRepo <- repository.save(giver, transaction)
       updatedOwner <- balanceRepo.updateBalance(owner, 1) if (savedInRepo)
       updatedGiver <- balanceRepo.updateBalance(giver, -1) if (savedInRepo)
     } yield {
@@ -58,8 +59,8 @@ case class SimpleThankTransactionService @Inject()(
     }
   }
 
-  override def removeAll(thanks: Seq[ThankTransaction]): Future[Boolean] = {
-    repository.removeAll(thanks)
+  override def removeAll(giver: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
+    repository.removeAll(giver, transactions)
   }
 
 }

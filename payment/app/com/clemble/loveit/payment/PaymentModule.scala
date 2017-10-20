@@ -62,8 +62,8 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     val currencyToAmount: Map[Currency, Amount] = Map[Currency, Amount](LoveItCurrency.getInstance("USD") -> 10L)
     bind[ExchangeService].toInstance(InMemoryExchangeService(currencyToAmount))
 
-    bind(classOf[ThankTransactionService]).to(classOf[SimpleThankTransactionService]).asEagerSingleton()
-    bind(classOf[ThankTransactionRepository]).to(classOf[MongoThankTransactionRepository])
+    bind(classOf[PendingTransactionService]).to(classOf[SimplePendingTransactionService]).asEagerSingleton()
+    bind(classOf[PendingTransactionRepository]).to(classOf[MongoPendingTransactionRepository])
   }
 
   @Provides

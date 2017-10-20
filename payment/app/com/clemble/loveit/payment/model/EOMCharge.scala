@@ -31,7 +31,7 @@ case class EOMCharge(
                       status: ChargeStatus,
                       amount: Money,
                       details: Option[JsValue],
-                      transactions: List[ThankTransaction],
+                      transactions: List[PendingTransaction],
                       created: LocalDateTime = LocalDateTime.now()
 ) extends Transaction with EOMAware
 

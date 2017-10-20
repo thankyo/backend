@@ -10,9 +10,9 @@ import org.specs2.runner.JUnitRunner
 import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
-class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTestExecutor {
+class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
-  val thankTransService = dependency[ThankTransactionService]
+  val thankTransService = dependency[PendingTransactionService]
   val userRepo = dependency[UserRepository]
   val balanceRepo = dependency[UserBalanceRepository]
 
@@ -66,13 +66,11 @@ class ThankTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentServ
 
       val transactionA = thank(giver, "A", someRandom[Resource])
       val transactionB = thank(giver, "B", someRandom[Resource])
-      await(thankTransService.removeAll(Seq(transactionB)))
+      await(thankTransService.removeAll(giver, Seq(transactionB)))
 
       val payments = pendingThanks(giver)
 
       payments must containAllOf(Seq(transactionA))
-
-
     }
 
   }

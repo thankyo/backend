@@ -17,12 +17,10 @@ val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.12.3"
 )
 
+resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
 
 lazy val common = (project in file("./common")).
   settings(commonSettings).
-  settings(
-    resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
-  ).
   settings(
     libraryDependencies ++= Seq(
       "com.mohiva" %% "play-silhouette" % "5.0.1" excludeAll (

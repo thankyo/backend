@@ -34,18 +34,18 @@ trait EOMPaymentService {
 
 @Singleton
 case class SimpleEOMPaymentService @Inject()(
-                                       statusRepo: EOMStatusRepository,
-                                       chargeRepo: EOMChargeRepository,
-                                       payoutRepo: EOMPayoutRepository,
-                                       chargeService: EOMChargeService,
-                                       payoutService: EOMPayoutService,
-                                       chargeAccService: ChargeAccountService,
-                                       payoutAccService: PayoutAccountService,
-                                       thankService: ThankTransactionService,
-                                       paymentRepo: PaymentRepository,
-                                       exchangeService: ExchangeService,
-                                       implicit val ec: ExecutionContext,
-                                       implicit val m: Materializer
+                                              statusRepo: EOMStatusRepository,
+                                              chargeRepo: EOMChargeRepository,
+                                              payoutRepo: EOMPayoutRepository,
+                                              chargeService: EOMChargeService,
+                                              payoutService: EOMPayoutService,
+                                              chargeAccService: ChargeAccountService,
+                                              payoutAccService: PayoutAccountService,
+                                              thankService: PendingTransactionService,
+                                              paymentRepo: PaymentRepository,
+                                              exchangeService: ExchangeService,
+                                              implicit val ec: ExecutionContext,
+                                              implicit val m: Materializer
                                      ) extends EOMPaymentService {
 
   override def getStatus(yom: YearMonth): Future[Option[EOMStatus]] = {
@@ -121,7 +121,7 @@ case class SimpleEOMPaymentService @Inject()(
         (status, details) <- chargeService.process(charge)
         _ <- chargeRepo.updatePending(charge.user, charge.yom, status, details)
       } yield {
-        if (status == ChargeStatus.Success) thankService.removeAll(charge.transactions)
+        if (status == ChargeStatus.Success) thankService.removeAll(charge.user, charge.transactions)
         status
       }
     }

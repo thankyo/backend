@@ -50,11 +50,11 @@ package object util {
       ChargeStatus.Pending,
       someRandom[Money],
       None,
-      List(someRandom[ThankTransaction])
+      List(someRandom[PendingTransaction])
     )
   }
   implicit val repositoryExceptionGenerator: Generator[RepositoryException] = () => {
-    new RepositoryException(RandomStringUtils.randomNumeric(10), RandomStringUtils.randomNumeric(30))
+    new RepositoryException(Random.nextString(10), Random.nextString(10))
   }
   implicit val thankExceptionGenerator: Generator[ThankException] = () => {
     if (Random.nextBoolean())
@@ -74,6 +74,9 @@ package object util {
   }
   implicit val thankTransactionGenerator: Generator[ThankTransaction] = () => {
     ThankTransaction(someRandom[UserID], someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
+  }
+  implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
+    PendingTransaction(someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
   }
   implicit val verificationGenerator: Generator[ROVerification[Resource]] = () => {
     val resource = someRandom[Resource]

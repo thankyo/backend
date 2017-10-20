@@ -7,6 +7,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, ThankTransaction, UserID}
+import com.clemble.loveit.payment.model.PendingTransaction
 import com.clemble.loveit.thank.service.ROService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
@@ -25,7 +26,6 @@ trait ControllerSpec extends FunctionalThankSpecification {
 
   implicit val ec = dependency[ExecutionContext]
 
-  val userRep = dependency[UserRepository]
   val ownershipService = dependency[ROService]
 
   implicit class ByteSourceReader(source: Source[ByteString, _]) {
@@ -80,7 +80,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
     userOpt.get
   }
 
-  def getMyPayments(user: String): Seq[ThankTransaction] = {
+  def getMyPending(user: String): Seq[PendingTransaction] = {
     val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/pending"))
     val fRes = route(application, req).get
 
@@ -88,7 +88,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
     val payments = res.body.consumeData(materializer).
       map(byteStream => byteStream.utf8String).
       map(str => {
-        Json.parse(str).as[List[ThankTransaction]]
+        Json.parse(str).as[List[PendingTransaction]]
       })
 
     await(payments)

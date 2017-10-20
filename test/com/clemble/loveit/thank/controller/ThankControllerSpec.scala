@@ -46,8 +46,8 @@ class ThankControllerSpec extends PaymentControllerTestExecutor {
       val req = sign(giver, FakeRequest(PUT, s"/api/v1/thank/http/${masterUrl}"))
       await(route(application, req).get)
 
-      val giverTransactions = getMyPayments(giver)
-      val ownerTransactions = getMyPayments(owner)
+      val giverTransactions = getMyPending(giver)
+      val ownerTransactions = getMyPending(owner)
 
       giverTransactions.size shouldEqual 1
       ownerTransactions.size shouldEqual 0

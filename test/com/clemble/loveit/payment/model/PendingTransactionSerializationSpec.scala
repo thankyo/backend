@@ -6,4 +6,4 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ThankTransactionSerializationSpec extends SerializationSpec[ThankTransaction]
+class PendingTransactionSerializationSpec extends SerializationSpec[PendingTransaction]

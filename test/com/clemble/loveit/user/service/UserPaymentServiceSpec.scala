@@ -1,7 +1,7 @@
 package com.clemble.loveit.user.service
 
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.payment.service.{PaymentServiceTestExecutor, ThankTransactionService}
+import com.clemble.loveit.payment.service.{PaymentServiceTestExecutor, PendingTransactionService}
 import com.clemble.loveit.thank.service.repository.RORepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -12,7 +12,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
 
   val service = dependency[UserService]
   val roRepo = dependency[RORepository]
-  val transactionService = dependency[ThankTransactionService]
+  val transactionService = dependency[PendingTransactionService]
 
   val giver = createUser()
 

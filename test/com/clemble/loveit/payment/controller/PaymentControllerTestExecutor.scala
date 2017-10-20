@@ -4,15 +4,15 @@ package com.clemble.loveit.payment.controller
 import com.clemble.loveit.common.ControllerSpec
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.payment.PaymentTestExecutor
-import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, EOMStatus, StripeCustomerToken}
-import com.clemble.loveit.payment.service.ThankTransactionService
+import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, PendingTransaction, StripeCustomerToken}
+import com.clemble.loveit.payment.service.PendingTransactionService
 import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 
 trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecutor with PaymentLimitExecutor {
 
-  val thankService = dependency[ThankTransactionService]
+  val thankService = dependency[PendingTransactionService]
 
   override def getBalance(user: UserID): Amount = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/balance"))
@@ -68,13 +68,13 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
     res.body.dataStream.readJson[Money].isDefined
   }
 
-  override def thank(giver: UserID, owner: UserID, resource: Resource): ThankTransaction = {
+  override def thank(giver: UserID, owner: UserID, resource: Resource): PendingTransaction = {
     await(thankService.create(giver, owner, resource))
   }
 
-  override def pendingThanks(giver: UserID): Seq[ThankTransaction] = {
+  override def pendingThanks(giver: UserID): Seq[PendingTransaction] = {
     val res = perform(giver, FakeRequest(GET, s"/api/v1/payment/my/pending"))
-    val pending = res.body.consumeData.map(str => Json.parse(str.utf8String).as[List[ThankTransaction]])
+    val pending = res.body.consumeData.map(str => Json.parse(str.utf8String).as[List[PendingTransaction]])
     await(pending)
   }
 

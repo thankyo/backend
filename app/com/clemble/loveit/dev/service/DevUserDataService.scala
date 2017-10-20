@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import akka.actor.{Actor, ActorSystem, Props}
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.common.util.AuthEnv
+import com.clemble.loveit.common.util.{AuthEnv, IDGenerator}
 import com.clemble.loveit.thank.service.{ROService, ThankService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
@@ -12,6 +12,7 @@ import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 
 case class DevSignUpEventListener(resources: List[Resource], thankService: ThankService) extends Actor {
 
@@ -35,7 +36,7 @@ case class DevSignUpEventListener(resources: List[Resource], thankService: Thank
 
 trait DevUserDataService {
 
-  def enable(resMap: Map[CommonSocialProfile, Resource]): Future[Boolean]
+  def enable(resMap: Map[User, Resource]): Future[Boolean]
 
 }
 
@@ -52,20 +53,21 @@ case class SimpleDevUserDataService @Inject()(
 ) extends DevUserDataService {
 
   val resMap = Map(
-    CommonSocialProfile(
-      loginInfo = LoginInfo("patreon", "zenpencil"),
+    User(
+      id = IDGenerator.generate(),
       firstName = Some("Gavin"),
       lastName = Some("Than"),
-      fullName = Some("Gavin Aung Than"),
-      email = None,
-      avatarURL = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg")
+      email = s"${Random.nextString(10)}@${Random.nextString(3)}.${Random.nextString(2)}",
+      profiles = Set(LoginInfo("patreon", "zenpencil")),
+      avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
+      link = Some("https://zenpencils.com")
     ) -> HttpResource("zenpencils.com")
   )
 
   enable(resMap)
 
 
-  override def enable(resMap: Map[CommonSocialProfile, Resource]): Future[Boolean] = {
+  override def enable(resMap: Map[User, Resource]): Future[Boolean] = {
     for {
       creatorsToRes <- ensureCreators(resMap)
       resources <- assignOwnership(creatorsToRes)
@@ -76,17 +78,16 @@ case class SimpleDevUserDataService @Inject()(
     }
   }
 
-  private def ensureCreators(resMap: Map[CommonSocialProfile, Resource]): Future[Map[User, Resource]] = {
+  private def ensureCreators(resMap: Map[User, Resource]): Future[Map[User, Resource]] = {
     val fCreators = for {
-      creator <- resMap.keys
+      (creator, resources) <- resMap
     } yield {
       userService.
-        createOrUpdateUser(creator).
-        map(_ match {
-          case Left(user) => user
-          case Right(user) => user
-        }).
-        map(user => user -> resMap(creator))
+        findByEmail(creator.email).
+        flatMap({
+          case Some(user) => Future.successful(user -> resources)
+          case None => userService.save(creator).map(creator => creator -> resources)
+        })
     }
     Future.sequence(fCreators).map(_.toMap)
   }

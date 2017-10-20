@@ -25,6 +25,7 @@ case class User(
                  email: Email,
                  avatar: Option[String] = None,
                  bio: Option[String] = None,
+                 link: Option[String] = None,
                  dateOfBirth: Option[LocalDateTime] = None,
                  profiles: Set[LoginInfo] = Set.empty,
                  created: LocalDateTime = LocalDateTime.now()

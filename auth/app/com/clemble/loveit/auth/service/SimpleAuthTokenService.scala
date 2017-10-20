@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.model.AuthToken
 import com.clemble.loveit.auth.service.repository.AuthTokenRepository
+import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.UserID
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,19 +31,31 @@ case class SimpleAuthTokenService @Inject()(
     * @param userID The user ID for which the token should be created.
     * @return The saved auth token.
     */
-  def create(userID: UserID) = {
+  def create(userID: UserID): Future[AuthToken] = {
     val token = AuthToken(UUID.randomUUID(), userID)
-    repo.save(token)
+    repo.
+      save(token).
+      recoverWith({
+        case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
+          for {
+            remove <- repo.removeByUser(userID) if (remove)
+            savedToken <- repo.save(token)
+          } yield {
+            savedToken
+          }
+      })
   }
 
   /**
     * Validates a token ID.
     *
-    * @param id The token ID to validate.
+    * @param token The token ID to validate.
     * @return The token if it's valid, None otherwise.
     */
-  def validate(id: UUID): Future[Option[AuthToken]] = {
-    repo.find(id)
+  def validate(token: UUID): Future[Option[AuthToken]] = {
+    val findRes = repo.find(token)
+    repo.remove(token)
+    findRes
   }
 
 }

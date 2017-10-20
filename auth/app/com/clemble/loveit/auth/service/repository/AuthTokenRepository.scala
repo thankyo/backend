@@ -3,6 +3,8 @@ package com.clemble.loveit.auth.service.repository
 import java.util.UUID
 
 import com.clemble.loveit.auth.model.AuthToken
+import com.clemble.loveit.common.model.UserID
+
 import scala.concurrent.Future
 
 /**
@@ -33,4 +35,6 @@ trait AuthTokenRepository {
    * @return A future to wait for the process to be completed.
    */
   def remove(id: UUID): Future[Boolean]
+
+  def removeByUser(user: UserID): Future[Boolean]
 }

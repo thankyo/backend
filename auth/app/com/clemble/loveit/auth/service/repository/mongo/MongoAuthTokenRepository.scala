@@ -5,14 +5,14 @@ import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.auth.model.AuthToken
 import com.clemble.loveit.auth.service.repository.AuthTokenRepository
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-
 import play.api.libs.json._
 import reactivemongo.play.json._
-
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONElement, BSONInteger}
 import reactivemongo.play.json.collection.JSONCollection
+
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -52,6 +52,11 @@ case class MongoAuthTokenRepository @Inject()(@Named("authToken") collection: JS
    */
   def remove(token: UUID): Future[Boolean] = {
     val selector = Json.obj("token" -> token)
+    MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
+  }
+
+  override def removeByUser(user: UserID) = {
+    val selector = Json.obj("user" -> user)
     MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
   }
 

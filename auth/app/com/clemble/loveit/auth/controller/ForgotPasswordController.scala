@@ -10,9 +10,9 @@ import com.clemble.loveit.auth.service.AuthTokenService
 import com.clemble.loveit.auth.views.html.emails.resetPassword
 import com.clemble.loveit.auth.views.txt.emails
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
+import org.matthicks.mailgun.{EmailAddress, Mailgun, Message}
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.JsBoolean
-import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
@@ -32,7 +32,7 @@ class ForgotPasswordController @Inject()(
                                           silhouette: Silhouette[AuthEnv],
                                           userService: UserService,
                                           authTokenService: AuthTokenService,
-                                          mailerClient: MailerClient
+                                          mailerClient: Mailgun
                                         )(
                                           implicit
                                           ex: ExecutionContext
@@ -55,15 +55,16 @@ class ForgotPasswordController @Inject()(
         user = userOpt.getOrElse({ throw new IdentityNotFoundException(s"No user with ${loginInfo.providerKey}")})
         authToken <- authTokenService.create(user.id)
       } yield {
-        val url = s"https://loveit.tips/password/${authToken.token}"
+        val url = s"https://loveit.tips/auth/reset/${authToken.token}"
         mailerClient.send(
-          Email(
+          Message.simple(
             subject = Messages("email.reset.password.subject"),
-            from = Messages("email.from"),
-            to = Seq(loginInfo.providerKey),
-            bodyText = Some(emails.resetPassword(user, url).body),
-            bodyHtml = Some(resetPassword(user, url).body)
-          ))
+            from = EmailAddress(Messages("email.from"), "Love it"),
+            to = EmailAddress(loginInfo.providerKey),
+            text = emails.resetPassword(user, url).body,
+            html = resetPassword(user, url).body
+          )
+        )
         Ok(JsBoolean(true))
       }
     }

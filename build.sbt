@@ -1,4 +1,5 @@
 import play.sbt.routes.RoutesKeys
+import sbt.Keys.libraryDependencies
 
 import scala.io.Source
 
@@ -13,13 +14,52 @@ val reactiveMongoVer = "0.12.6"
 val silhouetteVersion = "5.0.1"
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/repository/public"
+resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
 
-lazy val common = project in file("./common")
+val commonSettings: Seq[Setting[_]] = Seq(
+  scalaVersion := "2.12.3"
+)
+
+
+lazy val common = (project in file("./common")).
+  settings(commonSettings).
+  settings(
+    libraryDependencies ++= Seq(
+      "com.mohiva" %% "play-silhouette" % "5.0.1" excludeAll (
+        ExclusionRule(organization = "com.typesafe.play")
+        ),
+
+      "net.codingwell" %% "scala-guice" % "4.1.0",
+
+      "com.typesafe.play" %% "play" % "2.6.6" % "provided",
+
+      "org.reactivemongo" %% "reactivemongo" % "0.12.6",
+      "org.reactivemongo" %% "play2-reactivemongo" % "0.12.6-play26",
+      "org.reactivemongo" %% "reactivemongo-akkastream" % "0.12.6"
+    )
+  )
 
 
 lazy val auth = (project in file("./auth")).
   enablePlugins(PlayScala).
-  dependsOn(common)
+  dependsOn(common).
+  settings(commonSettings).
+  settings(
+    libraryDependencies ++= Seq(
+      ws,
+
+      "org.matthicks" %% "mailgun4s" % "1.0.6",
+
+      "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-persistence" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",
+
+      "net.codingwell" %% "scala-guice" % "4.1.0",
+      "com.iheart" %% "ficus" % "1.4.2",
+
+      "com.mohiva" %% "play-silhouette-testkit" % "5.0.1" % Test
+    )
+  )
 
 lazy val user = (project in file("./user")).
   enablePlugins(PlayScala).
@@ -43,6 +83,7 @@ lazy val root = (project in file(".")).
 libraryDependencies ++= Seq(
   guice,
   ws,
+
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
   "com.iheart" %% "ficus" % "1.4.2",

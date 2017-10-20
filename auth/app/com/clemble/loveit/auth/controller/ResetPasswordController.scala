@@ -9,8 +9,9 @@ import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import com.clemble.loveit.auth.model.requests.ResetPasswordRequest
-import com.clemble.loveit.auth.service.AuthTokenService
+import com.clemble.loveit.auth.model.requests.RestorePasswordRequest
+import com.clemble.loveit.auth.service.{AuthTokenService, UserLoggedIn}
+import com.clemble.loveit.common.error.FieldValidationError
 import play.api.i18n.I18nSupport
 import play.api.libs.json.JsBoolean
 import play.api.mvc._
@@ -28,15 +29,15 @@ import scala.concurrent.ExecutionContext
  * @param authTokenService       The auth token service implementation.
  * @param ex                     The execution context.
  */
-class ResetPasswordController @Inject() (
+class ResetPasswordController @Inject()(
                                           components: ControllerComponents,
-                                          silhouette: Silhouette[AuthEnv],
                                           userService: UserService,
                                           authInfoRepository: AuthInfoRepository,
                                           passwordHasherRegistry: PasswordHasherRegistry,
                                           authTokenService: AuthTokenService
 )(
   implicit
+  silhouette: Silhouette[AuthEnv],
   ex: ExecutionContext
 ) extends AbstractController(components) with I18nSupport {
 
@@ -46,16 +47,18 @@ class ResetPasswordController @Inject() (
    * @param token The token to identify a user.
    * @return The result to display.
    */
-  def submit(token: UUID) = silhouette.UnsecuredAction.async(parse.json[ResetPasswordRequest]) { implicit request =>
+  def submit(token: UUID) = silhouette.UnsecuredAction.async(parse.json[RestorePasswordRequest]) { implicit request =>
     val passwordInfo = passwordHasherRegistry.current.hash(request.body.password)
     for {
       authTokenOpt <- authTokenService.validate(token)
-      authToken = authTokenOpt.get
+      authToken = authTokenOpt.getOrElse({ throw FieldValidationError("password", "Token expired or already used") })
       userOpt <- userService.findById(authToken.user)
       loginInfoOpt = userOpt.flatMap(_.profiles.find(_.providerID == CredentialsProvider.ID))
       _ <- authInfoRepository.update[PasswordInfo](loginInfoOpt.get, passwordInfo)
+      authResult <- AuthUtils.authResponse(UserLoggedIn(userOpt.get, loginInfoOpt.get))
     } yield {
-      Ok(JsBoolean(true))
+      authResult
     }
   }
+
 }

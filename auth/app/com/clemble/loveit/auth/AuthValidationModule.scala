@@ -9,8 +9,9 @@ import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import net.codingwell.scalaguice.ScalaModule
+import org.matthicks.mailgun.Mailgun
 import play.api
-import play.api.{Configuration, Environment}
+import play.api.{Configuration}
 import play.modules.reactivemongo.ReactiveMongoApi
 
 import scala.concurrent.ExecutionContext
@@ -34,4 +35,11 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
   def authTokenCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext) = {
     JSONCollectionFactory.create("authInfo", mongoApi, ec, env)
   }
+
+  @Provides
+  @Singleton
+  def mailgun(): Mailgun = {
+    new Mailgun(conf.get[String]("EMAIL_MAILGUN_DOMAIN"), conf.get[String]("EMAIL_MAILGUN_API_KEY"))
+  }
+
 }

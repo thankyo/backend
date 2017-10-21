@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.service
 import javax.inject.{Inject, Singleton}
 
 import akka.actor.{Actor, ActorSystem, Props}
-import com.clemble.loveit.common.util.AuthEnv
+import com.clemble.loveit.common.util.{AuthEnv, EventBusManager}
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.{PaymentRepository, UserPaymentRepository}
 import com.clemble.loveit.user.model.User
@@ -13,7 +13,7 @@ import scala.concurrent.Future
 
 trait UserPaymentService {
 
-  def createAndSave(user: User): Future[Boolean]
+  def create(user: User): Future[Boolean]
 
 }
 
@@ -21,20 +21,17 @@ case class UserPaymentSignUpListener @Inject()(uPayS: UserPaymentService) extend
 
   override def receive: Receive = {
     case SignUpEvent(user : User, _) =>
-      uPayS.createAndSave(user)
+      uPayS.create(user)
   }
 
 }
 
 @Singleton
-class SimpleUserPaymentService @Inject()(actorSystem: ActorSystem, env: Environment[AuthEnv], paymentRepository: PaymentRepository) extends UserPaymentService {
+class SimpleUserPaymentService @Inject()(eventBusManager: EventBusManager, paymentRepository: PaymentRepository) extends UserPaymentService {
 
-  {
-    val subscriber = actorSystem.actorOf(Props(UserPaymentSignUpListener(this)))
-    env.eventBus.subscribe(subscriber, classOf[SignUpEvent[User]])
-  }
+  eventBusManager.onSignUp(Props(UserPaymentSignUpListener(this)))
 
-  override def createAndSave(user: User) = {
+  override def create(user: User) = {
     val payment = UserPayment from user
     paymentRepository.save(payment)
   }

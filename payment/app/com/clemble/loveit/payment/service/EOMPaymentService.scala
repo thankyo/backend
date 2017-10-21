@@ -131,7 +131,7 @@ case class SimpleEOMPaymentService @Inject()(
 
   private def doCreatePayout(yom: YearMonth): Future[EOMStatistics] = {
     def toPayoutMap(charge: EOMCharge): Map[UserID, Int] = {
-      charge.transactions.groupBy(_.destination).mapValues(_.size)
+      charge.transactions.groupBy(_.project.user).mapValues(_.size)
     }
 
     def combinePayoutMaps(agg: Map[UserID, Int], payout: Map[UserID, Int]): Map[UserID, Int] = {

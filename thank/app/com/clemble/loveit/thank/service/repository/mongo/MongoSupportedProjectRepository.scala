@@ -5,18 +5,27 @@ import javax.inject.{Inject, Named}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.SupportedProject
-import com.clemble.loveit.thank.service.repository.SupportedProjectRepo
-import com.clemble.loveit.user.model.User
+import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
 import play.api.libs.json.{JsObject, Json}
-import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
+import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MongoSupportedProjectRepository @Inject()(
-                                                @Named("userSupported") collection: JSONCollection,
-                                                implicit val ec: ExecutionContext
-                                              ) extends SupportedProjectRepo {
+                                                 @Named("userSupported") collection: JSONCollection,
+                                                 @Named("userResource") resCollection: JSONCollection,
+                                                 implicit val ec: ExecutionContext
+                                               ) extends SupportedProjectRepository {
+
+
+  override def getProject(owner: UserID): Future[Option[SupportedProject]] = {
+    val selector = Json.obj("_id" -> owner)
+    val projection = Json.obj("project" -> 1)
+    resCollection.find(selector, projection).one[JsObject].map(optJson => {
+      optJson.flatMap(json => (json \ "project").asOpt[SupportedProject])
+    })
+  }
 
   override def markSupported(supporter: UserID, project: SupportedProject): Future[Boolean] = {
     val selector = Json.obj("_id" -> supporter)

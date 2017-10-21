@@ -18,24 +18,26 @@ trait ROService {
 }
 
 @Singleton
-case class SimpleResourceOwnershipService @Inject() (userRepo: RORepository, thankRepo: ThankRepository, implicit val ec: ExecutionContext) extends ROService {
+case class SimpleResourceOwnershipService @Inject() (userRepo: RORepository, supportedProjectService: SupportedProjectService, thankRepo: ThankRepository, implicit val ec: ExecutionContext) extends ROService {
 
   override def list(user: UserID): Future[Set[Resource]] = {
     userRepo.listOwned(user)
   }
 
-  override def assignOwnership(user: UserID, res: Resource): Future[Resource] = {
+  override def assignOwnership(owner: UserID, res: Resource): Future[Resource] = {
     // TODO assign is internal operation, so it might not need to throw Exception,
     // since verification has already been done before
     val fUpdate = for {
       ownerOpt <- userRepo.findOwner(res)
     } yield {
-      if (ownerOpt.exists(_ != user))
+      if (ownerOpt.exists(_ != owner))
         throw UserException.resourceAlreadyOwned(ownerOpt.get)
       for {
-        updThanks <- thankRepo.updateOwner(user, res)
+        projectOpt <- supportedProjectService.getProject(owner)
+        project = projectOpt.getOrElse({ throw new IllegalArgumentException("No project exists for the user")})
+        updThanks <- thankRepo.updateOwner(project, res)
         continue = if (updThanks) true else throw new IllegalArgumentException("Can't update owner for Thank")
-        updRes <- userRepo.assignOwnership(user, res) if(continue)
+        updRes <- userRepo.assignOwnership(owner, res) if(continue)
       } yield {
         if (!updRes)
           throw new IllegalArgumentException("Can't assign ownership")

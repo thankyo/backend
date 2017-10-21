@@ -2,12 +2,16 @@ package com.clemble.loveit.user.service
 
 import javax.inject.{Inject, Singleton}
 
+import akka.actor.{Actor, ActorSystem, Props}
+import com.clemble.loveit.common.util.{AuthEnv, EventBusManager}
 import com.clemble.loveit.user.model.User
-import com.mohiva.play.silhouette.api.Logger
+import com.mohiva.play.silhouette.api.{Environment, Logger, SignUpEvent}
 import play.api.libs.ws.WSAuthScheme.BASIC
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
+
+
 
 sealed trait SubscriptionManager {
 
@@ -26,9 +30,19 @@ case object TestSubscriptionManager extends SubscriptionManager {
   override def subscribeContributor(email: String): Future[Boolean] = Future.successful(true)
 }
 
+case class SubscriptionOnSignUpListener(subscriptionManager: SubscriptionManager) extends Actor with Logger {
+
+  override def receive: Receive = {
+    case SignUpEvent(user: User, _) =>
+      subscriptionManager.signedUpUser(user)
+  }
+
+}
 
 @Singleton
-case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, implicit val ec: ExecutionContext) extends SubscriptionManager with Logger {
+case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, eventBusManager: EventBusManager, implicit val ec: ExecutionContext) extends SubscriptionManager with Logger {
+
+  eventBusManager.onSignUp(Props(SubscriptionOnSignUpListener(this)))
 
   private def remove(list: String, email: String) = {
     val uri = s"https://api.mailgun.net/v3/lists/${list}@mailgun.loveit.tips/members/${email}"

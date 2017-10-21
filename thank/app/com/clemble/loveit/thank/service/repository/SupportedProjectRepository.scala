@@ -5,7 +5,9 @@ import com.clemble.loveit.thank.model.SupportedProject
 
 import scala.concurrent.Future
 
-trait SupportedProjectRepo {
+trait SupportedProjectRepository {
+
+  def getProject(userID: UserID): Future[Option[SupportedProject]]
 
   def markSupported(supporter: UserID, project: SupportedProject): Future[Boolean]
 

@@ -3,6 +3,7 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
+import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.service.repository.ThankRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -19,8 +20,9 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
     val url = HttpResource(s"example.com/some/${someRandom[Long]}")
     // TODO flow must be changed here to use ResourceOwnersip verification
     val owner = createUser()
+    val project = SupportedProject from getUser(owner).get
     await(roService.assignOwnership(owner, url))
-    await(thankRepo.updateOwner(owner, url))
+    await(thankRepo.updateOwner(project, url))
     val giver = createUser()
 
     (url, owner, giver)

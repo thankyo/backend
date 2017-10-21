@@ -70,7 +70,7 @@ case class AuthService @Inject()(
             val user = register.toUser()
             for {
               avatar <- avatarService.retrieveURL(register.email)
-              user <- userService.save(user.copy(avatar = avatar))
+              user <- userService.create(user.copy(avatar = avatar))
               _ <- authInfoRepository.save(loginInfo, authInfo)
             } yield {
               UserRegister(user, loginInfo)

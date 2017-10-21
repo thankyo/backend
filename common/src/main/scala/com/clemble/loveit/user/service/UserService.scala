@@ -16,7 +16,7 @@ trait UserService extends IdentityService[User] {
     * @param user user to create
     * @return saved user
     */
-  def save(user: User): Future[User]
+  def create(user: User): Future[User]
 
   def retrieve(loginInfo: LoginInfo): Future[Option[User]]
 

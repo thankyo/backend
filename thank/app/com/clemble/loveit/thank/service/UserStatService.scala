@@ -44,7 +44,7 @@ class SimpleUserStatService @Inject()(
   }
 
   override def record(thank: ThankEvent) = {
-    repo.increase(thank.destination)
+    repo.increase(thank.project.user)
   }
 
 }

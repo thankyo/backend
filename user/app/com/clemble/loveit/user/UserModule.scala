@@ -5,11 +5,14 @@ import com.clemble.loveit.user.service.repository._
 import com.clemble.loveit.user.service.repository.mongo.{MongoInvitationRepository, MongoUserRepository}
 import javax.inject.{Named, Singleton}
 
+import akka.actor.ActorSystem
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.common.util.{AuthEnv, EventBusManager}
 import com.google.inject.Provides
+import com.mohiva.play.silhouette.api
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.WSClient
-import play.api.{Configuration, Environment, Mode}
+import play.api.{Configuration, Mode, Environment => PlayEnvironment}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -18,7 +21,7 @@ import scala.concurrent.ExecutionContext
 /**
   * Module with all service dependencies
   */
-class UserModule(env: Environment, conf: Configuration) extends ScalaModule {
+class UserModule(env: PlayEnvironment, conf: Configuration) extends ScalaModule {
 
   override def configure(): Unit = {
     bind(classOf[UserService]).to(classOf[SimpleUserService])
@@ -45,12 +48,12 @@ class UserModule(env: Environment, conf: Configuration) extends ScalaModule {
 
   @Provides
   @Singleton
-  def subscriptionManager(ws: WSClient, ec: ExecutionContext): SubscriptionManager = {
+  def subscriptionManager(ws: WSClient, ec: ExecutionContext, eventBusManager: EventBusManager): SubscriptionManager = {
     if (env.mode == Mode.Test) {
       TestSubscriptionManager
     } else {
       val apiKey = conf.get[String]("email.mailgun.api.key")
-      MailgunSubscriptionManager(apiKey, ws, ec)
+      MailgunSubscriptionManager(apiKey, ws, eventBusManager, ec)
     }
   }
 

@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.controller
 
 import com.clemble.loveit.common.ControllerSpec
-import com.clemble.loveit.thank.model.UserResource
+import com.clemble.loveit.thank.model.{SupportedProject, UserResource}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Json
@@ -22,9 +22,10 @@ class ROControllerSpec extends ControllerSpec {
 
     "List on new user" in {
       val user = createUser()
+      val project = SupportedProject from getMyUser(user)
 
       val resources = listResources(user)
-      resources shouldEqual UserResource(user)
+      resources shouldEqual UserResource(user, project)
     }
 
   }

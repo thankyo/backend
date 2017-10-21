@@ -41,7 +41,7 @@ case class SimpleThankService @Inject()(
           resource.parent() match {
             case Some(parRes) =>
               for {
-                owner <- getOrCreate(parRes).map(_.owner)
+                owner <- getOrCreate(parRes).map(_.project)
                 thank = Thank(resource, owner)
                 createdNew <- thankRepo.save(thank)
                 created <- if(createdNew) Future.successful(thank) else thankRepo.findByResource(resource).map(_.get)
@@ -63,7 +63,7 @@ case class SimpleThankService @Inject()(
       increased <- thankRepo.increase(giver, res)
     } yield {
       if (increased) {
-        thankEventBus.publish(ThankEvent(giver, thank.owner, res))
+        thankEventBus.publish(ThankEvent(giver, thank.project, res))
       }
       thank
     }

@@ -8,7 +8,7 @@ import com.clemble.loveit.common.error.{RepositoryException, ThankException, Use
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 import com.clemble.loveit.payment.model._
-import com.clemble.loveit.thank.model.{Pending, ROVerification, Thank}
+import com.clemble.loveit.thank.model.{Pending, ROVerification, SupportedProject, Thank}
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
@@ -73,10 +73,13 @@ package object util {
     PayoutAccount(randomNumeric(10), randomNumeric(4), randomNumeric(4))
   }
   implicit val thankTransactionGenerator: Generator[ThankEvent] = () => {
-    ThankEvent(someRandom[UserID], someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
+    ThankEvent(someRandom[UserID], someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
+  }
+  implicit val supportedProjectGenerator: Generator[SupportedProject] = () => {
+    SupportedProject from someRandom[User]
   }
   implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
-    PendingTransaction(someRandom[UserID], someRandom[Resource], someRandom[LocalDateTime])
+    PendingTransaction(someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
   }
   implicit val verificationGenerator: Generator[ROVerification[Resource]] = () => {
     val resource = someRandom[Resource]
@@ -89,7 +92,7 @@ package object util {
   implicit val thankGenerator: Generator[Thank] = () => {
     Thank(
       someRandom[Resource],
-      IDGenerator.generate(),
+      someRandom[SupportedProject],
       nextLong(0, Long.MaxValue)
     )
   }

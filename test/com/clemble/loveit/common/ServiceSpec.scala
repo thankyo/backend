@@ -22,9 +22,9 @@ trait ServiceSpec extends FunctionalThankSpecification {
 
   override def createUser(register: RegisterRequest = someRandom[RegisterRequest]): UserID = {
     val fUserID = for {
-      user <- userService.save(register.toUser())
-      _ <- userPayService.createAndSave(user)
-      _ <- userResService.createAndSave(user)
+      user <- userService.create(register.toUser())
+      _ <- userPayService.create(user)
+      _ <- userResService.create(user)
     } yield {
       user.id
     }

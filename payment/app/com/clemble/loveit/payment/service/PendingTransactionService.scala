@@ -7,6 +7,7 @@ import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{Resource, ThankEvent, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
 import com.clemble.loveit.payment.service.repository.{PendingTransactionRepository, UserBalanceRepository}
+import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.service.ThankEventBus
 import com.mohiva.play.silhouette.api.Logger
 
@@ -16,7 +17,7 @@ trait PendingTransactionService {
 
   def list(user: UserID): Source[PendingTransaction, _]
 
-  def create(giver: UserID, owner: UserID, url: Resource): Future[PendingTransaction]
+  def create(giver: UserID, owner: SupportedProject, url: Resource): Future[PendingTransaction]
 
   def removeAll(user: UserID, thank: Seq[PendingTransaction]): Future[Boolean]
 }
@@ -46,15 +47,15 @@ case class SimplePendingTransactionService @Inject()(
     repository.findByUser(user)
   }
 
-  override def create(giver: UserID, owner: UserID, url: Resource): Future[PendingTransaction] = {
-    val transaction = PendingTransaction(owner, url)
+  override def create(giver: UserID, project: SupportedProject, url: Resource): Future[PendingTransaction] = {
+    val transaction = PendingTransaction(project, url)
     for {
       savedInRepo <- repository.save(giver, transaction)
-      updatedOwner <- balanceRepo.updateBalance(owner, 1) if (savedInRepo)
+      updatedOwner <- balanceRepo.updateBalance(project.user, 1) if (savedInRepo)
       updatedGiver <- balanceRepo.updateBalance(giver, -1) if (savedInRepo)
     } yield {
       if (!updatedGiver || !updatedOwner || !savedInRepo)
-        logger.error(s"${giver} ${owner} ${url} failed to properly process transaction ${updatedGiver} ${updatedOwner} ${savedInRepo}")
+        logger.error(s"${giver} ${project.user} ${url} failed to properly process transaction ${updatedGiver} ${updatedOwner} ${savedInRepo}")
       transaction
     }
   }

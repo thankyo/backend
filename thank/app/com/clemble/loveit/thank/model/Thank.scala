@@ -11,7 +11,7 @@ import play.api.libs.json.Json
   */
 case class Thank(
                   resource: Resource,
-                  owner: UserID,
+                  project: SupportedProject,
                   given: Amount = 0L,
                   givers: Set[UserID] = Set.empty,
                   created: LocalDateTime = LocalDateTime.now()
@@ -23,15 +23,13 @@ case class Thank(
     case t : Thank =>
       t.resource == this.resource &&
       t.given == this.given &&
-      t.owner == this.owner
+      t.project == this.project
     case _ => false
   }
 
 }
 
 object Thank {
-
-  val INTEGRATION_DEFAULT = Thank(Resource.from("http://example.com/verified"), IDGenerator.ZERO)
 
   /**
     * JSON format for [[Thank]]

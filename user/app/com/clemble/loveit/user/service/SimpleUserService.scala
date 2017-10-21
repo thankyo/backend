@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec: ExecutionContext) extends UserService {
 
-  override def save(user: User): Future[User] = {
+  override def create(user: User): Future[User] = {
     userRepo.save(user)
   }
 

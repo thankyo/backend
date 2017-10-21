@@ -10,6 +10,7 @@ import play.api.libs.json._
   */
 case class UserResource(
                          _id: UserID,
+                         project: SupportedProject,
                          owns: Set[Resource] = Set.empty[Resource],
                          verification: Option[ROVerification[Resource]] = None
 ) extends UserAware {
@@ -20,7 +21,7 @@ case class UserResource(
 
 object UserResource {
 
-  def from(user: User): UserResource = UserResource(user.id)
+  def from(user: User): UserResource = UserResource(user.id, SupportedProject from user)
 
   implicit val jsonFormat: OFormat[UserResource] = Json.format[UserResource]
   implicit val writeable = WriteableUtils.jsonToWriteable[UserResource]()

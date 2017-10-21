@@ -1,9 +1,9 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.{HttpResource, Resource}
+import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.thank.model.Thank
+import com.clemble.loveit.thank.model.{SupportedProject, Thank}
 import com.clemble.loveit.thank.service.ThankService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -23,25 +23,21 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   }
 
   def createParentThank(thank: Thank) = {
-    val ownerResource = Thank(thank.resource.parents.last, IDGenerator.generate())
+    val ownerResource = Thank(thank.resource.parents.last, someRandom[SupportedProject])
     await(repo.save(ownerResource))
-  }
-
-  "DEFAULT exists" in {
-    eventually(await(repo.findByResource(Thank.INTEGRATION_DEFAULT.resource)) shouldNotEqual None)
   }
 
   "THANKED" should {
 
     "be NONE for non existent" in {
-      val user = IDGenerator.generate()
+      val user = someRandom[UserID]
       val resource = someRandom[Resource]
 
       await(repo.thanked(user, resource)) shouldEqual None
     }
 
     "be false for not thanked" in {
-      val user = IDGenerator.generate()
+      val user = someRandom[UserID]
 
       val thank = someRandom[Thank]
       await(repo.save(thank))
@@ -50,7 +46,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
     }
 
     "be true for thanked" in {
-      val user = IDGenerator.generate()
+      val user = someRandom[UserID]
 
       val thank = someRandom[Thank]
       await(repo.save(thank))
@@ -108,7 +104,7 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   "UPDATE OWNER" should {
 
     "create if missing" in {
-      val owner = IDGenerator.generate()
+      val owner = someRandom[SupportedProject]
       val resource = someRandom[Resource]
 
       await(repo.findByResource(resource)) shouldEqual None
@@ -120,20 +116,20 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
     "update if exists" in {
       val resource = someRandom[Resource]
 
-      val A = IDGenerator.generate()
+      val A = someRandom[SupportedProject]
 
       await(repo.updateOwner(A, resource)) shouldEqual true
-      await(repo.findByResource(resource)).get.owner shouldEqual A
+      await(repo.findByResource(resource)).get.project shouldEqual A
 
-      val B = IDGenerator.generate()
+      val B = someRandom[SupportedProject]
 
       await(repo.updateOwner(B, resource)) shouldEqual true
-      await(repo.findByResource(resource)).get.owner shouldEqual B
+      await(repo.findByResource(resource)).get.project shouldEqual B
     }
 
     "update children" in {
-      val A = IDGenerator.generate()
-      val B = IDGenerator.generate()
+      val A = someRandom[SupportedProject]
+      val B = someRandom[SupportedProject]
 
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
@@ -143,13 +139,13 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
       await(repo.updateOwner(B, parent))
 
-      await(repo.findByResource(parent)).get.owner shouldEqual B
-      await(repo.findByResource(child)).get.owner shouldEqual B
+      await(repo.findByResource(parent)).get.project shouldEqual B
+      await(repo.findByResource(child)).get.project shouldEqual B
     }
 
     "update children correctly" in {
-      val A = IDGenerator.generate()
-      val B = IDGenerator.generate()
+      val A = someRandom[SupportedProject]
+      val B = someRandom[SupportedProject]
 
       val parent = someRandom[HttpResource]
       val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
@@ -159,13 +155,13 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
       await(repo.updateOwner(B, parent))
 
-      await(repo.findByResource(parent)).get.owner shouldEqual B
-      await(repo.findByResource(difParent)).get.owner shouldEqual A
+      await(repo.findByResource(parent)).get.project shouldEqual B
+      await(repo.findByResource(difParent)).get.project shouldEqual A
     }
 
     "don't update parent" in {
-      val original = IDGenerator.generate()
-      val B = IDGenerator.generate()
+      val original = someRandom[SupportedProject]
+      val B = someRandom[SupportedProject]
 
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
@@ -175,8 +171,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
 
       await(repo.updateOwner(B, child))
 
-      await(repo.findByResource(parent)).get.owner shouldEqual original
-      await(repo.findByResource(child)).get.owner shouldEqual B
+      await(repo.findByResource(parent)).get.project shouldEqual original
+      await(repo.findByResource(child)).get.project shouldEqual B
     }
 
   }

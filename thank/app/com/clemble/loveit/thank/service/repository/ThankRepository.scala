@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.model.Thank
+import com.clemble.loveit.thank.model.{SupportedProject, Thank}
 
 import scala.concurrent.Future
 
@@ -40,6 +40,6 @@ trait ThankRepository {
   /**
     * Updates current resource ownership and all it's children
     */
-  def updateOwner(owner: String, url: Resource): Future[Boolean]
+  def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
 
 }

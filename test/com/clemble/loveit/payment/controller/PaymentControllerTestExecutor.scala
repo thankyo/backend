@@ -7,12 +7,15 @@ import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, PendingTransaction, StripeCustomerToken}
 import com.clemble.loveit.payment.service.PendingTransactionService
 import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor
+import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 
 trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecutor with PaymentLimitExecutor {
 
   val thankService = dependency[PendingTransactionService]
+  val projectRepo = dependency[SupportedProjectRepository]
 
   override def getBalance(user: UserID): Amount = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/balance"))
@@ -69,7 +72,8 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def thank(giver: UserID, owner: UserID, resource: Resource): PendingTransaction = {
-    await(thankService.create(giver, owner, resource))
+    val project = await(projectRepo.getProject(owner))
+    await(thankService.create(giver, project.get, resource))
   }
 
   override def pendingThanks(giver: UserID): Seq[PendingTransaction] = {

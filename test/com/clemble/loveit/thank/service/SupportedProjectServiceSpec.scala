@@ -19,8 +19,9 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
     val url = HttpResource(s"example.com/some/${someRandom[Long]}")
     // TODO flow must be changed here to use ResourceOwnership verification
     val owner = createUser()
+    val project = SupportedProject from getUser(owner).get
     await(roService.assignOwnership(owner, url))
-    await(thankRepo.updateOwner(owner, url))
+    await(thankRepo.updateOwner(project, url))
     val giver = createUser()
 
     (url, owner, giver)

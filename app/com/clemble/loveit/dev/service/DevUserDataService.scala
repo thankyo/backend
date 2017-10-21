@@ -2,18 +2,17 @@ package com.clemble.loveit.dev.service
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor, Props}
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.common.util.{AuthEnv, IDGenerator}
+import com.clemble.loveit.common.util.{AuthEnv, EventBusManager, IDGenerator}
 import com.clemble.loveit.thank.service.{ROService, ThankService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
-case class DevSignUpEventListener(resources: List[Resource], thankService: ThankService) extends Actor {
+case class DevSignUpListener(resources: List[Resource], thankService: ThankService) extends Actor {
 
   implicit val ec = context.dispatcher
 
@@ -46,8 +45,7 @@ case class SimpleDevUserDataService @Inject()(
                                                userService: UserService,
                                                roService: ROService,
                                                thankService: ThankService,
-                                               actorSystem: ActorSystem,
-                                               env: Environment[AuthEnv],
+                                               eventBusManager: EventBusManager,
                                                implicit val ec: ExecutionContext
                                              ) extends DevUserDataService {
 
@@ -71,9 +69,8 @@ case class SimpleDevUserDataService @Inject()(
       creatorsToRes <- ensureCreators(resMap)
       resources <- assignOwnership(creatorsToRes)
     } yield {
-      val subscriber = actorSystem.actorOf(Props(DevSignUpEventListener(resources, thankService)))
-      env.eventBus.subscribe(subscriber, classOf[SignUpEvent[User]])
-      env.eventBus.subscribe(subscriber, classOf[LoginEvent[User]])
+      eventBusManager.onSignUp(Props(DevSignUpListener(resources, thankService)))
+      eventBusManager.onLogin(Props(DevSignUpListener(resources, thankService)))
     }).recover({
       case t: Throwable => {
         print(t)
@@ -92,8 +89,8 @@ case class SimpleDevUserDataService @Inject()(
         flatMap({
           case Some(user) => Future.successful(user -> resources)
           case None => {
-            userService.save(creator).map(creator => {
-              env.eventBus.publish(SignUpEvent(creator, null))
+            userService.create(creator).map(creator => {
+              eventBusManager.publish(SignUpEvent(creator, null))
               creator -> resources
             })
           }

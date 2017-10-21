@@ -9,13 +9,14 @@ import com.clemble.loveit.auth.model.requests.ForgotPasswordRequest
 import com.clemble.loveit.auth.service.AuthTokenService
 import com.clemble.loveit.auth.views.html.emails.resetPassword
 import com.clemble.loveit.auth.views.txt.emails
+import com.clemble.loveit.common.error.FieldValidationError
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import org.matthicks.mailgun.{EmailAddress, Mailgun, Message}
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.JsBoolean
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * The `Forgot Password` controller.
@@ -51,8 +52,17 @@ class ForgotPasswordController @Inject()(
       val loginInfo = request.body.toLoginInfo
 
       for {
-        userOpt <- userService.retrieve(loginInfo)
-        user = userOpt.getOrElse({ throw new IdentityNotFoundException(s"No user with ${loginInfo.providerKey}")})
+        user <- userService.retrieve(loginInfo).flatMap(_ match {
+          case Some(user) => Future.successful(user)
+          case None => userService.
+            findByEmail(request.body.email).
+            map(_ match {
+              case Some(user) =>
+                throw FieldValidationError("email", s"You are registered through ${user.profiles.map(_.providerID).mkString(",")}")
+              case None =>
+                throw new IdentityNotFoundException(s"No user with ${loginInfo.providerKey}")
+            })
+        })
         authToken <- authTokenService.create(user.id)
       } yield {
         val url = s"https://loveit.tips/auth/reset/${authToken.token}"

@@ -1,5 +1,6 @@
 package com.clemble.loveit.dev.service
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
@@ -58,7 +59,25 @@ case class SimpleDevUserDataService @Inject()(
       profiles = Set(LoginInfo("patreon", "zenpencil")),
       avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
       link = Some("https://zenpencils.com")
-    ) -> HttpResource("zenpencils.com")
+    ) -> HttpResource("zenpencils.com"),
+    User(
+      id = IDGenerator.generate(),
+      firstName = Some("Manga"),
+      lastName = Some("Stream"),
+      email = "manga.stream@example.com",
+      profiles = Set(LoginInfo("patreon", "mangastream")),
+      avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
+      link = Some("https://mangastream.com")
+    ) -> HttpResource("mangastream.com"),
+    User(
+      id = IDGenerator.generate(),
+      firstName = Some("Personal"),
+      lastName = Some("Central"),
+      avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+      email = "personal.central@example.com",
+      profiles = Set(LoginInfo("patreon", "personal.central")),
+      link = Some("https://personacentral.com")
+    ) -> HttpResource("personacentral.com")
   )
 
   enable(resMap)
@@ -113,7 +132,7 @@ case class SimpleDevUserDataService @Inject()(
         )
       ownershipTask.
         map(res => (1 to 200).
-        map(i => HttpResource(s"${res.uri}/comics/${i}")))
+        map(i => HttpResource(s"${res.uri}/${LocalDate.now()}/${i}")))
     }
     Future.sequence(resources).map(_.flatten.toList)
   }

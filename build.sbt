@@ -7,14 +7,14 @@ name := "backend"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.4"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 val reactiveMongoVer = "0.12.6"
 val silhouetteVersion = "5.0.1"
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  scalaVersion := "2.12.3"
+  scalaVersion := "2.12.4"
 )
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
@@ -42,7 +42,6 @@ lazy val auth = (project in file("./auth")).
   enablePlugins(PlayScala).
   dependsOn(common).
   settings(commonSettings).
-
   settings(
     libraryDependencies ++= Seq(
       ws,
@@ -62,15 +61,36 @@ lazy val auth = (project in file("./auth")).
 
 lazy val user = (project in file("./user")).
   enablePlugins(PlayScala).
-  dependsOn(common)
+  dependsOn(common).
+  settings(commonSettings).
+  settings(
+    libraryDependencies ++= Seq(
+      ws
+    )
+  )
 
 lazy val thank = (project in file("./thank")).
   enablePlugins(PlayScala).
-  dependsOn(common)
+  dependsOn(common).
+  settings(commonSettings).
+  settings(
+    libraryDependencies ++= Seq(
+      ws,
+      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",
+    )
+  )
 
 lazy val payment = (project in file("./payment")).
   enablePlugins(PlayScala).
-  dependsOn(common)
+  dependsOn(common).
+  settings(commonSettings).
+  settings(
+    libraryDependencies ++= Seq(
+      ws,
+      "com.stripe" % "stripe-java" % "5.10.0",
+      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1"
+    )
+  )
 
 lazy val root = (project in file(".")).
   enablePlugins(PlayScala).

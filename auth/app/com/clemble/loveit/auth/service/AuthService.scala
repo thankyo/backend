@@ -5,13 +5,14 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.auth.model.requests.{LogInRequest, RegisterRequest}
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model.Email
+import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
-import com.mohiva.play.silhouette.api.LoginInfo
+import com.mohiva.play.silhouette.api.{AuthInfo, LoginInfo}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
-import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, CredentialsProvider, SocialProvider, SocialProviderRegistry}
+import com.mohiva.play.silhouette.impl.providers._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,7 +59,7 @@ case class AuthService @Inject()(
   }
 
   def register(register: RegisterRequest): Future[AuthServiceResult] = {
-    val loginInfo = LoginInfo(CredentialsProvider.ID, register.email)
+    val loginInfo = register.toLoginInfo()
     authInfoRepository.find[PasswordInfo](loginInfo).flatMap {
       case Some(_) =>
         login(register.toLogIn()).
@@ -68,27 +69,49 @@ case class AuthService @Inject()(
           flatMap(_ => {
             val authInfo = passwordHasherRegistry.current.hash(register.password)
             val user = register.toUser()
-            for {
-              avatar <- avatarService.retrieveURL(register.email)
-              user <- userService.create(user.copy(avatar = avatar))
-              _ <- authInfoRepository.save(loginInfo, authInfo)
-            } yield {
-              UserRegister(user, loginInfo)
-            }
+            createUser(user, loginInfo, authInfo)
           })
+    }
+  }
+
+  private def createUser(user: User, loginInfo: LoginInfo, authInfo: AuthInfo): Future[UserRegister] = {
+    for {
+      avatar <- avatarService.retrieveURL(user.email)
+      user <- userService.create(user.copy(avatar = avatar))
+      _ <- authInfoRepository.save(loginInfo, authInfo)
+    } yield {
+      UserRegister(user, loginInfo)
     }
   }
 
   def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A): Future[AuthServiceResult] = {
     for {
       profile <- p.retrieveProfile(authInfo)
-      eitherUser <- userService.createOrUpdateUser(profile)
-      _ <- authInfoRepository.save(profile.loginInfo, authInfo)
+      result <- createOrUpdateUser(profile, authInfo)
     } yield {
-      eitherUser match {
-        case Left(user) => UserLoggedIn(user, profile.loginInfo)
-        case Right(user) => UserRegister(user, profile.loginInfo)
+      result
+    }
+  }
+
+  private def createOrUpdateUser(profile: CommonSocialProfile, authInfo: AuthInfo): Future[AuthServiceResult] = {
+    for {
+      existingUserOpt <- userService.retrieve(profile.loginInfo)
+      result <- existingUserOpt match {
+        case Some(user: User) => {
+          for {
+            _ <- authInfoRepository.save(profile.loginInfo, authInfo)
+            user <- userService.update(user link profile)
+          } yield {
+            UserLoggedIn(user, profile.loginInfo)
+          }
+        }
+        case _ => {
+          val newUser = User(id = IDGenerator.generate(), email = profile.email.get).link(profile)
+          createUser(newUser, profile.loginInfo, authInfo)
+        }
       }
+    } yield {
+      result
     }
   }
 

@@ -24,10 +24,6 @@ trait UserService extends IdentityService[User] {
 
   def findByEmail(email: Email): Future[Option[User]]
 
-  /**
-    *
-    * @param profile Either Left if user already existed or Right if it's a new user
-    */
-  def createOrUpdateUser(profile: CommonSocialProfile): Future[Either[User, User]]
+  def update(user: User): Future[User]
 
 }

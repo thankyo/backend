@@ -119,8 +119,6 @@ libraryDependencies ++= Seq(
 
 TwirlKeys.templateImports := Seq()
 
-RoutesKeys.routesImport += "com.clemble.loveit.payment.controller._"
-
 def readProperties(fileName: String): Map[String, String] = {
   val f = new File(fileName)
   if (!f.exists()) {

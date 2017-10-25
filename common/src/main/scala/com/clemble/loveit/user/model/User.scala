@@ -49,8 +49,7 @@ case class User(
     this.copy(
       firstName = firstName.orElse(socialProfile.firstName),
       lastName = lastName.orElse(socialProfile.lastName),
-      // following #60
-      avatar = socialProfile.avatarURL.orElse(avatar),
+      // following #60 we should ignore avatar from profile for now
       profiles = profiles + socialProfile.loginInfo
     )
   }

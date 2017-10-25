@@ -30,25 +30,8 @@ case class SimpleUserService @Inject()(userRepo: UserRepository, implicit val ec
     userRepo.findByEmail(email)
   }
 
-  def updateExistingUser(user: User, profile: CommonSocialProfile): Future[User] = {
-    userRepo.save(user.link(profile))
+  override def update(user: User): Future[User] = {
+    userRepo.update(user)
   }
 
-  def createOrUpdateUser(profile: CommonSocialProfile): Future[Either[User, User]] = {
-    val email = profile.email.get
-    val user = User(id = IDGenerator.generate(), email = email).link(profile)
-    for {
-      existingUserOpt <- userRepo.retrieve(profile.loginInfo)
-      user <- existingUserOpt match {
-        case Some(user: User) => userRepo.update(user link profile)
-        case _ => userRepo.save(user)
-      }
-    } yield {
-      if (existingUserOpt.isDefined) {
-        Left(user)
-      } else {
-        Right(user)
-      }
-    }
-  }
 }

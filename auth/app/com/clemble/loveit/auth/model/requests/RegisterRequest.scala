@@ -16,15 +16,18 @@ case class RegisterRequest(
                         ) {
 
   def toUser(): User = {
-    val loginInfo = LoginInfo(CredentialsProvider.ID, email)
     User(
       id = IDGenerator.generate(),
       firstName = Some(firstName),
       lastName = Some(lastName),
       email = email,
       avatar = None,
-      profiles = Set(loginInfo)
+      profiles = Set(toLoginInfo())
     )
+  }
+
+  def toLoginInfo() = {
+    LoginInfo(CredentialsProvider.ID, email)
   }
 
   def toLogIn(): LogInRequest = {

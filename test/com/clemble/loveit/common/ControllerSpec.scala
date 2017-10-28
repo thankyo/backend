@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
+import com.clemble.loveit.auth.model.AuthResponse
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
@@ -99,11 +100,11 @@ object ControllerSpec {
   val userToAuth: ConcurrentHashMap[UserID, Seq[(String, String)]] = new ConcurrentHashMap[String, Seq[(String, String)]]
 
   def setUser(res: Result)(implicit m: Materializer): String = {
-    val bodyStr = Json.parse(Await.result(res.body.consumeData, 30 second).utf8String).as[String]
-    val jsonStr = JWSObject.parse(bodyStr).getPayload.toString
+    val authRes = Json.parse(Await.result(res.body.consumeData, 30 second).utf8String).as[AuthResponse]
+    val jsonStr = JWSObject.parse(authRes.token).getPayload.toString
     val user = (Json.parse(jsonStr) \ "id").as[String]
 
-    userToAuth.put(user, Seq("X-Auth-Token" -> bodyStr))
+    userToAuth.put(user, Seq("X-Auth-Token" -> authRes.token))
     user
   }
 

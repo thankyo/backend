@@ -3,7 +3,7 @@ package com.clemble.loveit.common.controller
 import javax.inject.{Inject, Provider, Singleton}
 
 import com.clemble.loveit.common.error.FieldValidationError
-import com.mohiva.play.silhouette.impl.exceptions.{IdentityNotFoundException, InvalidPasswordException}
+import com.mohiva.play.silhouette.impl.exceptions.{IdentityNotFoundException, InvalidPasswordException, UnexpectedResponseException}
 import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc._

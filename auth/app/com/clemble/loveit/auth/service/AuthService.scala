@@ -53,7 +53,7 @@ case class AuthService @Inject()(
           Future.successful(UserLoggedIn(user, loginInfo))
         case None =>
           checkUserExists(logIn.email).
-            map(_ => throw FieldValidationError("email", "Email or Password is wrong"))
+            map(_ => throw FieldValidationError("email", "No user found please, we'll investigate this"))
       }
     }
   }

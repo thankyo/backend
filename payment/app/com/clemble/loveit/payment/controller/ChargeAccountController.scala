@@ -3,7 +3,6 @@ package com.clemble.loveit.payment.controller
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.payment.model.ChargeAccount
 import com.clemble.loveit.payment.service.ChargeAccountService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
@@ -33,4 +32,9 @@ case class ChargeAccountController @Inject()(
     fUpdate.map(Ok(_))
   })
 
+  def deleteMyAccount = silhouette.SecuredAction.async(implicit req => {
+    val user = req.identity.id
+    val fDelete = chargeAccService.deleteChargeAccount(user)
+    fDelete.map(removed => Ok(Json.toJson(removed)))
+  })
 }

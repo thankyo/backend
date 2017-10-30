@@ -81,8 +81,13 @@ case class MongoPaymentRepository @Inject()(
   override def setChargeAccount(user: UserID, chAcc: ChargeAccount): Future[Boolean] = {
     val query = Json.obj("_id" -> user)
     val change = Json.obj("$set" -> Json.obj("chargeAccount" -> chAcc))
-    val update = collection.update(query, change).map(res => res.ok && res.n == 1)
-    MongoSafeUtils.safe(update)
+    MongoSafeUtils.safeSingleUpdate(collection.update(query, change))
+  }
+
+  override def deleteChargeAccount(user: UserID) = {
+    val query = Json.obj("_id" -> user)
+    val change = Json.obj("$unset" -> Json.obj("chargeAccount" -> Json.obj()))
+    MongoSafeUtils.safeSingleUpdate(collection.update(query, change))
   }
 
   override def getPayoutAccount(user: UserID): Future[Option[PayoutAccount]] = {

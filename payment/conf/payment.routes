@@ -7,6 +7,7 @@ GET         /:user/balance                   @com.clemble.loveit.payment.control
 
 GET         /my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.getMyAccount()
 POST        /my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.setMyAccount()
+DELETE      /my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.deleteMyAccount()
 
 GET         /my/payout                       @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
 GET         /my/payout/account               @com.clemble.loveit.payment.controller.PayoutAccountController.connectMyAccount()

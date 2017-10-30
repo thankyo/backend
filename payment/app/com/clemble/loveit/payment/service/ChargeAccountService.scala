@@ -22,10 +22,12 @@ trait ChargeAccountService {
 
   def updateChargeAccount(user: UserID, token: StripeCustomerToken): Future[ChargeAccount]
 
+  def deleteChargeAccount(user: UserID): Future[Boolean]
+
 }
 
 @Singleton
-case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, chAccService: ChargeAccountConverter, implicit val ec: ExecutionContext) extends ChargeAccountService {
+case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, converter: ChargeAccountConverter, implicit val ec: ExecutionContext) extends ChargeAccountService {
 
 
   override def getChargeAccount(user: UserID): Future[Option[ChargeAccount]] = {
@@ -34,7 +36,7 @@ case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, c
 
   override def updateChargeAccount(user: UserID, token: StripeCustomerToken): Future[ChargeAccount] = {
     for {
-      chAcc <- chAccService.processChargeToken(token)
+      chAcc <- converter.processChargeToken(token)
       updated <- repo.setChargeAccount(user, chAcc)
     } yield {
       if (!updated) throw PaymentException.failedToLinkChargeAccount(user)
@@ -42,6 +44,9 @@ case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, c
     }
   }
 
+  override def deleteChargeAccount(user: UserID) = {
+    repo.deleteChargeAccount(user)
+  }
 }
 
 

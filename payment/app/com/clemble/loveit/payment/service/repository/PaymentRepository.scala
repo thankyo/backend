@@ -42,6 +42,8 @@ trait ChargeAccountRepository {
     * @return true, if updated was successful, false otherwise
     */
   def setChargeAccount(user: UserID, chargeAccount: ChargeAccount): Future[Boolean]
+
+  def deleteChargeAccount(user: UserID): Future[Boolean]
 }
 
 trait PayoutAccountRepository {

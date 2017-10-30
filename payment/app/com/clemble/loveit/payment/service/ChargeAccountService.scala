@@ -7,7 +7,7 @@ import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.{ChargeAccount, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository.ChargeAccountRepository
 import com.google.common.collect.ImmutableMap
-import com.stripe.model.Card
+import com.stripe.model.{Card, Customer}
 import play.api.libs.ws.WSClient
 
 import scala.collection.JavaConverters._
@@ -45,7 +45,15 @@ case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, c
   }
 
   override def deleteChargeAccount(user: UserID) = {
-    repo.deleteChargeAccount(user)
+    for {
+      customerOpt <- repo.getChargeAccount(user)
+      removed <- repo.deleteChargeAccount(user)
+    } yield {
+      if (customerOpt.isDefined) {
+        Customer.retrieve(customerOpt.get.customer).delete()
+      }
+      removed
+    }
   }
 }
 
@@ -67,7 +75,7 @@ sealed trait ChargeAccountConverter {
   * Stripe processing service
   */
 @Singleton
-class StripeChargeAccountConverter @Inject() (wsClient: WSClient, implicit val ec: ExecutionContext) extends ChargeAccountConverter {
+class StripeChargeAccountConverter @Inject() (implicit val ec: ExecutionContext) extends ChargeAccountConverter {
   import com.stripe.model.Customer
 
   private def toInternalChargeAccount(customer: Customer): ChargeAccount = {

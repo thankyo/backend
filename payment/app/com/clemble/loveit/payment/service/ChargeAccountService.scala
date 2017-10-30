@@ -8,7 +8,6 @@ import com.clemble.loveit.payment.model.{ChargeAccount, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository.ChargeAccountRepository
 import com.google.common.collect.ImmutableMap
 import com.stripe.model.{Card, Customer}
-import play.api.libs.ws.WSClient
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}

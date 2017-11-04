@@ -11,29 +11,31 @@ scalaVersion := "2.12.4"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 val reactiveMongoVer = "0.12.6"
-val silhouetteVersion = "5.0.1"
+val silhouetteVersion = "5.0.2"
+val reactMongoVersion = "0.12.7"
 
 val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.12.4"
 )
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
+resolvers += Resolver.sbtPluginRepo("releases")
 
 lazy val common = (project in file("./common")).
   settings(commonSettings).
   settings(
     libraryDependencies ++= Seq(
-      "com.mohiva" %% "play-silhouette" % "5.0.1" excludeAll (
+      "com.mohiva" %% "play-silhouette" % silhouetteVersion excludeAll (
         ExclusionRule(organization = "com.typesafe.play")
         ),
 
       "net.codingwell" %% "scala-guice" % "4.1.0",
 
-      "com.typesafe.play" %% "play" % "2.6.6" % "provided",
+      "com.typesafe.play" %% "play" % "2.6.7" % "provided",
 
-      "org.reactivemongo" %% "reactivemongo" % "0.12.6",
-      "org.reactivemongo" %% "play2-reactivemongo" % "0.12.6-play26",
-      "org.reactivemongo" %% "reactivemongo-akkastream" % "0.12.6"
+      "org.reactivemongo" %% "reactivemongo" % reactMongoVersion,
+      "org.reactivemongo" %% "play2-reactivemongo" % s"${reactMongoVersion}-play26",
+      "org.reactivemongo" %% "reactivemongo-akkastream" % reactMongoVersion
     )
   )
 
@@ -46,16 +48,16 @@ lazy val auth = (project in file("./auth")).
     libraryDependencies ++= Seq(
       ws,
 
-      "org.matthicks" %% "mailgun4s" % "1.0.6",
+      "org.matthicks" %% "mailgun4s" % "1.0.9",
 
-      "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.1",
-      "com.mohiva" %% "play-silhouette-persistence" % "5.0.1",
-      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVersion,
+      "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
+      "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
 
       "net.codingwell" %% "scala-guice" % "4.1.0",
-      "com.iheart" %% "ficus" % "1.4.2",
+      "com.iheart" %% "ficus" % "1.4.3",
 
-      "com.mohiva" %% "play-silhouette-testkit" % "5.0.1" % Test
+      "com.mohiva" %% "play-silhouette-testkit" % silhouetteVersion % Test
     )
   )
 
@@ -76,7 +78,7 @@ lazy val thank = (project in file("./thank")).
   settings(
     libraryDependencies ++= Seq(
       ws,
-      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1",
+      "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
     )
   )
 
@@ -87,8 +89,8 @@ lazy val payment = (project in file("./payment")).
   settings(
     libraryDependencies ++= Seq(
       ws,
-      "com.stripe" % "stripe-java" % "5.10.0",
-      "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.1"
+      "com.stripe" % "stripe-java" % "5.23.0",
+      "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion
     )
   )
 
@@ -105,13 +107,13 @@ libraryDependencies ++= Seq(
 
   "net.codingwell" %% "scala-guice" % "4.1.0",
 
-  "com.iheart" %% "ficus" % "1.4.2",
+  "com.iheart" %% "ficus" % "1.4.3",
 
   "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.5.4",
+  "io.sentry" % "sentry-logback" % "1.6.1",
 
   "org.apache.commons" % "commons-text" % "1.1" % Test,
   specs2 % Test
@@ -150,7 +152,7 @@ javaOptions in Test ++= Seq("-Dconfig.resource=application.test.conf")
 
 version in Docker := "latest"
 maintainer in Docker := "antono@loveit.tips"
-dockerBaseImage := "openjdk:8u131-jre"
+dockerBaseImage := "openjdk:8u151-jre"
 dockerRepository := Some("loveit")
 dockerExposedPorts := Seq(9000, 9443)
 

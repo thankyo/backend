@@ -91,7 +91,7 @@ object MongoUserRepository {
       ),
       Index(
         key = Seq("email" -> IndexType.Ascending),
-        name = Some("user_profiles"),
+        name = Some("user_email"),
         unique = true,
       )
     )

@@ -1,5 +1,5 @@
 mongo:
-  image: mongo:3.4.9
+  image: mongo:3.4.10
   restart: always
   ports:
     - "27017:27017"

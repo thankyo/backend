@@ -26,27 +26,6 @@ class PaymentRepositorySpec extends RepositorySpec {
     await(repo.getBalance(A)) shouldEqual -100
   }
 
-  "PAYOUT ACCOUNT" should {
-
-    "get" in {
-      val A = createUser()
-      await(repo.getPayoutAccount(A)) shouldEqual None
-    }
-
-    "set same" in {
-      val A = createUser()
-      val B = createUser()
-      val ptAcc = someRandom[PayoutAccount]
-
-      await(repo.setPayoutAccount(A, ptAcc)) shouldEqual true
-      await(repo.setPayoutAccount(B, ptAcc)) should throwA[RepositoryException]
-
-      await(repo.getPayoutAccount(A)) shouldEqual Some(ptAcc)
-      await(repo.getPayoutAccount(B)) shouldNotEqual Some(ptAcc)
-    }
-
-  }
-
 
   "CHARGE ACCOUNT" should {
 

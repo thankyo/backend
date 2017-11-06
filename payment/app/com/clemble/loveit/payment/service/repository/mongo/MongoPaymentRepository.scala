@@ -104,6 +104,12 @@ case class MongoPaymentRepository @Inject()(
     MongoSafeUtils.safe(update)
   }
 
+  override def deletePayoutAccount(user: UserID) = {
+    val query = Json.obj("_id" -> user)
+    val change = Json.obj("$unset" -> Json.obj("payoutAccount" -> ""))
+    val update = collection.update(query, change).map(res => res.ok && res.n == 1)
+    MongoSafeUtils.safe(update)
+  }
 }
 
 object MongoPaymentRepository {

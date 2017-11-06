@@ -21,6 +21,8 @@ trait PayoutAccountService {
 
   def updatePayoutAccount(user: UserID, token: String): Future[PayoutAccount]
 
+  def deletePayoutAccount(user: UserID): Future[Boolean]
+
 }
 
 @Singleton
@@ -38,6 +40,10 @@ case class SimplePayoutAccountService @Inject()(repo: PayoutAccountRepository, c
       if (!updated) throw PaymentException.failedToLinkChargeAccount(user)
       ptAcc
     }
+  }
+
+  override def deletePayoutAccount(user: UserID) = {
+    repo.deletePayoutAccount(user)
   }
 
 }

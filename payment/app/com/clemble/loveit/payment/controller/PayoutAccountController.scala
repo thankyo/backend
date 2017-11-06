@@ -1,15 +1,15 @@
 package com.clemble.loveit.payment.controller
 
-import java.net.URLDecoder
 import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.payment.service.{PayoutAccountService}
+import com.clemble.loveit.payment.service.PayoutAccountService
 import com.mohiva.play.silhouette.api.Silhouette
-import com.mohiva.play.silhouette.api.crypto.Crypter
+import com.mohiva.play.silhouette.api.crypto.{Base64, Crypter}
 import play.api.Configuration
+import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,35 +33,40 @@ class PayoutAccountController @Inject()(
       s"response_type=code&" +
       s"client_id=${clientId}&" +
       s"scope=read_write&" +
-      s"state=${crypter.encrypt(user)}"
-  }
-
-  private def doConnectMyAccount[A](user: UserID, req: Request[A]): Future[Result] = {
-    if (req.queryString.isEmpty) {
-      cookieUtils.readUser(req)
-      Future.successful(Redirect(toStripeUrl(user)))
-    } else {
-      val tokenOpt = req.queryString.get("code").flatMap(_.headOption)
-      val userOpt = req.queryString.get("state").flatMap(_.headOption).map(URLDecoder.decode(_, "utf-8")).map(crypter.decrypt)
-      (tokenOpt, userOpt) match {
-        case (Some(token), Some(user)) =>
-          payoutAccService.
-            updatePayoutAccount(user, token).
-            map(_ => Redirect("/creator/my"))
-        case _ =>
-          Future.successful(BadRequest)
-      }
-    }
+      s"state=${Base64.encode(crypter.encrypt(user))}"
   }
 
   def connectMyAccount = silhouette.UnsecuredAction.async(implicit req => {
     val userOpt = cookieUtils.readUser(req)
     if (userOpt.isEmpty) {
-      Future.successful(BadRequest("No user exists"))
-    } else {
-      val user = userOpt.get
-      doConnectMyAccount(user, req)
+      throw new IllegalArgumentException("No user exists")
     }
+    val user = userOpt.get
+    if (req.queryString.isEmpty) {
+      Future.successful(Redirect(toStripeUrl(user)))
+    } else {
+      val tokenOpt = req.queryString.get("code").flatMap(_.headOption)
+      val expectedUser = cookieUtils.readUser(req)
+      val userOpt = req.queryString.get("state").flatMap(_.headOption).map(Base64.decode).map(crypter.decrypt)
+      if (userOpt != expectedUser) {
+        Future.successful(BadRequest)
+      } else {
+        (tokenOpt, userOpt) match {
+          case (Some(token), Some(user)) =>
+            payoutAccService.
+              updatePayoutAccount(user, token).
+              map(_ => Redirect("/settings/payout"))
+          case _ =>
+            Future.successful(BadRequest)
+        }
+      }
+    }
+  })
+
+  def deleteMyAccount() = silhouette.SecuredAction.async(implicit req => {
+    val userID = req.identity.id
+    val fDelete = payoutAccService.deletePayoutAccount(userID)
+    fDelete.map(removed => Ok(JsBoolean(removed)))
   })
 
 }

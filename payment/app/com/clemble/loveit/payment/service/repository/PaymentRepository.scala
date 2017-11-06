@@ -56,6 +56,8 @@ trait PayoutAccountRepository {
     * Set [[PayoutAccount]] for the user
     */
   def setPayoutAccount(user: UserID, payoutAccount: PayoutAccount): Future[Boolean]
+
+  def deletePayoutAccount(user: UserID): Future[Boolean]
 }
 
 trait UserBalanceRepository {

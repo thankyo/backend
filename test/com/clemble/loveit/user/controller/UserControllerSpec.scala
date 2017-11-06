@@ -2,17 +2,18 @@ package com.clemble.loveit.user.controller
 
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.ControllerSpec
-import com.clemble.loveit.user.model.User
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+import com.clemble.loveit.common.controller.CookieUtils
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 import play.api.libs.json.Json
-import com.clemble.loveit.user.model.User.socialProfileJsonFormat
+import com.mohiva.play.silhouette.api.crypto.Base64
 import play.api.test.FakeRequest
 
 @RunWith(classOf[JUnitRunner])
 class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
+
+  val cookieUtil = dependency[CookieUtils]
 
   "CREATE" should {
 
@@ -43,7 +44,7 @@ class UserControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
       setCookie.size shouldEqual 1
 
-      val userId = setCookie.head.value
+      val userId = cookieUtil.crypter.decrypt(Base64.decode(setCookie.head.value))
       val expectedId = getMyUser(userId).id
       userId shouldEqual expectedId
     }

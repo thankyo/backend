@@ -33,8 +33,15 @@ class PayoutAccountController @Inject()(
       s"response_type=code&" +
       s"client_id=${clientId}&" +
       s"scope=read_write&" +
+      s"type=standard&" +
       s"state=${Base64.encode(crypter.encrypt(user))}"
   }
+
+  def getMyAccount = silhouette.SecuredAction.async(implicit req => {
+    val user = req.identity.id
+    payoutAccService.getPayoutAccount(user).
+      map(accOpt => Ok(JsBoolean(accOpt.isDefined)))
+  })
 
   def connectMyAccount = silhouette.UnsecuredAction.async(implicit req => {
     val userOpt = cookieUtils.readUser(req)
@@ -64,8 +71,8 @@ class PayoutAccountController @Inject()(
   })
 
   def deleteMyAccount() = silhouette.SecuredAction.async(implicit req => {
-    val userID = req.identity.id
-    val fDelete = payoutAccService.deletePayoutAccount(userID)
+    val user = req.identity.id
+    val fDelete = payoutAccService.deletePayoutAccount(user)
     fDelete.map(removed => Ok(JsBoolean(removed)))
   })
 

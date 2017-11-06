@@ -20,8 +20,9 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ThankController @Inject()(
                                       service: ThankService,
                                       silhouette: Silhouette[AuthEnv],
-                                      components: ControllerComponents,
-                                      implicit val ec: ExecutionContext
+                                      components: ControllerComponents)(
+                                      implicit val ec: ExecutionContext,
+                                      cookieUtils: CookieUtils
                                     ) extends AbstractController(components) {
 
   private def getJson(res: Resource): Future[Result] = {
@@ -52,7 +53,7 @@ case class ThankController @Inject()(
   def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     render.async({
       case Accepts.Json() => getJson(res)
-      case Accepts.Html() => getHtml(CookieUtils.readUser(req), res)
+      case Accepts.Html() => getHtml(cookieUtils.readUser(req), res)
     })
   })
 

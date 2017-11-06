@@ -5,11 +5,12 @@ import javax.inject.Inject
 import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
 import com.clemble.loveit.auth.model.requests.RegisterRequest
-import com.clemble.loveit.auth.service.{AuthService}
+import com.clemble.loveit.auth.service.AuthService
+import com.clemble.loveit.common.controller.CookieUtils
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 
 /**
   * The `Register` controller.
@@ -22,9 +23,10 @@ class RegisterController @Inject()(
                                   authService: AuthService,
                                   components: ControllerComponents
                                 )(
-                                  implicit
-                                  silhouette: Silhouette[AuthEnv],
-                                  ex: ExecutionContext
+                                    implicit
+                                    silhouette: Silhouette[AuthEnv],
+                                    cookieUtils: CookieUtils,
+                                    ex: ExecutionContext
                                 ) extends AbstractController(components) with I18nSupport {
 
   /**

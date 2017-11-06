@@ -57,6 +57,14 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
 
   @Provides
   @Singleton
+  @Named("cookieCrypter")
+  def cookieCrypter(): Crypter = {
+    val config = conf.underlying.as[JcaCrypterSettings]("silhouette.cookie.crypter")
+    new JcaCrypter(config)
+  }
+
+  @Provides
+  @Singleton
   @Named("authInfo")
   def authInfoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext) = {
     JSONCollectionFactory.create("authInfo", mongoApi, ec, env)

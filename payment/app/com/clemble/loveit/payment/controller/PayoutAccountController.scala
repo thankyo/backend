@@ -1,11 +1,12 @@
 package com.clemble.loveit.payment.controller
 
+import java.net.URLDecoder
 import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.controller.CookieUtils
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.payment.service.{ChargeAccountService, PayoutAccountService}
+import com.clemble.loveit.payment.service.{PayoutAccountService}
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import play.api.Configuration
@@ -19,8 +20,10 @@ class PayoutAccountController @Inject()(
                                          @Named("paymentCrypter") crypter: Crypter,
                                          payoutAccService: PayoutAccountService,
                                          components: ControllerComponents,
-                                         silhouette: Silhouette[AuthEnv],
-                                         implicit val ec: ExecutionContext
+                                         silhouette: Silhouette[AuthEnv])
+                                       (
+                                         implicit val ec: ExecutionContext,
+                                         implicit val cookieUtils: CookieUtils
                                    ) extends AbstractController(components) {
 
   private val clientId = conf.get[String]("payment.stripe.clientId")
@@ -35,11 +38,11 @@ class PayoutAccountController @Inject()(
 
   private def doConnectMyAccount[A](user: UserID, req: Request[A]): Future[Result] = {
     if (req.queryString.isEmpty) {
-      CookieUtils.readUser(req)
+      cookieUtils.readUser(req)
       Future.successful(Redirect(toStripeUrl(user)))
     } else {
       val tokenOpt = req.queryString.get("code").flatMap(_.headOption)
-      val userOpt = req.queryString.get("state").flatMap(_.headOption).map(crypter.decrypt)
+      val userOpt = req.queryString.get("state").flatMap(_.headOption).map(URLDecoder.decode(_, "utf-8")).map(crypter.decrypt)
       (tokenOpt, userOpt) match {
         case (Some(token), Some(user)) =>
           payoutAccService.
@@ -52,7 +55,7 @@ class PayoutAccountController @Inject()(
   }
 
   def connectMyAccount = silhouette.UnsecuredAction.async(implicit req => {
-    val userOpt = CookieUtils.readUser(req)
+    val userOpt = cookieUtils.readUser(req)
     if (userOpt.isEmpty) {
       Future.successful(BadRequest("No user exists"))
     } else {

@@ -9,11 +9,12 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 
 class LogoutController @Inject() (
                                    silhouette: Silhouette[AuthEnv],
+                                   cookieUtils: CookieUtils,
                                    components: ControllerComponents
                                  ) extends AbstractController(components) {
 
   def logout() = silhouette.UnsecuredAction(_ => {
-    Redirect("/").withCookies(CookieUtils.removeUser())
+    Redirect("/").withCookies(cookieUtils.removeUser())
   })
 
 }

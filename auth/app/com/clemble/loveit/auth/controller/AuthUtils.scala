@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object AuthUtils {
 
-  def authResponse(authRes: AuthServiceResult)(implicit req: RequestHeader, ec: ExecutionContext, silhouette: Silhouette[AuthEnv]): Future[Result] = {
+  def authResponse(authRes: AuthServiceResult)(implicit req: RequestHeader, ec: ExecutionContext, silhouette: Silhouette[AuthEnv], cookieUtils: CookieUtils): Future[Result] = {
     val user = authRes.user
     val userDetails = Some(User.jsonFormat.writes(user))
     val existingUser = authRes match {
@@ -30,7 +30,7 @@ object AuthUtils {
       }
       silhouette.env.eventBus.publish(LoginEvent(user, req))
 
-      CookieUtils.setUser(httpRes, user.id)
+      cookieUtils.setUser(httpRes, user.id)
     }
   }
 

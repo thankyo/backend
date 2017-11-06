@@ -10,9 +10,8 @@ version := "1.0-SNAPSHOT"
 scalaVersion := "2.12.4"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val reactiveMongoVer = "0.12.6"
 val silhouetteVersion = "5.0.2"
-val reactMongoVersion = "0.12.7"
+val reactMongoVersion = "0.12.6"
 
 val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.12.4"

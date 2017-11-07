@@ -4,7 +4,7 @@ import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.controller.ControllerUtils._
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.UserID
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -17,7 +17,7 @@ case class UserController @Inject()(
                                      silhouette: Silhouette[AuthEnv],
                                      components: ControllerComponents,
                                      implicit val ec: ExecutionContext
-                                   ) extends AbstractController(components) {
+                                   ) extends LoveItController(components) {
 
   def get(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     import com.clemble.loveit.user.model.User.userWriteable

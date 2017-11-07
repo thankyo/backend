@@ -3,7 +3,7 @@ package com.clemble.loveit.auth.controller
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.service.AuthService
-import com.clemble.loveit.common.controller.CookieUtils
+import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
@@ -30,7 +30,7 @@ class SocialAuthController @Inject()(
                                       ec: ExecutionContext,
                                       cookieUtils: CookieUtils,
                                       silhouette: Silhouette[AuthEnv]
-                                    ) extends AbstractController(components) with Logger {
+                                    ) extends LoveItController(components) with Logger {
 
   /**
     * Authenticates a user against a social provider.

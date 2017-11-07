@@ -2,6 +2,7 @@ package com.clemble.loveit.user.controller
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.model.Invitation
 import com.clemble.loveit.user.service.InvitationService
@@ -21,7 +22,7 @@ case class InvitationController @Inject()(
                                            socialProviderRegistry: SocialProviderRegistry,
                                            components: ControllerComponents,
                                            implicit val ec: ExecutionContext
-                                         ) extends AbstractController(components) with Logger {
+                                         ) extends LoveItController(components) with Logger {
 
   def invite() = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "linkOrEmail"))(implicit req => {
     req.body match {

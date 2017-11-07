@@ -4,6 +4,7 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 import com.clemble.loveit.common.controller.ControllerUtils._
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.service.UserStatService
@@ -18,7 +19,7 @@ class UserStatController @Inject()(
                                     silhouette: Silhouette[AuthEnv],
                                     components: ControllerComponents,
                                     implicit val ec: ExecutionContext
-                                  ) extends AbstractController(components) {
+                                  ) extends LoveItController(components) {
 
   def get(supporter: UserID, year: Int, month: Int) = silhouette.SecuredAction.async(implicit req => {
     val user = idOrMe(supporter)

@@ -1,12 +1,13 @@
 package com.clemble.loveit.payment.controller
 
-import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.controller.LoveItController
+import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.service.ChargeAccountService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
@@ -15,8 +16,8 @@ case class ChargeAccountController @Inject()(
                                               chargeAccService: ChargeAccountService,
                                               components: ControllerComponents,
                                               silhouette: Silhouette[AuthEnv]
-                                            )( implicit ec: ExecutionContext
-) extends AbstractController(components) {
+                                            )(implicit ec: ExecutionContext
+                                            ) extends LoveItController(components) {
 
   def getMyAccount: Action[AnyContent] = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id

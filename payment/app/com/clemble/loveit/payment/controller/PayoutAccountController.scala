@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.controller
 
 import javax.inject.{Inject, Named, Singleton}
 
-import com.clemble.loveit.common.controller.CookieUtils
+import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.service.PayoutAccountService
@@ -24,7 +24,7 @@ class PayoutAccountController @Inject()(
                                        (
                                          implicit val ec: ExecutionContext,
                                          implicit val cookieUtils: CookieUtils
-                                   ) extends AbstractController(components) {
+                                   ) extends LoveItController(components) {
 
   private val clientId = conf.get[String]("payment.stripe.clientId")
 

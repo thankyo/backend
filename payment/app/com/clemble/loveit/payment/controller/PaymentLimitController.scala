@@ -2,12 +2,12 @@ package com.clemble.loveit.payment.controller
 
 import javax.inject.Inject
 
-import com.clemble.loveit.common.controller.ControllerUtils
+import com.clemble.loveit.common.controller.{ControllerUtils, LoveItController}
 import com.clemble.loveit.common.model.{Money, UserID}
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.service.repository.PaymentLimitRepository
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
@@ -16,10 +16,10 @@ class PaymentLimitController @Inject()(
                                         components: ControllerComponents,
                                         silhouette: Silhouette[AuthEnv],
                                         implicit val ec: ExecutionContext
-                                      ) extends AbstractController(components) {
+                                      ) extends LoveItController(components) {
 
   def getMonthlyLimit(user: UserID) = silhouette.SecuredAction.async(implicit req => {
-    val userID = ControllerUtils.idOrMe(user)
+    val userID = idOrMe(user)
     repo.getMonthlyLimit(userID).map(_ match {
       case Some(limit) => Ok(limit)
       case None => NotFound
@@ -31,7 +31,10 @@ class PaymentLimitController @Inject()(
     val fLimit = repo.setMonthlyLimit(user, req.body)
     fLimit.map(_ match {
       case true => Ok(req.body)
-      case false => InternalServerError("Failed to update user")
+      case false => {
+        LOG.error(s"${user} failed to update")
+        InternalServerError("Failed to update user")
+      }
     })
   })
 

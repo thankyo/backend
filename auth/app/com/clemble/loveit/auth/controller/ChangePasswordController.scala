@@ -8,6 +8,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import com.clemble.loveit.auth.model.requests.ChangePasswordRequest
+import com.clemble.loveit.common.controller.LoveItController
 import play.api.i18n.I18nSupport
 import play.api.libs.json.JsBoolean
 import play.api.mvc.{AbstractController, ControllerComponents, PlayBodyParsers}
@@ -33,7 +34,7 @@ class ChangePasswordController @Inject()(
                                         )(
                                           implicit
                                           ex: ExecutionContext
-                                        ) extends AbstractController(components) with I18nSupport {
+                                        ) extends LoveItController(components) with I18nSupport {
 
   /**
     * Changes the password.

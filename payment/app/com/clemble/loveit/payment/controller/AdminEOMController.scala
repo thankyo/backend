@@ -3,6 +3,7 @@ package com.clemble.loveit.payment.controller
 import java.time.YearMonth
 import javax.inject.Inject
 
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.service.EOMPaymentService
 import com.mohiva.play.silhouette.api.Silhouette
@@ -16,7 +17,7 @@ class AdminEOMController @Inject()(
                                     silhouette: Silhouette[AuthEnv],
                                     components: ControllerComponents,
                                     implicit val ec: ExecutionContext
-                                  ) extends AbstractController(components) {
+                                  ) extends LoveItController(components) {
 
   def getStatus(yom: YearMonth): Action[AnyContent] = silhouette.SecuredAction.async(implicit req => {
     val fStatus = service.getStatus(yom)

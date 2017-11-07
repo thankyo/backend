@@ -5,7 +5,7 @@ import com.clemble.loveit.thank.service.ThankService
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.controller.CookieUtils
+import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.error.ResourceException._
 import com.mohiva.play.silhouette.api.Silhouette
@@ -23,7 +23,7 @@ case class ThankController @Inject()(
                                       components: ControllerComponents)(
                                       implicit val ec: ExecutionContext,
                                       cookieUtils: CookieUtils
-                                    ) extends AbstractController(components) {
+                                    ) extends LoveItController(components) {
 
   private def getJson(res: Resource): Future[Result] = {
     service.getOrCreate(res).map(Ok(_))

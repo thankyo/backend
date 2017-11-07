@@ -6,7 +6,7 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.auth.service.AuthService
-import com.clemble.loveit.common.controller.CookieUtils
+import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 
@@ -27,7 +27,7 @@ class RegisterController @Inject()(
                                     silhouette: Silhouette[AuthEnv],
                                     cookieUtils: CookieUtils,
                                     ex: ExecutionContext
-                                ) extends AbstractController(components) with I18nSupport {
+                                ) extends LoveItController(components) with I18nSupport {
 
   /**
     * Handles the submitted form.

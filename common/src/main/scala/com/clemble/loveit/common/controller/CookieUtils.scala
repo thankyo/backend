@@ -16,7 +16,7 @@ case class CookieUtils @Inject() (@Named("cookieCrypter") crypter: Crypter) {
   def readUser[A](req: Request[A]): Option[UserID] = {
     req.cookies.find(_.name == COOKIE_NAME).
       map(_.value).
-      map(Base64.decode(_)).
+      map(Base64.decode).
       map(crypter.decrypt)
   }
 

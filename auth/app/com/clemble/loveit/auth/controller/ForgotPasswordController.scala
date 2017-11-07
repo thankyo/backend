@@ -9,6 +9,7 @@ import com.clemble.loveit.auth.model.requests.ForgotPasswordRequest
 import com.clemble.loveit.auth.service.AuthTokenService
 import com.clemble.loveit.auth.views.html.emails.resetPassword
 import com.clemble.loveit.auth.views.txt.emails
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.error.FieldValidationError
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import org.matthicks.mailgun.{EmailAddress, Mailgun, Message}
@@ -37,7 +38,7 @@ class ForgotPasswordController @Inject()(
                                         )(
                                           implicit
                                           ex: ExecutionContext
-                                        ) extends AbstractController(components) with I18nSupport {
+                                        ) extends LoveItController(components) with I18nSupport {
 
   /**
     * Sends an email with password reset instructions.

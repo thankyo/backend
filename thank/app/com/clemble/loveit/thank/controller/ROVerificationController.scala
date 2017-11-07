@@ -2,6 +2,7 @@ package com.clemble.loveit.thank.controller
 
 import javax.inject.Inject
 
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.service.ROVerificationService
@@ -16,7 +17,7 @@ case class ROVerificationController @Inject()(
                                                components: ControllerComponents,
                                                silhouette: Silhouette[AuthEnv],
                                                implicit val ec: ExecutionContext
-                                             ) extends AbstractController(components) {
+                                             ) extends LoveItController(components) {
 
   def removeMy() = silhouette.SecuredAction.async(implicit req => {
     val fRemove = service.remove(req.identity.id)

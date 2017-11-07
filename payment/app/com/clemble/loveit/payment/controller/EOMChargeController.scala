@@ -2,6 +2,7 @@ package com.clemble.loveit.payment.controller
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import com.mohiva.play.silhouette.api.Silhouette
@@ -15,7 +16,7 @@ class EOMChargeController @Inject()(
                                      silhouette: Silhouette[AuthEnv],
                                      components: ControllerComponents,
                                      implicit val ec: ExecutionContext
-                                   ) extends AbstractController(components) {
+                                   ) extends LoveItController(components) {
 
   def listMy() = silhouette.SecuredAction(req => {
     val charges = chargeRepo.findByUser(req.identity.id)

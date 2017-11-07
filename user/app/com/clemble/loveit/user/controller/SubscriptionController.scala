@@ -2,6 +2,7 @@ package com.clemble.loveit.user.controller
 
 import javax.inject.{Inject, Singleton}
 
+import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.user.service.SubscriptionManager
 import play.api.libs.json.{JsBoolean, JsDefined, JsObject, JsString}
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -13,7 +14,7 @@ case class SubscriptionController @Inject()(
                                              subManager: SubscriptionManager,
                                              components: ControllerComponents,
                                              implicit val ec: ExecutionContext
-                                           ) extends AbstractController(components) {
+                                           ) extends LoveItController(components) {
 
   def subscribeCreator() = Action.async(parse.json[JsObject].map(_ \ "email"))(implicit req => {
     req.body match {

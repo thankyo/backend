@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.clemble.loveit.auth.model.requests.LogInRequest
 import com.clemble.loveit.auth.service.AuthService
-import com.clemble.loveit.common.controller.CookieUtils
+import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.util.Credentials
@@ -28,7 +28,7 @@ class LogInController @Inject()(
                                  silhouette: Silhouette[AuthEnv],
                                  cookieUtils: CookieUtils,
                                  ex: ExecutionContext
-                               ) extends AbstractController(components) with I18nSupport {
+                               ) extends LoveItController(components) with I18nSupport {
 
 
   implicit val credentialsJson: OFormat[Credentials] = Json.format[Credentials]

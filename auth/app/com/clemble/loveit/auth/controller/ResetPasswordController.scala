@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import com.clemble.loveit.auth.model.requests.RestorePasswordRequest
 import com.clemble.loveit.auth.service.{AuthTokenService, UserLoggedIn}
-import com.clemble.loveit.common.controller.CookieUtils
+import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.user.service.UserService
@@ -40,7 +40,7 @@ class ResetPasswordController @Inject()(
                                          silhouette: Silhouette[AuthEnv],
                                          cookieUtils: CookieUtils,
                                          ex: ExecutionContext
-                                       ) extends AbstractController(components) with I18nSupport {
+                                       ) extends LoveItController(components) with I18nSupport {
 
   /**
     * Resets the password.

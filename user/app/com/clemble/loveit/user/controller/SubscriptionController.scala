@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.user.service.SubscriptionManager
 import play.api.libs.json.{JsBoolean, JsDefined, JsObject, JsString}
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{ControllerComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -9,7 +9,7 @@ import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.error.ResourceException._
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.mvc.{AbstractController, ControllerComponents, Result}
+import play.api.mvc.{ControllerComponents, Result}
 import com.clemble.loveit.thank.controller.html.hasNotThanked
 import com.clemble.loveit.thank.controller.html.ownerMissing
 import com.clemble.loveit.thank.controller.html.hasThanked

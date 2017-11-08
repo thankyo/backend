@@ -10,7 +10,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.{Logger, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import play.api.libs.json._
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{ControllerComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 

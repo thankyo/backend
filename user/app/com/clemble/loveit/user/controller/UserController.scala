@@ -7,7 +7,7 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.UserID
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 

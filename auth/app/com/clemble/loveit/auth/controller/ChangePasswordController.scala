@@ -11,7 +11,7 @@ import com.clemble.loveit.auth.model.requests.ChangePasswordRequest
 import com.clemble.loveit.common.controller.LoveItController
 import play.api.i18n.I18nSupport
 import play.api.libs.json.JsBoolean
-import play.api.mvc.{AbstractController, ControllerComponents, PlayBodyParsers}
+import play.api.mvc.{ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 

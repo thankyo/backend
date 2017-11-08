@@ -3,14 +3,13 @@ package com.clemble.loveit.thank.controller
 import java.time.YearMonth
 import javax.inject.Inject
 
-import com.clemble.loveit.common.controller.ControllerUtils._
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.service.UserStatService
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 

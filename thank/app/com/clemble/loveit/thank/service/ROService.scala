@@ -5,7 +5,7 @@ import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.{Resource, UserID}
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.thank.service.repository.{RORepository, ThankRepository}
+import com.clemble.loveit.thank.service.repository.{RORepository, PostRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -18,7 +18,7 @@ trait ROService {
 }
 
 @Singleton
-case class SimpleResourceOwnershipService @Inject() (userRepo: RORepository, supportedProjectService: SupportedProjectService, thankRepo: ThankRepository, implicit val ec: ExecutionContext) extends ROService {
+case class SimpleResourceOwnershipService @Inject() (userRepo: RORepository, supportedProjectService: SupportedProjectService, thankRepo: PostRepository, implicit val ec: ExecutionContext) extends ROService {
 
   override def list(user: UserID): Future[Set[Resource]] = {
     userRepo.listOwned(user)

@@ -11,7 +11,8 @@ case class SupportedProject(
                              lastName: Option[String] = None,
                              avatar: Option[String] = None,
                              bio: Option[String] = None,
-                             link: Option[String] = None
+                             link: Option[String] = None,
+                             tags: List[String] = List.empty
                            ) extends UserAware {
 
   val user: UserID = id

@@ -1,11 +1,11 @@
 package com.clemble.loveit.thank.service.repository.mongo
 
-import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.model.{SupportedProject, Thank}
-import com.clemble.loveit.thank.service.repository.ThankRepository
 import javax.inject.{Inject, Named, Singleton}
 
+import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.mongo.MongoSafeUtils
+import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
+import com.clemble.loveit.thank.service.repository.PostRepository
 import play.api.libs.json.{JsArray, JsObject, Json}
 import play.modules.reactivemongo.json._
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -14,41 +14,41 @@ import reactivemongo.play.json.collection.JSONCollection
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class MongoThankRepository @Inject()(
-                                           @Named("thank") collection: JSONCollection,
-                                           implicit val ec: ExecutionContext
-                                         ) extends ThankRepository {
+case class MongoPostRepository @Inject()(
+                                          @Named("post") collection: JSONCollection,
+                                          implicit val ec: ExecutionContext
+                                        ) extends PostRepository {
 
-  MongoThankRepository.ensureMeta(collection)
+  MongoPostRepository.ensureMeta(collection)
 
-  override def thanked(giver: UserID, resource: Resource): Future[Option[Boolean]] = {
+  override def isSupportedBy(supporter: UserID, resource: Resource): Future[Option[Boolean]] = {
     val query = Json.obj(
       "resource" -> resource,
-      "givers" -> Json.obj("$exists" -> giver)
+      "thank.supporters" -> Json.obj("$exists" -> supporter)
     )
-    val projection = Json.obj("givers" -> 1)
+    val projection = Json.obj("thank.supporters" -> 1)
     collection.find(query, projection).
       one[JsObject].
-      map(_.flatMap(json => (json \ "givers").asOpt[JsArray].map(_.value.nonEmpty)))
+      map(_.flatMap(json => (json \ "thank" \ "supporters").asOpt[JsArray].map(_.value.nonEmpty)))
   }
 
-  override def save(thank: Thank): Future[Boolean] = {
-    MongoSafeUtils.safeSingleUpdate(collection.insert(thank))
+  override def save(post: Post): Future[Boolean] = {
+    MongoSafeUtils.safeSingleUpdate(collection.insert(post))
   }
 
-  override def findByResource(resource: Resource): Future[Option[Thank]] = {
-    val fSearchResult = collection.find(Json.obj("resource" -> resource)).one[Thank]
+  override def findByResource(resource: Resource): Future[Option[Post]] = {
+    val fSearchResult = collection.find(Json.obj("resource" -> resource)).one[Post]
     MongoSafeUtils.safe(fSearchResult)
   }
 
-  override def increase(user: UserID, resource: Resource): Future[Boolean] = {
+  override def markSupported(user: UserID, resource: Resource): Future[Boolean] = {
     val query = Json.obj(
       "resource" -> resource,
-      "givers" -> Json.obj("$ne" -> user)
+      "thank.supporters" -> Json.obj("$ne" -> user)
     )
     val update = Json.obj(
-      "$inc" -> Json.obj("given" -> 1),
-      "$addToSet" -> Json.obj("givers" -> user)
+      "$inc" -> Json.obj("thank.given" -> 1),
+      "$addToSet" -> Json.obj("thank.supporters" -> user)
     )
     MongoSafeUtils.safeSingleUpdate(collection.update(query, update, multi = false))
   }
@@ -64,13 +64,13 @@ case class MongoThankRepository @Inject()(
         )
         val update = Json.obj("$set" -> Json.obj("project" -> project))
         collection.update(query, update, multi = true).map(res => res.ok && res.n > 0)
-      case None => save(Thank(res, project))
+      case None => save(Post(res, project))
     })
   }
 
 }
 
-object MongoThankRepository {
+object MongoPostRepository {
 
   def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext) = {
     ensureIndexes(collection)

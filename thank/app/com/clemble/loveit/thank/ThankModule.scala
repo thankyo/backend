@@ -20,8 +20,8 @@ import scala.concurrent.ExecutionContext
 class ThankModule @Inject()(env: Environment, conf: Configuration) extends ScalaModule {
 
   override def configure(): Unit = {
-    bind(classOf[ThankService]).to(classOf[SimpleThankService])
-    bind(classOf[ThankRepository]).to(classOf[MongoThankRepository])
+    bind(classOf[PostService]).to(classOf[SimplePostService])
+    bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
 
     bind(classOf[RORepository]).to(classOf[MongoRORepository]).asEagerSingleton()
     bind(classOf[ROService]).to(classOf[SimpleResourceOwnershipService])
@@ -52,9 +52,9 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
   @Provides
   @Singleton
-  @Named("thank")
-  def thankMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("thank", mongoApi, ec, env)
+  @Named("post")
+  def postMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("post", mongoApi, ec, env)
   }
 
   @Provides

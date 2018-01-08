@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.model.SupportedProject
-import com.clemble.loveit.thank.service.repository.ThankRepository
+import com.clemble.loveit.thank.service.repository.PostRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -11,8 +11,8 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
-  val thankService = dependency[ThankService]
-  val thankRepo = dependency[ThankRepository]
+  val thankService = dependency[PostService]
+  val thankRepo = dependency[PostRepository]
   val supportedProjectService = dependency[SupportedProjectService]
 
   def createScene():(Resource, UserID, UserID) = {

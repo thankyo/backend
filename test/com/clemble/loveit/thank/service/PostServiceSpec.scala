@@ -4,16 +4,16 @@ import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.model.SupportedProject
-import com.clemble.loveit.thank.service.repository.ThankRepository
+import com.clemble.loveit.thank.service.repository.PostRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
+class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
-  val thankService = dependency[ThankService]
-  val thankRepo = dependency[ThankRepository]
+  val thankService = dependency[PostService]
+  val thankRepo = dependency[PostRepository]
   val supportedProjectService = dependency[SupportedProjectService]
 
   def createScene():(Resource, UserID, UserID) = {
@@ -33,7 +33,7 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
   }
 
   def getBalance(url: Resource): Amount = {
-    await(thankService.getOrCreate(url)).given
+    await(thankService.getOrCreate(url)).thank.given
   }
 
   "thanked" should {
@@ -42,20 +42,20 @@ class ThankServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTest
       val user = someRandom[UserID]
       val res = someRandom[Resource]
 
-      await(thankService.hasThanked(user, res)) should throwA[ResourceException]
+      await(thankService.hasSupported(user, res)) should throwA[ResourceException]
     }
 
     "return false on not thanked res" in {
       val (res, _, giver) = createScene()
 
-      await(thankService.hasThanked(giver, res)) shouldEqual false
+      await(thankService.hasSupported(giver, res)) shouldEqual false
     }
 
     "return true if thanked" in {
       val (res, _, giver) = createScene()
 
       await(thankService.thank(giver, res))
-      await(thankService.hasThanked(giver, res)) shouldEqual true
+      await(thankService.hasSupported(giver, res)) shouldEqual true
     }
 
   }

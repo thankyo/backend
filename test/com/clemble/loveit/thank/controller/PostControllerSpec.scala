@@ -10,7 +10,7 @@ import play.api.test.FakeRequest
 import scala.concurrent.Future
 
 @RunWith(classOf[JUnitRunner])
-class ThankControllerSpec extends PaymentControllerTestExecutor {
+class PostControllerSpec extends PaymentControllerTestExecutor {
 
   "UPDATE" should {
 

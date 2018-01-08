@@ -2,9 +2,8 @@ package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.thank.model.{SupportedProject, Thank}
-import com.clemble.loveit.thank.service.ThankService
+import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
+import com.clemble.loveit.thank.service.PostService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -12,18 +11,18 @@ import org.specs2.runner.JUnitRunner
 import scala.concurrent.Future
 
 @RunWith(classOf[JUnitRunner])
-class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
+class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val repo = dependency[ThankRepository]
-  val service = dependency[ThankService]
+  val repo = dependency[PostRepository]
+  val service = dependency[PostService]
 
-  def findAll(resources: Seq[Resource]): Future[Seq[Thank]] = {
-    val searchQuery: Future[Seq[Option[Thank]]] = Future.sequence(resources.map(uri => repo.findByResource(uri)))
+  def findAll(resources: Seq[Resource]): Future[Seq[Post]] = {
+    val searchQuery: Future[Seq[Option[Post]]] = Future.sequence(resources.map(uri => repo.findByResource(uri)))
     searchQuery.map(_.flatten)
   }
 
-  def createParentThank(thank: Thank) = {
-    val ownerResource = Thank(thank.resource.parents.last, someRandom[SupportedProject])
+  def createParentThank(post: Post) = {
+    val ownerResource = Post(post.resource.parents.last, someRandom[SupportedProject])
     await(repo.save(ownerResource))
   }
 
@@ -33,26 +32,26 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val user = someRandom[UserID]
       val resource = someRandom[Resource]
 
-      await(repo.thanked(user, resource)) shouldEqual None
+      await(repo.isSupportedBy(user, resource)) shouldEqual None
     }
 
     "be false for not thanked" in {
       val user = someRandom[UserID]
 
-      val thank = someRandom[Thank]
-      await(repo.save(thank))
+      val post = someRandom[Post]
+      await(repo.save(post))
 
-      await(repo.thanked(user, thank.resource)) shouldEqual Some(false)
+      await(repo.isSupportedBy(user, post.resource)) shouldEqual Some(false)
     }
 
     "be true for thanked" in {
       val user = someRandom[UserID]
 
-      val thank = someRandom[Thank]
-      await(repo.save(thank))
+      val post = someRandom[Post]
+      await(repo.save(post))
 
-      await(repo.increase(user, thank.resource))
-      await(repo.thanked(user, thank.resource)) shouldEqual Some(true)
+      await(repo.markSupported(user, post.resource))
+      await(repo.isSupportedBy(user, post.resource)) shouldEqual Some(true)
     }
 
   }
@@ -60,12 +59,12 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   "CREATE" should {
 
     "create all parents" in {
-      val thank = someRandom[Thank]
-      createParentThank(thank)
+      val post = someRandom[Post]
+      createParentThank(post)
 
-      val urlParents = thank.resource.parents()
+      val urlParents = post.resource.parents()
       val allCreatedUri = for {
-        _ <- service.getOrCreate(thank.resource)
+        _ <- service.getOrCreate(post.resource)
         search <- findAll(urlParents).map(_.map(_.resource))
       } yield {
         search
@@ -79,24 +78,24 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
   "INCREASE" should {
 
     "increase only the nodes" in {
-      val thank = someRandom[Thank].copy(given = 0)
-      createParentThank(thank)
+      val post = someRandom[Post].copy(thank = Thank())
+      createParentThank(post)
 
-      await(repo.save(thank))
-      await(repo.increase("some", thank.resource)) shouldEqual true
+      await(repo.save(post))
+      await(repo.markSupported("some", post.resource)) shouldEqual true
 
-      await(repo.findByResource(thank.resource)).get.given shouldEqual 1
+      await(repo.findByResource(post.resource)).get.thank.given shouldEqual 1
     }
 
     "increase only once for the user" in {
-      val thank = someRandom[Thank].copy(given = 0)
-      createParentThank(thank)
+      val post = someRandom[Post].copy(thank = Thank())
+      createParentThank(post)
 
-      await(repo.save(thank))
-      await(repo.increase("some", thank.resource)) shouldEqual true
-      await(repo.increase("some", thank.resource)) shouldEqual false
+      await(repo.save(post))
+      await(repo.markSupported("some", post.resource)) shouldEqual true
+      await(repo.markSupported("some", post.resource)) shouldEqual false
 
-      await(repo.findByResource(thank.resource)).get.given shouldEqual 1
+      await(repo.findByResource(post.resource)).get.thank.given shouldEqual 1
     }
 
   }
@@ -134,8 +133,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      await(repo.save(Thank(parent, A))) shouldEqual true
-      await(repo.save(Thank(child, A))) shouldEqual true
+      await(repo.save(Post(parent, A))) shouldEqual true
+      await(repo.save(Post(child, A))) shouldEqual true
 
       await(repo.updateOwner(B, parent))
 
@@ -150,8 +149,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val parent = someRandom[HttpResource]
       val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
 
-      await(repo.save(Thank(parent, A))) shouldEqual true
-      await(repo.save(Thank(difParent, A))) shouldEqual true
+      await(repo.save(Post(parent, A))) shouldEqual true
+      await(repo.save(Post(difParent, A))) shouldEqual true
 
       await(repo.updateOwner(B, parent))
 
@@ -166,8 +165,8 @@ class ThankRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec 
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      await(repo.save(Thank(parent, original))) shouldEqual true
-      await(repo.save(Thank(child, original))) shouldEqual true
+      await(repo.save(Post(parent, original))) shouldEqual true
+      await(repo.save(Post(child, original))) shouldEqual true
 
       await(repo.updateOwner(B, child))
 

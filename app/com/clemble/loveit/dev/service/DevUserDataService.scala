@@ -6,14 +6,14 @@ import javax.inject.Inject
 import akka.actor.{Actor, Props}
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.{AuthEnv, EventBusManager, IDGenerator}
-import com.clemble.loveit.thank.service.{ROService, ThankService}
+import com.clemble.loveit.thank.service.{ROService, PostService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class DevSignUpListener(resources: List[Resource], thankService: ThankService) extends Actor {
+case class DevSignUpListener(resources: List[Resource], thankService: PostService) extends Actor {
 
   implicit val ec = context.dispatcher
 
@@ -45,7 +45,7 @@ trait DevUserDataService {
 case class SimpleDevUserDataService @Inject()(
                                                userService: UserService,
                                                roService: ROService,
-                                               thankService: ThankService,
+                                               thankService: PostService,
                                                eventBusManager: EventBusManager,
                                                implicit val ec: ExecutionContext
                                              ) extends DevUserDataService {

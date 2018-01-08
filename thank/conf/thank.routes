@@ -8,8 +8,8 @@ POST        /my/resource/verification          @com.clemble.loveit.thank.control
 PUT         /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()
 DELETE      /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.removeMy()
 
-GET         /http/*url                         @com.clemble.loveit.thank.controller.ThankController.get(url: com.clemble.loveit.common.model.Resource)
-PUT         /http/*url                         @com.clemble.loveit.thank.controller.ThankController.thank(url: com.clemble.loveit.common.model.Resource)
+GET         /http/*url                         @com.clemble.loveit.thank.controller.PostController.get(url: com.clemble.loveit.common.model.Resource)
+PUT         /http/*url                         @com.clemble.loveit.thank.controller.PostController.thank(url: com.clemble.loveit.common.model.Resource)
 
 GET         /:supporter/supported              @com.clemble.loveit.thank.controller.SupportedProjectController.getSupported(supporter)
 

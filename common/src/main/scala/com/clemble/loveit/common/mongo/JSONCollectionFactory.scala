@@ -14,24 +14,26 @@ import scala.concurrent.{Await, ExecutionContext, Future}
   */
 object JSONCollectionFactory extends Logger {
 
-  private def doCreate(collectionName: String, mongoApi: ReactiveMongoApi)(implicit ec: ExecutionContext): JSONCollection = {
+  private def doCreate(collectionName: String, mongoApi: ReactiveMongoApi, dropExisting: Boolean)(implicit ec: ExecutionContext): JSONCollection = {
     val fCollection: Future[JSONCollection] = mongoApi.
       database.
-      map(_.collection[JSONCollection](collectionName, FailoverStrategy.default))
-    fCollection.
-      failed.
-      foreach(err => {
-        logger.error(s"Failed to create $collectionName", err)
-        Thread.sleep(60000)
-        System.exit(1)
+      flatMap(db => {
+        db.collectionNames.flatMap(names => {
+          val jsonColl = db.collection[JSONCollection](collectionName, FailoverStrategy.default)
+          if (dropExisting) {
+            jsonColl.drop(false).flatMap(_ => jsonColl.create()).map(_ => jsonColl)
+          } else if (names.contains(collectionName)) {
+            Future.successful(jsonColl)
+          } else {
+            jsonColl.create().map(_ => jsonColl)
+          }
+        })
       })
     Await.result(fCollection, 1.minute)
   }
 
   def create(collectionName: String, mongoApi: ReactiveMongoApi, ec: ExecutionContext, env: Environment): JSONCollection = {
-    val collection = doCreate(collectionName, mongoApi)(ec)
-    if (env.mode == Mode.Test) Await.result(collection.drop(failIfNotFound = false)(ec), 1.minute)
-    collection
+    doCreate(collectionName, mongoApi, env.mode == Mode.Test)(ec)
   }
 
 }

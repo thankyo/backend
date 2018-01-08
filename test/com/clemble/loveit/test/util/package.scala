@@ -8,7 +8,7 @@ import com.clemble.loveit.common.error.{RepositoryException, ThankException, Use
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 import com.clemble.loveit.payment.model._
-import com.clemble.loveit.thank.model.{Pending, ROVerification, SupportedProject, Thank}
+import com.clemble.loveit.thank.model._
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
@@ -89,13 +89,14 @@ package object util {
       RandomStringUtils.randomNumeric(10)
     )
   }
-  implicit val thankGenerator: Generator[Thank] = () => {
-    Thank(
+  implicit val postGenerator: Generator[Post] = () => {
+    Post(
       someRandom[Resource],
-      someRandom[SupportedProject],
-      nextLong(0, Long.MaxValue)
+      someRandom[SupportedProject]
     )
   }
+  implicit val thankGenerator: Generator[Thank] = () => Thank(someRandom[Long])
+
   implicit val userGenerator: Generator[User] = () => {
     User(
       id = random(10),

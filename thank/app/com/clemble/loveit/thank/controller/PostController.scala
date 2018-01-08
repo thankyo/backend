@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.controller
 
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.thank.service.ThankService
+import com.clemble.loveit.thank.service.PostService
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
 
@@ -17,8 +17,8 @@ import com.clemble.loveit.thank.controller.html.hasThanked
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class ThankController @Inject()(
-                                      service: ThankService,
+case class PostController @Inject()(
+                                      service: PostService,
                                       silhouette: Silhouette[AuthEnv],
                                       components: ControllerComponents)(
                                       implicit val ec: ExecutionContext,
@@ -33,7 +33,7 @@ case class ThankController @Inject()(
     val fResponse = giver match {
       case Some(giver) =>
         for {
-          thanked <- service.hasThanked(giver, res)
+          thanked <- service.hasSupported(giver, res)
         } yield {
           if (thanked) {
             Ok(hasThanked())

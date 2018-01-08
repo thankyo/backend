@@ -10,11 +10,15 @@ version := "1.0-SNAPSHOT"
 scalaVersion := "2.12.4"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val silhouetteVersion = "5.0.2"
-val reactMongoVersion = "0.12.6"
+val silhouetteVersion = "5.0.3"
+val reactMongoVersion = "0.12.7"
+val scalaGuiceVersion = "4.1.1"
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  scalaVersion := "2.12.4"
+  scalaVersion := "2.12.4",
+  libraryDependencies ++= Seq(
+    "net.codingwell" %% "scala-guice" % scalaGuiceVersion,
+  )
 )
 
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
@@ -28,9 +32,7 @@ lazy val common = (project in file("./common")).
         ExclusionRule(organization = "com.typesafe.play")
         ),
 
-      "net.codingwell" %% "scala-guice" % "4.1.0",
-
-      "com.typesafe.play" %% "play" % "2.6.7" % "provided",
+      "com.typesafe.play" %% "play" % "2.6.10" % "provided",
 
       "org.reactivemongo" %% "reactivemongo" % reactMongoVersion,
       "org.reactivemongo" %% "play2-reactivemongo" % s"${reactMongoVersion}-play26",
@@ -53,7 +55,6 @@ lazy val auth = (project in file("./auth")).
       "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
       "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
 
-      "net.codingwell" %% "scala-guice" % "4.1.0",
       "com.iheart" %% "ficus" % "1.4.3",
 
       "com.mohiva" %% "play-silhouette-testkit" % silhouetteVersion % Test
@@ -88,7 +89,7 @@ lazy val payment = (project in file("./payment")).
   settings(
     libraryDependencies ++= Seq(
       ws,
-      "com.stripe" % "stripe-java" % "5.23.0",
+      "com.stripe" % "stripe-java" % "5.28.0",
       "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion
     )
   )
@@ -104,17 +105,15 @@ libraryDependencies ++= Seq(
   guice,
   ws,
 
-  "net.codingwell" %% "scala-guice" % "4.1.0",
-
   "com.iheart" %% "ficus" % "1.4.3",
 
   "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.6.1",
+  "io.sentry" % "sentry-logback" % "1.6.4",
 
-  "org.apache.commons" % "commons-text" % "1.1" % Test,
+  "org.apache.commons" % "commons-text" % "1.2" % Test,
   specs2 % Test
 )
 

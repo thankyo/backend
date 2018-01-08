@@ -1,41 +1,41 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.model.{SupportedProject, Thank}
+import com.clemble.loveit.thank.model.{Post, SupportedProject}
 
 import scala.concurrent.Future
 
 /**
-  * [[Thank]] repository
+  * [[Post]] repository
   */
-trait ThankRepository {
+trait PostRepository {
 
   /**
     * Create appropriate url
     *
-    * @param thank object to create
+    * @param post object to create
     * @return true if create was a success
     */
-  def save(thank: Thank): Future[Boolean]
+  def save(post: Post): Future[Boolean]
 
   /**
     * Checks if user thanked resource
     */
-  def thanked(giver: UserID, resource: Resource): Future[Option[Boolean]]
+  def isSupportedBy(user: UserID, resource: Resource): Future[Option[Boolean]]
 
   /**
-    * Find [[Thank]]
+    * Find [[Post]]
     *
-    * @return existing or creates new [[Thank]]
+    * @return existing or creates new [[Post]]
     */
-  def findByResource(uri: Resource): Future[Option[Thank]]
+  def findByResource(uri: Resource): Future[Option[Post]]
 
   /**
-    * Increases number of thanks given
+    * Increases number of supporters given
     *
     * @return true, if update passed
     */
-  def increase(user: String, url: Resource): Future[Boolean]
+  def markSupported(user: String, url: Resource): Future[Boolean]
 
   /**
     * Updates current resource ownership and all it's children

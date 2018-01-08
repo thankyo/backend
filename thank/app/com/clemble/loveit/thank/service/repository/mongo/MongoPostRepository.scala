@@ -2,6 +2,7 @@ package com.clemble.loveit.thank.service.repository.mongo
 
 import javax.inject.{Inject, Named, Singleton}
 
+import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
@@ -64,7 +65,9 @@ case class MongoPostRepository @Inject()(
         )
         val update = Json.obj("$set" -> Json.obj("project" -> project))
         collection.update(query, update, multi = true).map(res => res.ok && res.n > 0)
-      case None => save(Post(res, project))
+      case None =>
+        throw ResourceException.ownerMissing()
+        Future.failed(new IllegalArgumentException("Can't verify this resource"));
     })
   }
 

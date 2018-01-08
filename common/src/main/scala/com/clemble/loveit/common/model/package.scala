@@ -6,5 +6,7 @@ package object model {
   type Email = String
   type UserID = String
   type PaymentID = String
+  type Tag = String
+  type MimeType = String
 
 }

@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.model.{Resource, ThankEvent, UserID}
-import com.clemble.loveit.thank.model.{Post}
+import com.clemble.loveit.thank.model.{OpenGraphObject, Post}
 import com.clemble.loveit.thank.service.repository.PostRepository
 import javax.inject.{Inject, Singleton}
 

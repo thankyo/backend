@@ -13,7 +13,7 @@ import com.mohiva.play.silhouette.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class DevSignUpListener(resources: List[Resource], thankService: PostService) extends Actor {
+case class DevSignUpListener(resources: Seq[Resource], thankService: PostService) extends Actor {
 
   implicit val ec = context.dispatcher
 
@@ -80,6 +80,12 @@ case class SimpleDevUserDataService @Inject()(
     ) -> HttpResource("personacentral.com")
   )
 
+  val RESOURCES_TO_LOVE = List(
+    Resource.from("https://zenpencils.com/comic/poison/"),
+    Resource.from("https://zenpencils.com/comic/hustle/"),
+    Resource.from("https://zenpencils.com/comic/poe/"),
+  )
+
   enable(resMap)
 
 
@@ -88,8 +94,9 @@ case class SimpleDevUserDataService @Inject()(
       creatorsToRes <- ensureCreators(resMap)
       resources <- assignOwnership(creatorsToRes)
     } yield {
-      eventBusManager.onSignUp(Props(DevSignUpListener(resources, thankService)))
-      eventBusManager.onLogin(Props(DevSignUpListener(resources, thankService)))
+      val allResources = resources ++ RESOURCES_TO_LOVE
+      eventBusManager.onSignUp(Props(DevSignUpListener(allResources, thankService)))
+      eventBusManager.onLogin(Props(DevSignUpListener(allResources, thankService)))
     }).recover({
       case t: Throwable => {
         print(t)
@@ -122,7 +129,7 @@ case class SimpleDevUserDataService @Inject()(
     val resources = for {
       (creator, resource) <- creatorToRes
     } yield {
-      val ownershipTask = roService.
+      roService.
         assignOwnership(creator.id, resource).
         recoverWith({
           case _: Throwable =>
@@ -130,11 +137,8 @@ case class SimpleDevUserDataService @Inject()(
             roService.assignOwnership(creator.id, resource)
           }
         )
-      ownershipTask.
-        map(res => (1 to 200).
-        map(i => HttpResource(s"${res.uri}/${LocalDate.now()}/${i}")))
     }
-    Future.sequence(resources).map(_.flatten.toList)
+    Future.sequence(resources).map(_.toList)
   }
 
 }

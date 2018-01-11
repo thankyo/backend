@@ -11,5 +11,7 @@ DELETE      /my/resource/verification          @com.clemble.loveit.thank.control
 GET         /http/*url                         @com.clemble.loveit.thank.controller.PostController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /http/*url                         @com.clemble.loveit.thank.controller.PostController.thank(url: com.clemble.loveit.common.model.Resource)
 
+GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
+
 GET         /:supporter/supported              @com.clemble.loveit.thank.controller.SupportedProjectController.getSupported(supporter)
 

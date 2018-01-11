@@ -21,6 +21,8 @@ case class SupportedProject(
 
 object SupportedProject {
 
+  val empty = SupportedProject("unknown")
+
   def from(user: User): SupportedProject = {
     SupportedProject(user.id, user.firstName, user.lastName, user.avatar, user.bio, user.link)
   }

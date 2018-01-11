@@ -3,7 +3,7 @@ package com.clemble.loveit.common.model
 import com.clemble.loveit.common.util.WriteableUtils
 import play.api.http.Writeable
 import play.api.libs.json._
-import play.api.mvc.PathBindable
+import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import scala.annotation.tailrec
 
@@ -98,7 +98,19 @@ object Resource {
     constructor(normUri)
   }
 
-  implicit val stringToResource: PathBindable[Resource] = new PathBindable[Resource] {
+  implicit object queryStringBindable extends QueryStringBindable[Resource] {
+
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Resource]] = {
+      params.get(key).flatMap(_.headOption).map(uriStr => Right(Resource.from(uriStr)))
+    }
+
+    override def unbind(key: String, resource: Resource): String = {
+      resource.stringify()
+    }
+
+  }
+
+  implicit val resourceFromPath: PathBindable[Resource] = new PathBindable[Resource] {
 
     override def bind(key: String, value: String): Either[String, Resource] = {
       Right(from(value))

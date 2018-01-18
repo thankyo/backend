@@ -18,6 +18,8 @@ trait PostRepository {
     */
   def save(post: Post): Future[Boolean]
 
+  def update(post: Post): Future[Boolean]
+
   /**
     * Checks if user thanked resource
     */

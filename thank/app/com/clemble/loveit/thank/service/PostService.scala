@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.model.{Resource, ThankEvent, UserID}
-import com.clemble.loveit.thank.model.{Post, SupportedProject}
+import com.clemble.loveit.thank.model.{OpenGraphObject, Post, SupportedProject}
 import com.clemble.loveit.thank.service.repository.PostRepository
 import javax.inject.{Inject, Singleton}
 
@@ -14,6 +14,8 @@ trait PostService {
   def hasSupported(giver: UserID, uri: Resource): Future[Boolean]
 
   def getOrCreate(uri: Resource): Future[Post]
+
+  def create(og: OpenGraphObject): Future[Post]
 
   def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
 
@@ -58,6 +60,16 @@ case class SimplePostService @Inject()(
     }
 
     thankRepo.findByResource(resource).flatMap(createIfMissing)
+  }
+
+  override def create(og: OpenGraphObject): Future[Post] = {
+    val res = Resource.from(og.url)
+    for {
+      post <- getOrCreate(res)
+      saved <- thankRepo.update(post.copy(ogObj = Some(og))) if (saved)
+    } yield {
+      post.copy(ogObj = Some(og))
+    }
   }
 
   override def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean] = {

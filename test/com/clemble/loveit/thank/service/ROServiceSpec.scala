@@ -1,10 +1,8 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.Resource
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner

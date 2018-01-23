@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service.repository
 
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.thank.model.{Post, SupportedProject}
 
 import scala.concurrent.Future
@@ -17,6 +17,8 @@ trait PostRepository {
     * @return true if create was a success
     */
   def save(post: Post): Future[Boolean]
+
+  def setTags(res: Resource, tags: Set[Tag]): Future[Boolean]
 
   def update(post: Post): Future[Boolean]
 

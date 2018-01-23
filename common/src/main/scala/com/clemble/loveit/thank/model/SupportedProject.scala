@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.model
 
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Tag, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.user.model.{User, UserAware}
 import play.api.libs.json.{Json, OFormat}
@@ -12,7 +12,7 @@ case class SupportedProject(
                              avatar: Option[String] = None,
                              bio: Option[String] = None,
                              link: Option[String] = None,
-                             tags: List[String] = List.empty
+                             tags: Set[Tag] = Set.empty
                            ) extends UserAware {
 
   val user: UserID = id

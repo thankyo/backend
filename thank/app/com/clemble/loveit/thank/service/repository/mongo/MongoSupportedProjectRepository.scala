@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service.repository.mongo
 
 import javax.inject.{Inject, Named}
 
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
@@ -31,6 +31,12 @@ class MongoSupportedProjectRepository @Inject()(
     val selector = Json.obj("_id" -> supporter)
     val update = Json.obj("$addToSet" -> Json.obj("supported" -> project))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update, upsert = true))
+  }
+
+  override def setTags(user: UserID, tags: Set[Tag]): Future[Boolean] = {
+    val selector = Json.obj("_id" -> user)
+    val update = Json.obj("$set" -> tags)
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
   override def getSupported(supporter: UserID): Future[List[SupportedProject]] = {

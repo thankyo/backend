@@ -67,8 +67,8 @@ case class SimpleDevUserDataService @Inject()(
       email = "manga.stream@example.com",
       profiles = Set(LoginInfo("patreon", "mangastream")),
       avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
-      link = Some("https://mangastream.com")
-    ) -> HttpResource("mangastream.com"),
+      link = Some("https://readms.net")
+    ) -> HttpResource("readms.net"),
     User(
       id = IDGenerator.generate(),
       firstName = Some("Personal"),

@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service.repository.mongo
 import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.error.ResourceException
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
 import com.clemble.loveit.thank.service.repository.PostRepository
@@ -40,6 +40,12 @@ case class MongoPostRepository @Inject()(
   override def update(post: Post): Future[Boolean] = {
     val selector = Json.obj("resource" -> post.resource)
     val update = Json.toJsObject(post)
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+  }
+
+  override def setTags(res: Resource, tags: Set[Tag]): Future[Boolean] = {
+    val selector = Json.obj("resource" -> res)
+    val update = Json.obj("$set" -> Json.obj("tags" -> tags))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 

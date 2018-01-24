@@ -13,7 +13,7 @@ import play.api.mvc.{ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
-class UserStatController @Inject()(
+case class UserStatController @Inject()(
                                     statRepo: UserStatService,
                                     silhouette: Silhouette[AuthEnv],
                                     components: ControllerComponents,

@@ -1,12 +1,11 @@
 package com.clemble.loveit.dev.service
 
-import java.time.LocalDate
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
-import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.common.util.{AuthEnv, EventBusManager, IDGenerator}
-import com.clemble.loveit.thank.service.{ROService, PostService}
+import com.clemble.loveit.common.model.{Resource, Tag, UserID}
+import com.clemble.loveit.common.util.{EventBusManager, IDGenerator}
+import com.clemble.loveit.thank.service.{PostService, ROService, SupportedProjectService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
@@ -33,11 +32,14 @@ case class DevSignUpListener(resources: Seq[Resource], thankService: PostService
   }
 }
 
+case class DevCreatorConfig(creator: User, resource: Resource, tags: Set[Tag] = Set.empty[String])
+
 trait DevUserDataService {
 
-  def enable(resMap: Map[User, Resource]): Future[Boolean]
+  def enable(configs: Seq[DevCreatorConfig]): Future[Boolean]
 
 }
+
 
 /**
   * Service that creates first users and integrations for testing UI and UX
@@ -45,41 +47,52 @@ trait DevUserDataService {
 case class SimpleDevUserDataService @Inject()(
                                                userService: UserService,
                                                roService: ROService,
-                                               thankService: PostService,
+                                               postService: PostService,
+                                               supPrjService: SupportedProjectService,
                                                eventBusManager: EventBusManager,
                                                implicit val ec: ExecutionContext
                                              ) extends DevUserDataService {
 
   // quotes, inspirational, motivational, cartoons, comics, webcomic, inspire, inspiring, art, poetry
 
-  val resMap = Map(
-    User(
-      id = IDGenerator.generate(),
-      firstName = Some("Gavin"),
-      lastName = Some("Than"),
-      email = "gavin.than@example.com",
-      profiles = Set(LoginInfo("patreon", "zenpencil")),
-      avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
-      link = Some("https://zenpencils.com")
-    ) -> HttpResource("zenpencils.com"),
-    User(
-      id = IDGenerator.generate(),
-      firstName = Some("Manga"),
-      lastName = Some("Stream"),
-      email = "manga.stream@example.com",
-      profiles = Set(LoginInfo("patreon", "mangastream")),
-      avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
-      link = Some("https://readms.net")
-    ) -> HttpResource("readms.net"),
-    User(
-      id = IDGenerator.generate(),
-      firstName = Some("Personal"),
-      lastName = Some("Central"),
-      avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
-      email = "personal.central@example.com",
-      profiles = Set(LoginInfo("patreon", "personal.central")),
-      link = Some("https://personacentral.com")
-    ) -> HttpResource("personacentral.com")
+  val resMap = List(
+    DevCreatorConfig(
+      User(
+        id = IDGenerator.generate(),
+        firstName = Some("Gavin"),
+        lastName = Some("Than"),
+        email = "gavin.than@example.com",
+        profiles = Set(LoginInfo("patreon", "zenpencil")),
+        avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
+        link = Some("https://zenpencils.com")
+      ),
+      Resource.from("https://zenpencils.com"),
+      Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+    ),
+    DevCreatorConfig(
+      User(
+        id = IDGenerator.generate(),
+        firstName = Some("Manga"),
+        lastName = Some("Stream"),
+        email = "manga.stream@example.com",
+        profiles = Set(LoginInfo("patreon", "mangastream")),
+        avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
+        link = Some("https://readms.net")
+      ),
+      Resource.from("https://readms.net")
+    ),
+    DevCreatorConfig(
+      User(
+        id = IDGenerator.generate(),
+        firstName = Some("Personal"),
+        lastName = Some("Central"),
+        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+        email = "personal.central@example.com",
+        profiles = Set(LoginInfo("patreon", "personal.central")),
+        link = Some("https://personacentral.com")
+      ),
+      Resource.from("https://personacentral.com")
+    )
   )
 
   val RESOURCES_TO_LOVE = List(
@@ -91,14 +104,15 @@ case class SimpleDevUserDataService @Inject()(
   enable(resMap)
 
 
-  override def enable(resMap: Map[User, Resource]): Future[Boolean] = {
+  override def enable(configs: Seq[DevCreatorConfig]): Future[Boolean] = {
     (for {
-      creatorsToRes <- ensureCreators(resMap)
-      resources <- assignOwnership(creatorsToRes)
+      creators <- ensureCreators(configs.map(_.creator))
+      resources <- ensureOwnership(creators.zip(configs.map(_.resource)))
+      tags <- ensureTags(creators.zip(configs.map(_.tags))) if (tags)
     } yield {
       val allResources = resources ++ RESOURCES_TO_LOVE
-      eventBusManager.onSignUp(Props(DevSignUpListener(allResources, thankService)))
-      eventBusManager.onLogin(Props(DevSignUpListener(allResources, thankService)))
+      eventBusManager.onSignUp(Props(DevSignUpListener(allResources, postService)))
+      eventBusManager.onLogin(Props(DevSignUpListener(allResources, postService)))
     }).recover({
       case t: Throwable => {
         print(t)
@@ -108,26 +122,26 @@ case class SimpleDevUserDataService @Inject()(
     })
   }
 
-  private def ensureCreators(resMap: Map[User, Resource]): Future[Map[User, Resource]] = {
+  private def ensureCreators(creators: Seq[User]): Future[Seq[User]] = {
     val fCreators = for {
-      (creator, resources) <- resMap
+      creator <- creators
     } yield {
       userService.
         findByEmail(creator.email).
         flatMap({
-          case Some(user) => Future.successful(user -> resources)
+          case Some(user) => Future.successful(user)
           case None => {
             userService.create(creator).map(creator => {
               eventBusManager.publish(SignUpEvent(creator, null))
-              creator -> resources
+              creator
             })
           }
         })
     }
-    Future.sequence(fCreators).map(_.toMap)
+    Future.sequence(fCreators)
   }
 
-  private def assignOwnership(creatorToRes: Map[User, Resource]): Future[List[Resource]] = {
+  private def ensureOwnership(creatorToRes: Seq[(User, Resource)]): Future[Seq[Resource]] = {
     val resources = for {
       (creator, resource) <- creatorToRes
     } yield {
@@ -137,10 +151,20 @@ case class SimpleDevUserDataService @Inject()(
           case _: Throwable =>
             Thread.sleep(10000)
             roService.assignOwnership(creator.id, resource)
-          }
+        }
         )
     }
-    Future.sequence(resources).map(_.toList)
+    Future.sequence(resources)
+  }
+
+  private def ensureTags(creatorToTags: Seq[(User, Set[Tag])]): Future[Boolean] = {
+    val tags = for {
+      (user, tags) <- creatorToTags
+    } yield {
+      supPrjService.assignTags(user.id, tags)
+    }
+
+    Future.sequence(tags).map(_.forall(_ == true))
   }
 
 }

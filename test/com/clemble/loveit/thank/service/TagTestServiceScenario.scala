@@ -31,5 +31,9 @@ trait TagTestServiceScenario extends ServiceSpec with TagTestService with PostTe
 }
 
 @RunWith(classOf[JUnitRunner])
-class RepoTagTestServiceSpec extends TagTestServiceScenario with RepoTagTestService with RepoPostTestService {
+class RepoTagTestServiceSpec extends TagTestServiceScenario with RepoTagTestService with InternalPostTestService {
+}
+
+@RunWith(classOf[JUnitRunner])
+class InternalTagTestServiceSpec extends TagTestServiceScenario with InternalTagTestService with InternalPostTestService {
 }

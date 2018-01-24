@@ -22,7 +22,7 @@ class GraphController @Inject()(
   def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     service
       .getOrCreate(res)
-      .recover({ case _ => Post(res, SupportedProject.empty, OpenGraphObject(res.stringify())) })
+      .recover({ case _ => Post.from(res, SupportedProject.empty) })
       .map(Ok(_))
   })
 

@@ -50,6 +50,8 @@ case class SimpleDevUserDataService @Inject()(
                                                implicit val ec: ExecutionContext
                                              ) extends DevUserDataService {
 
+  // quotes, inspirational, motivational, cartoons, comics, webcomic, inspire, inspiring, art, poetry
+
   val resMap = Map(
     User(
       id = IDGenerator.generate(),

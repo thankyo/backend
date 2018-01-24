@@ -20,6 +20,9 @@ case class Post(
 
   def isSupportedBy(user: UserID): Boolean = thank.isSupportedBy(user)
 
+  def withOg(og: OpenGraphObject): Post = {
+    this.copy(ogObj = og)
+  }
 }
 
 object Post {
@@ -28,5 +31,7 @@ object Post {
 
   implicit val thankWriteable = WriteableUtils.jsonToWriteable[Post]
 
-
+  def from(res: Resource, project: SupportedProject): Post = {
+    Post(res, project, OpenGraphObject(res.stringify()), project.tags)
+  }
 }

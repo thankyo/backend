@@ -24,7 +24,7 @@ class SupportedProjectRepositorySpec(implicit val ee: ExecutionEnv) extends Repo
 
     val project = SupportedProject from getUser(owner).get
 
-    await(repo.markSupported(giver, project)) shouldEqual true
+    await(repo.isSupportedBy(giver, project)) shouldEqual true
     await(repo.getSupported(giver)) shouldEqual List(project)
   }
 

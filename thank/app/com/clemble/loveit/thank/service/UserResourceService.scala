@@ -3,18 +3,20 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 
 import akka.actor.{Actor, Props}
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.common.util.{EventBusManager}
-import com.clemble.loveit.thank.model.UserResource
+import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.util.EventBusManager
+import com.clemble.loveit.thank.model.{SupportedProject, UserResource}
 import com.clemble.loveit.thank.service.repository.UserResourceRepository
 import com.clemble.loveit.user.model.User
-import com.mohiva.play.silhouette.api.{SignUpEvent}
+import com.mohiva.play.silhouette.api.SignUpEvent
 
 import scala.concurrent.Future
 
 trait UserResourceService {
 
   def find(user: UserID): Future[Option[UserResource]]
+
+  def findOwner(res: Resource): Future[Option[SupportedProject]]
 
   def create(user: User): Future[Boolean]
 
@@ -39,6 +41,10 @@ class SimpleUserResourceService @Inject()(
 
   override def create(user: User) = {
     repo.save(UserResource from user)
+  }
+
+  override def findOwner(res: Resource): Future[Option[SupportedProject]] = {
+    repo.findOwner(res)
   }
 
   override def find(user: UserID) = {

@@ -23,7 +23,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   def createParentThank(post: Post) = {
     val res = post.resource.parents.last
-    val ownerResource = Post(res, someRandom[SupportedProject], OpenGraphObject(res.stringify()))
+    val ownerResource = Post.from(res, someRandom[SupportedProject])
     await(repo.save(ownerResource))
   }
 
@@ -134,8 +134,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      await(repo.save(Post(parent, A, OpenGraphObject(parent.stringify())))) shouldEqual true
-      await(repo.save(Post(child, A, OpenGraphObject(child.stringify())))) shouldEqual true
+      await(repo.save(Post.from(parent, A))) shouldEqual true
+      await(repo.save(Post.from(child, A))) shouldEqual true
 
       await(repo.updateOwner(B, parent))
 
@@ -150,8 +150,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
 
-      await(repo.save(Post(parent, A, OpenGraphObject(parent.stringify())))) shouldEqual true
-      await(repo.save(Post(difParent, A, OpenGraphObject(difParent.stringify())))) shouldEqual true
+      await(repo.save(Post.from(parent, A))) shouldEqual true
+      await(repo.save(Post.from(difParent, A))) shouldEqual true
 
       await(repo.updateOwner(B, parent))
 
@@ -166,8 +166,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      await(repo.save(Post(parent, original, OpenGraphObject(parent.stringify())))) shouldEqual true
-      await(repo.save(Post(child, original, OpenGraphObject(child.stringify())))) shouldEqual true
+      await(repo.save(Post.from(parent, original))) shouldEqual true
+      await(repo.save(Post.from(child, original))) shouldEqual true
 
       await(repo.updateOwner(B, child))
 

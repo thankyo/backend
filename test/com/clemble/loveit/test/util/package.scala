@@ -92,6 +92,13 @@ package object util {
       RandomStringUtils.randomNumeric(10)
     )
   }
+  implicit val userResourceGenerator: Generator[UserResource] = () => {
+    val user = someRandom[String]
+    UserResource(
+      user,
+      someRandom[SupportedProject].copy(id = user)
+    )
+  }
   implicit val postGenerator: Generator[Post] = () => {
     Post(
       someRandom[Resource],

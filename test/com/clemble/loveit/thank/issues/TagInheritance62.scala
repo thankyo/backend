@@ -3,30 +3,40 @@ package com.clemble.loveit.thank.issues
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post, SupportedProject}
-import com.clemble.loveit.thank.service.{PostTestService, SupportedProjectTestService, TagTestService}
+import com.clemble.loveit.thank.service._
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
 trait TagInheritance62 extends ServiceSpec with TagTestService with PostTestService with SupportedProjectTestService{
 
-  "Tags inherited from Supported project" in {
+  "Tags inherited from project Author" in {
     // Step 1. Create scene
     val owner = createUser()
-    val resource = someRandom[Resource]
-
-    assignOwnership(owner, resource)
 
     // Step 2. Assigning tags
     val projectTags = someRandom[Set[Tag]]
     assignTags(owner, projectTags)
-
-    // Step 2.1 Checking project tags are as assigned
     getTags(owner) shouldEqual projectTags
 
-    // Step 3. Creating post
-    val objRes = someChildResource(resource)
-    val openGraphObject = someRandom[OpenGraphObject].copy(url = objRes.stringify())
-    val post = createPost(openGraphObject)
+    // Step 3. Creating owned resource
+    val resource = someRandom[Resource]
+    assignOwnership(owner, resource)
 
-    post.tags shouldEqual projectTags
+    getTags(resource) shouldEqual projectTags
+
+    // Step 4. Creating post under owned resource
+    val objRes = someChildResource(resource)
+    val ogo = someRandom[OpenGraphObject].copy(url = objRes.stringify())
+    createPost(ogo)
+
+    getTags(objRes) shouldEqual projectTags
   }
 
+}
+
+@RunWith(classOf[JUnitRunner])
+class InternalTagInheritance62 extends TagInheritance62
+  with InternalTagTestService
+  with InternalPostTestService
+  with InternalSupportedProjectTestService {
 }

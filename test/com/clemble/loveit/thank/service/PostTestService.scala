@@ -3,12 +3,11 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post}
-import com.clemble.loveit.thank.service.repository.PostRepository
 
 trait PostTestService extends ServiceSpec {
 
   def someChildResource(res: Resource): Resource = {
-    Resource.from(s"http://${res.stringify()}/${someRandom[Int]}/${someRandom[Int]}")
+    Resource.from(s"${res.stringify()}/${someRandom[Int]}/${someRandom[Int]}")
   }
 
   def createPost(resource: Resource = someRandom[Resource]): Resource = {
@@ -28,7 +27,7 @@ trait PostTestService extends ServiceSpec {
 
 }
 
-trait RepoPostTestService extends ServiceSpec with PostTestService {
+trait InternalPostTestService extends ServiceSpec with PostTestService {
 
   lazy val postService = dependency[PostService]
 

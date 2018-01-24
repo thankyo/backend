@@ -43,7 +43,7 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
-  override def setTags(res: Resource, tags: Set[Tag]): Future[Boolean] = {
+  override def assignTags(res: Resource, tags: Set[Tag]): Future[Boolean] = {
     val selector = Json.obj("resource" -> res)
     val update = Json.obj("$set" -> Json.obj("tags" -> tags))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))

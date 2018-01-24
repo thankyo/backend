@@ -7,7 +7,7 @@ import scala.concurrent.Future
 
 trait SupportTrackRepository {
 
-  def markSupported(supporter: UserID, project: SupportedProject): Future[Boolean]
+  def isSupportedBy(supporter: UserID, project: SupportedProject): Future[Boolean]
 
   def getSupported(supporter: UserID): Future[List[SupportedProject]]
 

@@ -11,12 +11,22 @@ trait SupportedProjectTestService {
 
 }
 
-class RepoSupportedProjectTestService extends ServiceSpec with SupportedProjectTestService {
+trait RepoSupportedProjectTestService extends ServiceSpec with SupportedProjectTestService {
 
   val prjRepo = dependency[SupportedProjectRepository]
 
   override def getProject(user: UserID): SupportedProject = {
     await(prjRepo.getProject(user)).get
+  }
+
+}
+
+trait InternalSupportedProjectTestService extends ServiceSpec with SupportedProjectTestService {
+
+  val prjService = dependency[SupportedProjectService]
+
+  override def getProject(user: UserID): SupportedProject = {
+    await(prjService.getProject(user)).get
   }
 
 }

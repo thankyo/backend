@@ -18,14 +18,9 @@ trait PostRepository {
     */
   def save(post: Post): Future[Boolean]
 
-  def setTags(res: Resource, tags: Set[Tag]): Future[Boolean]
+  def assignTags(res: Resource, tags: Set[Tag]): Future[Boolean]
 
   def update(post: Post): Future[Boolean]
-
-  /**
-    * Checks if user thanked resource
-    */
-  def isSupportedBy(user: UserID, resource: Resource): Future[Option[Boolean]]
 
   /**
     * Find [[Post]]
@@ -35,6 +30,11 @@ trait PostRepository {
   def findByResource(uri: Resource): Future[Option[Post]]
 
   /**
+    * Updates current resource ownership and all it's children
+    */
+  def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
+
+  /**
     * Increases number of supporters given
     *
     * @return true, if update passed
@@ -42,8 +42,8 @@ trait PostRepository {
   def markSupported(user: String, url: Resource): Future[Boolean]
 
   /**
-    * Updates current resource ownership and all it's children
+    * Checks if user thanked resource
     */
-  def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
+  def isSupportedBy(user: UserID, resource: Resource): Future[Option[Boolean]]
 
 }

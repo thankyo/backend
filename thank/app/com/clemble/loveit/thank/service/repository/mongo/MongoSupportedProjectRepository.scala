@@ -26,7 +26,7 @@ class MongoSupportedProjectRepository @Inject()(
     })
   }
 
-  override def setTags(user: UserID, tags: Set[Tag]): Future[Boolean] = {
+  override def assignTags(user: UserID, tags: Set[Tag]): Future[Boolean] = {
     val selector = Json.obj("_id" -> user)
     val update = Json.obj("$set" -> Json.obj("project.tags" -> tags))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))

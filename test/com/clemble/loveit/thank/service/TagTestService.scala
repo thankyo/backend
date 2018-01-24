@@ -24,7 +24,7 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
   private val postRepo = dependency[PostRepository]
 
   override def assignTags(project: UserID, tags: Set[Tag]): Boolean = {
-    await(prjRepo.setTags(project, tags))
+    await(prjRepo.assignTags(project, tags))
   }
 
   override def getTags(project: UserID): Set[Tag] = {
@@ -32,11 +32,33 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
   }
 
   override def assignTags(res: Resource, tags: Set[Tag]): Boolean = {
-    await(postRepo.setTags(res, tags))
+    await(postRepo.assignTags(res, tags))
   }
 
   def getTags(res: Resource): Set[Tag] = {
     await(postRepo.findByResource(res).map(_.map(_.tags).getOrElse(Set.empty[Tag])))
   }
 
+}
+
+trait InternalTagTestService extends TagTestService with ServiceSpec {
+
+  private val prjService = dependency[SupportedProjectService]
+  private val postService = dependency[PostService]
+
+  override def assignTags(user: UserID, tags: Set[Tag]): Boolean = {
+    await(prjService.assignTags(user, tags))
+  }
+
+  override def assignTags(res: Resource, tags: Set[Tag]): Boolean = {
+    await(postService.assignTags(res, tags))
+  }
+
+  override def getTags(project: UserID): Set[Tag] = {
+    await(prjService.getProject(project)).map(_.tags).getOrElse(Set.empty[String])
+  }
+
+  override def getTags(res: Resource): Set[Tag] = {
+    await(postService.getOrCreate(res)).tags
+  }
 }

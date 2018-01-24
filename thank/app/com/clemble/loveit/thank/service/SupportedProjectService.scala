@@ -3,16 +3,17 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 
 import akka.actor.{Actor, ActorSystem, Props}
-import com.clemble.loveit.common.model.{ThankEvent, UserID}
+import com.clemble.loveit.common.model.{Tag, ThankEvent, UserID}
 import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.service.repository.{SupportTrackRepository, SupportedProjectRepository}
-import com.clemble.loveit.user.service.UserService
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SupportedProjectService {
 
   def getProject(project: UserID): Future[Option[SupportedProject]]
+
+  def assignTags(project: UserID, tags: Set[Tag]): Future[Boolean]
 
   def getSupported(user: UserID): Future[List[SupportedProject]]
 
@@ -46,12 +47,16 @@ class SimpleSupportedProjectService @Inject()(
     repo.getProject(userID)
   }
 
+  override def assignTags(project: UserID, tags: Set[Tag]): Future[Boolean] = {
+    repo.assignTags(project, tags)
+  }
+
   override def getSupported(user: UserID): Future[List[SupportedProject]] = {
     supTrackRepo.getSupported(user)
   }
 
   override def markSupported(giver: UserID, project: SupportedProject): Future[Boolean] = {
-    supTrackRepo.markSupported(giver, project)
+    supTrackRepo.isSupportedBy(giver, project)
   }
 
 }

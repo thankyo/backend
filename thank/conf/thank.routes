@@ -4,6 +4,7 @@ GET         /stat/:supporter/:year/:month      @com.clemble.loveit.thank.control
 
 GET         /:owner/resource                   @com.clemble.loveit.thank.controller.UserResourceController.get(owner)
 GET         /:owner/tag                        @com.clemble.loveit.thank.controller.UserTagController.getUserTags(owner)
+POST        /my/tag                            @com.clemble.loveit.thank.controller.UserTagController.setMyTags()
 
 POST        /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
 PUT         /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()

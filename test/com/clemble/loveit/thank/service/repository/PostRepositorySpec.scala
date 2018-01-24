@@ -57,25 +57,6 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   }
 
-  "CREATE" should {
-
-    "create all parents" in {
-      val post = someRandom[Post]
-      createParentThank(post)
-
-      val urlParents = post.resource.parents()
-      val allCreatedUri = for {
-        _ <- service.getOrCreate(post.resource)
-        search <- findAll(urlParents).map(_.map(_.resource))
-      } yield {
-        search
-      }
-
-      await(allCreatedUri) must beEqualTo(urlParents)
-    }
-
-  }
-
   "INCREASE" should {
 
     "increase only the nodes" in {
@@ -107,10 +88,10 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val owner = someRandom[SupportedProject]
       val resource = someRandom[Resource]
 
-      await(repo.findByResource(resource)) shouldEqual None
+      await(service.getOrCreate(resource)) should throwA()
 
-      await(repo.updateOwner(owner, resource)) shouldEqual true
-      await(repo.findByResource(resource)) shouldNotEqual None
+      await(service.updateOwner(owner, resource)) shouldEqual true
+      await(service.getOrCreate(resource)).project shouldEqual owner
     }
 
     "update if exists" in {
@@ -118,13 +99,13 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       val A = someRandom[SupportedProject]
 
-      await(repo.updateOwner(A, resource)) shouldEqual true
-      await(repo.findByResource(resource)).get.project shouldEqual A
+      await(service.updateOwner(A, resource)) shouldEqual true
+      await(service.getOrCreate(resource)).project shouldEqual A
 
       val B = someRandom[SupportedProject]
 
-      await(repo.updateOwner(B, resource)) shouldEqual true
-      await(repo.findByResource(resource)).get.project shouldEqual B
+      await(service.updateOwner(B, resource)) shouldEqual true
+      await(service.getOrCreate(resource)).project shouldEqual B
     }
 
     "update children" in {

@@ -79,7 +79,8 @@ case class SimpleDevUserDataService @Inject()(
         avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
         link = Some("https://readms.net")
       ),
-      Resource.from("https://readms.net")
+      Resource.from("https://readms.net"),
+      Set("manga", "japan", "one piece", "naruto", "bleach")
     ),
     DevCreatorConfig(
       User(
@@ -91,7 +92,8 @@ case class SimpleDevUserDataService @Inject()(
         profiles = Set(LoginInfo("patreon", "personal.central")),
         link = Some("https://personacentral.com")
       ),
-      Resource.from("https://personacentral.com")
+      Resource.from("https://personacentral.com"),
+      Set("manga", "japan")
     )
   )
 
@@ -107,8 +109,8 @@ case class SimpleDevUserDataService @Inject()(
   override def enable(configs: Seq[DevCreatorConfig]): Future[Boolean] = {
     (for {
       creators <- ensureCreators(configs.map(_.creator))
-      resources <- ensureOwnership(creators.zip(configs.map(_.resource)))
       tags <- ensureTags(creators.zip(configs.map(_.tags))) if (tags)
+      resources <- ensureOwnership(creators.zip(configs.map(_.resource)))
     } yield {
       val allResources = resources ++ RESOURCES_TO_LOVE
       eventBusManager.onSignUp(Props(DevSignUpListener(allResources, postService)))

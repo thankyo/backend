@@ -14,7 +14,7 @@ trait TagInheritance62 extends ServiceSpec with TagTestService with PostTestServ
     val owner = createUser()
 
     // Step 2. Assigning tags
-    val projectTags = someRandom[Set[Tag]]
+    val projectTags = Set("manga", "quote", "inspiration")
     assignTags(owner, projectTags)
     getTags(owner) shouldEqual projectTags
 

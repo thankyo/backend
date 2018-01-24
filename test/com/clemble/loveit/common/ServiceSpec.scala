@@ -24,6 +24,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
     val fUserID = for {
       user <- userService.create(register.toUser())
       _ <- userPayService.create(user)
+
       _ <- userResService.create(user)
     } yield {
       user.id

@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import akka.actor.{Actor, ActorSystem, Props}
 import com.clemble.loveit.common.model.{ThankEvent, UserID}
 import com.clemble.loveit.thank.model.SupportedProject
-import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
+import com.clemble.loveit.thank.service.repository.{SupportTrackRepository, SupportedProjectRepository}
 import com.clemble.loveit.user.service.UserService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,6 +32,7 @@ class SimpleSupportedProjectService @Inject()(
                                                actorSystem: ActorSystem,
                                                thankEventBus: ThankEventBus,
                                                repo: SupportedProjectRepository,
+                                               supTrackRepo: SupportTrackRepository,
                                                implicit val ec: ExecutionContext
                                                   ) extends SupportedProjectService {
 
@@ -46,11 +47,11 @@ class SimpleSupportedProjectService @Inject()(
   }
 
   override def getSupported(user: UserID): Future[List[SupportedProject]] = {
-    repo.getSupported(user)
+    supTrackRepo.getSupported(user)
   }
 
   override def markSupported(giver: UserID, project: SupportedProject): Future[Boolean] = {
-    repo.markSupported(giver, project)
+    supTrackRepo.markSupported(giver, project)
   }
 
 }

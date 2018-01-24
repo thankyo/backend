@@ -27,6 +27,6 @@ trait PostTestService extends ServiceSpec {
 
 }
 
-class RepoPostTestService extends ServiceSpec {
-
+trait RepoPostTestService extends ServiceSpec with PostTestService {
+  override def createPost(ogo: OpenGraphObject): Post = ???
 }

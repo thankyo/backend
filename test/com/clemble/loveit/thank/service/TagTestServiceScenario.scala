@@ -1,11 +1,11 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{Resource, Tag}
+import com.clemble.loveit.common.model.Tag
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
-trait TagTestServiceScenario extends TagTestService with ServiceSpec with PostTestService {
+trait TagTestServiceScenario extends ServiceSpec with TagTestService with PostTestService {
 
   "assign tags to user" in {
     val user = createUser()
@@ -31,6 +31,5 @@ trait TagTestServiceScenario extends TagTestService with ServiceSpec with PostTe
 }
 
 @RunWith(classOf[JUnitRunner])
-class RepoTagTestServiceSpec extends RepoTagTestService with TagTestServiceScenario {
-
+class RepoTagTestServiceSpec extends TagTestServiceScenario with RepoTagTestService with RepoPostTestService {
 }

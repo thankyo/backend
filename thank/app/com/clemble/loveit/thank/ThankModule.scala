@@ -28,6 +28,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[UserResourceService]).to(classOf[SimpleUserResourceService]).asEagerSingleton()
 
     bind(classOf[SupportedProjectRepository]).to(classOf[MongoSupportedProjectRepository]).asEagerSingleton()
+    bind(classOf[SupportTrackRepository]).to(classOf[MongoSupportTrackRepository]).asEagerSingleton()
     bind(classOf[SupportedProjectService]).to(classOf[SimpleSupportedProjectService]).asEagerSingleton()
 
     bind(classOf[UserResourceRepository]).to(classOf[MongoUserResourceRepository])

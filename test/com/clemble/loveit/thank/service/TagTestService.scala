@@ -4,6 +4,8 @@ import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.thank.service.repository.{PostRepository, SupportedProjectRepository}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 trait TagTestService {
 
   def assignTags(user: UserID, tags: Set[Tag]): Boolean
@@ -16,7 +18,7 @@ trait TagTestService {
 
 }
 
-class RepoTagTestService extends TagTestService with ServiceSpec {
+trait RepoTagTestService extends TagTestService with ServiceSpec {
 
   private val prjRepo = dependency[SupportedProjectRepository]
   private val postRepo = dependency[PostRepository]

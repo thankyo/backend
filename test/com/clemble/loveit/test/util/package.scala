@@ -16,11 +16,14 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomStringUtils.{random, randomAlphabetic, randomNumeric}
 import org.apache.commons.lang3.RandomUtils.{nextInt, nextLong}
 
+import scala.collection.immutable.List
 import scala.util.Random
 
 package object util {
 
   implicit val booleanGenerator: Generator[Boolean] = () => Random.nextBoolean()
+  implicit val intGenerator: Generator[Int] = () => Random.nextInt()
+
   implicit val resourceGenerator: Generator[Resource] = () => {
     HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
   }
@@ -151,6 +154,31 @@ package object util {
   }
 
   implicit val longGenerator: Generator[Long] = () => nextLong(0, Long.MaxValue)
+
+  implicit val ogiGenerator: Generator[OpenGraphImage] = () => OpenGraphImage(
+    url = someRandom[Resource].stringify(),
+    secureUrl = optionRandom[Resource].map(_.stringify()),
+    imageType = optionRandom[MimeType],
+    width = optionRandom[Int],
+    height = optionRandom[Int],
+    alt = optionRandom[String]
+  )
+
+  implicit val ogoGenerator: Generator[OpenGraphObject] = () => OpenGraphObject(
+    url = someRandom[Resource].stringify(),
+    title = optionRandom[String],
+    `type` = optionRandom[String],
+    image = optionRandom[OpenGraphImage],
+    description = optionRandom[String]
+  )
+
+  implicit def setGenerator[T](implicit gen: Generator[T]): Generator[Set[T]] = () => {
+    if (someRandom[Boolean]) {
+      Set(gen.generate()) ++ someRandom[Set[T]]
+    } else {
+      Set(gen.generate())
+    }
+  }
 
   def optionRandom[T](implicit get: Generator[T]) = {
     if (someRandom[Boolean]) {

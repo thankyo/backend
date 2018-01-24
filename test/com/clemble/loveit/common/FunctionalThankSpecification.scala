@@ -6,6 +6,7 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.collection.immutable
+import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 
 trait FunctionalThankSpecification extends ThankSpecification with ThankExecutor {

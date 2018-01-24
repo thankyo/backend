@@ -9,10 +9,6 @@ trait SupportedProjectRepository {
 
   def getProject(userID: UserID): Future[Option[SupportedProject]]
 
-  def markSupported(supporter: UserID, project: SupportedProject): Future[Boolean]
-
-  def getSupported(supporter: UserID): Future[List[SupportedProject]]
-
   def setTags(userID: UserID, tags: Set[Tag]): Future[Boolean]
 
 }

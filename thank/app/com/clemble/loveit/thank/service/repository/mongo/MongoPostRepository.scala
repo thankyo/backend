@@ -79,7 +79,6 @@ case class MongoPostRepository @Inject()(
         collection.update(query, update, multi = true).map(res => res.ok && res.n > 0)
       case None =>
         throw ResourceException.ownerMissing()
-        Future.failed(new IllegalArgumentException("Can't verify this resource"));
     })
   }
 

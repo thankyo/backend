@@ -10,7 +10,7 @@ case class Post(
                  resource: Resource,
                  project: SupportedProject,
 
-                 ogObj: Option[OpenGraphObject] = None,
+                 ogObj: OpenGraphObject,
                  tags: Set[Tag] = Set.empty,
 
                  thank: Thank = Thank(),

@@ -36,6 +36,8 @@ trait ServiceSpec extends FunctionalThankSpecification {
     await(userService.findById(user))
   }
 
-  def assignOwnership(user: UserID, res: Resource) = await(roService.assignOwnership(user, res))
+  def assignOwnership(user: UserID, res: Resource) = {
+    await(roService.assignOwnership(user, res))
+  }
 
 }

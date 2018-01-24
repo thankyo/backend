@@ -25,31 +25,31 @@ trait PostService {
 
 @Singleton
 case class SimplePostService @Inject()(
-                                         thankEventBus: ThankEventBus,
-                                         thankRepo: PostRepository,
-                                         implicit val ec: ExecutionContext
+                                        thankEventBus: ThankEventBus,
+                                        postRepo: PostRepository,
+                                        implicit val ec: ExecutionContext
 ) extends PostService {
 
   override def hasSupported(supporter: UserID, res: Resource): Future[Boolean] = {
-    thankRepo.isSupportedBy(supporter, res).flatMap(_ match {
+    postRepo.isSupportedBy(supporter, res).flatMap(_ match {
       case Some(thanked) => Future.successful(thanked)
       case None => getOrCreate(res).map(post => post.isSupportedBy(supporter))
     })
   }
 
-  override def getOrCreate(resource: Resource): Future[Post] = {
+  override def getOrCreate(res: Resource): Future[Post] = {
     def createIfMissing(postOpt: Option[Post]): Future[Post] = {
       postOpt match {
         case Some(post) =>
           Future.successful(post)
         case None =>
-          resource.parent() match {
+          res.parent() match {
             case Some(parRes) =>
               for {
                 owner <- getOrCreate(parRes).map(_.project)
-                post = Post(resource, owner)
-                createdNew <- thankRepo.save(post)
-                created <- if(createdNew) Future.successful(post) else thankRepo.findByResource(resource).map(_.get)
+                post = Post(res, owner, OpenGraphObject(res.stringify()))
+                createdNew <- postRepo.save(post)
+                created <- if(createdNew) Future.successful(post) else postRepo.findByResource(res).map(_.get)
               } yield {
                 created
               }
@@ -59,29 +59,35 @@ case class SimplePostService @Inject()(
       }
     }
 
-    thankRepo.findByResource(resource).flatMap(createIfMissing)
+    postRepo.findByResource(res).flatMap(createIfMissing)
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {
     val res = Resource.from(og.url)
     for {
       post <- getOrCreate(res)
-      saved <- thankRepo.update(post.copy(ogObj = Some(og))) if (saved)
+      saved <- postRepo.update(post.copy(ogObj = og)) if (saved)
     } yield {
-      post.copy(ogObj = Some(og))
+      post.copy(ogObj = og)
     }
   }
 
-  override def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean] = {
-    getOrCreate(url)
-      .recover({ case _ => thankRepo.save(Post(url, owner))})
-      .flatMap(_ => thankRepo.updateOwner(owner, url))
+  override def updateOwner(owner: SupportedProject, res: Resource): Future[Boolean] = {
+    val fPost = getOrCreate(res)
+      .recoverWith({ case _ => {
+        val post = Post(res, owner, OpenGraphObject(res.stringify()))
+        postRepo.save(post).filter(_ == true).map(_ => post)
+      }})
+    fPost
+      .flatMap(post => {
+        postRepo.updateOwner(owner, res)
+     })
   }
 
   override def thank(giver: UserID, res: Resource): Future[Post] = {
     for {
       post <- getOrCreate(res) // Ensure Thank exists
-      increased <- thankRepo.markSupported(giver, res)
+      increased <- postRepo.markSupported(giver, res)
     } yield {
       if (increased) {
         thankEventBus.publish(ThankEvent(giver, post.project, res))

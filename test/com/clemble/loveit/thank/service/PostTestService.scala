@@ -1,8 +1,9 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{Resource}
+import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post}
+import com.clemble.loveit.thank.service.repository.PostRepository
 
 trait PostTestService extends ServiceSpec {
 
@@ -28,5 +29,11 @@ trait PostTestService extends ServiceSpec {
 }
 
 trait RepoPostTestService extends ServiceSpec with PostTestService {
-  override def createPost(ogo: OpenGraphObject): Post = ???
+
+  lazy val postService = dependency[PostService]
+
+  override def createPost(ogo: OpenGraphObject): Post = {
+    await(postService.create(ogo))
+  }
+
 }

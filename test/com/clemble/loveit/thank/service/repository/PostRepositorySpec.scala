@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
+import com.clemble.loveit.thank.model.{OpenGraphObject, Post, SupportedProject, Thank}
 import com.clemble.loveit.thank.service.PostService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -22,7 +22,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   }
 
   def createParentThank(post: Post) = {
-    val ownerResource = Post(post.resource.parents.last, someRandom[SupportedProject])
+    val res = post.resource.parents.last
+    val ownerResource = Post(res, someRandom[SupportedProject], OpenGraphObject(res.stringify()))
     await(repo.save(ownerResource))
   }
 
@@ -133,8 +134,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      await(repo.save(Post(parent, A))) shouldEqual true
-      await(repo.save(Post(child, A))) shouldEqual true
+      await(repo.save(Post(parent, A, OpenGraphObject(parent.stringify())))) shouldEqual true
+      await(repo.save(Post(child, A, OpenGraphObject(child.stringify())))) shouldEqual true
 
       await(repo.updateOwner(B, parent))
 
@@ -149,8 +150,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
 
-      await(repo.save(Post(parent, A))) shouldEqual true
-      await(repo.save(Post(difParent, A))) shouldEqual true
+      await(repo.save(Post(parent, A, OpenGraphObject(parent.stringify())))) shouldEqual true
+      await(repo.save(Post(difParent, A, OpenGraphObject(difParent.stringify())))) shouldEqual true
 
       await(repo.updateOwner(B, parent))
 
@@ -165,8 +166,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      await(repo.save(Post(parent, original))) shouldEqual true
-      await(repo.save(Post(child, original))) shouldEqual true
+      await(repo.save(Post(parent, original, OpenGraphObject(parent.stringify())))) shouldEqual true
+      await(repo.save(Post(child, original, OpenGraphObject(child.stringify())))) shouldEqual true
 
       await(repo.updateOwner(B, child))
 

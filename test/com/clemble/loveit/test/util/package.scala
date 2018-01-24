@@ -95,7 +95,8 @@ package object util {
   implicit val postGenerator: Generator[Post] = () => {
     Post(
       someRandom[Resource],
-      someRandom[SupportedProject]
+      someRandom[SupportedProject],
+      someRandom[OpenGraphObject]
     )
   }
   implicit val thankGenerator: Generator[Thank] = () => Thank(someRandom[Long])

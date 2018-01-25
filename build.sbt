@@ -13,6 +13,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation")
 val silhouetteVersion = "5.0.3"
 val reactMongoVersion = "0.12.7"
 val scalaGuiceVersion = "4.1.1"
+val elastic4sVersion = "6.1.3"
 
 val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.12.4",
@@ -32,7 +33,7 @@ lazy val common = (project in file("./common")).
         ExclusionRule(organization = "com.typesafe.play")
         ),
 
-      "com.typesafe.play" %% "play" % "2.6.10" % "provided",
+      "com.typesafe.play" %% "play" % "2.6.11" % "provided",
 
       "org.reactivemongo" %% "reactivemongo" % reactMongoVersion,
       "org.reactivemongo" %% "play2-reactivemongo" % s"${reactMongoVersion}-play26",
@@ -79,6 +80,11 @@ lazy val thank = (project in file("./thank")).
     libraryDependencies ++= Seq(
       ws,
       "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
+
+      // ES dependencies
+      "com.sksamuel.elastic4s" %% "elastic4s-core" % elastic4sVersion,
+      // for the tcp client
+      "com.sksamuel.elastic4s" %% "elastic4s-tcp" % elastic4sVersion,
     )
   )
 
@@ -111,7 +117,7 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.6.4",
+  "io.sentry" % "sentry-logback" % "1.6.5",
 
   "org.apache.commons" % "commons-text" % "1.2" % Test,
   specs2 % Test

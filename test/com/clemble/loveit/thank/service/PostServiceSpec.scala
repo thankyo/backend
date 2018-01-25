@@ -12,8 +12,8 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
-  val thankService = dependency[PostService]
-  val thankRepo = dependency[PostRepository]
+  val service = dependency[PostService]
+  val repo = dependency[PostRepository]
   val supportedProjectService = dependency[SupportedProjectService]
 
   def createScene():(Resource, UserID, UserID) = {
@@ -22,18 +22,18 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
     val owner = createUser()
     val project = SupportedProject from getUser(owner).get
     await(roService.assignOwnership(owner, url))
-    await(thankRepo.updateOwner(project, url))
+    await(repo.updateOwner(project, url))
     val giver = createUser()
 
     (url, owner, giver)
   }
 
   def thank(user: UserID, url: Resource) = {
-    await(thankService.thank(user, url))
+    await(service.thank(user, url))
   }
 
   def getBalance(url: Resource): Amount = {
-    await(thankService.getOrCreate(url)).thank.given
+    await(service.getOrCreate(url)).thank.given
   }
 
   "thanked" should {
@@ -42,20 +42,20 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
       val user = someRandom[UserID]
       val res = someRandom[Resource]
 
-      await(thankService.hasSupported(user, res)) should throwA[ResourceException]
+      await(service.hasSupported(user, res)) should throwA[ResourceException]
     }
 
     "return false on not thanked res" in {
       val (res, _, giver) = createScene()
 
-      await(thankService.hasSupported(giver, res)) shouldEqual false
+      await(service.hasSupported(giver, res)) shouldEqual false
     }
 
     "return true if thanked" in {
       val (res, _, giver) = createScene()
 
-      await(thankService.thank(giver, res))
-      await(thankService.hasSupported(giver, res)) shouldEqual true
+      await(service.thank(giver, res))
+      await(service.hasSupported(giver, res)) shouldEqual true
     }
 
   }
@@ -96,6 +96,34 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
       // Balance did not change
       eventually(getBalance(owner) shouldEqual 1)
       eventually(getBalance(giver) shouldEqual - 1)
+    }
+
+  }
+
+  "UPDATE OWNER" should {
+
+    "create if missing" in {
+      val owner = someRandom[SupportedProject]
+      val resource = someRandom[Resource]
+
+      await(service.getOrCreate(resource)) should throwA()
+
+      await(service.updateOwner(owner, resource)) shouldEqual true
+      await(service.getOrCreate(resource)).project shouldEqual owner
+    }
+
+    "update if exists" in {
+      val resource = someRandom[Resource]
+
+      val A = someRandom[SupportedProject]
+
+      await(service.updateOwner(A, resource)) shouldEqual true
+      await(service.getOrCreate(resource)).project shouldEqual A
+
+      val B = someRandom[SupportedProject]
+
+      await(service.updateOwner(B, resource)) shouldEqual true
+      await(service.getOrCreate(resource)).project shouldEqual B
     }
 
   }

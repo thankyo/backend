@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.thank.model.{OpenGraphObject, Post, SupportedProject, Thank}
+import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
 import com.clemble.loveit.thank.service.PostService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -86,26 +86,26 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
     "create if missing" in {
       val owner = someRandom[SupportedProject]
-      val resource = someRandom[Resource]
+      val post = someRandom[Post]
 
-      await(service.getOrCreate(resource)) should throwA()
+      await(repo.save(post)) should beTrue
 
-      await(service.updateOwner(owner, resource)) shouldEqual true
-      await(service.getOrCreate(resource)).project shouldEqual owner
+      await(repo.updateOwner(owner, post.resource)) shouldEqual true
+      await(repo.findByResource(post.resource)).map(_.project) shouldEqual Some(owner)
     }
 
     "update if exists" in {
-      val resource = someRandom[Resource]
+      val post = someRandom[Post]
 
       val A = someRandom[SupportedProject]
 
-      await(service.updateOwner(A, resource)) shouldEqual true
-      await(service.getOrCreate(resource)).project shouldEqual A
+      await(repo.save(post)) shouldEqual true
+      await(repo.updateOwner(A, post.resource)) shouldEqual true
 
       val B = someRandom[SupportedProject]
 
-      await(service.updateOwner(B, resource)) shouldEqual true
-      await(service.getOrCreate(resource)).project shouldEqual B
+      await(repo.updateOwner(B, post.resource)) shouldEqual true
+      await(repo.findByResource(post.resource)).map(_.project) shouldEqual Some(B)
     }
 
     "update children" in {

@@ -30,6 +30,13 @@ object MongoSafeUtils {
       documentSource(err = ignoreErrorHandler(collection.name, selector))
   }
 
+  def collectAll[T](collection: JSONCollection, selector: JsObject, projection: JsObject = Json.obj())(implicit reads: Reads[T], ec: ExecutionContext, m: Materializer): Future[List[T]] = {
+    val fAll = findAll[T](collection, selector, projection)
+    fAll
+      .runFold(List.empty[T])((l, el) => el :: l)
+      .map(_.reverse)
+  }
+
   def toException(code: Int, msg: String): RepositoryException = {
     code match {
       case 11000 => RepositoryException.duplicateKey(msg)

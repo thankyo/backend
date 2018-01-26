@@ -15,6 +15,8 @@ trait PostRepository {
 
   def findByResource(uri: Resource): Future[Option[Post]]
 
+  def findByTags(tags: Set[String]): Future[List[Post]]
+
   def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
 
   def markSupported(user: String, url: Resource): Future[Boolean]

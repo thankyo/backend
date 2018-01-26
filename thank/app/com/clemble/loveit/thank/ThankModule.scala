@@ -1,17 +1,20 @@
 package com.clemble.loveit.thank
 
-import com.clemble.loveit.thank.service.repository._
-import com.clemble.loveit.thank.service.repository.mongo._
-import com.clemble.loveit.thank.service._
-import com.google.inject.Provides
 import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.thank.service._
+import com.clemble.loveit.thank.service.repository._
+import com.clemble.loveit.thank.service.repository.elastic.ElasticPostRepository
+import com.clemble.loveit.thank.service.repository.mongo._
+import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
+import com.sksamuel.elastic4s.ElasticsearchClientUri
+import com.sksamuel.elastic4s.http.HttpClient
 import net.codingwell.scalaguice.ScalaModule
-import play.api.{ConfigLoader, Configuration, Environment}
+import play.api.{Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 

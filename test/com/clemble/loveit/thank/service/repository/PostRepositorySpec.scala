@@ -158,4 +158,35 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   }
 
+  "TAG Search" should {
+
+    def createPostsWithTag(tag: String): Seq[Post] = {
+      for {
+        _ <- 1 to 10
+      } yield {
+        val post = someRandom[Post].copy (tags = Set (tag) )
+        await (repo.save (post) ) shouldEqual true
+        post
+      }
+    }
+
+    "simple search" in {
+      val tag = someRandom[String]
+      val posts = createPostsWithTag(tag)
+
+      await(repo.findByTags(Set(tag))) should containAllOf(posts)
+    }
+
+    "search with multiple tags" in {
+      val tagA = someRandom[String]
+      val tagB = someRandom[String]
+
+      val postsWithA = createPostsWithTag(tagA)
+      val postsWithB = createPostsWithTag(tagB)
+
+      await(repo.findByTags(Set(tagA, tagB))) should containAllOf(postsWithA ++ postsWithB)
+    }
+
+  }
+
 }

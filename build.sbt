@@ -84,7 +84,9 @@ lazy val thank = (project in file("./thank")).
       // ES dependencies
       "com.sksamuel.elastic4s" %% "elastic4s-core" % elastic4sVersion,
       // for the tcp client
-      "com.sksamuel.elastic4s" %% "elastic4s-tcp" % elastic4sVersion,
+      "com.sksamuel.elastic4s" %% "elastic4s-http" % elastic4sVersion,
+
+      "com.sksamuel.elastic4s" %% "elastic4s-play-json" % elastic4sVersion,
     )
   )
 

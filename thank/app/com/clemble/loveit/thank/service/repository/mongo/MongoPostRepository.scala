@@ -2,6 +2,7 @@ package com.clemble.loveit.thank.service.repository.mongo
 
 import javax.inject.{Inject, Named, Singleton}
 
+import akka.stream.Materializer
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
@@ -17,7 +18,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class MongoPostRepository @Inject()(
                                           @Named("post") collection: JSONCollection,
-                                          implicit val ec: ExecutionContext
+                                          implicit val ec: ExecutionContext,
+                                          implicit val mat: Materializer
                                         ) extends PostRepository {
 
   MongoPostRepository.ensureMeta(collection)
@@ -52,6 +54,12 @@ case class MongoPostRepository @Inject()(
   override def findByResource(resource: Resource): Future[Option[Post]] = {
     val fSearchResult = collection.find(Json.obj("resource" -> resource)).one[Post]
     MongoSafeUtils.safe(fSearchResult)
+  }
+
+
+  override def findByTags(tags: Set[String]): Future[List[Post]] = {
+    val selector = Json.obj("tags" -> Json.obj("$in" -> tags))
+    MongoSafeUtils.collectAll[Post](collection, selector)
   }
 
   override def markSupported(user: UserID, resource: Resource): Future[Boolean] = {

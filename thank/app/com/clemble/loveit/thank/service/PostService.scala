@@ -11,8 +11,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PostService {
 
-  def hasSupported(giver: UserID, uri: Resource): Future[Boolean]
-
   def getOrCreate(uri: Resource): Future[Post]
 
   def create(og: OpenGraphObject): Future[Post]
@@ -20,6 +18,10 @@ trait PostService {
   def assignTags(uri: Resource, tags: Set[Tag]): Future[Boolean]
 
   def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
+
+  def findByTags(tags: Set[Tag]): Future[List[Post]]
+
+  def hasSupported(giver: UserID, uri: Resource): Future[Boolean]
 
   def thank(supporter: UserID, url: Resource): Future[Post]
 
@@ -62,6 +64,11 @@ case class SimplePostService @Inject()(
     }
 
     postRepo.findByResource(res).flatMap(createIfMissing)
+  }
+
+
+  override def findByTags(tags: Set[Tag]): Future[List[Post]] = {
+    postRepo.findByTags(tags)
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {

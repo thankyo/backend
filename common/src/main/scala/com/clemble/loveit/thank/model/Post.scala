@@ -29,7 +29,9 @@ object Post {
 
   implicit val jsonFormat: OFormat[Post] = Json.format[Post]
 
-  implicit val thankWriteable = WriteableUtils.jsonToWriteable[Post]
+  implicit val postWriteable = WriteableUtils.jsonToWriteable[Post]
+
+  implicit val postsWriteable = WriteableUtils.jsonToWriteable[List[Post]]
 
   def from(res: Resource, project: SupportedProject): Post = {
     Post(res, project, OpenGraphObject(res.stringify()), project.tags)

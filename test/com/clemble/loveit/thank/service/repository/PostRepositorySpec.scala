@@ -164,8 +164,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       for {
         _ <- 1 to 10
       } yield {
-        val post = someRandom[Post].copy (tags = Set (tag) )
-        await (repo.save (post) ) shouldEqual true
+        val post = someRandom[Post].copy(tags = Set(tag))
+        await(repo.save(post)) shouldEqual true
         post
       }
     }
@@ -185,6 +185,28 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val postsWithB = createPostsWithTag(tagB)
 
       await(repo.findByTags(Set(tagA, tagB))) should containAllOf(postsWithA ++ postsWithB)
+    }
+
+  }
+
+  "AUTHOR search" should {
+
+    def createPostsWithAuthor(author: UserID): Seq[Post] = {
+      val supportedProject = someRandom[SupportedProject].copy(id = author)
+      for {
+        _ <- 1 to 10
+      } yield {
+        val post = someRandom[Post].copy(project = supportedProject)
+        await(repo.save(post)) shouldEqual true
+        post
+      }
+    }
+
+    "simple search" in {
+      val author = createUser()
+      val posts = createPostsWithAuthor(author)
+
+      await(repo.findByAuthor(author)) should containAllOf(posts)
     }
 
   }

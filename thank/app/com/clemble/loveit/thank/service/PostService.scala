@@ -21,6 +21,8 @@ trait PostService {
 
   def findByTags(tags: Set[Tag]): Future[List[Post]]
 
+  def findByAuthor(author: UserID): Future[List[Post]]
+
   def hasSupported(giver: UserID, uri: Resource): Future[Boolean]
 
   def thank(supporter: UserID, url: Resource): Future[Post]
@@ -69,6 +71,10 @@ case class SimplePostService @Inject()(
 
   override def findByTags(tags: Set[Tag]): Future[List[Post]] = {
     postRepo.findByTags(tags)
+  }
+
+  override def findByAuthor(author: UserID): Future[List[Post]] = {
+    postRepo.findByAuthor(author)
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {

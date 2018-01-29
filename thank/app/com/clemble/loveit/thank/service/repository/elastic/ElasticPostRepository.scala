@@ -70,6 +70,8 @@ case class ElasticPostRepository @Inject()(client: HttpClient)(implicit ec: Exec
 
   override def findByTags(tag: Set[String]): Future[List[Post]] = ???
 
+  override def findByAuthor(author: UserID): Future[List[Post]] = ???
+
   override def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean] = {
     ???
   }

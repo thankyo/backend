@@ -102,7 +102,11 @@ object MongoSafeUtils {
   def ensureUpdate(collection: JSONCollection, selector: JsObject, update: (JsObject) => Future[WriteResult])(implicit ec: ExecutionContext, m: Materializer): Unit = {
     val source = collection.find(selector).cursor[JsObject](ReadPreference.nearest).documentSource()
     val updateEach = source.runFoldAsync(true)((agg, jsObj) => update(jsObj).map(res => agg && res.ok && res.n == 1))
-    updateEach.foreach(success => if (!success) System.exit(1))
+    updateEach.foreach(success => {
+      if (!success) {
+        System.exit(1)
+      }
+    })
   }
 
 }

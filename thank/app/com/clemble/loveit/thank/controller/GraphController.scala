@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.controller
 import javax.inject.Inject
 
 import com.clemble.loveit.common.controller.LoveItController
-import com.clemble.loveit.common.model.{Resource, Tag}
+import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post, SupportedProject}
 import com.clemble.loveit.thank.service.PostService
@@ -33,9 +33,13 @@ class GraphController @Inject()(
       .map(Ok(_))
   })
 
-  def search() = silhouette.SecuredAction.async(implicit req => {
+  def searchByTags() = silhouette.SecuredAction.async(implicit req => {
     val tags: Set[Tag] = req.queryString.get("tags").map(_.toSet).getOrElse(Set.empty[Tag])
     service.findByTags(tags).map(posts => Ok(posts))
+  })
+
+  def searchByAuthor(author: UserID) = silhouette.SecuredAction.async(implicit req => {
+    service.findByAuthor(author).map(posts => Ok(posts))
   })
 
 }

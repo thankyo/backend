@@ -16,7 +16,9 @@ PUT         /http/*url                         @com.clemble.loveit.thank.control
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()
 
-GET         /graph/search                      @com.clemble.loveit.thank.controller.GraphController.search()
+GET         /graph/search                      @com.clemble.loveit.thank.controller.GraphController.searchByTags()
+
+GET         /graph/author/:author              @com.clemble.loveit.thank.controller.GraphController.searchByAuthor(author)
 
 GET         /:supporter/supported              @com.clemble.loveit.thank.controller.SupportedProjectController.getSupported(supporter)
 

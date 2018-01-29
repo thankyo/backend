@@ -56,9 +56,13 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safe(fSearchResult)
   }
 
-
   override def findByTags(tags: Set[String]): Future[List[Post]] = {
     val selector = Json.obj("tags" -> Json.obj("$in" -> tags))
+    MongoSafeUtils.collectAll[Post](collection, selector)
+  }
+
+  override def findByAuthor(author: UserID): Future[List[Post]] = {
+    val selector = Json.obj("project.id" -> author)
     MongoSafeUtils.collectAll[Post](collection, selector)
   }
 

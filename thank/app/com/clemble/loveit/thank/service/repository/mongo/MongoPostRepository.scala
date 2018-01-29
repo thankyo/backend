@@ -3,10 +3,9 @@ package com.clemble.loveit.thank.service.repository.mongo
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.stream.Materializer
-import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
+import com.clemble.loveit.thank.model.{Post, SupportedProject}
 import com.clemble.loveit.thank.service.repository.PostRepository
 import play.api.libs.json.{JsArray, JsObject, Json}
 import play.modules.reactivemongo.json._
@@ -79,19 +78,14 @@ case class MongoPostRepository @Inject()(
   }
 
   override def updateOwner(project: SupportedProject, res: Resource): Future[Boolean] = {
-    findByResource(res).flatMap({
-      case Some(_) =>
-        val query = Json.obj(
-          "$or" -> Json.arr(
-            Json.obj("resource.uri" -> res.uri),
-            Json.obj("resource.uri" -> Json.obj("$regex" -> s"^${res.uri}/.*"))
-          )
-        )
-        val update = Json.obj("$set" -> Json.obj("project" -> project))
-        collection.update(query, update, multi = true).map(res => res.ok && res.n > 0)
-      case None =>
-        throw ResourceException.ownerMissing()
-    })
+    val query = Json.obj(
+      "$or" -> Json.arr(
+        Json.obj("resource.uri" -> res.uri),
+        Json.obj("resource.uri" -> Json.obj("$regex" -> s"^${res.uri}/.*"))
+      )
+    )
+    val update = Json.obj("$set" -> Json.obj("project" -> project))
+    collection.update(query, update, multi = true).map(res => res.ok)
   }
 
 }

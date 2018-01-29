@@ -21,9 +21,12 @@ class GraphController @Inject()(
 
   def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     service
-      .getOrCreate(res)
-      .recover({ case _ => Post.from(res, SupportedProject.empty) })
-      .map(Ok(_))
+      .getPostOrProject(res)
+      .recover({ case _ => Left(Post.from(res, SupportedProject.empty)) })
+      .map(_ match {
+        case Left(post) => Ok(post)
+        case Right(project) => Ok(Post.from(res, project))
+      })
   })
 
   // TODO need a good security here

@@ -9,6 +9,7 @@ import com.clemble.loveit.auth.model.AuthResponse
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
+import com.clemble.loveit.thank.model.OpenGraphObject
 import com.clemble.loveit.thank.service.ROService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
@@ -66,7 +67,16 @@ trait ControllerSpec extends FunctionalThankSpecification {
   }
 
   def addOwnership(user: UserID, own: Resource): Option[Resource] = {
-    Some(await(ownershipService.assignOwnership(user, own)))
+    val resOpt = Some(await(ownershipService.assignOwnership(user, own)))
+
+    val ogObj = someRandom[OpenGraphObject].copy(url = own.uri)
+    val createOgObjReq = FakeRequest(POST, "/api/v1/thank/graph").withJsonBody(Json.toJson(ogObj))
+    val resp = await(route(application, createOgObjReq).get)
+    if (resp.header.status != OK) {
+      throw new IllegalArgumentException("Could not create OG obj for resource")
+    }
+
+    resOpt
   }
 
   def getMyUser(user: UserID): User = {

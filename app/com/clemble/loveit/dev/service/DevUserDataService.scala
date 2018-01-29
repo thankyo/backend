@@ -5,6 +5,7 @@ import javax.inject.Inject
 import akka.actor.{Actor, Props}
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.common.util.{EventBusManager, IDGenerator}
+import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post}
 import com.clemble.loveit.thank.service.{PostService, ROService, SupportedProjectService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
@@ -32,7 +33,7 @@ case class DevSignUpListener(resources: Seq[Resource], thankService: PostService
   }
 }
 
-case class DevCreatorConfig(creator: User, resource: Resource, tags: Set[Tag] = Set.empty[String])
+case class DevCreatorConfig(creator: User, resource: Resource, tags: Set[Tag] = Set.empty[String], ogObjs: Set[OpenGraphObject])
 
 trait DevUserDataService {
 
@@ -67,7 +68,16 @@ case class SimpleDevUserDataService @Inject()(
         link = Some("https://zenpencils.com")
       ),
       Resource.from("https://zenpencils.com"),
-      Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+      Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
+      Set(
+        OpenGraphObject(
+          url = "http://zenpencils.com/comic/creative/",
+          title = Some("ZEN PENCILS » 221. 8 tips to be more creative by Zen Pencils"),
+          `type` = Some("website"),
+          description = Some("Today is the launch day of my new collection CREATIVE STRUGGLE: Illustrated Advice From Masters of Creativity! Besides including creative advice from greats like Einstein, Van Gogh, Curie and Hemingway, it also features an all-new comic by myself. The comic describes my eight tips to be more creativ…"),
+          image = Some(OpenGraphImage(url = "https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/221_creativestruggle.jpg")),
+        )
+      )
     ),
     DevCreatorConfig(
       User(
@@ -80,7 +90,23 @@ case class SimpleDevUserDataService @Inject()(
         link = Some("https://readms.net")
       ),
       Resource.from("https://readms.net"),
-      Set("manga", "japan", "one piece", "naruto", "bleach")
+      Set("manga", "japan", "one piece", "naruto", "bleach"),
+      Set(
+        OpenGraphObject(
+          url = "https://readms.net/r/one_piece/892/4843/1",
+          title = Some("One Piece 892 - Manga Stream"),
+          `type` = Some("website"),
+          description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
+          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/51/4843/01.png"))
+        ),
+        OpenGraphObject(
+          url = "https://readms.net/r/attack_on_titan/101/4812/1",
+          title = Some("Attack on Titan 101 - Manga Stream"),
+          `type` = Some("website"),
+          description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
+          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/76/4812/01.png"))
+        )
+      )
     ),
     DevCreatorConfig(
       User(
@@ -93,14 +119,19 @@ case class SimpleDevUserDataService @Inject()(
         link = Some("https://personacentral.com")
       ),
       Resource.from("https://personacentral.com"),
-      Set("manga", "japan")
+      Set("manga", "japan"),
+      Set(
+        OpenGraphObject(
+          url = "https://personacentral.com/atlus-2018-online-consumer-survey-released/",
+          title = Some("Atlus 2018 Online Consumer Survey Released, Includes Company Collaboration Questions - Persona Central"),
+          description = Some("Atlus has released this year's online consumer survey to know more about what their customers want, including questions about remakes and company collaborations."),
+          `type` = Some("article"),
+          image = Some(OpenGraphImage(
+            url = "https://personacentral.com/wp-content/uploads/2018/01/Persona-5-Dancing-Star-Night-Morgana.jpg"
+          ))
+        )
+      )
     )
-  )
-
-  val RESOURCES_TO_LOVE = List(
-    Resource.from("https://zenpencils.com/comic/poison/"),
-    Resource.from("https://zenpencils.com/comic/hustle/"),
-    Resource.from("https://zenpencils.com/comic/poe/"),
   )
 
   enable(resMap)
@@ -110,9 +141,10 @@ case class SimpleDevUserDataService @Inject()(
     (for {
       creators <- ensureCreators(configs.map(_.creator))
       tags <- ensureTags(creators.zip(configs.map(_.tags))) if (tags)
-      resources <- ensureOwnership(creators.zip(configs.map(_.resource)))
+      assignedResources <- ensureOwnership(creators.zip(configs.map(_.resource))) if (assignedResources)
+      posts <- ensurePosts(configs.flatMap(_.ogObjs))
     } yield {
-      val allResources = resources ++ RESOURCES_TO_LOVE
+      val allResources = posts.map(_.resource)
       eventBusManager.onSignUp(Props(DevSignUpListener(allResources, postService)))
       eventBusManager.onLogin(Props(DevSignUpListener(allResources, postService)))
     }).recover({
@@ -143,20 +175,16 @@ case class SimpleDevUserDataService @Inject()(
     Future.sequence(fCreators)
   }
 
-  private def ensureOwnership(creatorToRes: Seq[(User, Resource)]): Future[Seq[Resource]] = {
+  private def ensureOwnership(creatorToRes: Seq[(User, Resource)]): Future[Boolean] = {
     val resources = for {
       (creator, resource) <- creatorToRes
     } yield {
-      roService.
-        assignOwnership(creator.id, resource).
-        recoverWith({
-          case _: Throwable =>
-            Thread.sleep(10000)
-            roService.assignOwnership(creator.id, resource)
-        }
-        )
+      roService.assignOwnership(creator.id, resource)
     }
-    Future.sequence(resources)
+    Future
+      .sequence(resources)
+      .map((_) => true)
+      .recover({ case _ => false })
   }
 
   private def ensureTags(creatorToTags: Seq[(User, Set[Tag])]): Future[Boolean] = {
@@ -167,6 +195,11 @@ case class SimpleDevUserDataService @Inject()(
     }
 
     Future.sequence(tags).map(_.forall(_ == true))
+  }
+
+  private def ensurePosts(ogObjs: Seq[OpenGraphObject]): Future[Seq[Post]] = {
+    val posts = ogObjs.map(obj => postService.create(obj))
+    Future.sequence(posts)
   }
 
 }

@@ -13,6 +13,7 @@ import play.api.mvc.{ControllerComponents, Result}
 import com.clemble.loveit.thank.controller.html.hasNotThanked
 import com.clemble.loveit.thank.controller.html.ownerMissing
 import com.clemble.loveit.thank.controller.html.hasThanked
+import com.clemble.loveit.thank.model.Post
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +27,10 @@ case class PostController @Inject()(
                                     ) extends LoveItController(components) {
 
   private def getJson(res: Resource): Future[Result] = {
-    service.getOrCreate(res).map(Ok(_))
+    service.getPostOrProject(res).map(_ match {
+      case Left(post) => Ok(post)
+      case Right(project) => Ok(Post.from(res, project))
+    })
   }
 
   private def getHtml(giver: Option[String], res: Resource): Future[Result] = {

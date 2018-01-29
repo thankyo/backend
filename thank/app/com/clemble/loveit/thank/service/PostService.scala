@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PostService {
 
-  def getOrCreate(uri: Resource): Future[Post]
+  def getPostOrProject(uri: Resource): Future[Either[Post, SupportedProject]]
 
   def create(og: OpenGraphObject): Future[Post]
 
@@ -40,28 +40,22 @@ case class SimplePostService @Inject()(
   override def hasSupported(supporter: UserID, res: Resource): Future[Boolean] = {
     postRepo.isSupportedBy(supporter, res).flatMap(_ match {
       case Some(thanked) => Future.successful(thanked)
-      case None => getOrCreate(res).map(post => post.isSupportedBy(supporter))
+      case None => Future.successful(false)
     })
   }
 
-  override def getOrCreate(res: Resource): Future[Post] = {
-    def createIfMissing(postOpt: Option[Post]): Future[Post] = {
+  override def getPostOrProject(res: Resource): Future[Either[Post, SupportedProject]] = {
+    def createIfMissing(postOpt: Option[Post]): Future[Either[Post, SupportedProject]] = {
       postOpt match {
         case Some(post) =>
-          Future.successful(post)
+          Future.successful(Left(post))
         case None =>
           userResService
             .findOwner(res)
-            .flatMap(ownerOpt => {
-              ownerOpt match {
-                case Some(owner) =>
-                  val post = Post.from(res, owner)
-                  postRepo.save(post).filter(_ == true).flatMap(_ => postRepo.findByResource(res).map(_.get))
-                case None => {
-                  throw ResourceException.ownerMissing()
-                }
-              }
-            })
+            .map(_ match {
+                case Some(owner) => Right(owner)
+                case None => throw ResourceException.ownerMissing()
+              })
       }
     }
 
@@ -79,12 +73,14 @@ case class SimplePostService @Inject()(
 
   override def create(og: OpenGraphObject): Future[Post] = {
     val res = Resource.from(og.url)
-    for {
-      post <- getOrCreate(res)
-      saved <- postRepo.update(post.withOg(og)) if (saved)
-    } yield {
-      post.withOg(og)
-    }
+    getPostOrProject(res).flatMap(_ match {
+      case Left(post) =>
+        val updPost = post.withOg(og)
+        postRepo.update(updPost).filter(_ == true).map(_ => post)
+      case Right(project) =>
+        val post = Post.from(og, project)
+        postRepo.save(post).filter(_ == true).map((_) => post)
+    })
   }
 
   override def assignTags(uri: Resource, tags: Set[Tag]): Future[Boolean] = {
@@ -92,21 +88,13 @@ case class SimplePostService @Inject()(
   }
 
   override def updateOwner(owner: SupportedProject, res: Resource): Future[Boolean] = {
-    val fPost = getOrCreate(res)
-      .recoverWith({ case _ => {
-        val post = Post.from(res, owner)
-        postRepo.save(post).filter(_ == true).map(_ => post)
-      }
-      })
-    fPost
-      .flatMap(post => {
-        postRepo.updateOwner(owner, res)
-      })
+    postRepo.updateOwner(owner, res)
   }
 
   override def thank(giver: UserID, res: Resource): Future[Post] = {
     for {
-      post <- getOrCreate(res) // Ensure Thank exists
+      postOpt <- postRepo.findByResource(res) // Ensure Thank exists
+      post = postOpt.get
       increased <- postRepo.markSupported(giver, res)
     } yield {
       if (increased) {

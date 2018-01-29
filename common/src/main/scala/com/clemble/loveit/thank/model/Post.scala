@@ -36,4 +36,8 @@ object Post {
   def from(res: Resource, project: SupportedProject): Post = {
     Post(res, project, OpenGraphObject(res.stringify()), project.tags)
   }
+
+  def from(og: OpenGraphObject, project: SupportedProject): Post = {
+    Post.from(Resource.from(og.url), project).withOg(og)
+  }
 }

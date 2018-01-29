@@ -20,11 +20,11 @@ case class OpenGraphObject(
   */
 case class OpenGraphImage(
   url: String,
-  secureUrl: Option[String],
-  imageType: Option[MimeType],
-  width: Option[Int],
-  height: Option[Int],
-  alt: Option[String]
+  secureUrl: Option[String] = None,
+  imageType: Option[MimeType] = None,
+  width: Option[Int] = None,
+  height: Option[Int] = None,
+  alt: Option[String] = None
 )
 
 object OpenGraphObject {

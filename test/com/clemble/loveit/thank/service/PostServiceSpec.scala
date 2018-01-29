@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.{OpenGraphObject, SupportedProject}
 import com.clemble.loveit.thank.service.repository.PostRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -17,15 +17,16 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
   val supportedProjectService = dependency[SupportedProjectService]
 
   def createScene():(Resource, UserID, UserID) = {
-    val url = HttpResource(s"example.com/some/${someRandom[Long]}")
-    // TODO flow must be changed here to use ResourceOwnersip verification
     val owner = createUser()
-    val project = SupportedProject from getUser(owner).get
-    await(roService.assignOwnership(owner, url))
-    await(repo.updateOwner(project, url))
     val giver = createUser()
 
-    (url, owner, giver)
+    val url = s"https://example.com/some/${someRandom[Long]}"
+    val res = Resource.from(url)
+
+    await(roService.assignOwnership(owner, res))
+    await(service.create(someRandom[OpenGraphObject].copy(url = url)))
+
+    (res, owner, giver)
   }
 
   def thank(user: UserID, url: Resource) = {
@@ -33,7 +34,10 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
   }
 
   def getBalance(url: Resource): Amount = {
-    await(service.getOrCreate(url)).thank.given
+    await(service.getPostOrProject(url)) match {
+      case Left(post) => post.thank.given
+      case _ => 0
+    }
   }
 
   "thanked" should {
@@ -42,7 +46,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
       val user = someRandom[UserID]
       val res = someRandom[Resource]
 
-      await(service.hasSupported(user, res)) should throwA[ResourceException]
+      await(service.hasSupported(user, res)) shouldEqual false
     }
 
     "return false on not thanked res" in {
@@ -103,27 +107,29 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
   "UPDATE OWNER" should {
 
     "create if missing" in {
-      val owner = someRandom[SupportedProject]
+      val owner = createUser()
       val resource = someRandom[Resource]
 
-      await(service.getOrCreate(resource)) should throwA()
+      await(service.getPostOrProject(resource)) should throwA()
 
-      await(service.updateOwner(owner, resource)) shouldEqual true
-      await(service.getOrCreate(resource)).project shouldEqual owner
+      await(roService.assignOwnership(owner, resource)) shouldEqual resource
+      await(service.getPostOrProject(resource)).right.exists(_.id == owner) should beTrue
     }
 
     "update if exists" in {
       val resource = someRandom[Resource]
 
-      val A = someRandom[SupportedProject]
+      val A = createUser()
 
-      await(service.updateOwner(A, resource)) shouldEqual true
-      await(service.getOrCreate(resource)).project shouldEqual A
+      await(roService.assignOwnership(A, resource)) shouldEqual resource
+      await(service.getPostOrProject(resource)).isRight shouldEqual true
+      await(service.getPostOrProject(resource)).right.exists(_.id == A) should beTrue
 
-      val B = someRandom[SupportedProject]
+      val B = createUser()
 
-      await(service.updateOwner(B, resource)) shouldEqual true
-      await(service.getOrCreate(resource)).project shouldEqual B
+      await(roService.assignOwnership(B, resource)) should throwA[Throwable]
+      await(service.getPostOrProject(resource)).isRight shouldEqual true
+      await(service.getPostOrProject(resource)).right.exists(_.id == A) should beTrue
     }
 
   }

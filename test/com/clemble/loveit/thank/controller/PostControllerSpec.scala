@@ -31,7 +31,8 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
         route(application, req).get.map(_.header.status).recover({ case _ => 500 })
       }
       val updateReq = await(Future.sequence(thanks))
-      updateReq.forall(_ == OK) should beTrue
+      val allSuccess = updateReq.forall(_ == OK)
+      allSuccess should beTrue
 
       getBalance(owner) shouldEqual ownerBalanceBefore + 1
     }

@@ -59,6 +59,9 @@ trait InternalTagTestService extends TagTestService with ServiceSpec {
   }
 
   override def getTags(res: Resource): Set[Tag] = {
-    await(postService.getOrCreate(res)).tags
+    await(postService.getPostOrProject(res)) match {
+      case Left(post) => post.tags
+      case Right(project) => project.tags
+    }
   }
 }

@@ -42,7 +42,7 @@ class GraphController @Inject()(
   })
 
   def searchByAuthor(author: UserID) = silhouette.SecuredAction.async(implicit req => {
-    service.findByAuthor(author).map(posts => Ok(posts))
+    service.findByAuthor(idOrMe(author)).map(posts => Ok(posts))
   })
 
 }

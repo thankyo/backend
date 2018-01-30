@@ -11,7 +11,6 @@ case class SupportedProject(
                              lastName: Option[String] = None,
                              avatar: Option[String] = None,
                              bio: Option[String] = None,
-                             link: Option[String] = None,
                              tags: Set[Tag] = Set.empty
                            ) extends UserAware {
 
@@ -24,7 +23,7 @@ object SupportedProject {
   val empty = SupportedProject("unknown")
 
   def from(user: User): SupportedProject = {
-    SupportedProject(user.id, user.firstName, user.lastName, user.avatar, user.bio, user.link)
+    SupportedProject(user.id, user.firstName, user.lastName, user.avatar, user.bio)
   }
 
   implicit val jsonFormat: OFormat[SupportedProject] = Json.format[SupportedProject]

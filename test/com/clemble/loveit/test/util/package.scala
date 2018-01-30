@@ -1,6 +1,6 @@
 package com.clemble.loveit.test
 
-import java.time.{LocalDateTime, YearMonth}
+import java.time.{LocalDateTime, LocalDate, YearMonth}
 import java.util.Currency
 
 import com.clemble.loveit.auth.model.requests.RegisterRequest
@@ -115,7 +115,7 @@ package object util {
       lastName = optionRandom[String],
       email = s"${someRandom[String]}@${someRandom[String]}.${someRandom[String]}",
       avatar = optionRandom[String],
-      dateOfBirth = optionRandom[LocalDateTime],
+      dateOfBirth = optionRandom[LocalDate],
       profiles = Set.empty[LoginInfo]
     )
   }
@@ -153,6 +153,9 @@ package object util {
   }
   implicit val dateTimeGenerator: Generator[LocalDateTime] = () => {
     LocalDateTime.now()
+  }
+  implicit val dateGenerator: Generator[LocalDate] = () => {
+    LocalDate.now()
   }
   implicit val yomGenerator: Generator[YearMonth] = () => {
     YearMonth.of(nextInt(1000, 3000), nextInt(1, 13))

@@ -3,7 +3,6 @@ package com.clemble.loveit.dev.service
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
-import com.clemble.loveit.auth.controller.AuthUtils
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}

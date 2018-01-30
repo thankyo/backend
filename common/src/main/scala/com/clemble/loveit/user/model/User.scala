@@ -1,6 +1,6 @@
 package com.clemble.loveit.user.model
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.WriteableUtils
@@ -25,8 +25,7 @@ case class User(
                  email: Email,
                  avatar: Option[String] = None,
                  bio: Option[String] = None,
-                 link: Option[String] = None,
-                 dateOfBirth: Option[LocalDateTime] = None,
+                 dateOfBirth: Option[LocalDate] = None,
                  profiles: Set[LoginInfo] = Set.empty,
                  created: LocalDateTime = LocalDateTime.now()
                ) extends Identity with CreatedAware {

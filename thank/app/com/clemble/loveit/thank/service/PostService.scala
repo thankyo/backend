@@ -53,8 +53,12 @@ case class SimplePostService @Inject()(
           userResService
             .findOwner(res)
             .map(_ match {
-                case Some(owner) => Right(owner)
-                case None => throw ResourceException.ownerMissing()
+                case Some(owner) => {
+                  Right(owner)
+                }
+                case None => {
+                  throw ResourceException.ownerMissing()
+                }
               })
       }
     }

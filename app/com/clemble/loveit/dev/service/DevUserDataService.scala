@@ -3,12 +3,14 @@ package com.clemble.loveit.dev.service
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
+import com.clemble.loveit.auth.controller.AuthUtils
+import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
-import com.clemble.loveit.common.util.{EventBusManager, IDGenerator}
+import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post}
 import com.clemble.loveit.thank.service.{PostService, ROService, SupportedProjectService}
 import com.clemble.loveit.user.model.User
-import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,7 +35,7 @@ case class DevSignUpListener(resources: Seq[Resource], thankService: PostService
   }
 }
 
-case class DevCreatorConfig(creator: User, resource: Resource, tags: Set[Tag] = Set.empty[String], ogObjs: Set[OpenGraphObject])
+case class DevCreatorConfig(creator: RegisterRequest, resource: Resource, tags: Set[Tag] = Set.empty[String], ogObjs: Set[OpenGraphObject])
 
 trait DevUserDataService {
 
@@ -46,7 +48,7 @@ trait DevUserDataService {
   * Service that creates first users and integrations for testing UI and UX
   */
 case class SimpleDevUserDataService @Inject()(
-                                               userService: UserService,
+                                               authService: AuthService,
                                                roService: ROService,
                                                postService: PostService,
                                                supPrjService: SupportedProjectService,
@@ -58,14 +60,15 @@ case class SimpleDevUserDataService @Inject()(
 
   val resMap = List(
     DevCreatorConfig(
-      User(
-        id = IDGenerator.generate(),
-        firstName = Some("Gavin"),
-        lastName = Some("Than"),
+      RegisterRequest(
+        firstName = "Gavin",
+        lastName = "Than",
         email = "gavin.than@example.com",
-        profiles = Set(LoginInfo("patreon", "zenpencil")),
-        avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
-        link = Some("https://zenpencils.com")
+        password = "1234567890" //,
+        //        id = IDGenerator.generate(),
+        //        profiles = Set(LoginInfo("patreon", "zenpencil")),
+        //        avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
+        //        link = Some("https://zenpencils.com")
       ),
       Resource.from("https://zenpencils.com"),
       Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
@@ -80,14 +83,15 @@ case class SimpleDevUserDataService @Inject()(
       )
     ),
     DevCreatorConfig(
-      User(
-        id = IDGenerator.generate(),
-        firstName = Some("Manga"),
-        lastName = Some("Stream"),
+      RegisterRequest(
+        firstName = "Manga",
+        lastName = "Stream",
         email = "manga.stream@example.com",
-        profiles = Set(LoginInfo("patreon", "mangastream")),
-        avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
-        link = Some("https://readms.net")
+        password = "1234567890"
+        //        id = IDGenerator.generate(),
+        //        profiles = Set(LoginInfo("patreon", "mangastream")),
+        //        avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
+        //        link = Some("https://readms.net")
       ),
       Resource.from("https://readms.net"),
       Set("manga", "japan", "one piece", "naruto", "bleach"),
@@ -109,14 +113,15 @@ case class SimpleDevUserDataService @Inject()(
       )
     ),
     DevCreatorConfig(
-      User(
-        id = IDGenerator.generate(),
-        firstName = Some("Personal"),
-        lastName = Some("Central"),
-        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+      RegisterRequest(
+        firstName = "Personal",
+        lastName = "Central",
         email = "personal.central@example.com",
-        profiles = Set(LoginInfo("patreon", "personal.central")),
-        link = Some("https://personacentral.com")
+        password = "1234567890"
+//        id = IDGenerator.generate(),
+//        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+//        profiles = Set(LoginInfo("patreon", "personal.central")),
+//        link = Some("https://personacentral.com")
       ),
       Resource.from("https://personacentral.com"),
       Set("manga", "japan"),
@@ -140,10 +145,13 @@ case class SimpleDevUserDataService @Inject()(
   override def enable(configs: Seq[DevCreatorConfig]): Future[Boolean] = {
     (for {
       creators <- ensureCreators(configs.map(_.creator))
-      tags <- ensureTags(creators.zip(configs.map(_.tags))) if (tags)
-      assignedResources <- ensureOwnership(creators.zip(configs.map(_.resource))) if (assignedResources)
+      tags <- ensureTags(creators.zip(configs.map(_.tags)))
+      assignedResources <- ensureOwnership(creators.zip(configs.map(_.resource)))
       posts <- ensurePosts(configs.flatMap(_.ogObjs))
     } yield {
+      if (!tags || !assignedResources) {
+        throw new IllegalArgumentException(s"Could not initialize tags: ${tags}, resources: ${assignedResources}")
+      }
       val allResources = posts.map(_.resource)
       eventBusManager.onSignUp(Props(DevSignUpListener(allResources, postService)))
       eventBusManager.onLogin(Props(DevSignUpListener(allResources, postService)))
@@ -156,30 +164,28 @@ case class SimpleDevUserDataService @Inject()(
     })
   }
 
-  private def ensureCreators(creators: Seq[User]): Future[Seq[User]] = {
+  private def ensureCreators(creators: Seq[RegisterRequest]): Future[Seq[UserID]] = {
     val fCreators = for {
       creator <- creators
     } yield {
-      userService.
-        findByEmail(creator.email).
-        flatMap({
-          case Some(user) => Future.successful(user)
-          case None => {
-            userService.create(creator).map(creator => {
-              eventBusManager.publish(SignUpEvent(creator, null))
-              creator
-            })
-          }
-        })
+      authService.register(creator).map(authRes => {
+        authRes match {
+          case UserRegister(user, _) =>
+            eventBusManager.publish(SignUpEvent(user, null))
+          case UserLoggedIn(user, _) =>
+            eventBusManager.publish(LoginEvent(user, null))
+        }
+        authRes.user.id
+      })
     }
     Future.sequence(fCreators)
   }
 
-  private def ensureOwnership(creatorToRes: Seq[(User, Resource)]): Future[Boolean] = {
+  private def ensureOwnership(creatorToRes: Seq[(UserID, Resource)]): Future[Boolean] = {
     val resources = for {
       (creator, resource) <- creatorToRes
     } yield {
-      roService.assignOwnership(creator.id, resource)
+      roService.assignOwnership(creator, resource)
     }
     Future
       .sequence(resources)
@@ -187,19 +193,18 @@ case class SimpleDevUserDataService @Inject()(
       .recover({ case _ => false })
   }
 
-  private def ensureTags(creatorToTags: Seq[(User, Set[Tag])]): Future[Boolean] = {
+  private def ensureTags(creatorToTags: Seq[(UserID, Set[Tag])]): Future[Boolean] = {
     val tags = for {
-      (user, tags) <- creatorToTags
+      (creator, tags) <- creatorToTags
     } yield {
-      supPrjService.assignTags(user.id, tags)
+      supPrjService.assignTags(creator, tags)
     }
 
     Future.sequence(tags).map(_.forall(_ == true))
   }
 
-  private def ensurePosts(ogObjs: Seq[OpenGraphObject]): Future[Seq[Post]] = {
-    val posts = ogObjs.map(obj => postService.create(obj))
-    Future.sequence(posts)
+  private def ensurePosts(posts: Seq[OpenGraphObject]): Future[Seq[Post]] = {
+    Future.sequence(posts.map(obj => postService.create(obj)))
   }
 
 }

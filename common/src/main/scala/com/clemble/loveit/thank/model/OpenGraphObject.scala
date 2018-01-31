@@ -10,8 +10,8 @@ import play.api.libs.json.{Json, OFormat}
 case class OpenGraphObject(
   url: String,
   title: Option[String] = None,
-  image: Option[OpenGraphImage] = None,
   description: Option[String] = None,
+  image: Option[OpenGraphImage] = None,
 )
 
 /**
@@ -23,7 +23,7 @@ case class OpenGraphImage(
   imageType: Option[MimeType] = None,
   width: Option[Int] = None,
   height: Option[Int] = None,
-  alt: Option[String] = None
+  alt: Option[String] = None,
 )
 
 object OpenGraphObject {

@@ -30,7 +30,7 @@ class GraphController @Inject()(
   })
 
   // TODO need a good security here
-  def create() = silhouette.UnsecuredAction.async(parse.json[OpenGraphObject])(implicit req => {
+  def create() = silhouette.SecuredAction.async(parse.json[OpenGraphObject])(implicit req => {
     service
       .create(req.body)
       .map(Ok(_))

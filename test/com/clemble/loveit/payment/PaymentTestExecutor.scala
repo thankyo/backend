@@ -3,6 +3,7 @@ package com.clemble.loveit.payment
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, PendingTransaction, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor
+import com.clemble.loveit.thank.model.SupportedProject
 
 trait PaymentTestExecutor extends TestStripeUtils with PaymentLimitExecutor {
 
@@ -16,7 +17,7 @@ trait PaymentTestExecutor extends TestStripeUtils with PaymentLimitExecutor {
 
   def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount
 
-  def thank(giver: UserID, owner: UserID, resource: Resource): PendingTransaction
+  def thank(giver: UserID, project: SupportedProject, resource: Resource): PendingTransaction
 
   def pendingThanks(giver: UserID): Seq[PendingTransaction]
 

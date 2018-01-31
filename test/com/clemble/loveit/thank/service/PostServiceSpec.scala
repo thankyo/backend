@@ -1,7 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.error.ResourceException
-import com.clemble.loveit.common.model.{Amount, HttpResource, Resource, UserID}
+import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.model.{OpenGraphObject, SupportedProject}
 import com.clemble.loveit.thank.service.repository.PostRepository
@@ -21,12 +20,12 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
     val giver = createUser()
 
     val url = s"https://example.com/some/${someRandom[Long]}"
-    val res = Resource.from(url)
+    val resource = Resource.from(url)
 
-    await(roService.assignOwnership(owner, res))
+    await(roService.validate(SupportedProject(resource, owner)))
     await(service.create(someRandom[OpenGraphObject].copy(url = url)))
 
-    (res, owner, giver)
+    (resource, owner, giver)
   }
 
   def thank(user: UserID, url: Resource) = {
@@ -112,8 +111,8 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
       await(service.getPostOrProject(resource)) should throwA()
 
-      await(roService.assignOwnership(owner, resource)) shouldEqual resource
-      await(service.getPostOrProject(resource)).right.exists(_.id == owner) should beTrue
+      await(roService.validate(SupportedProject(resource, owner))) shouldEqual resource
+      await(service.getPostOrProject(resource)).right.exists(_.user == owner) should beTrue
     }
 
     "update if exists" in {
@@ -121,15 +120,15 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
       val A = createUser()
 
-      await(roService.assignOwnership(A, resource)) shouldEqual resource
+      await(roService.validate(SupportedProject(resource, A))) shouldEqual resource
       await(service.getPostOrProject(resource)).isRight shouldEqual true
-      await(service.getPostOrProject(resource)).right.exists(_.id == A) should beTrue
+      await(service.getPostOrProject(resource)).right.exists(_.user == A) should beTrue
 
       val B = createUser()
 
-      await(roService.assignOwnership(B, resource)) should throwA[Throwable]
+      await(roService.validate(SupportedProject(resource, B))) should throwA[Throwable]
       await(service.getPostOrProject(resource)).isRight shouldEqual true
-      await(service.getPostOrProject(resource)).right.exists(_.id == A) should beTrue
+      await(service.getPostOrProject(resource)).right.exists(_.user == A) should beTrue
     }
 
   }

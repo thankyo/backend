@@ -2,10 +2,6 @@
 
 GET         /stat/:supporter/:year/:month      @com.clemble.loveit.thank.controller.UserStatController.get(supporter, year: Int, month: Int)
 
-GET         /:owner/resource                   @com.clemble.loveit.thank.controller.UserResourceController.get(owner)
-GET         /:owner/tag                        @com.clemble.loveit.thank.controller.UserTagController.getUserTags(owner)
-POST        /my/tag                            @com.clemble.loveit.thank.controller.UserTagController.setMyTags()
-
 POST        /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
 PUT         /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()
 DELETE      /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.removeMy()

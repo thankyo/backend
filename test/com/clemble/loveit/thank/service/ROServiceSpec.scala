@@ -3,6 +3,7 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.thank.model.SupportedProject
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -11,13 +12,15 @@ import org.specs2.runner.JUnitRunner
 class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   lazy val service = dependency[ROService]
+  lazy val supPrjService = dependency[SupportedProjectService]
 
-  def listResources(user: String): Set[Resource] = {
-    await(service.list(user))
+  def listResources(user: String): Set[SupportedProject] = {
+    await(supPrjService.getProjectsByUser(user)).toSet
   }
 
   def assignOwnership(userAuth: Seq[(String, String)], resource: Resource) = {
-    await(service.assignOwnership(userAuth.head._2, resource))
+    val user = userAuth.head._2
+    await(service.validate(SupportedProject(resource, user)))
   }
 
   "POST" should {
@@ -26,7 +29,7 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       val user = createUser()
 
       val resource = Resource from s"http://${someRandom[String]}.com"
-      assignOwnership(user, resource)
+      createProject(user, resource)
 
       eventually(listResources(user).size shouldEqual 1)
 
@@ -41,8 +44,8 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
       val resource = someRandom[Resource]
 
-      assignOwnership(A, resource) mustEqual resource
-      assignOwnership(B, resource) must throwA[UserException]
+      createProject(A, resource) mustEqual resource
+      createProject(B, resource) must throwA[UserException]
     }
 
     "prohibit assigning sub resource" in {
@@ -52,8 +55,8 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       val child = someRandom[Resource]
       val parent = child.parent.get
 
-      assignOwnership(A, parent) mustEqual parent
-      assignOwnership(B, child) must throwA[UserException]
+      createProject(A, parent) mustEqual parent
+      createProject(B, child) must throwA[UserException]
     }
 
     "allow assigning of sub resource to the owner" in {
@@ -62,8 +65,8 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
       val child = someRandom[Resource]
       val parent = child.parent.get
 
-      assignOwnership(A, parent) mustEqual parent
-      assignOwnership(A, child) mustEqual child
+      createProject(A, parent) mustEqual parent
+      createProject(A, child) mustEqual child
     }
 
   }

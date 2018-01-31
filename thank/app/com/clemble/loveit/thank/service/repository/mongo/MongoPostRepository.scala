@@ -77,11 +77,11 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(query, update, multi = false))
   }
 
-  override def updateOwner(project: SupportedProject, res: Resource): Future[Boolean] = {
+  override def updateProject(project: SupportedProject): Future[Boolean] = {
     val query = Json.obj(
       "$or" -> Json.arr(
-        Json.obj("resource.uri" -> res.uri),
-        Json.obj("resource.uri" -> Json.obj("$regex" -> s"^${res.uri}/.*"))
+        Json.obj("resource.uri" -> project.resource.uri),
+        Json.obj("resource.uri" -> Json.obj("$regex" -> s"^${project.resource.uri}/.*"))
       )
     )
     val update = Json.obj("$set" -> Json.obj("project" -> project))

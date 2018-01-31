@@ -11,6 +11,4 @@ trait UserResourceRepository {
 
   def find(user: UserID): Future[Option[UserResource]]
 
-  def findOwner(res: Resource): Future[Option[SupportedProject]]
-
 }

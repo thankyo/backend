@@ -3,6 +3,7 @@ package com.clemble.loveit.thank.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
+import com.clemble.loveit.thank.model.SupportedProject
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -10,11 +11,11 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class RORepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec  {
 
-  lazy val resOwnRepo = dependency[RORepository]
+  lazy val resOwnRepo = dependency[SupportedProjectRepository]
 
-  def assignOwnership(user: UserID, res: Resource) = await(resOwnRepo.assignOwnership(user, res))
-  def listOwned(user: UserID) = await(resOwnRepo.listOwned(user))
-  def findOwner(res: Resource) = await(resOwnRepo.findOwner(res))
+  def assignOwnership(user: UserID, res: Resource): Boolean = await(resOwnRepo.saveProject(SupportedProject(res, user)))
+  def listOwned(user: UserID): List[Resource] = await(resOwnRepo.getProjectsByUser(user)).map(_.resource)
+  def findOwner(res: Resource): Option[UserID] = await(resOwnRepo.findProject(res)).map(_.user)
 
   "LIST" should {
 

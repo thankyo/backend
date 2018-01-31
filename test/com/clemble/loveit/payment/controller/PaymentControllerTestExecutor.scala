@@ -71,9 +71,8 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
     res.body.dataStream.readJson[Money].isDefined
   }
 
-  override def thank(giver: UserID, owner: UserID, resource: Resource): PendingTransaction = {
-    val project = await(projectRepo.getProject(owner))
-    await(thankService.create(giver, project.get, resource))
+  override def thank(giver: UserID, project: SupportedProject, resource: Resource): PendingTransaction = {
+    await(thankService.create(giver, project, resource))
   }
 
   override def pendingThanks(giver: UserID): Seq[PendingTransaction] = {

@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.Tag
+import com.clemble.loveit.common.model.{Resource, Tag}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -10,12 +10,14 @@ trait TagTestServiceScenario extends ServiceSpec with TagTestService with PostTe
   "assign tags to user" in {
     val user = createUser()
 
-    val tags = getTags(user)
-    val newTags = someRandom[Set[Tag]]
-    tags shouldNotEqual newTags
+    val resource = someRandom[Resource]
+    val project = createProject(user, resource)
 
-    assignTags(user, newTags) shouldEqual true
-    getTags(user) shouldEqual newTags
+    val newTags = someRandom[Set[Tag]]
+    newTags shouldNotEqual getProjectTags(resource)
+
+    assignTags(project, newTags) shouldEqual true
+    getProjectTags(resource) shouldEqual newTags
   }
 
   "assign tags to post" in {

@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 
 import akka.actor.{Actor, ActorSystem, Props}
-import com.clemble.loveit.common.model.{Tag, ThankEvent, UserID}
+import com.clemble.loveit.common.model.{Resource, Tag, ThankEvent, UserID}
 import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.service.repository.{SupportTrackRepository, SupportedProjectRepository}
 
@@ -11,9 +11,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait SupportedProjectService {
 
-  def getProject(project: UserID): Future[Option[SupportedProject]]
+  def findProject(res: Resource): Future[Option[SupportedProject]]
 
-  def assignTags(project: UserID, tags: Set[Tag]): Future[Boolean]
+  def getProjectsByUser(user: UserID): Future[List[SupportedProject]]
+
+  def create(project: SupportedProject): Future[Boolean]
+
+  def assignTags(resource: Resource, tags: Set[Tag]): Future[Boolean]
 
   def getSupported(user: UserID): Future[List[SupportedProject]]
 
@@ -42,13 +46,20 @@ class SimpleSupportedProjectService @Inject()(
     thankEventBus.subscribe(subscriber, classOf[ThankEvent])
   }
 
-
-  override def getProject(userID: UserID) = {
-    repo.getProject(userID)
+  override def findProject(res: Resource): Future[Option[SupportedProject]] = {
+    repo.findProject(res)
   }
 
-  override def assignTags(project: UserID, tags: Set[Tag]): Future[Boolean] = {
-    repo.assignTags(project, tags)
+  override def create(project: SupportedProject): Future[Boolean] = {
+    repo.saveProject(project)
+  }
+
+  override def getProjectsByUser(userID: UserID): Future[List[SupportedProject]] = {
+    repo.getProjectsByUser(userID)
+  }
+
+  override def assignTags(resource: Resource, tags: Set[Tag]): Future[Boolean] = {
+    repo.assignTags(resource, tags)
   }
 
   override def getSupported(user: UserID): Future[List[SupportedProject]] = {

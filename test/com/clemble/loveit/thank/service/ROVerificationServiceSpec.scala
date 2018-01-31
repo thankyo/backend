@@ -19,7 +19,7 @@ class ROVerificationServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSp
       val B = createUser()
 
       val res = someRandom[Resource]
-      assignOwnership(A, res)
+      createProject(A, res)
 
       await(resVerService.create(B, res)) should throwA[UserException]
     }

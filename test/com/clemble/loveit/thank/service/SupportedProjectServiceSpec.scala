@@ -15,17 +15,17 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
   val thankRepo = dependency[PostRepository]
   val supportedProjectService = dependency[SupportedProjectService]
 
-  def createScene():(Resource, UserID, UserID) = {
+  def createScene():(SupportedProject, UserID, UserID) = {
     val owner = createUser()
     val giver = createUser()
 
     val url = s"https://example.com/some/${someRandom[Long]}"
     val res = Resource.from(url)
 
-    await(roService.assignOwnership(owner, res))
+    val project = await(roService.validate(SupportedProject(res, owner)))
     await(postService.create(someRandom[OpenGraphObject].copy(url = url)))
 
-    (res, owner, giver)
+    (project, owner, giver)
   }
 
   def thank(user: UserID, url: Resource) = {
@@ -39,15 +39,15 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
   "Supported projects " should {
 
     "be initialized on Thank" in {
-      val (url, owner, giver) = createScene()
+      val (project, owner, giver) = createScene()
 
       getSupported(giver) shouldEqual Nil
       getSupported(owner) shouldEqual Nil
 
-      thank(giver, url)
+      thank(giver, project.resource)
 
       getSupported(owner) shouldEqual Nil
-      eventually(getSupported(giver) shouldEqual List(SupportedProject from getUser(owner).get))
+      eventually(getSupported(giver) shouldEqual List(project))
     }
 
   }

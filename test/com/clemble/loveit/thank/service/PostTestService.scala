@@ -15,7 +15,7 @@ trait PostTestService extends ServiceSpec {
     val owner = createUser()
     val resource = someRandom[Resource]
     // Step 2. Assign ownership to resource
-    assignOwnership(owner, resource)
+    createProject(owner, resource)
     // Step 3. Create OGO with specific resource
     val ogo = someRandom[OpenGraphObject].copy(url = resource.stringify())
     createPost(ogo)

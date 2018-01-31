@@ -5,6 +5,7 @@ import com.clemble.loveit.common.model._
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, PendingTransaction, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository._
+import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
 
 trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
@@ -46,9 +47,8 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
     await(monLimRepo.setMonthlyLimit(user, limit))
   }
 
-  override def thank(giver: UserID, owner: UserID, resource: Resource): PendingTransaction = {
-    val projectOpt = await(projectsRepo.getProject(owner))
-    await(thankTransactionService.create(giver, projectOpt.get, resource))
+  override def thank(giver: UserID, project: SupportedProject, resource: Resource): PendingTransaction = {
+    await(thankTransactionService.create(giver, project, resource))
   }
 
   override def pendingThanks(giver: UserID): Seq[PendingTransaction] = {

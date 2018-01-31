@@ -22,11 +22,10 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
       val giver = createUser()
       val res = someRandom[Resource]
 
-      val A = createUser()
-      val B = createUser()
+      val A = createProject()
 
       thank(giver, A, res)
-      Try(thank(giver, B, res))
+      Try(thank(giver, A, res))
 
       val payments = pendingThanks(giver)
       payments.size must beEqualTo(1)
@@ -37,17 +36,17 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
 
     "increase resource owner balance" in {
       val giver = createUser()
-      val owner = createUser()
+      val owner = createProject()
 
       thank(giver, owner, someRandom[Resource])
-      val ownerBalanceAfter = await(balanceRepo.getBalance(owner))
+      val ownerBalanceAfter = await(balanceRepo.getBalance(owner.user))
 
       ownerBalanceAfter shouldEqual 1
     }
 
     "decrease giver balance" in {
       val giver = createUser()
-      val owner = createUser()
+      val owner = createProject()
 
       thank(giver, owner, someRandom[Resource])
       val giverBalanceAfter = await(balanceRepo.getBalance(giver))
@@ -58,28 +57,28 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
     "list all transactions" in {
       val giver = createUser()
 
-      val A = createUser()
-      val B = createUser()
+      val A = createProject()
+      val B = createProject()
 
       val transactionA = thank(giver, A, someRandom[Resource])
       val transactionB = thank(giver, B, someRandom[Resource])
-      val payments = pendingThanks(giver)
 
+      val payments = pendingThanks(giver)
       payments must containAllOf(Seq(transactionA, transactionB))
     }
 
     "remove transactions" in {
       val giver = createUser()
 
-      val A = createUser()
-      val B = createUser()
+      val A = createProject()
+      val B = createProject()
 
       val transactionA = thank(giver, A, someRandom[Resource])
       val transactionB = thank(giver, B, someRandom[Resource])
+
       await(thankTransService.removeAll(giver, Seq(transactionB)))
 
       val payments = pendingThanks(giver)
-
       payments must containAllOf(Seq(transactionA))
     }
 

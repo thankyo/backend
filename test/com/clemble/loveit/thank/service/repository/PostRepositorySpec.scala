@@ -85,72 +85,75 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   "UPDATE OWNER" should {
 
     "create if missing" in {
-      val owner = someRandom[SupportedProject]
-      val post = someRandom[Post]
+      val resource = someRandom[Resource]
+      val owner = someRandom[SupportedProject].copy(resource = resource)
+      val post = someRandom[Post].copy(resource = resource)
 
       await(repo.save(post)) should beTrue
 
-      await(repo.updateOwner(owner, post.resource)) shouldEqual true
+      await(repo.updateProject(owner)) shouldEqual true
       await(repo.findByResource(post.resource)).map(_.project) shouldEqual Some(owner)
     }
 
     "update if exists" in {
-      val post = someRandom[Post]
+      val resource = someRandom[Resource]
+      val post = someRandom[Post].copy(resource = resource)
 
-      val A = someRandom[SupportedProject]
+      val A = someRandom[SupportedProject].copy(resource = resource)
 
       await(repo.save(post)) shouldEqual true
-      await(repo.updateOwner(A, post.resource)) shouldEqual true
+      await(repo.updateProject(A)) shouldEqual true
 
-      val B = someRandom[SupportedProject]
+      val B = someRandom[SupportedProject].copy(resource = resource)
 
-      await(repo.updateOwner(B, post.resource)) shouldEqual true
+      await(repo.updateProject(B)) shouldEqual true
       await(repo.findByResource(post.resource)).map(_.project) shouldEqual Some(B)
     }
 
     "update children" in {
-      val A = someRandom[SupportedProject]
-      val B = someRandom[SupportedProject]
+      val resource = someRandom[Resource]
+      val A = someRandom[SupportedProject].copy(resource = resource)
+      val B = someRandom[SupportedProject].copy(resource = resource)
 
-      val parent = someRandom[HttpResource]
-      val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
+      val child = HttpResource(s"${resource.uri}/${someRandom[Long]}")
 
-      await(repo.save(Post.from(parent, A))) shouldEqual true
+      await(repo.save(Post.from(resource, A))) shouldEqual true
       await(repo.save(Post.from(child, A))) shouldEqual true
 
-      await(repo.updateOwner(B, parent))
+      await(repo.updateProject(B))
 
-      await(repo.findByResource(parent)).get.project shouldEqual B
+      await(repo.findByResource(resource)).get.project shouldEqual B
       await(repo.findByResource(child)).get.project shouldEqual B
     }
 
     "update children correctly" in {
-      val A = someRandom[SupportedProject]
-      val B = someRandom[SupportedProject]
-
       val parent = someRandom[HttpResource]
       val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
+
+      val A = someRandom[SupportedProject].copy(resource = parent)
+      val B = someRandom[SupportedProject].copy(resource = difParent)
 
       await(repo.save(Post.from(parent, A))) shouldEqual true
       await(repo.save(Post.from(difParent, A))) shouldEqual true
 
-      await(repo.updateOwner(B, parent))
+      await(repo.updateProject(B))
 
       await(repo.findByResource(parent)).get.project shouldEqual B
       await(repo.findByResource(difParent)).get.project shouldEqual A
     }
 
     "don't update parent" in {
-      val original = someRandom[SupportedProject]
-      val B = someRandom[SupportedProject]
-
       val parent = someRandom[HttpResource]
+
+      val original = someRandom[SupportedProject].copy(resource = parent)
+      val B = someRandom[SupportedProject].copy(resource = parent)
+
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
       await(repo.save(Post.from(parent, original))) shouldEqual true
       await(repo.save(Post.from(child, original))) shouldEqual true
 
-      await(repo.updateOwner(B, child))
+      await(repo.updateProject(B))
 
       await(repo.findByResource(parent)).get.project shouldEqual original
       await(repo.findByResource(child)).get.project shouldEqual B
@@ -193,7 +196,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   "AUTHOR search" should {
 
     def createPostsWithAuthor(author: UserID): Seq[Post] = {
-      val supportedProject = someRandom[SupportedProject].copy(id = author)
+      val supportedProject = someRandom[SupportedProject].copy(user = author)
       for {
         _ <- 1 to 10
       } yield {

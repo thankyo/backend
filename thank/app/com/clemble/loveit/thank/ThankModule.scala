@@ -6,7 +6,6 @@ import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
-import com.clemble.loveit.thank.service.repository.elastic.ElasticPostRepository
 import com.clemble.loveit.thank.service.repository.mongo._
 import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.Crypter
@@ -26,15 +25,12 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[PostService]).to(classOf[SimplePostService])
     bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
 
-    bind(classOf[RORepository]).to(classOf[MongoRORepository]).asEagerSingleton()
-    bind(classOf[ROService]).to(classOf[SimpleResourceOwnershipService])
-    bind(classOf[UserResourceService]).to(classOf[SimpleUserResourceService]).asEagerSingleton()
+    bind(classOf[ROService]).to(classOf[SimpleROService])
 
     bind(classOf[SupportedProjectRepository]).to(classOf[MongoSupportedProjectRepository]).asEagerSingleton()
     bind(classOf[SupportTrackRepository]).to(classOf[MongoSupportTrackRepository]).asEagerSingleton()
     bind(classOf[SupportedProjectService]).to(classOf[SimpleSupportedProjectService]).asEagerSingleton()
 
-    bind(classOf[UserResourceRepository]).to(classOf[MongoUserResourceRepository])
     bind(classOf[UserStatService]).to(classOf[SimpleUserStatService]).asEagerSingleton()
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
 
@@ -66,6 +62,13 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Named("userResource")
   def userResourceCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("userResource", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
+  @Named("projects")
+  def projectsCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("projects", mongoApi, ec, env)
   }
 
   @Provides

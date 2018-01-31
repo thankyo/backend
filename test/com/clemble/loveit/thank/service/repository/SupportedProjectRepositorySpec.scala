@@ -9,23 +9,23 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class SupportedProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val repo = dependency[SupportTrackRepository]
+  val trackRepo = dependency[SupportTrackRepository]
   val supRepo = dependency[SupportedProjectRepository]
 
   "Resource repo creates a project" in {
     val user = createUser()
 
-    await(supRepo.getProject(user)) shouldNotEqual None
+    await(supRepo.getProjectsByUser(user)) shouldNotEqual None
   }
 
   "Update repo" in {
     val giver = createUser()
     val owner = createUser()
 
-    val project = SupportedProject from getUser(owner).get
+    val project = someRandom[SupportedProject]
 
-    await(repo.isSupportedBy(giver, project)) shouldEqual true
-    await(repo.getSupported(giver)) shouldEqual List(project)
+    await(trackRepo.isSupportedBy(giver, project)) shouldEqual true
+    await(trackRepo.getSupported(giver)) shouldEqual List(project)
   }
 
 }

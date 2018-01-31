@@ -19,7 +19,7 @@ trait PostRepository {
 
   def findByAuthor(author: UserID): Future[List[Post]]
 
-  def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
+  def updateProject(owner: SupportedProject): Future[Boolean]
 
   def markSupported(user: String, url: Resource): Future[Boolean]
 

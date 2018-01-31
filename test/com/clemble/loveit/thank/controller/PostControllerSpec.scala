@@ -21,7 +21,7 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
       val owner = createUser()
       val ownerBalanceBefore = getBalance(owner)
 
-      addOwnership(owner, HttpResource(masterUrl)) shouldNotEqual None
+      createProject(owner, HttpResource(masterUrl)) shouldNotEqual None
 
       val uriVariations = ResourceSpec.generateVariations(masterUrl)
       val thanks = for {
@@ -42,7 +42,7 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
 
       val giver = createUser()
       val owner = createUser()
-      addOwnership(getMyUser(owner).id, HttpResource(masterUrl)) shouldNotEqual None
+      createProject(getMyUser(owner).id, HttpResource(masterUrl)) shouldNotEqual None
 
       val req = sign(giver, FakeRequest(PUT, s"/api/v1/thank/http/${masterUrl}"))
       await(route(application, req).get)

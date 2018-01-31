@@ -7,7 +7,7 @@ import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.common.util.EventBusManager
-import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post}
+import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, SupportedProject}
 import com.clemble.loveit.thank.service.{PostService, ROService, SupportedProjectService}
 import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api._
@@ -34,7 +34,11 @@ case class DevSignUpListener(resources: Seq[Resource], thankService: PostService
   }
 }
 
-case class DevCreatorConfig(creator: RegisterRequest, resource: Resource, tags: Set[Tag] = Set.empty[String], ogObjs: Set[OpenGraphObject])
+case class DevCreatorConfig(
+                           creator: RegisterRequest,
+                           project: SupportedProject,
+                           ogObjs: Set[OpenGraphObject]
+)
 
 trait DevUserDataService {
 
@@ -65,12 +69,14 @@ case class SimpleDevUserDataService @Inject()(
         email = "gavin.than@example.com",
         password = "1234567890" //,
         //        id = IDGenerator.generate(),
-        //        profiles = Set(LoginInfo("patreon", "zenpencil")),
-        //        avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
         //        link = Some("https://zenpencils.com")
       ),
-      Resource.from("https://zenpencils.com"),
-      Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
+      SupportedProject(
+        user = "",
+        resource = Resource.from("https://zenpencils.com"),
+        avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
+        tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+      ),
       Set(
         OpenGraphObject(
           url = "http://zenpencils.com/comic/creative/",
@@ -88,12 +94,14 @@ case class SimpleDevUserDataService @Inject()(
         email = "manga.stream@example.com",
         password = "1234567890"
         //        id = IDGenerator.generate(),
-        //        profiles = Set(LoginInfo("patreon", "mangastream")),
-        //        avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
         //        link = Some("https://readms.net")
       ),
-      Resource.from("https://readms.net"),
-      Set("manga", "japan", "one piece", "naruto", "bleach"),
+      SupportedProject(
+        resource = Resource.from("https://readms.net"),
+        user = "",
+        avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
+        tags = Set("manga", "japan", "one piece", "naruto", "bleach")
+      ),
       Set(
         OpenGraphObject(
           url = "https://readms.net/r/one_piece/892/4843/1",
@@ -118,12 +126,14 @@ case class SimpleDevUserDataService @Inject()(
         email = "personal.central@example.com",
         password = "1234567890"
         //        id = IDGenerator.generate(),
-        //        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
-        //        profiles = Set(LoginInfo("patreon", "personal.central")),
         //        link = Some("https://personacentral.com")
       ),
-      Resource.from("https://personacentral.com"),
-      Set("manga", "japan"),
+      SupportedProject(
+        resource = Resource.from("https://personacentral.com"),
+        user = "",
+        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+        tags = Set("manga", "japan")
+      ),
       Set(
         OpenGraphObject(
           url = "https://personacentral.com/atlus-2018-online-consumer-survey-released/",
@@ -144,12 +154,11 @@ case class SimpleDevUserDataService @Inject()(
   override def enable(configs: Seq[DevCreatorConfig]): Future[Boolean] = {
     (for {
       creators <- ensureCreators(configs.map(_.creator))
-      tags <- ensureTags(creators.zip(configs.map(_.tags)))
-      assignedResources <- ensureOwnership(creators.zip(configs.map(_.resource)))
+      assignedResources <- ensureOwnership(creators.zip(configs.map(_.project)))
       posts <- ensurePosts(configs.flatMap(_.ogObjs))
     } yield {
-      if (!tags || !assignedResources) {
-        throw new IllegalArgumentException(s"Could not initialize tags: ${tags}, resources: ${assignedResources}")
+      if (!assignedResources) {
+        throw new IllegalArgumentException(s"Could not initialize resources")
       }
       val allResources = posts.map(_.resource)
       eventBusManager.onSignUp(Props(DevSignUpListener(allResources, postService)))
@@ -180,26 +189,16 @@ case class SimpleDevUserDataService @Inject()(
     Future.sequence(fCreators)
   }
 
-  private def ensureOwnership(creatorToRes: Seq[(UserID, Resource)]): Future[Boolean] = {
+  private def ensureOwnership(creatorToRes: Seq[(UserID, SupportedProject)]): Future[Boolean] = {
     val resources = for {
       (creator, resource) <- creatorToRes
     } yield {
-      roService.assignOwnership(creator, resource)
+      roService.validate(resource.copy(user = creator))
     }
     Future
       .sequence(resources)
       .map((_) => true)
       .recover({ case _ => false })
-  }
-
-  private def ensureTags(creatorToTags: Seq[(UserID, Set[Tag])]): Future[Boolean] = {
-    val tags = for {
-      (creator, tags) <- creatorToTags
-    } yield {
-      supPrjService.assignTags(creator, tags)
-    }
-
-    Future.sequence(tags).map(_.forall(_ == true))
   }
 
   private def ensurePosts(posts: Seq[OpenGraphObject]): Future[Seq[Post]] = {

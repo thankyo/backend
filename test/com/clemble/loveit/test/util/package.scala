@@ -79,7 +79,13 @@ package object util {
     ThankEvent(someRandom[UserID], someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
   }
   implicit val supportedProjectGenerator: Generator[SupportedProject] = () => {
-    SupportedProject from someRandom[User]
+    SupportedProject(
+      someRandom[Resource],
+      someRandom[UserID],
+      optionRandom[String],
+      optionRandom[String],
+      someRandom[Set[Tag]]
+    )
   }
   implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
     PendingTransaction(someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
@@ -90,13 +96,6 @@ package object util {
       Pending,
       resource,
       RandomStringUtils.randomNumeric(10)
-    )
-  }
-  implicit val userResourceGenerator: Generator[UserResource] = () => {
-    val user = someRandom[String]
-    UserResource(
-      user,
-      someRandom[SupportedProject].copy(id = user)
     )
   }
   implicit val postGenerator: Generator[Post] = () => {

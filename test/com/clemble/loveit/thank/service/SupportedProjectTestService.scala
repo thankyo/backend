@@ -7,7 +7,7 @@ import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
 
 trait SupportedProjectTestService {
 
-  def getProject(id: UserID): SupportedProject
+  def getProjectsByUser(id: UserID): List[SupportedProject]
 
 }
 
@@ -15,8 +15,8 @@ trait RepoSupportedProjectTestService extends ServiceSpec with SupportedProjectT
 
   val prjRepo = dependency[SupportedProjectRepository]
 
-  override def getProject(user: UserID): SupportedProject = {
-    await(prjRepo.getProject(user)).get
+  override def getProjectsByUser(user: UserID): List[SupportedProject] = {
+    await(prjRepo.getProjectsByUser(user))
   }
 
 }
@@ -25,8 +25,8 @@ trait InternalSupportedProjectTestService extends ServiceSpec with SupportedProj
 
   val prjService = dependency[SupportedProjectService]
 
-  override def getProject(user: UserID): SupportedProject = {
-    await(prjService.getProject(user)).get
+  override def getProjectsByUser(user: UserID): List[SupportedProject] = {
+    await(prjService.getProjectsByUser(user))
   }
 
 }

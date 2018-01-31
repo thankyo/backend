@@ -61,6 +61,8 @@ trait UserAware {
 
 object User {
 
+  val UNKNOWN = "UNKNOWN"
+
   implicit val socialProfileJsonFormat: OFormat[CommonSocialProfile] = Json.format[CommonSocialProfile]
   implicit val jsonFormat: OFormat[User] = Json.format[User]
 

@@ -17,7 +17,7 @@ trait PostService {
 
   def assignTags(uri: Resource, tags: Set[Tag]): Future[Boolean]
 
-  def updateOwner(owner: SupportedProject, url: Resource): Future[Boolean]
+  def updateOwner(owner: SupportedProject): Future[Boolean]
 
   def findByTags(tags: Set[Tag]): Future[List[Post]]
 
@@ -32,7 +32,7 @@ trait PostService {
 @Singleton
 case class SimplePostService @Inject()(
                                         thankEventBus: ThankEventBus,
-                                        userResService: UserResourceService,
+                                        prjService: SupportedProjectService,
                                         postRepo: PostRepository,
                                         implicit val ec: ExecutionContext
                                       ) extends PostService {
@@ -50,16 +50,9 @@ case class SimplePostService @Inject()(
         case Some(post) =>
           Future.successful(Left(post))
         case None =>
-          userResService
-            .findOwner(res)
-            .map(_ match {
-                case Some(owner) => {
-                  Right(owner)
-                }
-                case None => {
-                  throw ResourceException.ownerMissing()
-                }
-              })
+          prjService
+            .findProject(res)
+            .map(_.map(Right(_)).getOrElse({ throw ResourceException.ownerMissing() }))
       }
     }
 
@@ -91,8 +84,8 @@ case class SimplePostService @Inject()(
     postRepo.assignTags(uri, tags)
   }
 
-  override def updateOwner(owner: SupportedProject, res: Resource): Future[Boolean] = {
-    postRepo.updateOwner(owner, res)
+  override def updateOwner(project: SupportedProject): Future[Boolean] = {
+    postRepo.updateProject(project)
   }
 
   override def thank(giver: UserID, res: Resource): Future[Post] = {

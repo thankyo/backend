@@ -9,18 +9,18 @@ import org.specs2.runner.JUnitRunner
 
 trait TagInheritance62 extends ServiceSpec with TagTestService with PostTestService with SupportedProjectTestService{
 
-  "Tags inherited from project Author" in {
+  "Tags inherited from parent project" in {
     // Step 1. Create scene
     val owner = createUser()
 
-    // Step 2. Assigning tags
-    val projectTags = Set("manga", "quote", "inspiration")
-    assignTags(owner, projectTags)
-    getTags(owner) shouldEqual projectTags
-
-    // Step 3. Creating owned resource
+    // Step 2. Creating owned resource
     val resource = someRandom[Resource]
-    assignOwnership(owner, resource)
+    val project = createProject(owner, resource)
+
+    // Step 3. Assigning tags
+    val projectTags = Set("manga", "quote", "inspiration")
+    assignTags(project, projectTags)
+    getProjectTags(resource) shouldEqual projectTags
 
     getTags(resource) shouldEqual projectTags
 

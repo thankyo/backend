@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.service
 
 import java.time.YearMonth
 
-import com.clemble.loveit.common.FunctionalThankSpecification
+import com.clemble.loveit.common.{FunctionalThankSpecification, ServiceSpec}
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{Money, Resource}
 import com.clemble.loveit.common.util.LoveItCurrency
@@ -67,7 +67,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
     "EOM creates charges" in {
       val yom = someRandom[YearMonth]
       val user = createUser()
-      val owner = createUser()
+      val owner = createProject()
 
       1 to 30 map (_ => thank(user, owner, someRandom[Resource]))
 
@@ -106,7 +106,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
     "EOM charge Success on positive amount" in {
       val yom = someRandom[YearMonth]
 
-      val owner = createUser()
+      val owner = createProject()
       val giver = createUser()
       addChargeAccount(giver)
 
@@ -132,7 +132,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
     "EOM charge UnderMin on small thank amount" in {
       val yom = someRandom[YearMonth]
 
-      val owner = createUser()
+      val owner = createProject()
       val giver = createUser()
       addChargeAccount(giver)
 
@@ -156,7 +156,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
     "EOM should generate Payout" in {
       val yom = someRandom[YearMonth]
 
-      val owner = createUser()
+      val owner = createProject()
 
       val giverA = createUser()
       addChargeAccount(giverA)
@@ -170,7 +170,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val finalStatus = runAndWait(yom)
 
       finalStatus.createPayout.get.success shouldEqual 1
-      val ownerPayouts = payouts(owner)
+      val ownerPayouts = payouts(owner.user)
       ownerPayouts.size shouldEqual 1
       ownerPayouts.head.amount shouldEqual new Money(5.4, "USD")
     }

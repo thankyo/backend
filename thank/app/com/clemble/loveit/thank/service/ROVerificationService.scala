@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException, UserException}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model._
-import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, RORepository}
+import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, SupportedProjectRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,7 +28,7 @@ trait ROVerificationService {
 case class SimpleROVerificationService @Inject()(
                                                   generator: ROVerificationGenerator,
                                                   repo: ROVerificationRepository,
-                                                  resRepo: RORepository,
+                                                  resRepo: SupportedProjectRepository,
                                                   resOwnService: ROService,
                                                   confirmationService: ROVerificationConfirmationService[Resource],
                                                   implicit val ec: ExecutionContext
@@ -43,10 +43,10 @@ case class SimpleROVerificationService @Inject()(
 
   override def create(user: UserID, res: Resource): Future[ROVerification[Resource]] = {
     val fSavedReq = for {
-      ownerOpt <- resRepo.findOwner(res)
+      prjOpt <- resRepo.findProject(res)
     } yield {
-      if (ownerOpt.isDefined)
-        throw UserException.resourceAlreadyOwned(ownerOpt.get)
+      if (prjOpt.isDefined)
+        throw UserException.resourceAlreadyOwned(prjOpt.get.user)
       repo.save(user, generator.generate(user, res)).recoverWith({
         case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
           Future.failed(ResourceException.verificationAlreadyRequested())
@@ -66,7 +66,7 @@ case class SimpleROVerificationService @Inject()(
       if (!updated)
         throw new IllegalArgumentException("Internal problem")
       if (statusUpdate == Verified)
-        resOwnService.assignOwnership(requester, res)
+        resOwnService.validate(SupportedProject(res, requester))
 
       verOpt.map(_.copy(status = statusUpdate))
     }

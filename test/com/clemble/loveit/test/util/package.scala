@@ -178,7 +178,6 @@ package object util {
   implicit val ogoGenerator: Generator[OpenGraphObject] = () => OpenGraphObject(
     url = someRandom[Resource].stringify(),
     title = optionRandom[String],
-    `type` = optionRandom[String],
     image = optionRandom[OpenGraphImage],
     description = optionRandom[String]
   )

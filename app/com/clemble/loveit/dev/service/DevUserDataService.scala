@@ -75,7 +75,6 @@ case class SimpleDevUserDataService @Inject()(
         OpenGraphObject(
           url = "http://zenpencils.com/comic/creative/",
           title = Some("ZEN PENCILS » 221. 8 tips to be more creative by Zen Pencils"),
-          `type` = Some("website"),
           description = Some("Today is the launch day of my new collection CREATIVE STRUGGLE: Illustrated Advice From Masters of Creativity! Besides including creative advice from greats like Einstein, Van Gogh, Curie and Hemingway, it also features an all-new comic by myself. The comic describes my eight tips to be more creativ…"),
           image = Some(OpenGraphImage(url = "https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/221_creativestruggle.jpg")),
         )
@@ -98,14 +97,12 @@ case class SimpleDevUserDataService @Inject()(
         OpenGraphObject(
           url = "https://readms.net/r/one_piece/892/4843/1",
           title = Some("One Piece 892 - Manga Stream"),
-          `type` = Some("website"),
           description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
           image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/51/4843/01.png"))
         ),
         OpenGraphObject(
           url = "https://readms.net/r/attack_on_titan/101/4812/1",
           title = Some("Attack on Titan 101 - Manga Stream"),
-          `type` = Some("website"),
           description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
           image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/76/4812/01.png"))
         )
@@ -117,10 +114,10 @@ case class SimpleDevUserDataService @Inject()(
         lastName = "Central",
         email = "personal.central@example.com",
         password = "1234567890"
-//        id = IDGenerator.generate(),
-//        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
-//        profiles = Set(LoginInfo("patreon", "personal.central")),
-//        link = Some("https://personacentral.com")
+        //        id = IDGenerator.generate(),
+        //        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+        //        profiles = Set(LoginInfo("patreon", "personal.central")),
+        //        link = Some("https://personacentral.com")
       ),
       Resource.from("https://personacentral.com"),
       Set("manga", "japan"),
@@ -129,7 +126,6 @@ case class SimpleDevUserDataService @Inject()(
           url = "https://personacentral.com/atlus-2018-online-consumer-survey-released/",
           title = Some("Atlus 2018 Online Consumer Survey Released, Includes Company Collaboration Questions - Persona Central"),
           description = Some("Atlus has released this year's online consumer survey to know more about what their customers want, including questions about remakes and company collaborations."),
-          `type` = Some("article"),
           image = Some(OpenGraphImage(
             url = "https://personacentral.com/wp-content/uploads/2018/01/Persona-5-Dancing-Star-Night-Morgana.jpg"
           ))

@@ -8,23 +8,24 @@ import play.api.libs.json.{Json, OFormat}
   * TODO We can extend it in future as needed, for now this is enough to get things from the ground
   */
 case class OpenGraphObject(
-  url: String,
-  title: Option[String] = None,
-  description: Option[String] = None,
-  image: Option[OpenGraphImage] = None,
-)
+                            url: String,
+                            tags: Set[Tag],
+                            image: Option[OpenGraphImage] = None,
+                            title: Option[String] = None,
+                            description: Option[String] = None,
+                          )
 
 /**
   * OpenGraph Image model
   */
 case class OpenGraphImage(
-  url: String,
-  secureUrl: Option[String] = None,
-  imageType: Option[MimeType] = None,
-  width: Option[Int] = None,
-  height: Option[Int] = None,
-  alt: Option[String] = None,
-)
+                           url: String,
+                           secureUrl: Option[String] = None,
+                           imageType: Option[MimeType] = None,
+                           width: Option[Int] = None,
+                           height: Option[Int] = None,
+                           alt: Option[String] = None,
+                         )
 
 object OpenGraphObject {
 

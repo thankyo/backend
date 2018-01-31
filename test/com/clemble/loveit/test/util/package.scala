@@ -179,7 +179,8 @@ package object util {
     url = someRandom[Resource].stringify(),
     title = optionRandom[String],
     image = optionRandom[OpenGraphImage],
-    description = optionRandom[String]
+    description = optionRandom[String],
+    tags = someRandom[Set[Tag]],
   )
 
   implicit def setGenerator[T](implicit gen: Generator[T]): Generator[Set[T]] = () => {

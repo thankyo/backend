@@ -11,7 +11,6 @@ case class Post(
                  project: SupportedProject,
 
                  ogObj: OpenGraphObject,
-                 tags: Set[Tag] = Set.empty,
 
                  thank: Thank = Thank(),
 
@@ -34,10 +33,10 @@ object Post {
   implicit val postsWriteable = WriteableUtils.jsonToWriteable[List[Post]]
 
   def from(res: Resource, project: SupportedProject): Post = {
-    Post(res, project, OpenGraphObject(res.stringify()), project.tags)
+    Post(res, project, OpenGraphObject(res.stringify(), project.tags))
   }
 
   def from(og: OpenGraphObject, project: SupportedProject): Post = {
-    Post.from(Resource.from(og.url), project).withOg(og)
+    Post.from(Resource.from(og.url), project).withOg(og.copy(tags = og.tags ++ project.tags))
   }
 }

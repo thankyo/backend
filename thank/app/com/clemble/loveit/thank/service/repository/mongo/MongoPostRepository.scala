@@ -46,7 +46,7 @@ case class MongoPostRepository @Inject()(
 
   override def assignTags(res: Resource, tags: Set[Tag]): Future[Boolean] = {
     val selector = Json.obj("resource" -> res)
-    val update = Json.obj("$set" -> Json.obj("tags" -> tags))
+    val update = Json.obj("$set" -> Json.obj("ogObj.tags" -> tags))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
@@ -56,7 +56,7 @@ case class MongoPostRepository @Inject()(
   }
 
   override def findByTags(tags: Set[String]): Future[List[Post]] = {
-    val selector = Json.obj("tags" -> Json.obj("$in" -> tags))
+    val selector = Json.obj("ogObj.tags" -> Json.obj("$in" -> tags))
     MongoSafeUtils.collectAll[Post](collection, selector)
   }
 

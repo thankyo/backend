@@ -164,9 +164,10 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       for {
         _ <- 1 to 10
       } yield {
-        val post = someRandom[Post].copy(tags = Set(tag))
-        await(repo.save(post)) shouldEqual true
-        post
+        val post = someRandom[Post]
+        val postWithTag = post.copy(ogObj = post.ogObj.copy(tags = Set(tag)))
+        await(repo.save(postWithTag)) shouldEqual true
+        postWithTag
       }
     }
 

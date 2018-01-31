@@ -15,6 +15,7 @@ PUT         /http/*url                         @com.clemble.loveit.thank.control
 
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()
+POST        /graph/my                          @com.clemble.loveit.thank.controller.GraphController.createMyPost()
 
 GET         /graph/search                      @com.clemble.loveit.thank.controller.GraphController.searchByTags()
 

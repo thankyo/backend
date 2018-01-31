@@ -77,6 +77,7 @@ case class SimpleDevUserDataService @Inject()(
           title = Some("ZEN PENCILS » 221. 8 tips to be more creative by Zen Pencils"),
           description = Some("Today is the launch day of my new collection CREATIVE STRUGGLE: Illustrated Advice From Masters of Creativity! Besides including creative advice from greats like Einstein, Van Gogh, Curie and Hemingway, it also features an all-new comic by myself. The comic describes my eight tips to be more creativ…"),
           image = Some(OpenGraphImage(url = "https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/221_creativestruggle.jpg")),
+          tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
         )
       )
     ),
@@ -98,13 +99,15 @@ case class SimpleDevUserDataService @Inject()(
           url = "https://readms.net/r/one_piece/892/4843/1",
           title = Some("One Piece 892 - Manga Stream"),
           description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
-          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/51/4843/01.png"))
+          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/51/4843/01.png")),
+          tags = Set("manga", "japan", "comics", "one piece")
         ),
         OpenGraphObject(
           url = "https://readms.net/r/attack_on_titan/101/4812/1",
           title = Some("Attack on Titan 101 - Manga Stream"),
           description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
-          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/76/4812/01.png"))
+          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/76/4812/01.png")),
+          tags = Set("manga", "japan", "comics")
         )
       )
     ),
@@ -128,7 +131,8 @@ case class SimpleDevUserDataService @Inject()(
           description = Some("Atlus has released this year's online consumer survey to know more about what their customers want, including questions about remakes and company collaborations."),
           image = Some(OpenGraphImage(
             url = "https://personacentral.com/wp-content/uploads/2018/01/Persona-5-Dancing-Star-Night-Morgana.jpg"
-          ))
+          )),
+          tags = Set("manga", "japan", "comics")
         )
       )
     )

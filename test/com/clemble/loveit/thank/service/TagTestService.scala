@@ -36,7 +36,7 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
   }
 
   def getTags(res: Resource): Set[Tag] = {
-    await(postRepo.findByResource(res).map(_.map(_.tags).getOrElse(Set.empty[Tag])))
+    await(postRepo.findByResource(res).map(_.map(_.ogObj.tags).getOrElse(Set.empty[Tag])))
   }
 
 }
@@ -60,7 +60,7 @@ trait InternalTagTestService extends TagTestService with ServiceSpec {
 
   override def getTags(res: Resource): Set[Tag] = {
     await(postService.getPostOrProject(res)) match {
-      case Left(post) => post.tags
+      case Left(post) => post.ogObj.tags
       case Right(project) => project.tags
     }
   }

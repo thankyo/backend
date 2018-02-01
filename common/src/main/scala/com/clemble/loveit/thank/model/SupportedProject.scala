@@ -3,6 +3,7 @@ package com.clemble.loveit.thank.model
 import com.clemble.loveit.common.model.{Resource, ResourceAware, Tag, UserID}
 import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.user.model.{User, UserAware}
+import play.api.http.Writeable
 import play.api.libs.json.{Json, OFormat}
 
 case class SupportedProject(
@@ -20,7 +21,8 @@ object SupportedProject {
 
   implicit val jsonFormat: OFormat[SupportedProject] = Json.format[SupportedProject]
 
-  implicit val writableFormat = WriteableUtils.jsonToWriteable[SupportedProject]()
+  implicit val projectWritable = WriteableUtils.jsonToWriteable[SupportedProject]()
+  implicit val projectListWriteable: Writeable[List[SupportedProject]] = WriteableUtils.jsonToWriteable[List[SupportedProject]]
 
 }
 

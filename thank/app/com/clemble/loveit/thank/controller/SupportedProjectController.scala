@@ -20,6 +20,13 @@ class SupportedProjectController @Inject()(
                                             implicit val ec: ExecutionContext
                                               ) extends LoveItController(components) {
 
+  def getMy() = silhouette.SecuredAction.async(implicit req => {
+    val user = req.identity.id
+    supportedProjectsService
+      .findProjectsByUser(user)
+      .map(Ok(_))
+  })
+
   def getSupported(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {
     supportedProjectsService.
       getSupported(idOrMe(supporter)).

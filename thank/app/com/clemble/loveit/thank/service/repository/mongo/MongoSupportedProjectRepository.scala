@@ -24,7 +24,8 @@ case class MongoSupportedProjectRepository @Inject()(
   MongoSupportedProjectRepository.ensureMeta(collection)
 
   override def saveProject(project: SupportedProject): Future[Boolean] = {
-    findProject(project.resource) flatMap(_ match {
+    val selector = Json.obj("resource" -> project.resource)
+    collection.find(selector).one[SupportedProject] flatMap(_ match {
       case Some(_) => {
         val selector = Json.obj("resource" -> project.resource)
         val update = Json.obj("$set" -> project)

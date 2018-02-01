@@ -3,6 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.thank.model.SupportedProject
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ROService {
@@ -18,8 +19,10 @@ case class SimpleROService @Inject()(supportedProjectService: SupportedProjectSe
     // TODO assign is internal operation, so it might not need to throw Exception,
     // since verification has already been done before
     for {
-      created <- supportedProjectService.create(project) if (created)
+      created <- supportedProjectService.create(project)
+      _ = if (!created) throw new IllegalArgumentException("Could not create project")
       updPosts <- postService.updateOwner(project) if (updPosts)
+      _ = if (!updPosts) throw new IllegalArgumentException("Failed to update posts")
     } yield {
       if (!updPosts)
         throw new IllegalArgumentException("Can't assign ownership")

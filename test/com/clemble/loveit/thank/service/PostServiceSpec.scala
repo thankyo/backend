@@ -111,7 +111,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
       await(service.getPostOrProject(resource)) should throwA()
 
-      await(roService.validate(SupportedProject(resource, owner))) shouldEqual resource
+      await(roService.validate(SupportedProject(resource, owner))).resource shouldEqual resource
       await(service.getPostOrProject(resource)).right.exists(_.user == owner) should beTrue
     }
 
@@ -120,7 +120,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
       val A = createUser()
 
-      await(roService.validate(SupportedProject(resource, A))) shouldEqual resource
+      await(roService.validate(SupportedProject(resource, A))).resource shouldEqual resource
       await(service.getPostOrProject(resource)).isRight shouldEqual true
       await(service.getPostOrProject(resource)).right.exists(_.user == A) should beTrue
 

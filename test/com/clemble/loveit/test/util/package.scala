@@ -84,6 +84,7 @@ package object util {
       someRandom[UserID],
       optionRandom[String],
       optionRandom[String],
+      optionRandom[String],
       someRandom[Set[Tag]]
     )
   }
@@ -99,9 +100,13 @@ package object util {
     )
   }
   implicit val postGenerator: Generator[Post] = () => {
+    val resource = optionRandom[String] match {
+      case None => someRandom[Resource]
+      case Some(child) => Resource.from(s"${someRandom[Resource].stringify()}/${child}")
+    }
     Post(
-      someRandom[Resource],
-      someRandom[SupportedProject],
+      resource,
+      someRandom[SupportedProject].copy(resource = resource),
       someRandom[OpenGraphObject]
     )
   }

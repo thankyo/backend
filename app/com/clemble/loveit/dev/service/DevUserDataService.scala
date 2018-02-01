@@ -74,6 +74,7 @@ case class SimpleDevUserDataService @Inject()(
       SupportedProject(
         user = "",
         resource = Resource.from("https://zenpencils.com"),
+        title = Some("Zen Pencil"),
         avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
         tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
       ),
@@ -99,6 +100,7 @@ case class SimpleDevUserDataService @Inject()(
       SupportedProject(
         resource = Resource.from("https://readms.net"),
         user = "",
+        title = Some("Manga Stream"),
         avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
         tags = Set("manga", "japan", "one piece", "naruto", "bleach")
       ),
@@ -130,6 +132,7 @@ case class SimpleDevUserDataService @Inject()(
       ),
       SupportedProject(
         resource = Resource.from("https://personacentral.com"),
+        title = Some("Personal Central"),
         user = "",
         avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
         tags = Set("manga", "japan")
@@ -191,14 +194,16 @@ case class SimpleDevUserDataService @Inject()(
 
   private def ensureOwnership(creatorToRes: Seq[(UserID, SupportedProject)]): Future[Boolean] = {
     val resources = for {
-      (creator, resource) <- creatorToRes
+      (creator, project) <- creatorToRes
     } yield {
-      roService.validate(resource.copy(user = creator))
+      supPrjService
+        .findProject(project.resource)
+        .flatMap(_ match {
+          case Some(_) => Future.successful(true)
+          case None => roService.validate(project.copy(user = creator)).map(_ => true)
+        })
     }
-    Future
-      .sequence(resources)
-      .map((_) => true)
-      .recover({ case _ => false })
+    Future.sequence(resources).map(seq => seq.forall(_ == true))
   }
 
   private def ensurePosts(posts: Seq[OpenGraphObject]): Future[Seq[Post]] = {

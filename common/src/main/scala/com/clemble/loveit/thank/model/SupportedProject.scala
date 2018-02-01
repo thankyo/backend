@@ -8,6 +8,7 @@ import play.api.libs.json.{Json, OFormat}
 case class SupportedProject(
                              resource: Resource,
                              user: UserID,
+                             title: Option[String] = None,
                              description: Option[String] = None,
                              avatar: Option[String] = None,
                              tags: Set[Tag] = Set.empty

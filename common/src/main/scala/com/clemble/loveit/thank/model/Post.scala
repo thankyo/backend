@@ -19,6 +19,12 @@ case class Post(
 
   def isSupportedBy(user: UserID): Boolean = thank.isSupportedBy(user)
 
+  def validate() = {
+    if (!resource.parents().contains(project.resource)) {
+      throw new IllegalArgumentException("Resource should be a child of a project")
+    }
+  }
+
   def withOg(og: OpenGraphObject): Post = {
     this.copy(ogObj = og)
   }

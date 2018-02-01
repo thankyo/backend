@@ -35,6 +35,7 @@ case class MongoPostRepository @Inject()(
   }
 
   override def save(post: Post): Future[Boolean] = {
+    post.validate()
     MongoSafeUtils.safeSingleUpdate(collection.insert(post))
   }
 
@@ -61,7 +62,7 @@ case class MongoPostRepository @Inject()(
   }
 
   override def findByAuthor(author: UserID): Future[List[Post]] = {
-    val selector = Json.obj("project.id" -> author)
+    val selector = Json.obj("project.user" -> author)
     MongoSafeUtils.collectAll[Post](collection, selector)
   }
 

@@ -5,7 +5,7 @@ import javax.inject.Inject
 import akka.actor.{Actor, Props}
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
-import com.clemble.loveit.common.model.{Resource, Tag, UserID}
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, SupportedProject}
 import com.clemble.loveit.thank.service.{PostService, ROService, SupportedProjectService}
@@ -35,10 +35,10 @@ case class DevSignUpListener(resources: Seq[Resource], thankService: PostService
 }
 
 case class DevCreatorConfig(
-                           creator: RegisterRequest,
-                           project: SupportedProject,
-                           ogObjs: Set[OpenGraphObject]
-)
+                             creator: RegisterRequest,
+                             projects: Set[SupportedProject],
+                             ogObjs: Set[OpenGraphObject]
+                           )
 
 trait DevUserDataService {
 
@@ -71,13 +71,22 @@ case class SimpleDevUserDataService @Inject()(
         //        id = IDGenerator.generate(),
         //        link = Some("https://zenpencils.com")
       ),
-      SupportedProject(
-        user = "",
-        resource = Resource.from("https://zenpencils.com"),
-        title = Some("Zen Pencil"),
-        avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
-        tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
-      ),
+      Set(
+        SupportedProject(
+          user = "",
+          resource = Resource.from("https://zenpencils.com"),
+          title = Some("Zen Pencil"),
+          avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
+          tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+        ),
+        SupportedProject(
+          user = "",
+          resource = Resource.from("http://www.gocomics.com/zen-pencils"),
+          title = Some("Zen Pencil on GoComics"),
+          avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
+          tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+      )),
+
       Set(
         OpenGraphObject(
           url = "http://zenpencils.com/comic/creative/",
@@ -85,6 +94,14 @@ case class SimpleDevUserDataService @Inject()(
           description = Some("Today is the launch day of my new collection CREATIVE STRUGGLE: Illustrated Advice From Masters of Creativity! Besides including creative advice from greats like Einstein, Van Gogh, Curie and Hemingway, it also features an all-new comic by myself. The comic describes my eight tips to be more creativ…"),
           image = Some(OpenGraphImage(url = "https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/221_creativestruggle.jpg")),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+        ),
+        OpenGraphObject(
+          url = "http://www.gocomics.com/zen-pencils",
+          title = Some("Zen Pencils by Gavin Aung Than for Jan 29, 2018 | GoComics.com"),
+          description = Some("Jan 29, 2018"),
+          image = Some(
+            OpenGraphImage(url = "http://assets.amuniversal.com/8b0ddf60d66601350cae005056a9545d", width = Some(900), height = Some(2545))
+          )
         )
       )
     ),
@@ -97,13 +114,14 @@ case class SimpleDevUserDataService @Inject()(
         //        id = IDGenerator.generate(),
         //        link = Some("https://readms.net")
       ),
-      SupportedProject(
-        resource = Resource.from("https://readms.net"),
-        user = "",
-        title = Some("Manga Stream"),
-        avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
-        tags = Set("manga", "japan", "one piece", "naruto", "bleach")
-      ),
+      Set(
+        SupportedProject(
+          resource = Resource.from("https://readms.net"),
+          user = "",
+          title = Some("Manga Stream"),
+          avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
+          tags = Set("manga", "japan", "one piece", "naruto", "bleach")
+        )),
       Set(
         OpenGraphObject(
           url = "https://readms.net/r/one_piece/892/4843/1",
@@ -130,12 +148,14 @@ case class SimpleDevUserDataService @Inject()(
         //        id = IDGenerator.generate(),
         //        link = Some("https://personacentral.com")
       ),
-      SupportedProject(
-        resource = Resource.from("https://personacentral.com"),
-        title = Some("Personal Central"),
-        user = "",
-        avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
-        tags = Set("manga", "japan")
+      Set(
+        SupportedProject(
+          resource = Resource.from("https://personacentral.com"),
+          title = Some("Personal Central"),
+          user = "",
+          avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+          tags = Set("manga", "japan")
+        )
       ),
       Set(
         OpenGraphObject(
@@ -157,7 +177,7 @@ case class SimpleDevUserDataService @Inject()(
   override def enable(configs: Seq[DevCreatorConfig]): Future[Boolean] = {
     (for {
       creators <- ensureCreators(configs.map(_.creator))
-      assignedResources <- ensureOwnership(creators.zip(configs.map(_.project)))
+      assignedResources <- ensureOwnership(creators.zip(configs.map(_.projects)))
       posts <- ensurePosts(configs.flatMap(_.ogObjs))
     } yield {
       if (!assignedResources) {
@@ -192,9 +212,10 @@ case class SimpleDevUserDataService @Inject()(
     Future.sequence(fCreators)
   }
 
-  private def ensureOwnership(creatorToRes: Seq[(UserID, SupportedProject)]): Future[Boolean] = {
+  private def ensureOwnership(creatorToRes: Seq[(UserID, Set[SupportedProject])]): Future[Boolean] = {
     val resources = for {
-      (creator, project) <- creatorToRes
+      (creator, projects) <- creatorToRes
+      project <- projects
     } yield {
       supPrjService
         .findProject(project.resource)

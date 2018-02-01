@@ -9,10 +9,10 @@ import play.api.libs.json.{Json, OFormat}
   */
 case class OpenGraphObject(
                             url: String,
-                            tags: Set[Tag],
                             image: Option[OpenGraphImage] = None,
                             title: Option[String] = None,
                             description: Option[String] = None,
+                            tags: Set[Tag] = Set.empty,
                           )
 
 /**

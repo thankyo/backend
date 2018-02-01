@@ -13,7 +13,7 @@ trait SupportedProjectService {
 
   def findProject(res: Resource): Future[Option[SupportedProject]]
 
-  def getProjectsByUser(user: UserID): Future[List[SupportedProject]]
+  def findProjectsByUser(user: UserID): Future[List[SupportedProject]]
 
   def create(project: SupportedProject): Future[Boolean]
 
@@ -54,8 +54,8 @@ class SimpleSupportedProjectService @Inject()(
     repo.saveProject(project)
   }
 
-  override def getProjectsByUser(userID: UserID): Future[List[SupportedProject]] = {
-    repo.getProjectsByUser(userID)
+  override def findProjectsByUser(userID: UserID): Future[List[SupportedProject]] = {
+    repo.findProjectsByUser(userID)
   }
 
   override def assignTags(resource: Resource, tags: Set[Tag]): Future[Boolean] = {

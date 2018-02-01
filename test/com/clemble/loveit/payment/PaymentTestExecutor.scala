@@ -17,6 +17,10 @@ trait PaymentTestExecutor extends TestStripeUtils with PaymentLimitExecutor {
 
   def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount
 
+  def thank(giver: UserID, project: SupportedProject): PendingTransaction = {
+    thank(giver, project, project.resource)
+  }
+
   def thank(giver: UserID, project: SupportedProject, resource: Resource): PendingTransaction
 
   def pendingThanks(giver: UserID): Seq[PendingTransaction]

@@ -15,7 +15,7 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
   lazy val supPrjService = dependency[SupportedProjectService]
 
   def listResources(user: String): Set[SupportedProject] = {
-    await(supPrjService.getProjectsByUser(user)).toSet
+    await(supPrjService.findProjectsByUser(user)).toSet
   }
 
   def assignOwnership(userAuth: Seq[(String, String)], resource: Resource) = {

@@ -13,6 +13,6 @@ trait SupportedProjectRepository {
 
   def assignTags(resource: Resource, tags: Set[Tag]): Future[Boolean]
 
-  def getProjectsByUser(user: UserID): Future[List[SupportedProject]]
+  def findProjectsByUser(user: UserID): Future[List[SupportedProject]]
 
 }

@@ -16,7 +16,7 @@ trait RepoSupportedProjectTestService extends ServiceSpec with SupportedProjectT
   val prjRepo = dependency[SupportedProjectRepository]
 
   override def getProjectsByUser(user: UserID): List[SupportedProject] = {
-    await(prjRepo.getProjectsByUser(user))
+    await(prjRepo.findProjectsByUser(user))
   }
 
 }
@@ -26,7 +26,7 @@ trait InternalSupportedProjectTestService extends ServiceSpec with SupportedProj
   val prjService = dependency[SupportedProjectService]
 
   override def getProjectsByUser(user: UserID): List[SupportedProject] = {
-    await(prjService.getProjectsByUser(user))
+    await(prjService.findProjectsByUser(user))
   }
 
 }

@@ -24,10 +24,19 @@ case class MongoSupportedProjectRepository @Inject()(
   MongoSupportedProjectRepository.ensureMeta(collection)
 
   override def saveProject(project: SupportedProject): Future[Boolean] = {
-    MongoSafeUtils.safeSingleUpdate(collection.insert(project))
+    findProject(project.resource) flatMap(_ match {
+      case Some(_) => {
+        val selector = Json.obj("resource" -> project.resource)
+        val update = Json.obj("$set" -> project)
+        MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+      }
+      case None => {
+        MongoSafeUtils.safeSingleUpdate(collection.insert(project))
+      }
+    })
   }
 
-  override def getProjectsByUser(owner: UserID): Future[List[SupportedProject]] = {
+  override def findProjectsByUser(owner: UserID): Future[List[SupportedProject]] = {
     val selector = Json.obj("user" -> owner)
     MongoSafeUtils.collectAll[SupportedProject](collection, selector)
   }

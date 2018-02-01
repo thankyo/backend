@@ -32,9 +32,8 @@ case class MongoROVerificationRepository @Inject()(@Named("userResource") collec
   }
 
   override def save(user: UserID, req: ROVerification[Resource]): Future[ROVerification[Resource]] = {
-    val selector = Json.obj("_id" -> user)
-    val push = Json.obj("$set" -> Json.obj("verification" -> req))
-    MongoSafeUtils.safe(req, collection.update(selector, push))
+    val insertReq = Json.obj("_id" -> user, "verification" -> req)
+    MongoSafeUtils.safe(req, collection.insert(insertReq))
   }
 
   override def update(user: UserID, res: Resource, status: VerificationStatus): Future[Boolean] = {

@@ -8,7 +8,7 @@ import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.model.SupportedProject._
 import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
@@ -26,9 +26,9 @@ case class MongoSupportedProjectRepository @Inject()(
   override def saveProject(project: SupportedProject): Future[Boolean] = {
     val selector = Json.obj("resource" -> project.resource)
     collection.find(selector).one[SupportedProject] flatMap(_ match {
-      case Some(_) => {
-        val selector = Json.obj("resource" -> project.resource)
-        val update = Json.obj("$set" -> project)
+      case Some(existingPrj) => {
+        val selector = Json.obj("_id" -> existingPrj._id)
+        val update = Json.obj("$set" -> (Json.toJsObject(project) - "_id"))
         MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
       }
       case None => {

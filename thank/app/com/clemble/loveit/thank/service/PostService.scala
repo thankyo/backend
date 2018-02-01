@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.ResourceException
-import com.clemble.loveit.common.model.{Resource, Tag, ThankEvent, UserID}
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post, SupportedProject}
 import com.clemble.loveit.thank.service.repository.PostRepository
 
@@ -22,6 +22,8 @@ trait PostService {
   def findByTags(tags: Set[Tag]): Future[List[Post]]
 
   def findByAuthor(author: UserID): Future[List[Post]]
+
+  def findByProject(project: ProjectID): Future[List[Post]]
 
   def hasSupported(giver: UserID, uri: Resource): Future[Boolean]
 
@@ -66,6 +68,10 @@ case class SimplePostService @Inject()(
 
   override def findByAuthor(author: UserID): Future[List[Post]] = {
     postRepo.findByAuthor(author)
+  }
+
+  override def findByProject(project: ProjectID): Future[List[Post]] = {
+    postRepo.findByProject(project)
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {

@@ -83,7 +83,7 @@ case class SimpleDevUserDataService @Inject()(
           user = "",
           resource = Resource.from("http://www.gocomics.com/zen-pencils"),
           title = Some("Zen Pencil on GoComics"),
-          avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
+          avatar = Some("http://avatar.amuniversal.com/feature_avatars/ubadge_images/features/ch/mid_u-201701251613.png"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
       )),
 

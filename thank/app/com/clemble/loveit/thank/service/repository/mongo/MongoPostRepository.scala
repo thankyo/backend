@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service.repository.mongo
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.stream.Materializer
-import com.clemble.loveit.common.model.{Resource, Tag, UserID}
+import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.{Post, SupportedProject}
 import com.clemble.loveit.thank.service.repository.PostRepository
@@ -58,6 +58,11 @@ case class MongoPostRepository @Inject()(
 
   override def findByTags(tags: Set[String]): Future[List[Post]] = {
     val selector = Json.obj("ogObj.tags" -> Json.obj("$in" -> tags))
+    MongoSafeUtils.collectAll[Post](collection, selector)
+  }
+
+  override def findByProject(project: ProjectID): Future[List[Post]] = {
+    val selector = Json.obj("project._id" -> project)
     MongoSafeUtils.collectAll[Post](collection, selector)
   }
 

@@ -186,26 +186,37 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   }
 
+  def createPostsWithProject(project: SupportedProject): Seq[Post] = {
+    for {
+      _ <- 1 to 10
+    } yield {
+      val childResource = Resource.from(s"${project.resource.stringify()}/${someRandom[String]}")
+      val post = someRandom[Post].copy(project = project, resource = childResource)
+      await(postRepo.save(post)) shouldEqual true
+      post
+    }
+  }
+
   "AUTHOR search" should {
+    val user = createUser()
 
-    def createPostsWithProject(project: SupportedProject): Seq[Post] = {
-      for {
-        _ <- 1 to 10
-      } yield {
-        val childResource = Resource.from(s"${project.resource.stringify()}/${someRandom[String]}")
-        val post = someRandom[Post].copy(project = project, resource = childResource)
-        await(postRepo.save(post)) shouldEqual true
-        post
-      }
-    }
+    val postsProjectA = createPostsWithProject(createProject(user))
+    val postsProjectB = createPostsWithProject(createProject(user))
 
-    "simple search" in {
-      val project = createProject()
-      val posts = createPostsWithProject(project)
+    await(postRepo.findByAuthor(user)) should containAllOf(postsProjectA ++ postsProjectB)
+  }
 
-      await(postRepo.findByAuthor(project.user)) should containAllOf(posts)
-    }
+  "PROJECT search" should {
+    val user = createUser()
 
+    val projectA = createProject(user)
+    val postsProjectA = createPostsWithProject(projectA)
+
+    val projectB = createProject(user)
+    val postsProjectB = createPostsWithProject(projectB)
+
+    await(postRepo.findByProject(projectA._id)) should containAllOf(postsProjectA)
+    await(postRepo.findByProject(projectB._id)) should containAllOf(postsProjectB)
   }
 
 }

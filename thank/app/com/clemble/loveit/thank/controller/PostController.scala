@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.controller
 
-import com.clemble.loveit.common.model.Resource
+import com.clemble.loveit.common.model.{ProjectID, Resource}
 import com.clemble.loveit.thank.service.PostService
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
@@ -53,6 +53,10 @@ case class PostController @Inject()(
         Ok(ownerMissing(res))
     })
   }
+
+  def getByProject(project: ProjectID) = silhouette.SecuredAction.async(implicit req => {
+    service.findByProject(project).map(Ok(_))
+  })
 
   def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     render.async({

@@ -54,10 +54,6 @@ case class PostController @Inject()(
     })
   }
 
-  def getByProject(project: ProjectID) = silhouette.SecuredAction.async(implicit req => {
-    service.findByProject(project).map(Ok(_))
-  })
-
   def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     render.async({
       case Accepts.Json() => getJson(res)

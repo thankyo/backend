@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException, UserException}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.thank.model._
-import com.clemble.loveit.thank.service.repository.{ROVerificationRepository, SupportedProjectRepository}
+import com.clemble.loveit.thank.service.repository.{ROVerificationRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,7 +28,7 @@ trait ROVerificationService {
 case class SimpleROVerificationService @Inject()(
                                                   generator: ROVerificationGenerator,
                                                   repo: ROVerificationRepository,
-                                                  resRepo: SupportedProjectRepository,
+                                                  prjService: SupportedProjectService,
                                                   resOwnService: ROService,
                                                   confirmationService: ROVerificationConfirmationService[Resource],
                                                   implicit val ec: ExecutionContext
@@ -43,7 +43,7 @@ case class SimpleROVerificationService @Inject()(
 
   override def create(user: UserID, res: Resource): Future[ROVerification[Resource]] = {
     val fSavedReq = for {
-      prjOpt <- resRepo.findProject(res)
+      prjOpt <- prjService.findProject(res)
     } yield {
       if (prjOpt.isDefined)
         throw UserException.resourceAlreadyOwned(prjOpt.get.user)

@@ -3,12 +3,12 @@ package com.clemble.loveit.thank.service.repository.mongo
 import javax.inject.{Inject, Named}
 
 import akka.stream.Materializer
-import com.clemble.loveit.common.model.{Resource, Tag, UserID}
+import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.SupportedProject
 import com.clemble.loveit.thank.model.SupportedProject._
 import com.clemble.loveit.thank.service.repository.SupportedProjectRepository
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.Json
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
@@ -23,18 +23,24 @@ case class MongoSupportedProjectRepository @Inject()(
 
   MongoSupportedProjectRepository.ensureMeta(collection)
 
+
+  override def findById(project: ProjectID): Future[Option[SupportedProject]] = {
+    val selector = Json.obj("_id" -> project)
+    collection.find(selector).one[SupportedProject]
+  }
+
   override def saveProject(project: SupportedProject): Future[Boolean] = {
     val selector = Json.obj("resource" -> project.resource)
     collection.find(selector).one[SupportedProject] flatMap(_ match {
-      case Some(existingPrj) => {
-        val selector = Json.obj("_id" -> existingPrj._id)
-        val update = Json.obj("$set" -> (Json.toJsObject(project) - "_id"))
-        MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
-      }
-      case None => {
-        MongoSafeUtils.safeSingleUpdate(collection.insert(project))
-      }
+      case Some(existingPrj) => update(project.copy(_id = existingPrj._id))
+      case None => MongoSafeUtils.safeSingleUpdate(collection.insert(project))
     })
+  }
+
+  override def update(project: SupportedProject): Future[Boolean] = {
+    val selector = Json.obj("_id" -> project._id)
+    val update = Json.obj("$set" -> (Json.toJsObject(project) - "_id"))
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
   override def findProjectsByUser(owner: UserID): Future[List[SupportedProject]] = {

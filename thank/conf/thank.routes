@@ -3,6 +3,10 @@
 GET         /stat/:supporter/:year/:month      @com.clemble.loveit.thank.controller.UserStatController.get(supporter, year: Int, month: Int)
 
 GET         /my/project                        @com.clemble.loveit.thank.controller.SupportedProjectController.getMy()
+PUT         /my/project/:project               @com.clemble.loveit.thank.controller.SupportedProjectController.updateProject(project)
+GET         /project/:project                  @com.clemble.loveit.thank.controller.SupportedProjectController.getProject(project)
+
+GET         /user/:user/project                @com.clemble.loveit.thank.controller.SupportedProjectController.getUserProject(user)
 
 POST        /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.createMy()
 PUT         /my/resource/verification          @com.clemble.loveit.thank.controller.ROVerificationController.verifyMy()

@@ -5,7 +5,7 @@ import javax.inject.{Inject, Named}
 import com.clemble.loveit.common.model.{Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.SupportedProject
-import com.clemble.loveit.thank.service.repository.{SupportTrackRepository, SupportedProjectRepository}
+import com.clemble.loveit.thank.service.repository.{SupportTrackRepository}
 import play.api.libs.json.{JsObject, Json}
 
 import reactivemongo.play.json._

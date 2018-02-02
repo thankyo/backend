@@ -27,12 +27,16 @@ object PaymentException {
 
 object ResourceException {
   val OWNER_MISSING_CODE = "OWNER_MISSING_CODE"
+  val DIFFERENT_OWNER_CODE = "DIFFERENT_OWNER_CODE"
+  val DIFFERENT_ID_CODE = "DIFFERENT_ID_CODE"
   val VERIFICATION_IN_PROGRESS_CODE = "VERIFICATION_IN_PROGRESS"
   val NO_RESOURCE_EXISTS_CODE = "NO_RESOURCE_EXISTS_CODE"
 
   def noResourceExists() = ResourceException(NO_RESOURCE_EXISTS_CODE, "Resource does not exist")
   def verificationAlreadyRequested() = ResourceException(VERIFICATION_IN_PROGRESS_CODE, "Resource verification already in progress")
   def ownerMissing() = new ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
+  def differentOwner() = new ResourceException(DIFFERENT_OWNER_CODE, "Different owner registered for the project")
+  def differentId() = new ResourceException(DIFFERENT_ID_CODE, "Different project id")
 }
 
 object RepositoryException {
@@ -47,7 +51,7 @@ object RepositoryException {
   }
 
   def unknown() = RepositoryException("UNKNOWN", "Unknown error")
-
+  def failedToUpdate() = RepositoryException("Failed to update", "Unknown server error")
 }
 
 object ThankException {

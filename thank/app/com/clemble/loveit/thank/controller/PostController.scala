@@ -62,8 +62,8 @@ case class PostController @Inject()(
   })
 
   def thank(resource: Resource) = silhouette.SecuredAction.async(implicit req => {
-    val giver = req.identity
-    val fThank = service.thank(giver.id, resource)
+    val giver = req.identity.id
+    val fThank = service.thank(giver, resource)
     fThank.map(Ok(_))
   })
 

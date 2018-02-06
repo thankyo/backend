@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.model
 import java.time.LocalDateTime
 
 import com.clemble.loveit.common.model.{CreatedAware, Resource, UserID, _}
-import com.clemble.loveit.common.util.WriteableUtils
+import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import play.api.libs.json.{Json, OFormat}
 
 case class Post(
@@ -14,7 +14,8 @@ case class Post(
 
                  thank: Thank = Thank(),
 
-                 created: LocalDateTime = LocalDateTime.now()
+                 created: LocalDateTime = LocalDateTime.now(),
+                 _id: String = IDGenerator.generate()
                ) extends CreatedAware with ResourceAware {
 
   def isSupportedBy(user: UserID): Boolean = thank.isSupportedBy(user)

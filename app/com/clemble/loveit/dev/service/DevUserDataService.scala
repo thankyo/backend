@@ -2,37 +2,15 @@ package com.clemble.loveit.dev.service
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, Props}
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, SupportedProject}
 import com.clemble.loveit.thank.service.{PostService, ROService, SupportedProjectService}
-import com.clemble.loveit.user.model.User
 import com.mohiva.play.silhouette.api._
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class DevSignUpListener(resources: Seq[Resource], thankService: PostService) extends Actor {
-
-  implicit val ec = context.dispatcher
-
-  def runThanks(giver: UserID) = {
-    for {
-      res <- resources
-    } yield {
-      thankService.thank(giver, res)
-    }
-  }
-
-  override def receive: Receive = {
-    case SignUpEvent(user: User, _) =>
-      runThanks(user.id)
-    case LoginEvent(user: User, _) =>
-      runThanks(user.id)
-  }
-}
 
 case class DevCreatorConfig(
                              creator: RegisterRequest,
@@ -85,7 +63,7 @@ case class SimpleDevUserDataService @Inject()(
           title = Some("Zen Pencil on GoComics"),
           avatar = Some("http://avatar.amuniversal.com/feature_avatars/ubadge_images/features/ch/mid_u-201701251613.png"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
-      )),
+        )),
 
       Set(
         OpenGraphObject(
@@ -102,6 +80,13 @@ case class SimpleDevUserDataService @Inject()(
           image = Some(
             OpenGraphImage(url = "http://assets.amuniversal.com/8b0ddf60d66601350cae005056a9545d", width = Some(900), height = Some(2545))
           )
+        ),
+        OpenGraphObject(
+          url = "http://zenpencils.com/comic/hustle/",
+          title = Some("ZEN PENCILS » 220. CHRIS GUILLEBEAU: The art of the Side Hustle"),
+          image = Some(
+            OpenGraphImage("https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/220_hustle.jpg")
+          ),
         )
       )
     ),
@@ -183,9 +168,7 @@ case class SimpleDevUserDataService @Inject()(
       if (!assignedResources) {
         throw new IllegalArgumentException(s"Could not initialize resources")
       }
-      val allResources = posts.map(_.resource)
-      eventBusManager.onSignUp(Props(DevSignUpListener(allResources, postService)))
-      eventBusManager.onLogin(Props(DevSignUpListener(allResources, postService)))
+      assignedResources
     }).recover({
       case t: Throwable => {
         print(t)

@@ -30,7 +30,7 @@ class SupportedProjectController @Inject()(
 
   def getUserProject(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     supportedProjectsService
-      .findProjectsByUser(user)
+      .findProjectsByUser(idOrMe(user))
       .map(Ok(_))
   })
 

@@ -79,7 +79,7 @@ case class SimplePostService @Inject()(
     getPostOrProject(res).flatMap(_ match {
       case Left(post) =>
         val updPost = post.withOg(og)
-        postRepo.update(updPost).filter(_ == true).map(_ => post)
+        postRepo.update(updPost).filter(_ == true).map(_ => updPost)
       case Right(project) =>
         val post = Post.from(og, project)
         postRepo.save(post).filter(_ == true).map((_) => post)
@@ -96,14 +96,16 @@ case class SimplePostService @Inject()(
 
   override def thank(giver: UserID, res: Resource): Future[Post] = {
     for {
-      postOpt <- postRepo.findByResource(res) // Ensure Thank exists
-      post = postOpt.get
+      postOpt <- postRepo.findByResource(res)
+      post = postOpt.getOrElse({ throw ResourceException.ownerMissing() })
       increased <- postRepo.markSupported(giver, res)
     } yield {
       if (increased) {
         thankEventBus.publish(ThankEvent(giver, post.project, res))
+        post.copy(thank = post.thank.withSupporter(giver))
+      } else {
+        post
       }
-      post
     }
   }
 

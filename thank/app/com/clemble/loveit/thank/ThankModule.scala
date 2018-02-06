@@ -13,6 +13,7 @@ import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import com.sksamuel.elastic4s.ElasticsearchClientUri
 import com.sksamuel.elastic4s.http.HttpClient
 import net.codingwell.scalaguice.ScalaModule
+import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
@@ -92,6 +93,15 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     val key = conf.get[String]("thank.crypter.key")
     val config = JcaCrypterSettings(key)
     new JcaCrypter(config)
+  }
+
+
+  @Provides
+  @Singleton
+  def resourceAnalyzerService(wsClient: WSClient)(implicit ec: ExecutionContext): ResourceAnalyzerService = {
+    val host = conf.get[String]("thank.resource.analyzer.host")
+    val port = conf.get[Int]("thank.resource.analyzer.port")
+    WappalyzerResourceAnalyzerService(s"http://${host}:${port}/lookup/v1/",wsClient)
   }
 
 }

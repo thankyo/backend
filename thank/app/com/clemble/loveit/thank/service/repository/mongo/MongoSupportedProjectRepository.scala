@@ -23,10 +23,14 @@ case class MongoSupportedProjectRepository @Inject()(
 
   MongoSupportedProjectRepository.ensureMeta(collection)
 
-
   override def findById(project: ProjectID): Future[Option[SupportedProject]] = {
     val selector = Json.obj("_id" -> project)
     collection.find(selector).one[SupportedProject]
+  }
+
+  override def findAll(ids: List[ProjectID]): Future[List[SupportedProject]] = {
+    val selector = Json.obj("_id" -> Json.obj("$in" -> ids))
+    MongoSafeUtils.collectAll[SupportedProject](collection, selector)
   }
 
   override def saveProject(project: SupportedProject): Future[Boolean] = {

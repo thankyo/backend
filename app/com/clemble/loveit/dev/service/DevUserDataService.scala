@@ -87,7 +87,13 @@ case class SimpleDevUserDataService @Inject()(
           image = Some(
             OpenGraphImage("https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/220_hustle.jpg")
           ),
-        )
+        ),
+        OpenGraphObject(
+          url = "http://zenpencils.com/comic/poe/",
+          image = Some(
+            OpenGraphImage("https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/218_poe.jpg")),
+          title = Some("ZEN PENCILS » 218. EDGAR ALLAN POE: Procrastination"),
+          description = Some("Ah procrastination, something I constantly struggle with. Don’t we all? I’m fighting it right now – I don’t really enjoy writing these blog posts underneath each comic and I always put it off to until the last minute. I know I must do it, but I really don’t want to. As I sat down to write this, my c…"))
       )
     ),
     DevCreatorConfig(

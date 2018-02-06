@@ -9,6 +9,8 @@ trait SupportedProjectRepository {
 
   def findById(project: ProjectID): Future[Option[SupportedProject]]
 
+  def findAll(ids: List[ProjectID]): Future[List[SupportedProject]]
+
   def findProject(res: Resource): Future[Option[SupportedProject]]
 
   def saveProject(project: SupportedProject): Future[Boolean]

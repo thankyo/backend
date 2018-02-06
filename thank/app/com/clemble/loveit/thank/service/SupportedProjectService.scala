@@ -86,7 +86,7 @@ class SimpleSupportedProjectService @Inject()(
   }
 
   override def getSupported(user: UserID): Future[List[SupportedProject]] = {
-    supTrackRepo.getSupported(user)
+    supTrackRepo.getSupported(user).flatMap(repo.findAll)
   }
 
   override def markSupported(giver: UserID, project: SupportedProject): Future[Boolean] = {

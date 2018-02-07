@@ -15,6 +15,7 @@ import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo
 import com.mohiva.play.silhouette.impl.providers._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 sealed trait AuthServiceResult {
   val user: User
@@ -95,8 +96,9 @@ case class AuthService @Inject()(
 
   private def createOrUpdateUser(profile: CommonSocialProfile, authInfo: AuthInfo): Future[AuthServiceResult] = {
     for {
-      existingUserOpt <- userService.retrieve(profile.loginInfo)
-      result <- existingUserOpt match {
+      userByLogin <- userService.retrieve(profile.loginInfo)
+      userByEmail <- profile.email.map(userService.findByEmail).getOrElse(Future.successful(None))
+      result <- userByLogin.orElse(userByEmail) match {
         case Some(user: User) => {
           for {
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)

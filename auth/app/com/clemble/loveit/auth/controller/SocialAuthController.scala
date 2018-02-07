@@ -40,17 +40,20 @@ class SocialAuthController @Inject()(
     */
   def authenticate(provider: String) = Action.async {
     implicit req => {
-      (socialProviderRegistry.get[SocialProvider](provider) match {
+      val providerOpt = socialProviderRegistry.get[SocialProvider](provider)
+      providerOpt match {
         case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
-          p.authenticate().flatMap {
+          val fAuthentication = p.authenticate()
+          fAuthentication.flatMap(_ match {
             case Left(redirect) =>
               Future.successful(redirect)
             case Right(authInfo) =>
-              authService.registerSocial(p)(authInfo).flatMap(AuthUtils.authResponse)
-          }
+              val fSocialReg = authService.registerSocial(p)(authInfo)
+              fSocialReg.flatMap(AuthUtils.authResponse)
+          })
         case _ =>
           Future.successful(BadRequest(FieldValidationError("providerId", s"Cannot authenticate with unexpected social provider $provider")))
-      })
+      }
     }
   }
 

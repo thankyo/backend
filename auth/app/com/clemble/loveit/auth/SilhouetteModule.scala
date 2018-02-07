@@ -136,10 +136,13 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
    */
   @Provides
   def provideSocialProviderRegistry(
-    facebookProvider: FacebookProvider): SocialProviderRegistry = {
+    facebookProvider: FacebookProvider,
+    googleProvider: GoogleProvider
+  ): SocialProviderRegistry = {
 
     SocialProviderRegistry(Seq(
-      facebookProvider
+      facebookProvider,
+      googleProvider
     ))
   }
 
@@ -224,7 +227,21 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
     socialStateHandler: SocialStateHandler,
     configuration: Configuration): FacebookProvider = {
 
-    new FacebookProvider(httpLayer, socialStateHandler, configuration.underlying.as[OAuth2Settings]("silhouette.facebook"))
+    new FacebookProvider(
+      httpLayer,
+      socialStateHandler,
+      configuration.underlying.as[OAuth2Settings]("silhouette.facebook")
+    )
   }
 
+  @Provides
+  def googleProvider(httpLayer: HTTPLayer,
+                     socialStateHandler: SocialStateHandler,
+                     configuration: Configuration): GoogleProvider = {
+    new GoogleProvider(
+      httpLayer,
+      socialStateHandler,
+      configuration.underlying.as[OAuth2Settings]("silhouette.google")
+    )
+  }
 }

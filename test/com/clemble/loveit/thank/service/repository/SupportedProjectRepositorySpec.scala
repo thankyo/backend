@@ -33,7 +33,7 @@ class SupportedProjectRepositorySpec(implicit val ee: ExecutionEnv) extends Repo
     val project = someRandom[SupportedProject]
 
     await(trackRepo.isSupportedBy(giver, project)) shouldEqual true
-    await(trackRepo.getSupported(giver)) shouldEqual List(project)
+    await(trackRepo.getSupported(giver)) shouldEqual List(project._id)
   }
 
   "LIST" should {

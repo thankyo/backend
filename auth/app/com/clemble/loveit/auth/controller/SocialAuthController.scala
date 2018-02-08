@@ -9,6 +9,7 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers._
+import com.mohiva.play.silhouette.impl.providers.state.UserStateItem
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,13 +42,14 @@ class SocialAuthController @Inject()(
   def authenticate(provider: String) = Action.async {
     implicit req => {
       val providerOpt = socialProviderRegistry.get[SocialProvider](provider)
+      val user = cookieUtils.readUser(req)
       providerOpt match {
         case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
           p.authenticate().flatMap({
             case Left(redirect) =>
               Future.successful(redirect)
             case Right(authInfo) =>
-              val fSocialReg = authService.registerSocial(p)(authInfo)
+              val fSocialReg = authService.registerSocial(p)(authInfo, user)
               fSocialReg.flatMap(AuthUtils.authResponse)
           })
         case _ =>

@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.model.requests.{LogInRequest, RegisterRequest}
 import com.clemble.loveit.common.error.FieldValidationError
-import com.clemble.loveit.common.model.Email
+import com.clemble.loveit.common.model.{Email, UserID}
 import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
@@ -85,20 +85,21 @@ case class AuthService @Inject()(
     }
   }
 
-  def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A): Future[AuthServiceResult] = {
+  def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult] = {
     for {
       profile <- p.retrieveProfile(authInfo)
-      result <- createOrUpdateUser(profile, authInfo)
+      result <- createOrUpdateUser(profile, authInfo, userOpt)
     } yield {
       result
     }
   }
 
-  private def createOrUpdateUser(profile: CommonSocialProfile, authInfo: AuthInfo): Future[AuthServiceResult] = {
+  private def createOrUpdateUser(profile: CommonSocialProfile, authInfo: AuthInfo, userOpt: Option[UserID]): Future[AuthServiceResult] = {
     for {
+      userById <- userOpt.map(user => userService.findById(user)).getOrElse(Future.successful(None))
       userByLogin <- userService.retrieve(profile.loginInfo)
       userByEmail <- profile.email.map(userService.findByEmail).getOrElse(Future.successful(None))
-      result <- userByLogin.orElse(userByEmail) match {
+      result <- userById.orElse(userByLogin).orElse(userByEmail) match {
         case Some(user: User) => {
           for {
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)

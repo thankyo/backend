@@ -59,7 +59,8 @@ class ForgotPasswordController @Inject()(
             findByEmail(request.body.email).
             map(_ match {
               case Some(user) =>
-                throw FieldValidationError("email", s"You are registered through ${user.profiles.map(_.providerID).mkString(",")}")
+                import user.profiles._
+                throw FieldValidationError("email", s"You are registered through FB ${facebook.isDefined}, Google ${google.isDefined}, Credentials ${credentials.isDefined}")
               case None =>
                 throw new IdentityNotFoundException(s"No user with ${loginInfo.providerKey}")
             })

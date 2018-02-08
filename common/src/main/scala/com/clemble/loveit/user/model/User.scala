@@ -4,10 +4,17 @@ import java.time.{LocalDate, LocalDateTime}
 
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.WriteableUtils
-import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
+import com.mohiva.play.silhouette.api.{Identity}
+import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, CredentialsProvider}
+import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
 import play.api.http.Writeable
 import play.api.libs.json.{Json, OFormat}
+
+case class UserSocialConnections(
+                                  credentials: Option[String] = None,
+                                  facebook: Option[String] = None,
+                                  google: Option[String] = None
+                                )
 
 /**
   * User abstraction
@@ -26,7 +33,7 @@ case class User(
                  avatar: Option[String] = None,
                  bio: Option[String] = None,
                  dateOfBirth: Option[LocalDate] = None,
-                 profiles: Set[LoginInfo] = Set.empty,
+                 profiles: UserSocialConnections = UserSocialConnections(),
                  created: LocalDateTime = LocalDateTime.now()
                ) extends Identity with CreatedAware {
 
@@ -41,7 +48,11 @@ case class User(
   }
 
   def hasProvider(providerID: String): Boolean = {
-    profiles.exists(_.providerID == providerID)
+    providerID match {
+      case FacebookProvider.ID => profiles.facebook.isDefined
+      case GoogleProvider.ID => profiles.google.isDefined
+      case CredentialsProvider.ID => profiles.credentials.isDefined
+    }
   }
 
   def link(socialProfile: CommonSocialProfile): User = {
@@ -49,7 +60,11 @@ case class User(
       firstName = firstName.orElse(socialProfile.firstName),
       lastName = lastName.orElse(socialProfile.lastName),
       // following #60 we should ignore avatar from profile for now
-      profiles = profiles + socialProfile.loginInfo
+      profiles = socialProfile.loginInfo.providerID match {
+        case FacebookProvider.ID => profiles.copy(facebook = Some(socialProfile.loginInfo.providerKey))
+        case GoogleProvider.ID => profiles.copy(google = Some(socialProfile.loginInfo.providerKey))
+        case CredentialsProvider.ID => profiles.copy(credentials = Some(socialProfile.loginInfo.providerKey))
+      }
     )
   }
 
@@ -64,6 +79,7 @@ object User {
   val UNKNOWN = "UNKNOWN"
 
   implicit val socialProfileJsonFormat: OFormat[CommonSocialProfile] = Json.format[CommonSocialProfile]
+  implicit val userSocialConnections: OFormat[UserSocialConnections] = Json.format[UserSocialConnections]
   implicit val jsonFormat: OFormat[User] = Json.format[User]
 
   implicit val userWriteable: Writeable[User] = WriteableUtils.jsonToWriteable[User]

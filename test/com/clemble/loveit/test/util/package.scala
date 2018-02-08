@@ -119,8 +119,7 @@ package object util {
       lastName = optionRandom[String],
       email = s"${someRandom[String]}@${someRandom[String]}.${someRandom[String]}",
       avatar = optionRandom[String],
-      dateOfBirth = optionRandom[LocalDate],
-      profiles = Set.empty[LoginInfo]
+      dateOfBirth = optionRandom[LocalDate]
     )
   }
   implicit val userIDGenerator: Generator[UserID] = () => IDGenerator.generate()

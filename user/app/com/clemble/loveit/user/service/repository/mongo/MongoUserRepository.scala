@@ -52,7 +52,7 @@ case class MongoUserRepository @Inject()(
   }
 
   override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
-    val query = Json.obj("profiles.providerID" -> loginInfo.providerID, "profiles.providerKey" -> loginInfo.providerKey)
+    val query = Json.obj(s"profiles.${loginInfo.providerID}" -> loginInfo.providerKey)
     val fUser = collection.find(query).one[User]
     MongoSafeUtils.safe(fUser)
   }

@@ -56,7 +56,7 @@ class ResetPasswordController @Inject()(
         throw FieldValidationError("password", "Token expired or already used")
       })
       userOpt <- userService.findById(authToken.user)
-      loginInfoOpt = userOpt.flatMap(_.profiles.find(_.providerID == CredentialsProvider.ID))
+      loginInfoOpt = userOpt.flatMap(_.profiles.credentials.map(providerKey => LoginInfo(CredentialsProvider.ID, providerKey)))
       _ <- authInfoRepository.update[PasswordInfo](loginInfoOpt.get, passwordInfo)
       authResult <- AuthUtils.authResponse(UserLoggedIn(userOpt.get, loginInfoOpt.get))
     } yield {

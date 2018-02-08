@@ -43,8 +43,7 @@ class SocialAuthController @Inject()(
       val providerOpt = socialProviderRegistry.get[SocialProvider](provider)
       providerOpt match {
         case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
-          val fAuthentication = p.authenticate()
-          fAuthentication.flatMap(_ match {
+          p.authenticate().flatMap({
             case Left(redirect) =>
               Future.successful(redirect)
             case Right(authInfo) =>

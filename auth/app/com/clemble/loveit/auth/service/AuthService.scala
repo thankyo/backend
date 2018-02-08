@@ -41,7 +41,7 @@ case class AuthService @Inject()(
   private def checkUserExists(email: Email): Future[Boolean] = {
     userService.findByEmail(email).flatMap {
       case Some(user) =>
-        Future.failed(FieldValidationError("email", s"registered through social ${user.profiles.map(_.providerID)}"))
+        Future.failed(FieldValidationError("email", s"registered through FB ${user.profiles.facebook.isDefined} or Google ${user.profiles.google.isDefined}"))
       case None =>
         Future.successful(false)
     }

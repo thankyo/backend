@@ -91,14 +91,6 @@ package object util {
   implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
     PendingTransaction(someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
   }
-  implicit val verificationGenerator: Generator[ROVerification[Resource]] = () => {
-    val resource = someRandom[Resource]
-    ROVerification(
-      Pending,
-      resource,
-      RandomStringUtils.randomNumeric(10)
-    )
-  }
   implicit val postGenerator: Generator[Post] = () => {
     val resource = optionRandom[String] match {
       case None => someRandom[Resource]

@@ -2,7 +2,6 @@ package com.clemble.loveit.thank
 
 import javax.inject.{Inject, Named, Singleton}
 
-import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
@@ -10,8 +9,6 @@ import com.clemble.loveit.thank.service.repository.mongo._
 import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
-import com.sksamuel.elastic4s.ElasticsearchClientUri
-import com.sksamuel.elastic4s.http.HttpClient
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
@@ -34,21 +31,6 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[UserStatService]).to(classOf[SimpleUserStatService]).asEagerSingleton()
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
-
-    ownershipVerification()
-  }
-
-  def ownershipVerification(): Unit = {
-    bind(classOf[ROVerificationGenerator]).to(classOf[CryptROVerificationGenerator])
-    bind(classOf[ROVerificationRepository]).to(classOf[MongoROVerificationRepository])
-    bind(classOf[MetaTagReader]).to(classOf[WSMetaTagReader])
-    bind(classOf[ROVerificationService]).to(classOf[SimpleROVerificationService])
-  }
-
-  @Provides
-  @Singleton
-  def resourceVerificationService(httpVerification: HttpROVerificationConfirmationService): ROVerificationConfirmationService[Resource] = {
-    ROVerificationConfirmationFacade(httpVerification)
   }
 
   @Provides

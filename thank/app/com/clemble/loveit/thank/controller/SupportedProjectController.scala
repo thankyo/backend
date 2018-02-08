@@ -15,7 +15,7 @@ import com.clemble.loveit.thank.model.SupportedProject
 
 @Singleton
 class SupportedProjectController @Inject()(
-                                            supportedProjectsService: SupportedProjectService,
+                                            service: SupportedProjectService,
                                             silhouette: Silhouette[AuthEnv],
                                             components: ControllerComponents,
                                             implicit val ec: ExecutionContext
@@ -23,13 +23,13 @@ class SupportedProjectController @Inject()(
 
   def getMy() = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id
-    supportedProjectsService
+    service
       .findProjectsByUser(user)
       .map(Ok(_))
   })
 
   def getUserProject(user: UserID) = silhouette.SecuredAction.async(implicit req => {
-    supportedProjectsService
+    service
       .findProjectsByUser(idOrMe(user))
       .map(Ok(_))
   })
@@ -37,17 +37,17 @@ class SupportedProjectController @Inject()(
   def updateProject(id: ProjectID) = silhouette.SecuredAction(parse.json[SupportedProject]).async(implicit req => {
     val user = req.identity.id
     val project = req.body.copy(user = user, _id = id)
-    supportedProjectsService.update(project).map(Ok(_))
+    service.update(project).map(Ok(_))
   })
 
   def getSupported(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {
-    supportedProjectsService.
+    service.
       getSupported(idOrMe(supporter)).
       map(projects => Ok(Json.toJson(projects)))
   })
 
   def getProject(project: ProjectID) = silhouette.SecuredAction.async(implicit req => {
-    supportedProjectsService.findById(project).map(_ match {
+    service.findById(project).map(_ match {
       case Some(prj) => Ok(prj)
       case None => NotFound
     })

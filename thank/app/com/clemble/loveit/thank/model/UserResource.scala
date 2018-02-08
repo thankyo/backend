@@ -10,8 +10,7 @@ import play.api.libs.json._
   */
 case class UserResource(
                          _id: UserID,
-                         owns: Set[SupportedProject] = Set.empty[SupportedProject],
-                         verification: Option[ROVerification[Resource]] = None
+                         owns: Set[SupportedProject] = Set.empty[SupportedProject]
 ) extends UserAware {
 
   val user = _id

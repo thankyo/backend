@@ -15,7 +15,6 @@ import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo
 import com.mohiva.play.silhouette.impl.providers._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 sealed trait AuthServiceResult {
   val user: User

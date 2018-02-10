@@ -78,6 +78,7 @@ package object util {
   implicit val thankTransactionGenerator: Generator[ThankEvent] = () => {
     ThankEvent(someRandom[UserID], someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
   }
+  implicit val webStackGenerator: Generator[WebStack] = () => WordPress
   implicit val supportedProjectGenerator: Generator[SupportedProject] = () => {
     SupportedProject(
       someRandom[Resource],
@@ -85,6 +86,7 @@ package object util {
       optionRandom[String],
       optionRandom[String],
       optionRandom[String],
+      optionRandom[WebStack],
       someRandom[Set[Tag]]
     )
   }

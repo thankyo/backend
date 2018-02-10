@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{ProjectID, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.service.SupportedProjectService
+import com.clemble.loveit.thank.service.{ROService, SupportedProjectService}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
@@ -16,6 +16,7 @@ import com.clemble.loveit.thank.model.SupportedProject
 @Singleton
 class SupportedProjectController @Inject()(
                                             service: SupportedProjectService,
+                                            roService: ROService,
                                             silhouette: Silhouette[AuthEnv],
                                             components: ControllerComponents,
                                             implicit val ec: ExecutionContext
@@ -26,6 +27,10 @@ class SupportedProjectController @Inject()(
     service
       .findProjectsByUser(user)
       .map(Ok(_))
+  })
+
+  def listPending() = silhouette.SecuredAction.async(implicit req => {
+    roService.list(req.identity.id).map(Ok(_))
   })
 
   def getUserProject(user: UserID) = silhouette.SecuredAction.async(implicit req => {

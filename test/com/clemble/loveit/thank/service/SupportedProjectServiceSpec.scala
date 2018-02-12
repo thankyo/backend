@@ -14,6 +14,7 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
   val postService = dependency[PostService]
   val thankRepo = dependency[PostRepository]
   val supportedProjectService = dependency[SupportedProjectService]
+  val trackService = dependency[SupportedProjectTrackService]
 
   def createScene():(SupportedProject, UserID, UserID) = {
     val owner = createUser()
@@ -22,7 +23,7 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
     val url = s"https://example.com/some/${someRandom[Long]}"
     val res = Resource.from(url)
 
-    val project = await(roService.validate(SupportedProject(res, owner)))
+    val project = await(roService.enable(SupportedProject(res, owner)))
     await(postService.create(someRandom[OpenGraphObject].copy(url = url)))
 
     (project, owner, giver)
@@ -33,7 +34,7 @@ class SupportedProjectServiceSpec(implicit val ee: ExecutionEnv) extends Payment
   }
 
   def getSupported(user: UserID) = {
-    await(supportedProjectService.getSupported(user))
+    await(trackService.getSupported(user))
   }
 
   "Supported projects " should {

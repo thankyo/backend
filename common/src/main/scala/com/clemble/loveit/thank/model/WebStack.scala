@@ -19,6 +19,7 @@ object WebStack {
 
     override def reads(json: JsValue): JsResult[WebStack] = json match {
       case WORD_PRESS => JsSuccess(WordPress)
+      case _ => JsError("No WebStack associated")
     }
   }
 

@@ -16,17 +16,18 @@ import com.mohiva.play.silhouette.impl.providers._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-sealed trait AuthServiceResult {
-  val user: User
-  val loginInfo: LoginInfo
+trait AuthService {
+
+  def login(logIn: LogInRequest): Future[AuthServiceResult]
+
+  def register(register: RegisterRequest): Future[AuthServiceResult]
+
+  def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult]
+
 }
 
-case class UserRegister(user: User, loginInfo: LoginInfo) extends AuthServiceResult
-
-case class UserLoggedIn(user: User, loginInfo: LoginInfo) extends AuthServiceResult
-
 @Singleton
-case class AuthService @Inject()(
+case class SimpleAuthService @Inject()(
                                   userService: UserService,
                                   avatarService: AvatarService,
                                   passwordHasherRegistry: PasswordHasherRegistry,
@@ -35,7 +36,7 @@ case class AuthService @Inject()(
                                   socialProviderRegistry: SocialProviderRegistry
                                 )(
                                   implicit ec: ExecutionContext
-                                ) {
+                                ) extends AuthService with UserOAuthService {
 
   private def checkUserExists(email: Email): Future[Boolean] = {
     userService.findByEmail(email).flatMap {
@@ -46,7 +47,7 @@ case class AuthService @Inject()(
     }
   }
 
-  def login(logIn: LogInRequest): Future[AuthServiceResult] = {
+  override def login(logIn: LogInRequest): Future[AuthServiceResult] = {
     credentialsProvider.authenticate(logIn.toCredentials()).flatMap { loginInfo =>
       userService.retrieve(loginInfo).flatMap {
         case Some(user) =>
@@ -58,7 +59,7 @@ case class AuthService @Inject()(
     }
   }
 
-  def register(register: RegisterRequest): Future[AuthServiceResult] = {
+  override def register(register: RegisterRequest): Future[AuthServiceResult] = {
     val loginInfo = register.toLoginInfo()
     authInfoRepository.find[PasswordInfo](loginInfo).flatMap {
       case Some(_) =>
@@ -84,7 +85,7 @@ case class AuthService @Inject()(
     }
   }
 
-  def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult] = {
+  override def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult] = {
     for {
       profile <- p.retrieveProfile(authInfo)
       result <- createOrUpdateUser(profile, authInfo, userOpt)
@@ -115,6 +116,10 @@ case class AuthService @Inject()(
     } yield {
       result
     }
+  }
+
+  override def findAuthInfo(loginInfo: LoginInfo): Future[Option[OAuth2Info]] = {
+    authInfoRepository.find[OAuth2Info](loginInfo)
   }
 
 }

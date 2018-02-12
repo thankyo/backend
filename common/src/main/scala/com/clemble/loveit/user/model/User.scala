@@ -4,7 +4,7 @@ import java.time.{LocalDate, LocalDateTime}
 
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.WriteableUtils
-import com.mohiva.play.silhouette.api.{Identity}
+import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, CredentialsProvider}
 import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
 import play.api.http.Writeable
@@ -14,7 +14,15 @@ case class UserSocialConnections(
                                   credentials: Option[String] = None,
                                   facebook: Option[String] = None,
                                   google: Option[String] = None
-                                )
+                                ) {
+
+  def asGoogleLogin() = google.map(LoginInfo(GoogleProvider.ID, _))
+
+  def asFacebookLogin() = facebook.map(LoginInfo(FacebookProvider.ID, _))
+
+  def asCredentialsLogin() = credentials.map(LoginInfo(CredentialsProvider.ID, _))
+
+}
 
 /**
   * User abstraction

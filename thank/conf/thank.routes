@@ -13,8 +13,6 @@ GET         /user/:user/project                @com.clemble.loveit.thank.control
 GET         /http/*url                         @com.clemble.loveit.thank.controller.PostController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /http/*url                         @com.clemble.loveit.thank.controller.PostController.thank(url: com.clemble.loveit.common.model.Resource)
 
-GET         /analyze/*url                      @com.clemble.loveit.thank.controller.ResourceAnalyzerController.analyze(url)
-
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()
 POST        /graph/my                          @com.clemble.loveit.thank.controller.GraphController.createMyPost()

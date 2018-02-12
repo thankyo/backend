@@ -17,7 +17,7 @@ case class MongoSupportTrackRepository @Inject()(
                                              implicit val ec: ExecutionContext
                                            ) extends SupportTrackRepository {
 
-  override def isSupportedBy(supporter: UserID, project: SupportedProject): Future[Boolean] = {
+  override def markSupportedBy(supporter: UserID, project: SupportedProject): Future[Boolean] = {
     val selector = Json.obj("_id" -> supporter)
     val update = Json.obj("$addToSet" -> Json.obj("supported" -> project._id))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update, upsert = true))

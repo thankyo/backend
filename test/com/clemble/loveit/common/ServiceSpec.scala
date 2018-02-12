@@ -5,7 +5,7 @@ import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.service.UserPaymentService
 import com.clemble.loveit.thank.model.SupportedProject
-import com.clemble.loveit.thank.service.{ROService}
+import com.clemble.loveit.thank.service.{OwnedProjectService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -18,7 +18,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
   lazy val userService: UserService = dependency[UserService]
   lazy val userPayService: UserPaymentService = dependency[UserPaymentService]
   lazy val userRep: UserRepository = dependency[UserRepository]
-  lazy val roService = dependency[ROService]
+  lazy val roService = dependency[OwnedProjectService]
 
   override def createUser(register: RegisterRequest = someRandom[RegisterRequest]): UserID = {
     val fUserID = for {
@@ -35,7 +35,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
   }
 
   def createProject(user: UserID = createUser(), res: Resource = someRandom[Resource]): SupportedProject = {
-    await(roService.validate(SupportedProject(res, user)))
+    await(roService.enable(SupportedProject(res, user)))
   }
 
 }

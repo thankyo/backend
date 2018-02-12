@@ -9,9 +9,9 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
+class OwnedProjectServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
-  lazy val service = dependency[ROService]
+  lazy val service = dependency[OwnedProjectService]
   lazy val supPrjService = dependency[SupportedProjectService]
 
   def listResources(user: String): Set[Resource] = {
@@ -20,7 +20,7 @@ class ROServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   def assignOwnership(userAuth: Seq[(String, String)], resource: Resource) = {
     val user = userAuth.head._2
-    await(service.validate(SupportedProject(resource, user)))
+    await(service.enable(SupportedProject(resource, user)))
   }
 
   "POST" should {

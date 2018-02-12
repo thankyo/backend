@@ -14,6 +14,7 @@ case class SupportedProject(
                              avatar: Option[String] = None,
                              webStack: Option[WebStack] = None,
                              tags: Set[Tag] = Set.empty,
+                             enabled: Boolean = false,
                              _id: ProjectID = IDGenerator.generate()
                            ) extends UserAware with ResourceAware
 

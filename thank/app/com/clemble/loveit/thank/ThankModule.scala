@@ -23,7 +23,8 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[PostService]).to(classOf[SimplePostService])
     bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
 
-    bind(classOf[ROService]).to(classOf[SimpleROService])
+    bind(classOf[OwnedProjectRefreshService]).to(classOf[SimpleOwnedProjectRefreshService])
+    bind(classOf[OwnedProjectService]).to(classOf[SimpleOwnedProjectService])
 
     bind(classOf[SupportedProjectRepository]).to(classOf[MongoSupportedProjectRepository]).asEagerSingleton()
     bind(classOf[SupportTrackRepository]).to(classOf[MongoSupportTrackRepository]).asEagerSingleton()

@@ -5,7 +5,7 @@ import javax.inject.Singleton
 import akka.actor.ActorSystem
 import com.clemble.loveit.auth.service.repository.AuthTokenRepository
 import com.clemble.loveit.auth.service.repository.mongo.MongoAuthTokenRepository
-import com.clemble.loveit.auth.service.{AuthTokenService, SimpleAuthTokenService}
+import com.clemble.loveit.auth.service._
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.util.{AuthEnv, EventBusManager}
 import com.google.inject.name.Named
@@ -28,6 +28,8 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
     * Configures the module.
     */
   def configure(): Unit = {
+    bind[AuthService].to[SimpleAuthService]
+    bind[UserOAuthService].to[SimpleAuthService]
     bind[AuthTokenRepository].to[MongoAuthTokenRepository]
     bind[AuthTokenService].to[SimpleAuthTokenService]
   }

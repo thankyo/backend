@@ -48,7 +48,7 @@ trait InternalTagTestService extends TagTestService with ServiceSpec {
   private val postService = dependency[PostService]
 
   override def assignTags(project: SupportedProject, tags: Set[Tag]): Boolean = {
-    await(prjService.assignTags(project.resource, tags))
+    await(prjService.update(project.copy(tags = tags)).map(_ => true))
   }
 
   override def assignTags(res: Resource, tags: Set[Tag]): Boolean = {

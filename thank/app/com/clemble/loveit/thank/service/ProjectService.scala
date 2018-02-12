@@ -26,7 +26,8 @@ trait ProjectService {
 @Singleton
 class SimpleProjectService @Inject()(
                                       repo: ProjectRepository,
-                                      refreshService: OwnedProjectRefreshService,
+                                      enrichService: ProjectEnrichService,
+                                      refreshService: ProjectRefreshService,
                                       implicit val ec: ExecutionContext
                                              ) extends ProjectService {
 
@@ -40,21 +41,19 @@ class SimpleProjectService @Inject()(
 
   override def refresh(user: UserID): Future[List[Project]] = {
     val fExisting = findProjectsByUser(user)
-    val fOwned = refreshService.fetch(user)
+    val fEnriched = fExisting.map(_.map(enrichService.enrich)).flatMap(Future.sequence(_))
 
-    val fNewProjects = for {
+    for {
+      owned <- refreshService.fetch(user)
       existing <- fExisting
-      owned <- fOwned
+      newProjects = owned.filter(project => !existing.exists(_.resource == project.resource))
+      _ <- Future.sequence(newProjects.map(repo.saveProject))
+      enriched <- fEnriched
+      updatedProjects = enriched.filterNot(existing.contains)
+      _ <- Future.sequence(updatedProjects.map(update))
     } yield {
-      owned.filter(project => !existing.exists(_.resource == project.resource))
+      newProjects ++ enriched
     }
-
-    val fNewSaved = fNewProjects
-      .map(_.map(repo.saveProject))
-      .flatMap(Future.sequence(_))
-      .map(_.forall(_ == true))
-
-    fNewSaved.flatMap(_ => findProjectsByUser(user))
   }
 
   override def update(project: Project): Future[Project] = {

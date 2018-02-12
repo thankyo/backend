@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.service.{UserOAuthService}
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.model.{Project, WebStack}
+import com.clemble.loveit.thank.model.{Project}
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
@@ -16,42 +16,19 @@ import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ResourceAnalyzerService {
-
-  def analyzeWebStack(url: String): Future[Option[WebStack]]
-
-}
-
-case class WappalyzerResourceAnalyzerService @Inject()(lookupUrl: String, wsClient: WSClient)(implicit ec: ExecutionContext) extends ResourceAnalyzerService {
-
-  override def analyzeWebStack(url: String): Future[Option[WebStack]] = {
-    wsClient.url(lookupUrl)
-      .addQueryStringParameters("url" -> url)
-      .execute()
-      .filter(_.status == 200)
-      .map(resp => {
-        val apps = (resp.json \ "applications").asOpt[List[JsObject]].getOrElse(List.empty[JsObject])
-        val appNames = apps.map(_ \ "name").map(_.asOpt[WebStack]).flatten
-        appNames.headOption
-      })
-  }
-
-}
-
-trait OwnedProjectRefreshService {
+trait ProjectRefreshService {
 
   def fetch(user: UserID): Future[List[Project]]
 
 }
 
 @Singleton
-case class SimpleOwnedProjectRefreshService @Inject()(
+case class SimpleProjectRefreshService @Inject()(
                                                        userService: UserService,
                                                        oAuthService: UserOAuthService,
                                                        client: WSClient,
-                                                       analyzerService: ResourceAnalyzerService,
                                                        implicit val ec : ExecutionContext
-                                                    ) extends OwnedProjectRefreshService {
+                                                    ) extends ProjectRefreshService {
 
   private def fetchGoogleResources(user: UserID): Future[List[Project]] = {
     (for {
@@ -89,16 +66,6 @@ case class SimpleOwnedProjectRefreshService @Inject()(
 
   override def fetch(user: UserID): Future[List[Project]] = {
     fetchGoogleResources(user)
-      .flatMap(projects => {
-        Future.sequence(
-          projects.map(res => {
-            val webStack = List(
-              analyzerService.analyzeWebStack(s"http://${res.resource.uri}"),
-              analyzerService.analyzeWebStack(s"https://${res.resource.uri}")
-            )
-            Future.sequence(webStack).map(_.flatten.headOption).map(ws => res.copy(webStack = ws))
-          }))
-      })
   }
 
 }

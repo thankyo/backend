@@ -23,7 +23,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[PostService]).to(classOf[SimplePostService])
     bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
 
-    bind(classOf[OwnedProjectRefreshService]).to(classOf[SimpleOwnedProjectRefreshService])
+    bind(classOf[ProjectRefreshService]).to(classOf[SimpleProjectRefreshService])
 
     bind(classOf[ProjectRepository]).to(classOf[MongoProjectRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
@@ -82,10 +82,10 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
   @Provides
   @Singleton
-  def resourceAnalyzerService(wsClient: WSClient)(implicit ec: ExecutionContext): ResourceAnalyzerService = {
+  def projectEnrichService(wsClient: WSClient)(implicit ec: ExecutionContext): ProjectEnrichService = {
     val host = conf.get[String]("thank.resource.analyzer.host")
     val port = conf.get[Int]("thank.resource.analyzer.port")
-    WappalyzerResourceAnalyzerService(s"http://${host}:${port}/lookup/v1/",wsClient)
+    SimpleProjectEnrichService(s"http://${host}:${port}/lookup/v1/",wsClient)
   }
 
 }

@@ -11,6 +11,7 @@ PUT         /project/:project                  @com.clemble.loveit.thank.control
 GET         /user/:user/supported              @com.clemble.loveit.thank.controller.ProjectController.getSupportedByUser(user)
 GET         /user/:user/project                @com.clemble.loveit.thank.controller.ProjectController.getProjectsByUser(user)
 
+GET         /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.getOwnedProjects()
 PUT         /user/my/project                   @com.clemble.loveit.thank.controller.ProjectController.refreshMyProjects()
 
 GET         /http/*url                         @com.clemble.loveit.thank.controller.PostController.get(url: com.clemble.loveit.common.model.Resource)

@@ -22,9 +22,14 @@ class ProjectController @Inject()(
                                    implicit val ec: ExecutionContext
                                               ) extends LoveItController(components) {
 
+  def getOwnedProjects() = silhouette.SecuredAction.async(implicit req => {
+    service.findProjectsByUser(req.identity.id).map(Ok(_))
+  })
+
   def getProjectsByUser(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     service
       .findProjectsByUser(idOrMe(user))
+      .map(_.filter(_.enabled))
       .map(Ok(_))
   })
 

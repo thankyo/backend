@@ -22,7 +22,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
     val url = s"https://example.com/some/${someRandom[Long]}"
     val resource = Resource.from(url)
 
-    await(roService.enable(Project(resource, owner)))
+    createProject(owner, resource)
     await(service.create(someRandom[OpenGraphObject].copy(url = url)))
 
     (resource, owner, giver)
@@ -111,7 +111,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
       await(service.getPostOrProject(resource)) should throwA()
 
-      await(roService.enable(Project(resource, owner))).resource shouldEqual resource
+      createProject(owner, resource).resource shouldEqual resource
       await(service.getPostOrProject(resource)).right.exists(_.user == owner) should beTrue
     }
 
@@ -120,13 +120,13 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
       val A = createUser()
 
-      await(roService.enable(Project(resource, A))).resource shouldEqual resource
+      createProject(A, resource).resource shouldEqual resource
       await(service.getPostOrProject(resource)).isRight shouldEqual true
       await(service.getPostOrProject(resource)).right.exists(_.user == A) should beTrue
 
       val B = createUser()
 
-      await(roService.enable(Project(resource, B))).resource shouldEqual resource
+      createProject(B, resource).resource shouldEqual resource
       await(service.getPostOrProject(resource)).isRight shouldEqual true
       await(service.getPostOrProject(resource)).right.exists(_.user == B) should beTrue
     }

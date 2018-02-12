@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{ProjectID, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.service.{OwnedProjectService, ProjectService, ProjectSupportTrackService}
+import com.clemble.loveit.thank.service.{ProjectService, ProjectSupportTrackService}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
@@ -17,7 +17,6 @@ import com.clemble.loveit.thank.model.Project
 class ProjectController @Inject()(
                                    service: ProjectService,
                                    trackService: ProjectSupportTrackService,
-                                   roService: OwnedProjectService,
                                    silhouette: Silhouette[AuthEnv],
                                    components: ControllerComponents,
                                    implicit val ec: ExecutionContext

@@ -10,7 +10,7 @@ import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
 import com.clemble.loveit.thank.model.{OpenGraphObject, Project}
-import com.clemble.loveit.thank.service.OwnedProjectService
+import com.clemble.loveit.thank.service.repository.ProjectRepository
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
 import com.nimbusds.jose.JWSObject
@@ -26,7 +26,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
 
   implicit val ec = dependency[ExecutionContext]
 
-  val ownershipService = dependency[OwnedProjectService]
+  val prjRepo = dependency[ProjectRepository]
 
   implicit class ByteSourceReader(source: Source[ByteString, _]) {
     def read(): String = await(source.runWith(Sink.fold("")((agg, s) => agg.concat(s.utf8String))))
@@ -67,7 +67,8 @@ trait ControllerSpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), resource: Resource = someRandom[Resource]): Project = {
-    val project = await(ownershipService.enable(Project(resource, user)))
+    val project = Project(resource, user)
+    await(prjRepo.saveProject(Project(resource, user)))
 
     val ogObj = someRandom[OpenGraphObject].copy(url = resource.uri)
     val createOgObjReq = FakeRequest(POST, "/api/v1/thank/graph").withJsonBody(Json.toJson(ogObj))

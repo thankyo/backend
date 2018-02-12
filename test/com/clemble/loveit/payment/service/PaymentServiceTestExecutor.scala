@@ -16,7 +16,6 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
   val monLimRepo = dependency[PaymentLimitRepository]
   val eomChargeRepo = dependency[EOMChargeRepository]
   val eomPayoutRepo = dependency[EOMPayoutRepository]
-  val projectsRepo = dependency[ProjectRepository]
 
   def getBalance(user: UserID): Amount = {
     val userOpt = await(payRepo.findById(user))

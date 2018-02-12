@@ -21,7 +21,6 @@ trait TagTestService {
 
 trait RepoTagTestService extends TagTestService with ServiceSpec {
 
-  private val prjRepo = dependency[ProjectRepository]
   private val postRepo = dependency[PostRepository]
 
   override def assignTags(project: Project, tags: Set[Tag]): Boolean = {

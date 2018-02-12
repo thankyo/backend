@@ -7,7 +7,8 @@ import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, Project}
-import com.clemble.loveit.thank.service.{PostService, OwnedProjectService, ProjectService}
+import com.clemble.loveit.thank.service.repository.ProjectRepository
+import com.clemble.loveit.thank.service.{PostService, ProjectService}
 import com.mohiva.play.silhouette.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,9 +31,9 @@ trait DevUserDataService {
   */
 case class SimpleDevUserDataService @Inject()(
                                                authService: AuthService,
-                                               roService: OwnedProjectService,
                                                postService: PostService,
                                                supPrjService: ProjectService,
+                                               prjRepo: ProjectRepository,
                                                eventBusManager: EventBusManager,
                                                implicit val ec: ExecutionContext
                                              ) extends DevUserDataService {
@@ -210,7 +211,7 @@ case class SimpleDevUserDataService @Inject()(
         .findProject(project.resource)
         .flatMap(_ match {
           case Some(_) => Future.successful(true)
-          case None => roService.enable(project.copy(user = creator)).map(_ => true)
+          case None => prjRepo.saveProject(project.copy(user = creator))
         })
     }
     Future.sequence(resources).map(seq => seq.forall(_ == true))

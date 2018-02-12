@@ -13,7 +13,7 @@ class ProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTe
 
   val postService = dependency[PostService]
   val thankRepo = dependency[PostRepository]
-  val supportedProjectService = dependency[ProjectService]
+  val prjService = dependency[ProjectService]
   val trackService = dependency[ProjectSupportTrackService]
 
   def createScene():(Project, UserID, UserID) = {
@@ -23,7 +23,7 @@ class ProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTe
     val url = s"https://example.com/some/${someRandom[Long]}"
     val res = Resource.from(url)
 
-    val project = await(roService.enable(Project(res, owner)))
+    val project = createProject(owner, res)
     await(postService.create(someRandom[OpenGraphObject].copy(url = url)))
 
     (project, owner, giver)

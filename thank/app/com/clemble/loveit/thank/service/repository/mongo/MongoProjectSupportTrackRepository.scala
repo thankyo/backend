@@ -5,17 +5,17 @@ import javax.inject.{Inject, Named}
 import com.clemble.loveit.common.model.{ProjectID, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.Project
-import com.clemble.loveit.thank.service.repository.SupportTrackRepository
+import com.clemble.loveit.thank.service.repository.ProjectSupportTrackRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class MongoSupportTrackRepository @Inject()(
+case class MongoProjectSupportTrackRepository @Inject()(
                                              @Named("userSupported") collection: JSONCollection,
                                              implicit val ec: ExecutionContext
-                                           ) extends SupportTrackRepository {
+                                           ) extends ProjectSupportTrackRepository {
 
   override def markSupportedBy(supporter: UserID, project: Project): Future[Boolean] = {
     val selector = Json.obj("_id" -> supporter)

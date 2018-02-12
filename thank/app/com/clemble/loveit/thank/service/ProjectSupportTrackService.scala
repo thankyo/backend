@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import akka.actor.{Actor, ActorSystem, Props}
 import com.clemble.loveit.common.model.{ThankEvent, UserID}
 import com.clemble.loveit.thank.model.Project
-import com.clemble.loveit.thank.service.repository.{SupportTrackRepository, ProjectRepository}
+import com.clemble.loveit.thank.service.repository.{ProjectSupportTrackRepository, ProjectRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,11 +27,11 @@ case class ProjectSupportThankListener(service: ProjectSupportTrackService) exte
 
 @Singleton
 class SimpleProjectSupportTrackService @Inject()(
-                                                    actorSystem: ActorSystem,
-                                                    thankEventBus: ThankEventBus,
-                                                    repo: ProjectRepository,
-                                                    supTrackRepo: SupportTrackRepository,
-                                                    implicit val ec: ExecutionContext
+                                                  actorSystem: ActorSystem,
+                                                  thankEventBus: ThankEventBus,
+                                                  repo: ProjectRepository,
+                                                  supTrackRepo: ProjectSupportTrackRepository,
+                                                  implicit val ec: ExecutionContext
                                                   ) extends ProjectSupportTrackService {
 
   {

@@ -26,8 +26,10 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[OwnedProjectRefreshService]).to(classOf[SimpleOwnedProjectRefreshService])
 
     bind(classOf[ProjectRepository]).to(classOf[MongoProjectRepository]).asEagerSingleton()
-    bind(classOf[SupportTrackRepository]).to(classOf[MongoSupportTrackRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
+
+    bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()
+    bind(classOf[ProjectSupportTrackService]).to(classOf[SimpleProjectSupportTrackService]).asEagerSingleton()
 
     bind(classOf[UserStatService]).to(classOf[SimpleUserStatService]).asEagerSingleton()
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])

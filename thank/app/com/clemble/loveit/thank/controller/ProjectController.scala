@@ -22,14 +22,7 @@ class ProjectController @Inject()(
                                    implicit val ec: ExecutionContext
                                               ) extends LoveItController(components) {
 
-  def getMy() = silhouette.SecuredAction.async(implicit req => {
-    val user = req.identity.id
-    service
-      .findProjectsByUser(user)
-      .map(Ok(_))
-  })
-
-  def getUserProject(user: UserID) = silhouette.SecuredAction.async(implicit req => {
+  def getProjectsByUser(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     service
       .findProjectsByUser(idOrMe(user))
       .map(Ok(_))
@@ -41,7 +34,12 @@ class ProjectController @Inject()(
     service.update(project).map(Ok(_))
   })
 
-  def getSupported(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {
+  def refreshMyProjects = silhouette.SecuredAction.async(implicit req => {
+    val user = req.identity.id
+    service.refresh(user).map(Ok(_))
+  })
+
+  def getSupportedByUser(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {
     trackService.
       getSupported(idOrMe(supporter)).
       map(projects => Ok(Json.toJson(projects)))

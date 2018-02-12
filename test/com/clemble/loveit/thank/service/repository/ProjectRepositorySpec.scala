@@ -11,7 +11,7 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val trackRepo = dependency[SupportTrackRepository]
+  val trackRepo = dependency[ProjectSupportTrackRepository]
 
   def assignOwnership(user: UserID, res: Resource): Boolean = await(prjRepo.saveProject(Project(res, user)))
 

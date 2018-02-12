@@ -10,8 +10,10 @@ abstract class LoveItController(controllerComponents: ControllerComponents) exte
 
   val LOG = LoggerFactory.getLogger(getClass())
 
+  val MY = "my"
+
   def idOrMe(id: UserID)(implicit req: SecuredRequest[AuthEnv, _]): UserID = {
-    if (id == "my") {
+    if (id == MY) {
       req.identity.id
     } else {
       id

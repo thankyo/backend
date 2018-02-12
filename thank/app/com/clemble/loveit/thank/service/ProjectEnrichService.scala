@@ -3,6 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.Inject
 
 import com.clemble.loveit.thank.model.{Project, WebStack}
+import com.clemble.loveit.user.service.UserService
 import play.api.libs.json.JsObject
 import play.api.libs.ws.WSClient
 
@@ -14,9 +15,9 @@ trait ProjectEnrichService {
 
 }
 
-case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient)(implicit ec: ExecutionContext) extends ProjectEnrichService {
+case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient, userService: UserService)(implicit ec: ExecutionContext) extends ProjectEnrichService {
 
-  def analyzeWebStack(url: String): Future[Option[WebStack]] = {
+  private def analyzeWebStack(url: String): Future[Option[WebStack]] = {
     wsClient.url(lookupUrl)
       .addQueryStringParameters("url" -> url)
       .execute()
@@ -28,17 +29,28 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       })
   }
 
-  override def enrich(project: Project): Future[Project] = {
-    if (project.webStack.isDefined) {
-      return Future.successful(project)
-    }
-
+  private def enrichWebStack(project: Project): Future[Option[WebStack]] = {
     val uri = project.resource.uri
     for {
       webStacks <- Future.sequence(List(analyzeWebStack(s"http://${uri}"), analyzeWebStack(s"https://${uri}")))
     } yield {
-      val possibleStack = webStacks.flatten.headOption.orElse(project.webStack)
-      project.copy(webStack = possibleStack)
+      webStacks.flatten.headOption.orElse(project.webStack)
+    }
+  }
+
+  private def enrichAvatar(project: Project): Future[Option[String]] = {
+    if (project.avatar.isDefined) {
+      return Future.successful(project.avatar)
+    }
+    userService.findById(project.user).map(_.flatMap(_.avatar))
+  }
+
+  override def enrich(project: Project): Future[Project] = {
+    for {
+      webStack <- enrichWebStack(project)
+      avatar <- enrichAvatar(project)
+    } yield {
+      project.copy(webStack = webStack, avatar = avatar, title = project.title.orElse(Some(project.resource.uri)))
     }
   }
 

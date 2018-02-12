@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
-import com.clemble.loveit.thank.model.{Post, SupportedProject}
+import com.clemble.loveit.thank.model.{Post, Project}
 
 import scala.concurrent.Future
 
@@ -21,7 +21,7 @@ trait PostRepository {
 
   def findByProject(project: ProjectID): Future[List[Post]]
 
-  def updateProject(project: SupportedProject): Future[Boolean]
+  def updateProject(project: Project): Future[Boolean]
 
   def markSupported(user: String, url: Resource): Future[Boolean]
 

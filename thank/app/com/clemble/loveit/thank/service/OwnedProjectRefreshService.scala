@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.service.{UserOAuthService}
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.model.{SupportedProject, WebStack}
+import com.clemble.loveit.thank.model.{Project, WebStack}
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
@@ -40,7 +40,7 @@ case class WappalyzerResourceAnalyzerService @Inject()(lookupUrl: String, wsClie
 
 trait OwnedProjectRefreshService {
 
-  def fetch(user: UserID): Future[List[SupportedProject]]
+  def fetch(user: UserID): Future[List[Project]]
 
 }
 
@@ -53,7 +53,7 @@ case class SimpleOwnedProjectRefreshService @Inject()(
                                                        implicit val ec : ExecutionContext
                                                     ) extends OwnedProjectRefreshService {
 
-  private def fetchGoogleResources(user: UserID): Future[List[SupportedProject]] = {
+  private def fetchGoogleResources(user: UserID): Future[List[Project]] = {
     (for {
       googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
       googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
@@ -66,12 +66,12 @@ case class SimpleOwnedProjectRefreshService @Inject()(
             .get()
             .map(res => readGoogleResources(user, res.json))
         case None =>
-          Future.successful(List.empty[SupportedProject])
+          Future.successful(List.empty[Project])
       }
     }).flatten
   }
 
-  private def readGoogleResources(user: UserID, json: JsValue): List[SupportedProject] = {
+  private def readGoogleResources(user: UserID, json: JsValue): List[Project] = {
     (json \ "error").asOpt[JsObject].foreach(error => {
       val errorCode = (error \ "code").as[Int]
       val errorMsg = (error \ "message").as[String]
@@ -84,10 +84,10 @@ case class SimpleOwnedProjectRefreshService @Inject()(
       .map(_.map(_ \ "site" \ "identifier").map(_.asOpt[String]).flatten)
       .getOrElse(List.empty[String])
 
-    resources.map(res => SupportedProject(Resource.from(res), user))
+    resources.map(res => Project(Resource.from(res), user))
   }
 
-  override def fetch(user: UserID): Future[List[SupportedProject]] = {
+  override def fetch(user: UserID): Future[List[Project]] = {
     fetchGoogleResources(user)
       .flatMap(projects => {
         Future.sequence(

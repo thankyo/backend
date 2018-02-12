@@ -4,23 +4,23 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{ProjectID, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.service.{OwnedProjectService, SupportedProjectService, SupportedProjectTrackService}
+import com.clemble.loveit.thank.service.{OwnedProjectService, ProjectService, ProjectSupportTrackService}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 
 import scala.concurrent.ExecutionContext
 import com.clemble.loveit.common.controller.LoveItController
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 
 @Singleton
-class SupportedProjectController @Inject()(
-                                            service: SupportedProjectService,
-                                            trackService: SupportedProjectTrackService,
-                                            roService: OwnedProjectService,
-                                            silhouette: Silhouette[AuthEnv],
-                                            components: ControllerComponents,
-                                            implicit val ec: ExecutionContext
+class ProjectController @Inject()(
+                                   service: ProjectService,
+                                   trackService: ProjectSupportTrackService,
+                                   roService: OwnedProjectService,
+                                   silhouette: Silhouette[AuthEnv],
+                                   components: ControllerComponents,
+                                   implicit val ec: ExecutionContext
                                               ) extends LoveItController(components) {
 
   def getMy() = silhouette.SecuredAction.async(implicit req => {
@@ -30,17 +30,13 @@ class SupportedProjectController @Inject()(
       .map(Ok(_))
   })
 
-  def listPending() = silhouette.SecuredAction.async(implicit req => {
-    roService.list(req.identity.id).map(Ok(_))
-  })
-
   def getUserProject(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     service
       .findProjectsByUser(idOrMe(user))
       .map(Ok(_))
   })
 
-  def updateProject(id: ProjectID) = silhouette.SecuredAction(parse.json[SupportedProject]).async(implicit req => {
+  def updateProject(id: ProjectID) = silhouette.SecuredAction(parse.json[Project]).async(implicit req => {
     val user = req.identity.id
     val project = req.body.copy(user = user, _id = id)
     service.update(project).map(Ok(_))

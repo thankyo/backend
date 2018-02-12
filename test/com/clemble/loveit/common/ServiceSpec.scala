@@ -4,7 +4,7 @@ import com.clemble.loveit.auth.controller.SocialAuthController
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.service.UserPaymentService
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 import com.clemble.loveit.thank.service.{OwnedProjectService}
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.user.service.UserService
@@ -34,8 +34,8 @@ trait ServiceSpec extends FunctionalThankSpecification {
     await(userService.findById(user))
   }
 
-  def createProject(user: UserID = createUser(), res: Resource = someRandom[Resource]): SupportedProject = {
-    await(roService.enable(SupportedProject(res, user)))
+  def createProject(user: UserID = createUser(), res: Resource = someRandom[Resource]): Project = {
+    await(roService.enable(Project(res, user)))
   }
 
 }

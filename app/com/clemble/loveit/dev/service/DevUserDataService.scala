@@ -6,15 +6,15 @@ import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.EventBusManager
-import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, SupportedProject}
-import com.clemble.loveit.thank.service.{PostService, OwnedProjectService, SupportedProjectService}
+import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, Project}
+import com.clemble.loveit.thank.service.{PostService, OwnedProjectService, ProjectService}
 import com.mohiva.play.silhouette.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 case class DevCreatorConfig(
                              creator: RegisterRequest,
-                             projects: Set[SupportedProject],
+                             projects: Set[Project],
                              ogObjs: Set[OpenGraphObject]
                            )
 
@@ -32,7 +32,7 @@ case class SimpleDevUserDataService @Inject()(
                                                authService: AuthService,
                                                roService: OwnedProjectService,
                                                postService: PostService,
-                                               supPrjService: SupportedProjectService,
+                                               supPrjService: ProjectService,
                                                eventBusManager: EventBusManager,
                                                implicit val ec: ExecutionContext
                                              ) extends DevUserDataService {
@@ -50,14 +50,14 @@ case class SimpleDevUserDataService @Inject()(
         //        link = Some("https://zenpencils.com")
       ),
       Set(
-        SupportedProject(
+        Project(
           user = "",
           resource = Resource.from("https://zenpencils.com"),
           title = Some("Zen Pencil"),
           avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
         ),
-        SupportedProject(
+        Project(
           user = "",
           resource = Resource.from("http://www.gocomics.com/zen-pencils"),
           title = Some("Zen Pencil on GoComics"),
@@ -106,7 +106,7 @@ case class SimpleDevUserDataService @Inject()(
         //        link = Some("https://readms.net")
       ),
       Set(
-        SupportedProject(
+        Project(
           resource = Resource.from("https://readms.net"),
           user = "",
           title = Some("Manga Stream"),
@@ -140,7 +140,7 @@ case class SimpleDevUserDataService @Inject()(
         //        link = Some("https://personacentral.com")
       ),
       Set(
-        SupportedProject(
+        Project(
           resource = Resource.from("https://personacentral.com"),
           title = Some("Personal Central"),
           user = "",
@@ -201,7 +201,7 @@ case class SimpleDevUserDataService @Inject()(
     Future.sequence(fCreators)
   }
 
-  private def ensureOwnership(creatorToRes: Seq[(UserID, Set[SupportedProject])]): Future[Boolean] = {
+  private def ensureOwnership(creatorToRes: Seq[(UserID, Set[Project])]): Future[Boolean] = {
     val resources = for {
       (creator, projects) <- creatorToRes
       project <- projects

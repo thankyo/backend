@@ -2,13 +2,12 @@
 
 GET         /stat/:supporter/:year/:month      @com.clemble.loveit.thank.controller.UserStatController.get(supporter, year: Int, month: Int)
 
-GET         /my/project                        @com.clemble.loveit.thank.controller.SupportedProjectController.getMy()
-GET         /my/project/pending                @com.clemble.loveit.thank.controller.SupportedProjectController.listPending()
-PUT         /my/project/:project               @com.clemble.loveit.thank.controller.SupportedProjectController.updateProject(project)
+GET         /my/project                        @com.clemble.loveit.thank.controller.ProjectController.getMy()
+PUT         /my/project/:project               @com.clemble.loveit.thank.controller.ProjectController.updateProject(project)
 
-GET         /project/:project                  @com.clemble.loveit.thank.controller.SupportedProjectController.getProject(project)
+GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
 
-GET         /user/:user/project                @com.clemble.loveit.thank.controller.SupportedProjectController.getUserProject(user)
+GET         /user/:user/project                @com.clemble.loveit.thank.controller.ProjectController.getUserProject(user)
 
 GET         /http/*url                         @com.clemble.loveit.thank.controller.PostController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /http/*url                         @com.clemble.loveit.thank.controller.PostController.thank(url: com.clemble.loveit.common.model.Resource)
@@ -23,5 +22,5 @@ GET         /graph/author/:author              @com.clemble.loveit.thank.control
 
 GET         /graph/project/:project            @com.clemble.loveit.thank.controller.GraphController.searchByProject(project)
 
-GET         /:supporter/supported              @com.clemble.loveit.thank.controller.SupportedProjectController.getSupported(supporter)
+GET         /:supporter/supported              @com.clemble.loveit.thank.controller.ProjectController.getSupported(supporter)
 

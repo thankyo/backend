@@ -2,7 +2,7 @@ package com.clemble.loveit.user.service
 
 import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -12,7 +12,7 @@ class UserPaymentServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTe
 
   val giver = createUser()
 
-  def childProject(project: SupportedProject): SupportedProject = {
+  def childProject(project: Project): Project = {
     val user = createUser()
     val childResource = Resource.from(s"${project.resource.stringify()}/${someRandom[Long]}")
     createProject(user, childResource)

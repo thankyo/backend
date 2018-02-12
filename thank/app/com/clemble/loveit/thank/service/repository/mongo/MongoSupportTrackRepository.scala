@@ -4,7 +4,7 @@ import javax.inject.{Inject, Named}
 
 import com.clemble.loveit.common.model.{ProjectID, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 import com.clemble.loveit.thank.service.repository.SupportTrackRepository
 import play.api.libs.json.{JsObject, Json}
 import reactivemongo.play.json._
@@ -17,7 +17,7 @@ case class MongoSupportTrackRepository @Inject()(
                                              implicit val ec: ExecutionContext
                                            ) extends SupportTrackRepository {
 
-  override def markSupportedBy(supporter: UserID, project: SupportedProject): Future[Boolean] = {
+  override def markSupportedBy(supporter: UserID, project: Project): Future[Boolean] = {
     val selector = Json.obj("_id" -> supporter)
     val update = Json.obj("$addToSet" -> Json.obj("supported" -> project._id))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update, upsert = true))

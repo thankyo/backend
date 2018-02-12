@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.UserException
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -12,7 +12,7 @@ import org.specs2.runner.JUnitRunner
 class OwnedProjectServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   lazy val service = dependency[OwnedProjectService]
-  lazy val supPrjService = dependency[SupportedProjectService]
+  lazy val supPrjService = dependency[ProjectService]
 
   def listResources(user: String): Set[Resource] = {
     await(supPrjService.findProjectsByUser(user)).map(_.resource).toSet
@@ -20,7 +20,7 @@ class OwnedProjectServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec
 
   def assignOwnership(userAuth: Seq[(String, String)], resource: Resource) = {
     val user = userAuth.head._2
-    await(service.enable(SupportedProject(resource, user)))
+    await(service.enable(Project(resource, user)))
   }
 
   "POST" should {

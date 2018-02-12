@@ -2,10 +2,10 @@ package com.clemble.loveit.payment.model
 
 import java.time.LocalDate
 
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 
 case class PendingCharge (
-                          project: SupportedProject,
-                          transactions: List[PendingTransaction],
-                          created: LocalDate
+                           project: Project,
+                           transactions: List[PendingTransaction],
+                           created: LocalDate
                         )

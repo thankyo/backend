@@ -8,7 +8,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class Post(
                  resource: Resource,
-                 project: SupportedProject,
+                 project: Project,
 
                  ogObj: OpenGraphObject,
 
@@ -39,11 +39,11 @@ object Post {
 
   implicit val postsWriteable = WriteableUtils.jsonToWriteable[List[Post]]
 
-  def from(res: Resource, project: SupportedProject): Post = {
+  def from(res: Resource, project: Project): Post = {
     Post(res, project, OpenGraphObject(url = res.stringify(), tags = project.tags))
   }
 
-  def from(og: OpenGraphObject, project: SupportedProject): Post = {
+  def from(og: OpenGraphObject, project: Project): Post = {
     Post.from(Resource.from(og.url), project).withOg(og.copy(tags = og.tags ++ project.tags))
   }
 }

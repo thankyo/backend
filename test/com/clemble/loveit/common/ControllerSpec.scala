@@ -9,7 +9,7 @@ import com.clemble.loveit.auth.model.AuthResponse
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
-import com.clemble.loveit.thank.model.{OpenGraphObject, SupportedProject}
+import com.clemble.loveit.thank.model.{OpenGraphObject, Project}
 import com.clemble.loveit.thank.service.OwnedProjectService
 import com.clemble.loveit.user.model.User.socialProfileJsonFormat
 import com.clemble.loveit.user.model._
@@ -66,8 +66,8 @@ trait ControllerSpec extends FunctionalThankSpecification {
     await(fRes)
   }
 
-  override def createProject(user: UserID = createUser(), resource: Resource = someRandom[Resource]): SupportedProject = {
-    val project = await(ownershipService.enable(SupportedProject(resource, user)))
+  override def createProject(user: UserID = createUser(), resource: Resource = someRandom[Resource]): Project = {
+    val project = await(ownershipService.enable(Project(resource, user)))
 
     val ogObj = someRandom[OpenGraphObject].copy(url = resource.uri)
     val createOgObjReq = FakeRequest(POST, "/api/v1/thank/graph").withJsonBody(Json.toJson(ogObj))

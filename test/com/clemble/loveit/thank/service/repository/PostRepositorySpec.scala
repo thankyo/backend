@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
-import com.clemble.loveit.thank.model.{Post, SupportedProject, Thank}
+import com.clemble.loveit.thank.model.{Post, Project, Thank}
 import com.clemble.loveit.thank.service.PostService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -22,7 +22,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   def createParentThank(post: Post) = {
     val parentResource = post.resource.parents.last
-    val parentProject = Post.from(parentResource, someRandom[SupportedProject].copy(resource = parentResource))
+    val parentProject = Post.from(parentResource, someRandom[Project].copy(resource = parentResource))
     await(postRepo.save(parentProject))
   }
 
@@ -85,8 +85,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
     "create if missing" in {
       val resource = someRandom[Resource]
-      val newProject = someRandom[SupportedProject].copy(resource = resource)
-      val oldProject = someRandom[SupportedProject].copy(resource = resource)
+      val newProject = someRandom[Project].copy(resource = resource)
+      val oldProject = someRandom[Project].copy(resource = resource)
       val post = someRandom[Post].copy(resource = resource, project = oldProject)
 
       await(postRepo.save(post)) should beTrue
@@ -98,13 +98,13 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     "update if exists" in {
       val resource = someRandom[Resource]
 
-      val A = someRandom[SupportedProject].copy(resource = resource)
+      val A = someRandom[Project].copy(resource = resource)
       val post = someRandom[Post].copy(resource = resource, project = A)
 
       await(postRepo.save(post)) shouldEqual true
       await(postRepo.updateProject(A)) shouldEqual true
 
-      val B = someRandom[SupportedProject].copy(resource = resource)
+      val B = someRandom[Project].copy(resource = resource)
 
       await(postRepo.updateProject(B)) shouldEqual true
       await(postRepo.findByResource(post.resource)).map(_.project) shouldEqual Some(B)
@@ -114,8 +114,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[Resource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      val A = someRandom[SupportedProject].copy(resource = parent)
-      val B = someRandom[SupportedProject].copy(resource = parent)
+      val A = someRandom[Project].copy(resource = parent)
+      val B = someRandom[Project].copy(resource = parent)
 
       await(postRepo.save(Post.from(parent, A))) shouldEqual true
       await(postRepo.save(Post.from(child, A))) shouldEqual true
@@ -130,7 +130,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
 
-      val A = someRandom[SupportedProject].copy(resource = parent)
+      val A = someRandom[Project].copy(resource = parent)
 
       await(postRepo.save(Post.from(difParent, A))) should throwA
     }
@@ -139,12 +139,12 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = someRandom[HttpResource]
       val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
 
-      val original = someRandom[SupportedProject].copy(resource = parent)
+      val original = someRandom[Project].copy(resource = parent)
 
       await(postRepo.save(Post.from(parent, original))) shouldEqual true
       await(postRepo.save(Post.from(child, original))) shouldEqual true
 
-      val B = someRandom[SupportedProject].copy(resource = child)
+      val B = someRandom[Project].copy(resource = child)
 
       await(postRepo.updateProject(B))
 
@@ -186,7 +186,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   }
 
-  def createPostsWithProject(project: SupportedProject): Seq[Post] = {
+  def createPostsWithProject(project: Project): Seq[Post] = {
     for {
       _ <- 1 to 10
     } yield {

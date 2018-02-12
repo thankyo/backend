@@ -3,17 +3,17 @@ package com.clemble.loveit.thank.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class SupportedProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
+class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   val trackRepo = dependency[SupportTrackRepository]
 
-  def assignOwnership(user: UserID, res: Resource): Boolean = await(prjRepo.saveProject(SupportedProject(res, user)))
+  def assignOwnership(user: UserID, res: Resource): Boolean = await(prjRepo.saveProject(Project(res, user)))
 
   def listOwned(user: UserID): List[Resource] = await(prjRepo.findProjectsByUser(user)).map(_.resource)
 
@@ -30,7 +30,7 @@ class SupportedProjectRepositorySpec(implicit val ee: ExecutionEnv) extends Repo
     val giver = createUser()
     val owner = createUser()
 
-    val project = someRandom[SupportedProject]
+    val project = someRandom[Project]
 
     await(trackRepo.markSupportedBy(giver, project)) shouldEqual true
     await(trackRepo.getSupported(giver)) shouldEqual List(project._id)

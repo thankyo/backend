@@ -5,7 +5,7 @@ import javax.inject.{Inject, Named, Singleton}
 import akka.stream.Materializer
 import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.thank.model.{Post, SupportedProject}
+import com.clemble.loveit.thank.model.{Post, Project}
 import com.clemble.loveit.thank.service.repository.PostRepository
 import play.api.libs.json.{JsArray, JsObject, Json}
 import play.modules.reactivemongo.json._
@@ -83,7 +83,7 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(query, update, multi = false))
   }
 
-  override def updateProject(project: SupportedProject): Future[Boolean] = {
+  override def updateProject(project: Project): Future[Boolean] = {
     val query = Json.obj(
       "$or" -> Json.arr(
         Json.obj("resource.uri" -> project.resource.uri),

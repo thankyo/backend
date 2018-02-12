@@ -4,20 +4,20 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.thank.model.{OpenGraphObject, Post, SupportedProject}
+import com.clemble.loveit.thank.model.{OpenGraphObject, Post, Project}
 import com.clemble.loveit.thank.service.repository.PostRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait PostService {
 
-  def getPostOrProject(uri: Resource): Future[Either[Post, SupportedProject]]
+  def getPostOrProject(uri: Resource): Future[Either[Post, Project]]
 
   def create(og: OpenGraphObject): Future[Post]
 
   def assignTags(uri: Resource, tags: Set[Tag]): Future[Boolean]
 
-  def updateOwner(owner: SupportedProject): Future[Boolean]
+  def updateOwner(owner: Project): Future[Boolean]
 
   def findByTags(tags: Set[Tag]): Future[List[Post]]
 
@@ -34,7 +34,7 @@ trait PostService {
 @Singleton
 case class SimplePostService @Inject()(
                                         thankEventBus: ThankEventBus,
-                                        prjService: SupportedProjectService,
+                                        prjService: ProjectService,
                                         postRepo: PostRepository,
                                         implicit val ec: ExecutionContext
                                       ) extends PostService {
@@ -46,8 +46,8 @@ case class SimplePostService @Inject()(
     })
   }
 
-  override def getPostOrProject(res: Resource): Future[Either[Post, SupportedProject]] = {
-    def createIfMissing(postOpt: Option[Post]): Future[Either[Post, SupportedProject]] = {
+  override def getPostOrProject(res: Resource): Future[Either[Post, Project]] = {
+    def createIfMissing(postOpt: Option[Post]): Future[Either[Post, Project]] = {
       postOpt match {
         case Some(post) =>
           Future.successful(Left(post))
@@ -90,7 +90,7 @@ case class SimplePostService @Inject()(
     postRepo.assignTags(uri, tags)
   }
 
-  override def updateOwner(project: SupportedProject): Future[Boolean] = {
+  override def updateOwner(project: Project): Future[Boolean] = {
     postRepo.updateProject(project)
   }
 

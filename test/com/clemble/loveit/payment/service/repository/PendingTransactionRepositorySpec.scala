@@ -3,7 +3,7 @@ package com.clemble.loveit.payment.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{Resource}
 import com.clemble.loveit.payment.model.PendingTransaction
-import com.clemble.loveit.thank.model.SupportedProject
+import com.clemble.loveit.thank.model.Project
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -20,8 +20,8 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
     "same resource transactions saved only once" in {
       val user = createUser()
       val res = someRandom[Resource]
-      val A = PendingTransaction(someRandom[SupportedProject], res)
-      val B = PendingTransaction(someRandom[SupportedProject], res)
+      val A = PendingTransaction(someRandom[Project], res)
+      val B = PendingTransaction(someRandom[Project], res)
 
       await(repo.save(user, A))
       await(repo.save(user, B))
@@ -32,8 +32,8 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
     "save all payments for the user" in {
       val user = createUser()
-      val A = PendingTransaction(someRandom[SupportedProject], someRandom[Resource])
-      val B = PendingTransaction(someRandom[SupportedProject], someRandom[Resource])
+      val A = PendingTransaction(someRandom[Project], someRandom[Resource])
+      val B = PendingTransaction(someRandom[Project], someRandom[Resource])
 
       await(repo.save(user, A))
       await(repo.save(user, B))
@@ -44,8 +44,8 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
     "remove specified" in {
       val user = createUser()
-      val A = PendingTransaction(someRandom[SupportedProject], someRandom[Resource])
-      val B = PendingTransaction(someRandom[SupportedProject], someRandom[Resource])
+      val A = PendingTransaction(someRandom[Project], someRandom[Resource])
+      val B = PendingTransaction(someRandom[Project], someRandom[Resource])
 
       await(repo.save(user, A))
       await(repo.save(user, B))

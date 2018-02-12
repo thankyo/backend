@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{UserID}
-import com.clemble.loveit.thank.model.{SupportedProject}
+import com.clemble.loveit.thank.model.{Project}
 import com.clemble.loveit.user.service.UserService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -11,32 +11,26 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait OwnedProjectService {
 
-  def list(user: UserID): Future[List[SupportedProject]]
+  def enable(prj: Project): Future[Project]
 
-  def enable(prj: SupportedProject): Future[SupportedProject]
-
-  def refresh(user: UserID): Future[List[SupportedProject]]
+  def refresh(user: UserID): Future[List[Project]]
 
 }
 
 @Singleton
 case class SimpleOwnedProjectService @Inject()(
-                                      supportedProjectService: SupportedProjectService,
-                                      postService: PostService,
-                                      refreshService: OwnedProjectRefreshService,
-                                      userService: UserService,
-                                      implicit val ec: ExecutionContext
+                                                supportedProjectService: ProjectService,
+                                                postService: PostService,
+                                                refreshService: OwnedProjectRefreshService,
+                                                userService: UserService,
+                                                implicit val ec: ExecutionContext
                                     ) extends OwnedProjectService {
 
-  override def refresh(user: UserID): Future[List[SupportedProject]] = {
+  override def refresh(user: UserID): Future[List[Project]] = {
     refreshService.fetch(user)
   }
 
-  override def list(user: UserID): Future[List[SupportedProject]] = {
-    refresh(user)
-  }
-
-  override def enable(project: SupportedProject): Future[SupportedProject] = {
+  override def enable(project: Project): Future[Project] = {
     // TODO assign is internal operation, so it might not need to throw Exception,
     // since verification has already been done before
     for {

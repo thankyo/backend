@@ -76,11 +76,11 @@ package object util {
     PayoutAccount(randomNumeric(10), randomNumeric(4), randomNumeric(4))
   }
   implicit val thankTransactionGenerator: Generator[ThankEvent] = () => {
-    ThankEvent(someRandom[UserID], someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
+    ThankEvent(someRandom[UserID], someRandom[Project], someRandom[Resource], someRandom[LocalDateTime])
   }
   implicit val webStackGenerator: Generator[WebStack] = () => WordPress
-  implicit val supportedProjectGenerator: Generator[SupportedProject] = () => {
-    SupportedProject(
+  implicit val supportedProjectGenerator: Generator[Project] = () => {
+    Project(
       someRandom[Resource],
       someRandom[UserID],
       optionRandom[String],
@@ -91,7 +91,7 @@ package object util {
     )
   }
   implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
-    PendingTransaction(someRandom[SupportedProject], someRandom[Resource], someRandom[LocalDateTime])
+    PendingTransaction(someRandom[Project], someRandom[Resource], someRandom[LocalDateTime])
   }
   implicit val postGenerator: Generator[Post] = () => {
     val resource = optionRandom[String] match {
@@ -100,7 +100,7 @@ package object util {
     }
     Post(
       resource,
-      someRandom[SupportedProject].copy(resource = resource),
+      someRandom[Project].copy(resource = resource),
       someRandom[OpenGraphObject]
     )
   }

@@ -6,7 +6,7 @@ import com.clemble.loveit.user.model.{User, UserAware}
 import play.api.http.Writeable
 import play.api.libs.json.{Json, OFormat}
 
-case class SupportedProject(
+case class Project(
                              resource: Resource,
                              user: UserID,
                              title: Option[String] = None,
@@ -18,14 +18,14 @@ case class SupportedProject(
                              _id: ProjectID = IDGenerator.generate()
                            ) extends UserAware with ResourceAware
 
-object SupportedProject {
+object Project {
 
-  def error(res: Resource): SupportedProject = SupportedProject(res, User.UNKNOWN, Some("No owner registered for this resource"))
+  def error(res: Resource): Project = Project(res, User.UNKNOWN, Some("No owner registered for this resource"))
 
-  implicit val jsonFormat: OFormat[SupportedProject] = Json.format[SupportedProject]
+  implicit val jsonFormat: OFormat[Project] = Json.format[Project]
 
-  implicit val projectWritable = WriteableUtils.jsonToWriteable[SupportedProject]()
-  implicit val projectListWriteable: Writeable[List[SupportedProject]] = WriteableUtils.jsonToWriteable[List[SupportedProject]]
+  implicit val projectWritable = WriteableUtils.jsonToWriteable[Project]()
+  implicit val projectListWriteable: Writeable[List[Project]] = WriteableUtils.jsonToWriteable[List[Project]]
 
 }
 

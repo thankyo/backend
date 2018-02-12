@@ -2,14 +2,14 @@ package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.{Resource, Tag}
-import com.clemble.loveit.thank.model.SupportedProject
-import com.clemble.loveit.thank.service.repository.{PostRepository, SupportedProjectRepository}
+import com.clemble.loveit.thank.model.Project
+import com.clemble.loveit.thank.service.repository.{PostRepository, ProjectRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait TagTestService {
 
-  def assignTags(project: SupportedProject, tags: Set[Tag]): Boolean
+  def assignTags(project: Project, tags: Set[Tag]): Boolean
 
   def getProjectTags(resource: Resource): Set[Tag]
 
@@ -21,10 +21,10 @@ trait TagTestService {
 
 trait RepoTagTestService extends TagTestService with ServiceSpec {
 
-  private val prjRepo = dependency[SupportedProjectRepository]
+  private val prjRepo = dependency[ProjectRepository]
   private val postRepo = dependency[PostRepository]
 
-  override def assignTags(project: SupportedProject, tags: Set[Tag]): Boolean = {
+  override def assignTags(project: Project, tags: Set[Tag]): Boolean = {
     await(prjRepo.assignTags(project.resource, tags))
   }
 
@@ -44,10 +44,10 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
 
 trait InternalTagTestService extends TagTestService with ServiceSpec {
 
-  private val prjService = dependency[SupportedProjectService]
+  private val prjService = dependency[ProjectService]
   private val postService = dependency[PostService]
 
-  override def assignTags(project: SupportedProject, tags: Set[Tag]): Boolean = {
+  override def assignTags(project: Project, tags: Set[Tag]): Boolean = {
     await(prjService.update(project.copy(tags = tags)).map(_ => true))
   }
 

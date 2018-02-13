@@ -4,18 +4,19 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.model.{ProjectID, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.service.{ProjectService, ProjectSupportTrackService}
+import com.clemble.loveit.thank.service.{ProjectFeedService, ProjectService, ProjectSupportTrackService}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.thank.model.Project
 
 @Singleton
 class ProjectController @Inject()(
                                    service: ProjectService,
+                                   feedService: ProjectFeedService,
                                    trackService: ProjectSupportTrackService,
                                    silhouette: Silhouette[AuthEnv],
                                    components: ControllerComponents,
@@ -37,6 +38,16 @@ class ProjectController @Inject()(
     val user = req.identity.id
     val project = req.body.copy(user = user, _id = id)
     service.update(project).map(Ok(_))
+  })
+
+  def getProjectFeed(id: ProjectID) = silhouette.SecuredAction.async(implicit req => {
+    val requester = req.identity.id
+    service.findById(id).flatMap(_ match {
+      case Some(project) if (project.user == requester) =>
+        feedService.refresh(project).map(Ok(_))
+      case _ =>
+        Future.successful(BadRequest)
+    })
   })
 
   def refreshMyProjects = silhouette.SecuredAction.async(implicit req => {

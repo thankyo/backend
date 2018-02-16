@@ -1,7 +1,6 @@
 package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.payment.service.repository.UserBalanceRepository
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -14,7 +13,6 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
 
   val thankTransService = dependency[PendingTransactionService]
   val userRepo = dependency[UserRepository]
-  val balanceRepo = dependency[UserBalanceRepository]
 
   "PAYMENT" should {
 
@@ -29,29 +27,6 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
 
       val payments = pendingThanks(giver)
       payments.size must beEqualTo(1)
-
-      val giverBalanceAfter = await(balanceRepo.getBalance(giver))
-      giverBalanceAfter shouldEqual -1
-    }
-
-    "increase resource owner balance" in {
-      val giver = createUser()
-      val owner = createProject()
-
-      thank(giver, owner, someRandom[Resource])
-      val ownerBalanceAfter = await(balanceRepo.getBalance(owner.user))
-
-      ownerBalanceAfter shouldEqual 1
-    }
-
-    "decrease giver balance" in {
-      val giver = createUser()
-      val owner = createProject()
-
-      thank(giver, owner, someRandom[Resource])
-      val giverBalanceAfter = await(balanceRepo.getBalance(giver))
-
-      giverBalanceAfter shouldEqual -1
     }
 
     "list all transactions" in {

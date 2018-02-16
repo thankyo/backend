@@ -26,10 +26,7 @@ case class PendingTransactionController @Inject()(
 
   def list(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     val userID = ControllerUtils.idOrMe(user)
-    val thanks = pendindTransactionService.list(userID)
-    thanks.
-      runWith(Sink.seq[PendingTransaction]).
-      map(tr => Ok(Json.toJson(tr)))
+    pendindTransactionService.list(userID).map(Ok(_))
   })
 
 }

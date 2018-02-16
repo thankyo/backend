@@ -15,18 +15,6 @@ class PaymentRepositorySpec extends RepositorySpec {
 
   val repo = dependency[PaymentRepository]
 
-  "get balance" in {
-    val A = createUser()
-    await(repo.getBalance(A)) shouldEqual 0
-  }
-
-  "update balance" in {
-    val A = createUser()
-    await(repo.updateBalance(A, -100)  )
-    await(repo.getBalance(A)) shouldEqual -100
-  }
-
-
   "CHARGE ACCOUNT" should {
 
     "get chargeAccount" in {

@@ -1,6 +1,5 @@
 package com.clemble.loveit.payment.service.repository
 
-import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
 
@@ -13,7 +12,9 @@ trait PendingTransactionRepository {
 
   def save(user: UserID, payment: PendingTransaction): Future[Boolean]
 
-  def findByUser(user: UserID): Source[PendingTransaction, _]
+  def findOutgoingByUser(user: UserID): Future[List[PendingTransaction]]
+
+  def findIncomingByUser(user: UserID): Future[List[PendingTransaction]]
 
   def removeAll(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean]
 

@@ -4,8 +4,6 @@ GET         /:user/pending                   @com.clemble.loveit.payment.control
 
 GET         /my/charge                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 
-GET         /:user/balance                   @com.clemble.loveit.payment.controller.UserBalanceController.getBalance(user)
-
 GET         /my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.getMyAccount()
 POST        /my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.setMyAccount()
 DELETE      /my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.deleteMyAccount()

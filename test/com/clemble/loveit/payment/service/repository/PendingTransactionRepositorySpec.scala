@@ -26,7 +26,7 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
       await(repo.save(user, A))
       await(repo.save(user, B))
 
-      val userTransactions = repo.findByUser(user).toSeq()
+      val userTransactions = await(repo.findOutgoingByUser(user))
       userTransactions.size shouldEqual 1
     }
 
@@ -37,7 +37,7 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
       await(repo.save(user, A))
       await(repo.save(user, B))
-      val transactions = repo.findByUser(user).toSeq
+      val transactions = await(repo.findOutgoingByUser(user))
 
       transactions must containAllOf(Seq(A, B)).exactly
     }
@@ -52,7 +52,7 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
       await(repo.removeAll(user, Seq(A)))
 
-      val afterRemove = repo.findByUser(user).toSeq
+      val afterRemove = await(repo.findOutgoingByUser(user))
       afterRemove shouldEqual Seq(B)
     }
 

@@ -51,7 +51,7 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
   }
 
   override def pendingThanks(giver: UserID): Seq[PendingTransaction] = {
-    thankTransactionService.list(giver).toSeq()
+    await(thankTransactionService.list(giver))
   }
 
 }

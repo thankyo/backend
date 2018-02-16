@@ -22,23 +22,31 @@ case class MongoPendingTransactionRepository @Inject()(
   extends PendingTransactionRepository {
 
   override def save(user: UserID, transaction: PendingTransaction): Future[Boolean] = {
-    val selector = Json.obj("_id" -> user, "pending.resource" -> Json.obj("$ne" -> transaction.resource))
-    val update = Json.obj("$push" -> Json.obj("pending" -> transaction))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+    val giverSelector = Json.obj("_id" -> user, "pending.resource" -> Json.obj("$ne" -> transaction.resource))
+    val giverUpdate = Json.obj("$push" -> Json.obj("pending" -> transaction))
+    val updateGiver = MongoSafeUtils.safeSingleUpdate(collection.update(giverSelector, giverUpdate))
+
+    val ownerSelector = Json.obj("_id" -> transaction.user)
+    val ownerUpdate = Json.obj("$push" -> Json.obj("incoming" -> transaction))
+    val updateOwner = MongoSafeUtils.safeSingleUpdate(collection.update(ownerSelector, ownerUpdate))
+
+    Future.sequence(List(updateGiver, updateOwner)).map(_.forall(_ == true))
   }
 
-  override def findByUser(user: UserID): Source[PendingTransaction, _] = {
+  override def findOutgoingByUser(user: UserID): Future[List[PendingTransaction]] = {
     val selector = Json.obj("_id" -> user)
     val projection = Json.obj("pending" -> 1)
-    val fSource = collection.find(selector, projection).
+    collection.find(selector, projection).
       one[JsObject].
-      map(pendingOpt => {
-        pendingOpt.
-          flatMap(obj => (obj \ "pending").asOpt[Seq[PendingTransaction]]).
-          map(p => Source.fromIterator(() => p.iterator)).
-          getOrElse(Source.empty[PendingTransaction])
-      })
-    Source.fromFuture(fSource).flatMapConcat(s => s)
+      map(_.flatMap(obj => (obj \ "pending").asOpt[List[PendingTransaction]]).getOrElse(List.empty))
+  }
+
+  override def findIncomingByUser(user: UserID): Future[List[PendingTransaction]] = {
+    val selector = Json.obj("_id" -> user)
+    val projection = Json.obj("incoming" -> 1)
+    collection.find(selector, projection).
+      one[JsObject].
+      map(_.flatMap(obj => (obj \ "incoming").asOpt[List[PendingTransaction]]).getOrElse(List.empty))
   }
 
   override def removeAll(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean] = {

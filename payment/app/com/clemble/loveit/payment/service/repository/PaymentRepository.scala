@@ -60,22 +60,6 @@ trait PayoutAccountRepository {
   def deletePayoutAccount(user: UserID): Future[Boolean]
 }
 
-trait UserBalanceRepository {
-
-  /**
-    * @return 0 if user is missing, or has no activity, otherwise returns current user balance
-    */
-  def getBalance(user: UserID): Future[Amount]
-
-  /**
-    * Changes user balance
-    *
-    * @return true if operation proceeded as expected, false otherwise
-    */
-  def updateBalance(user: UserID, change: Amount): Future[Boolean]
-
-}
-
 trait UserPaymentRepository {
 
   def save(userPayment: UserPayment): Future[Boolean]
@@ -86,5 +70,5 @@ trait UserPaymentRepository {
 
 }
 
-trait PaymentRepository extends PaymentLimitRepository with ChargeAccountRepository with PayoutAccountRepository with UserBalanceRepository with UserPaymentRepository {
+trait PaymentRepository extends PaymentLimitRepository with ChargeAccountRepository with PayoutAccountRepository with UserPaymentRepository {
 }

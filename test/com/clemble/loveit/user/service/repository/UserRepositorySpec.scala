@@ -4,7 +4,7 @@ import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.user.model.User
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.payment.model.ChargeAccount
-import com.clemble.loveit.payment.service.repository.{ChargeAccountRepository, UserBalanceRepository}
+import com.clemble.loveit.payment.service.repository.{ChargeAccountRepository}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -14,7 +14,6 @@ import scala.concurrent.Future
 @RunWith(classOf[JUnitRunner])
 class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  lazy val balanceRepo = dependency[UserBalanceRepository]
   lazy val chargeAccRepo = dependency[ChargeAccountRepository]
 
   "CREATE" should {
@@ -63,38 +62,6 @@ class UserRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
         chargeAccount <- chargeAccRepo.getChargeAccount(A)
       } yield {
         chargeAccount must beSome(chAcc)
-      }
-
-      matchResult.await
-    }
-
-  }
-
-  "CHANGE balance" should {
-
-    "increase when positive" in {
-      val user = createUser()
-
-      val matchResult = for {
-        balanceBefore <- balanceRepo.getBalance(user)
-        _ <- balanceRepo.updateBalance(user, 10)
-        balanceAfter <- balanceRepo.getBalance(user)
-      } yield {
-        balanceAfter shouldEqual balanceBefore + 10
-      }
-
-      matchResult.await
-    }
-
-    "decrease when negative" in {
-      val user = createUser()
-
-      val matchResult = for {
-        balanceBefore <- balanceRepo.getBalance(user)
-        _ <- balanceRepo.updateBalance(user, -10)
-        balanceAfter <- balanceRepo.getBalance(user)
-      } yield {
-        balanceAfter shouldEqual balanceBefore - 10
       }
 
       matchResult.await

@@ -26,6 +26,7 @@ object PendingTransaction {
   }
 
   implicit val jsonFormat = Json.format[PendingTransaction]
-  implicit val thankTransactionWriteable: Writeable[PendingTransaction] = WriteableUtils.jsonToWriteable[PendingTransaction]
+  implicit val pendingTransactionWriteable: Writeable[PendingTransaction] = WriteableUtils.jsonToWriteable[PendingTransaction]
+  implicit val pendingTransactionListWriteable: Writeable[List[PendingTransaction]] = WriteableUtils.jsonToWriteable[List[PendingTransaction]]
 
 }

@@ -3,8 +3,7 @@ package com.clemble.loveit.payment
 import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
-import com.clemble.loveit.payment.model.ChargeAccount
-import com.clemble.loveit.payment.service.repository.{UserBalanceRepository, _}
+import com.clemble.loveit.payment.service.repository.{_}
 import com.clemble.loveit.payment.service.repository.mongo._
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
@@ -18,7 +17,6 @@ import com.stripe.Stripe
 import com.stripe.net.RequestOptions
 import com.stripe.net.RequestOptions.RequestOptionsBuilder
 import net.codingwell.scalaguice.ScalaModule
-import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
@@ -36,7 +34,6 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
     bind[EOMChargeRepository].to[MongoEOMChargeRepository]
 
-    bind[UserBalanceRepository].to[MongoPaymentRepository].asEagerSingleton()
     bind[UserPaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
     bind[ChargeAccountRepository].to[MongoPaymentRepository].asEagerSingleton()

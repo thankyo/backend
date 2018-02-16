@@ -14,7 +14,8 @@ case class UserPayment(
                         chargeAccount: Option[ChargeAccount] = None,
                         payoutAccount: Option[PayoutAccount] = None,
                         monthlyLimit: Money = UserPayment.DEFAULT_LIMIT,
-                        pending: List[PendingTransaction] = List.empty[PendingTransaction]
+                        pending: List[PendingTransaction] = List.empty[PendingTransaction],
+                        incoming: List[PendingTransaction] = List.empty[PendingTransaction]
                       ) extends UserAware {
 
   val user: UserID = _id

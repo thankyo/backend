@@ -11,24 +11,21 @@ import scala.xml.XML
 class ProjectFeedServiceSpec extends ThankSpecification {
 
   "Read RSS feed from zenpencil" in {
-    val project = someRandom[Project]
     val url = getClass.getResource("zenpencil.rss.xml")
     val rssSource = XML.load(url)
-    ProjectFeedService.readRSS(project, rssSource) shouldNotEqual List()
+    ProjectFeedService.readRSS(rssSource) shouldNotEqual List()
   }
 
   "Read RSS feed from clemble" in {
-    val project = someRandom[Project]
     val url = getClass.getResource("clemble.rss.xml")
     val rssSource = XML.load(url)
-    ProjectFeedService.readRSS(project, rssSource) shouldNotEqual List()
+    ProjectFeedService.readRSS(rssSource) shouldNotEqual List()
   }
 
   "Read RSS feed from Mangastream" in {
-    val project = someRandom[Project]
     val url = getClass.getResource("mangastream.rss.xml")
     val rssSource = XML.load(url)
-    ProjectFeedService.readRSS(project, rssSource) shouldNotEqual List()
+    ProjectFeedService.readRSS(rssSource) shouldNotEqual List()
   }
 
 }

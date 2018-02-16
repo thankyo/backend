@@ -10,6 +10,7 @@ import scala.annotation.tailrec
 sealed trait Resource {
   val uri: String
   def stringify(): String
+  def isParent(parent: Resource): Boolean = parents().contains(parent)
   def parent(): Option[Resource]
   def parents(): List[Resource]
 }

@@ -27,7 +27,11 @@ case class Post(
   }
 
   def withOg(og: OpenGraphObject): Post = {
-    this.copy(ogObj = og)
+    this.copy(ogObj = og.copy(tags = project.tags))
+  }
+
+  def withUrl(url: String): Post = {
+    copy(resource = Resource.from(url), ogObj = ogObj.copy(url = url))
   }
 }
 

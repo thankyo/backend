@@ -1,8 +1,11 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
+GET        /assets/*file                            @controllers.Assets.at(file)
+
 ->         /api/v1/auth                             auth.Routes
 ->         /api/v1/payment                          payment.Routes
 ->         /api/v1/thank                            thank.Routes
 ->         /api/v1/user                             user.Routes
+
 

@@ -28,4 +28,3 @@ GET         /graph/search                      @com.clemble.loveit.thank.control
 GET         /graph/author/:author              @com.clemble.loveit.thank.controller.GraphController.searchByAuthor(author)
 GET         /graph/project/:project            @com.clemble.loveit.thank.controller.GraphController.searchByProject(project)
 
-

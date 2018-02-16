@@ -25,7 +25,7 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
       thank(giver, A, res)
       Try(thank(giver, A, res))
 
-      val payments = pendingThanks(giver)
+      val payments = outgoingTransactions(giver)
       payments.size must beEqualTo(1)
     }
 
@@ -38,7 +38,7 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
       val transactionA = thank(giver, A, someRandom[Resource])
       val transactionB = thank(giver, B, someRandom[Resource])
 
-      val payments = pendingThanks(giver)
+      val payments = outgoingTransactions(giver)
       payments must containAllOf(Seq(transactionA, transactionB))
     }
 
@@ -53,7 +53,7 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
 
       await(thankTransService.removeAll(giver, Seq(transactionB)))
 
-      val payments = pendingThanks(giver)
+      val payments = outgoingTransactions(giver)
       payments must containAllOf(Seq(transactionA))
     }
 

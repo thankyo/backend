@@ -23,6 +23,6 @@ trait PaymentTestExecutor extends TestStripeUtils with PaymentLimitExecutor {
 
   def thank(giver: UserID, project: Project, resource: Resource): PendingTransaction
 
-  def pendingThanks(giver: UserID): Seq[PendingTransaction]
+  def outgoingTransactions(giver: UserID): Seq[PendingTransaction]
 
 }

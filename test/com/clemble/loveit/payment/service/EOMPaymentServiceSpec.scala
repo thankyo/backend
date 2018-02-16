@@ -111,7 +111,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       addChargeAccount(giver)
 
       val expectedTransactions = 1 to 30 map (_ => thank(giver, owner, someRandom[Resource]))
-      eventually(pendingThanks(giver) should containAllOf(expectedTransactions))
+      eventually(outgoingTransactions(giver) should containAllOf(expectedTransactions))
 
       runAndWait(yom)
 
@@ -126,7 +126,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       yomCharge.status shouldEqual ChargeStatus.Success
       yomCharge.transactions shouldEqual expectedTransactions
       // If success there should be no pending transactions left
-      eventually(pendingThanks(giver) shouldEqual List.empty)
+      eventually(outgoingTransactions(giver) shouldEqual List.empty)
     }
 
     "EOM charge UnderMin on small thank amount" in {
@@ -137,7 +137,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       addChargeAccount(giver)
 
       val expectedTransactions = 1 to 3 map (_ => thank(giver, owner, someRandom[Resource]))
-      pendingThanks(giver) should containAllOf(expectedTransactions)
+      outgoingTransactions(giver) should containAllOf(expectedTransactions)
 
       runAndWait(yom)
 
@@ -147,7 +147,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       chargeOpt.get.status shouldEqual ChargeStatus.UnderMin
       chargeOpt.get.transactions shouldEqual expectedTransactions
       // If UnderMin there should be no change in pending transactions
-      pendingThanks(giver) shouldEqual expectedTransactions
+      outgoingTransactions(giver) shouldEqual expectedTransactions
     }
   }
 

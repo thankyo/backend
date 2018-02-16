@@ -10,7 +10,7 @@ class PendingTransactionControllerSpec extends PaymentControllerTestExecutor {
 
     "List on new user" in {
       val user = createUser()
-      val pending = pendingThanks(user)
+      val pending = outgoingTransactions(user)
       pending shouldEqual Nil
     }
 

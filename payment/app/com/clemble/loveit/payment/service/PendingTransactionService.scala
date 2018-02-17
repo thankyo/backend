@@ -20,7 +20,9 @@ trait PendingTransactionService {
 
   def create(giver: UserID, owner: Project, url: Resource): Future[PendingTransaction]
 
-  def removeAll(user: UserID, thank: Seq[PendingTransaction]): Future[Boolean]
+  def removeOutgoing(user: UserID, thank: Seq[PendingTransaction]): Future[Boolean]
+
+  def removeIncoming(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean]
 }
 
 case class PaymentThankListener(service: PendingTransactionService) extends Actor {
@@ -62,8 +64,11 @@ case class SimplePendingTransactionService @Inject()(
     }
   }
 
-  override def removeAll(giver: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
-    repo.removeAll(giver, transactions)
+  override def removeOutgoing(giver: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
+    repo.removeOutgoing(giver, transactions)
   }
 
+  override def removeIncoming(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
+    repo.removeOutgoing(user, transactions)
+  }
 }

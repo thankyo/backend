@@ -123,7 +123,8 @@ package object util {
       someRandom[YearMonth],
       optionRandom[PayoutAccount],
       someRandom[Money],
-      PayoutStatus.Pending
+      PayoutStatus.Pending,
+      someRandom[List[PendingTransaction]]
     )
   }
   implicit val eomStatGenerator: Generator[EOMStatistics] = () => {
@@ -179,6 +180,15 @@ package object util {
     description = optionRandom[String],
     tags = someRandom[Set[Tag]],
   )
+
+  // TODO can combine in a single generator
+  implicit def listGenerator[T](implicit gen: Generator[T]): Generator[List[T]] = () => {
+    if (someRandom[Boolean]) {
+      List(gen.generate()) ++ someRandom[List[T]]
+    } else {
+      List(gen.generate())
+    }
+  }
 
   implicit def setGenerator[T](implicit gen: Generator[T]): Generator[Set[T]] = () => {
     if (someRandom[Boolean]) {

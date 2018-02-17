@@ -49,11 +49,16 @@ case class MongoPendingTransactionRepository @Inject()(
       map(_.flatMap(obj => (obj \ "incoming").asOpt[List[PendingTransaction]]).getOrElse(List.empty))
   }
 
-  override def removeAll(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean] = {
+  override def removeOutgoing(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean] = {
     val selector = Json.obj("_id" -> user)
     val update = Json.obj("$pull" -> Json.obj("pending" -> Json.obj("$in" -> thanks)))
     MongoSafeUtils.safe(collection.update(selector, update, multi = true).map(_.ok))
   }
 
+  override def removeIncoming(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
+    val selector = Json.obj("_id" -> user)
+    val update = Json.obj("$pull" -> Json.obj("outgoing" -> Json.obj("$in" -> transactions)))
+    MongoSafeUtils.safe(collection.update(selector, update, multi = true).map(_.ok))
+  }
 
 }

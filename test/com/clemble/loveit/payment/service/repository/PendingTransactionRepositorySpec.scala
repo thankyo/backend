@@ -50,7 +50,7 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
       await(repo.save(user, A))
       await(repo.save(user, B))
 
-      await(repo.removeAll(user, Seq(A)))
+      await(repo.removeOutgoing(user, Seq(A)))
 
       val afterRemove = await(repo.findOutgoingByUser(user))
       afterRemove shouldEqual Seq(B)

@@ -30,6 +30,7 @@ case class EOMPayout(
                       destination: Option[PayoutAccount],
                       amount: Money,
                       status: PayoutStatus,
+                      transactions: List[PendingTransaction],
                       created: LocalDateTime = LocalDateTime.now()
 ) extends Transaction with EOMAware
 

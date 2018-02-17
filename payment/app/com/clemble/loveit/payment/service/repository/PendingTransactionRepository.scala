@@ -16,6 +16,8 @@ trait PendingTransactionRepository {
 
   def findIncomingByUser(user: UserID): Future[List[PendingTransaction]]
 
-  def removeAll(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean]
+  def removeOutgoing(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean]
+
+  def removeIncoming(user: UserID, transaction: Seq[PendingTransaction]): Future[Boolean]
 
 }

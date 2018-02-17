@@ -51,7 +51,7 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
       val transactionA = thank(giver, A, someRandom[Resource])
       val transactionB = thank(giver, B, someRandom[Resource])
 
-      await(thankTransService.removeAll(giver, Seq(transactionB)))
+      await(thankTransService.removeOutgoing(giver, Seq(transactionB)))
 
       val payments = outgoingTransactions(giver)
       payments must containAllOf(Seq(transactionA))

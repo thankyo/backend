@@ -9,7 +9,7 @@ import com.clemble.loveit.common.model.{Amount, UserID}
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
-import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutAccount, PayoutStatus, UserPayment}
+import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, EOMStatistics, EOMStatus, PayoutAccount, PayoutStatus, PendingTransaction, UserPayment}
 import com.clemble.loveit.payment.service.repository._
 import play.api.Logger
 
@@ -121,7 +121,7 @@ case class SimpleEOMPaymentService @Inject()(
         (status, details) <- chargeService.process(charge)
         _ <- chargeRepo.updatePending(charge.user, charge.yom, status, details)
       } yield {
-        if (status == ChargeStatus.Success) thankService.removeAll(charge.user, charge.transactions)
+        if (status == ChargeStatus.Success) thankService.removeOutgoing(charge.user, charge.transactions)
         status
       }
     }
@@ -130,20 +130,23 @@ case class SimpleEOMPaymentService @Inject()(
   }
 
   private def doCreatePayout(yom: YearMonth): Future[EOMStatistics] = {
-    def toPayoutMap(charge: EOMCharge): Map[UserID, Int] = {
-      charge.transactions.groupBy(_.project.user).mapValues(_.size)
+    def toPayoutMap(charge: EOMCharge): Map[UserID, List[PendingTransaction]] = {
+      charge.transactions.groupBy(_.project.user)
     }
 
-    def combinePayoutMaps(agg: Map[UserID, Int], payout: Map[UserID, Int]): Map[UserID, Int] = {
-      agg ++ payout.map({ case (user, amount) => user -> (amount + agg.getOrElse(user, 0)) })
+    def combinePayoutMaps(agg: Map[UserID, List[PendingTransaction]], payout: Map[UserID, List[PendingTransaction]]): Map[UserID, List[PendingTransaction]] = {
+      agg ++ payout.map({
+        case (user, transactions) =>
+          user -> (transactions ++ agg.getOrElse(user, List.empty[PendingTransaction]))
+      })
     }
 
-    def toPayout(user: UserID, ptAcc: Option[PayoutAccount], payout: Amount): EOMPayout = {
-      val amount = exchangeService.toAmountAfterPlatformFee(payout, LoveItCurrency.DEFAULT)
-      EOMPayout(user, yom, ptAcc, amount, PayoutStatus.Pending)
+    def toPayout(user: UserID, ptAcc: Option[PayoutAccount], payout: List[PendingTransaction]): EOMPayout = {
+      val amount = exchangeService.toAmountAfterPlatformFee(payout.size, LoveItCurrency.DEFAULT)
+      EOMPayout(user, yom, ptAcc, amount, PayoutStatus.Pending, payout)
     }
 
-    def savePayouts(payoutMap: (UserID, Int)): Future[Boolean] = {
+    def savePayouts(payoutMap: (UserID, List[PendingTransaction])): Future[Boolean] = {
       val (user, payout) = payoutMap
       for {
         ptAcc <- payoutAccService.getPayoutAccount(user)
@@ -156,7 +159,7 @@ case class SimpleEOMPaymentService @Inject()(
     chargeRepo.
       listSuccessful(yom).
       map(toPayoutMap).
-      runWith(Sink.fold(Map.empty[UserID, Int])((agg, ch) => combinePayoutMaps(agg, ch))).
+      runWith(Sink.fold(Map.empty[UserID, List[PendingTransaction]])((agg, ch) => combinePayoutMaps(agg, ch))).
       flatMap(payoutMap => applyToAll(Source(payoutMap), savePayouts, true))
   }
 
@@ -166,6 +169,7 @@ case class SimpleEOMPaymentService @Inject()(
         (status, details) <- payoutService.process(payout)
         _ <- payoutRepo.updatePending(payout.user, payout.yom, status, details)
       } yield {
+        if (status == PayoutStatus.Success) thankService.removeIncoming(payout.user, payout.transactions)
         status
       }
     }

@@ -70,7 +70,8 @@ case class SimpleDevUserDataService @Inject()(
           title = Some("Zen Pencil on GoComics"),
           avatar = Some("http://avatar.amuniversal.com/feature_avatars/ubadge_images/features/ch/mid_u-201701251613.png"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
-        )),
+        )
+      ),
 
       Set(
         OpenGraphObject(
@@ -118,7 +119,8 @@ case class SimpleDevUserDataService @Inject()(
           user = "",
           title = Some("Manga Stream"),
           avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
-          tags = Set("manga", "japan", "one piece", "naruto", "bleach")
+          tags = Set("manga", "japan", "one piece", "naruto", "bleach"),
+          rss = Some("https://readms.net/rss")
         )),
       Set(
         OpenGraphObject(
@@ -142,7 +144,7 @@ case class SimpleDevUserDataService @Inject()(
         firstName = "Personal",
         lastName = "Central",
         email = "personal.central@example.com",
-        password = "1234567890"
+        password = "1234567890",
         //        id = IDGenerator.generate(),
         //        link = Some("https://personacentral.com")
       ),
@@ -152,7 +154,8 @@ case class SimpleDevUserDataService @Inject()(
           title = Some("Personal Central"),
           user = "",
           avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
-          tags = Set("manga", "japan")
+          tags = Set("manga", "japan"),
+          rss = Some("https://personacentral.com/feed")
         )
       ),
       Set(

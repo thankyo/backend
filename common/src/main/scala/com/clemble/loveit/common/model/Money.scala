@@ -29,6 +29,8 @@ case class Money(
 
 object Money {
 
+  val ZERO = Money(0, LoveItCurrency.DEFAULT)
+
   implicit val currencyFormat: Format[Currency] = new Format[Currency] {
 
     override def writes(o: Currency): JsValue = JsString(o.getCurrencyCode)

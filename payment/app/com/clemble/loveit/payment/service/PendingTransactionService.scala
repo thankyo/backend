@@ -20,6 +20,10 @@ trait PendingTransactionService {
 
   def create(giver: UserID, owner: Project, url: Resource): Future[PendingTransaction]
 
+  def findUsersWithIncoming(): Future[List[UserID]]
+
+  def findUsersWithoutOutgoing(): Future[List[UserID]]
+
   def removeOutgoing(user: UserID, thank: Seq[PendingTransaction]): Future[Boolean]
 
   def removeIncoming(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean]
@@ -51,6 +55,14 @@ case class SimplePendingTransactionService @Inject()(
 
   override def listIncoming(user: UserID): Future[List[PendingTransaction]] = {
     repo.findIncomingByUser(user)
+  }
+
+  override def findUsersWithIncoming(): Future[List[UserID]] = {
+    repo.findUsersWithIncoming()
+  }
+
+  override def findUsersWithoutOutgoing(): Future[List[UserID]] = {
+    repo.findUsersWithoutOutgoing()
   }
 
   override def create(giver: UserID, project: Project, url: Resource): Future[PendingTransaction] = {

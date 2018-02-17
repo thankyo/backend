@@ -11,7 +11,7 @@ import javax.inject.{Inject, Named, Singleton}
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{JsObject, JsValue, Json, OFormat}
 import reactivemongo.api.ReadPreference
 
 import scala.concurrent.{ExecutionContext, Future}

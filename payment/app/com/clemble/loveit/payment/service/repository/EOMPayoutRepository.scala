@@ -15,6 +15,11 @@ import scala.concurrent.Future
 trait EOMPayoutRepository extends UserAwareRepository[EOMPayout] {
 
   /**
+    * List processed EOMPayouts
+    */
+  def listCreated(yom: YearMonth): Future[List[UserID]]
+
+  /**
     * Lists all charges with specified status
     */
   def listPending(yom: YearMonth): Source[EOMPayout, _]

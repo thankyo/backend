@@ -41,7 +41,7 @@ case class SimpleEOMPaymentService @Inject()(
                                               payoutService: EOMPayoutService,
                                               chargeAccService: ChargeAccountService,
                                               payoutAccService: PayoutAccountService,
-                                              thankService: PendingTransactionService,
+                                              transactionService: PendingTransactionService,
                                               paymentRepo: PaymentRepository,
                                               exchangeService: ExchangeService,
                                               implicit val ec: ExecutionContext,
@@ -62,13 +62,16 @@ case class SimpleEOMPaymentService @Inject()(
   private def doRun(yom: YearMonth) = {
     for {
       createCharges <- doCreateCharges(yom)
-      _ <- statusRepo.updateCreateCharges(yom, createCharges)
+      emptyCharges <- doCreateEmptyCharges(yom)
+      _ <- statusRepo.updateCreateCharges(yom, createCharges.copy(empty = emptyCharges))
       applyCharges <- doApplyCharges(yom)
       _ <- statusRepo.updateApplyCharges(yom, applyCharges)
       createPayout <- doCreatePayout(yom)
-      _ <- statusRepo.updateCreatePayout(yom, createPayout)
+      emptyPayouts <- doCreateEmptyPayouts(yom)
+      _ <- statusRepo.updateCreatePayout(yom, createPayout.copy(empty = emptyPayouts))
       applyPayout <- doApplyPayout(yom)
       _ <- statusRepo.updateApplyPayout(yom, applyPayout)
+
       update <- statusRepo.updateFinished(yom, LocalDateTime.now())
     } yield {
       update
@@ -115,13 +118,17 @@ case class SimpleEOMPaymentService @Inject()(
     applyToAll(paymentRepo.find(), createCharge, ChargeStatus.Pending)
   }
 
+  private def doCreateEmptyCharges(yom: YearMonth): Future[Int] = {
+    transactionService.findUsersWithoutOutgoing().map(_.size)
+  }
+
   private def doApplyCharges(yom: YearMonth): Future[EOMStatistics] = {
     def applyCharge(charge: EOMCharge): Future[ChargeStatus] = {
       for {
         (status, details) <- chargeService.process(charge)
         _ <- chargeRepo.updatePending(charge.user, charge.yom, status, details)
       } yield {
-        if (status == ChargeStatus.Success) thankService.removeOutgoing(charge.user, charge.transactions)
+        if (status == ChargeStatus.Success) transactionService.removeOutgoing(charge.user, charge.transactions)
         status
       }
     }
@@ -163,13 +170,25 @@ case class SimpleEOMPaymentService @Inject()(
       flatMap(payoutMap => applyToAll(Source(payoutMap), savePayouts, true))
   }
 
+  private def doCreateEmptyPayouts(yom: YearMonth): Future[Int] = {
+    for {
+      usersWithIncoming <- transactionService.findUsersWithIncoming()
+      pendingPayouts <- payoutRepo.listCreated(yom)
+      userWithNoPayouts = usersWithIncoming.filterNot(pendingPayouts.contains)
+      emptyPayouts = userWithNoPayouts.map(user => EOMPayout.empty(user, yom))
+      saved <- Future.sequence(emptyPayouts.map(payoutRepo.save))
+    } yield {
+      saved.size
+    }
+  }
+
   private def doApplyPayout(yom: YearMonth): Future[EOMStatistics] = {
     def applyPayout(payout: EOMPayout): Future[PayoutStatus] = {
       for {
         (status, details) <- payoutService.process(payout)
         _ <- payoutRepo.updatePending(payout.user, payout.yom, status, details)
       } yield {
-        if (status == PayoutStatus.Success) thankService.removeIncoming(payout.user, payout.transactions)
+        if (status == PayoutStatus.Success) transactionService.removeIncoming(payout.user, payout.transactions)
         status
       }
     }

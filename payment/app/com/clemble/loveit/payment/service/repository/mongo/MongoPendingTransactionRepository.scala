@@ -49,6 +49,18 @@ case class MongoPendingTransactionRepository @Inject()(
       map(_.flatMap(obj => (obj \ "incoming").asOpt[List[PendingTransaction]]).getOrElse(List.empty))
   }
 
+  override def findUsersWithIncoming(): Future[List[UserID]] = {
+    val selector = Json.obj("incoming" -> Json.obj("$not" -> Json.obj("$size" -> 0)))
+    val projection = Json.obj("_id" -> 1)
+    MongoSafeUtils.collectAll[JsObject](collection, selector, projection).map(_.map(obj => (obj \ "_id").as[String]))
+  }
+
+  override def findUsersWithoutOutgoing(): Future[List[UserID]] = {
+    val selector = Json.obj("pending" -> Json.obj("$size" -> 0))
+    val projection = Json.obj("_id" -> 1)
+    MongoSafeUtils.collectAll[JsObject](collection, selector, projection).map(_.map(obj => (obj \ "_id").as[String]))
+  }
+
   override def removeOutgoing(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean] = {
     val selector = Json.obj("_id" -> user)
     val update = Json.obj("$pull" -> Json.obj("pending" -> Json.obj("$in" -> thanks)))

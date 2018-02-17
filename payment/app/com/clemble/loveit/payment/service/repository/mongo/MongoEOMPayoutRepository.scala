@@ -10,7 +10,7 @@ import com.clemble.loveit.common.mongo.{MongoSafeUtils, MongoUserAwareRepository
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, PayoutStatus}
 import com.clemble.loveit.payment.service.repository.EOMPayoutRepository
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{JsObject, JsValue, Json, OFormat}
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
@@ -26,6 +26,12 @@ case class MongoEOMPayoutRepository @Inject()(@Named("eomPayout") collection: JS
   override implicit val format: OFormat[EOMPayout] = EOMPayout.jsonFormat
 
   MongoEOMPayoutRepository.ensureMeta(collection)
+
+  override def listCreated(yom: YearMonth): Future[List[UserID]] = {
+    val selector = Json.obj("yom" -> yom)
+    val projection = Json.obj("user" -> 1)
+    MongoSafeUtils.collectAll[JsObject](collection, selector, projection).map(_.map(obj => (obj \ "user").as[String]))
+  }
 
   override def listPending(yom: YearMonth): Source[EOMPayout, _] = {
     val selector = Json.obj("yom" -> yom, "status" -> PayoutStatus.Pending)

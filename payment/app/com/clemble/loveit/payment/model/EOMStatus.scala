@@ -19,7 +19,8 @@ case class EOMStatistics(
                     total: Long = 0,
                     pending: Long = 0,
                     success: Long = 0,
-                    failed: Long = 0
+                    failed: Long = 0,
+                    empty: Long = 0
                   ) {
 
   def isValid: Boolean = total == (pending + success + failed)

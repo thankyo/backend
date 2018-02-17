@@ -10,7 +10,7 @@ import play.api.libs.json._
 
 case object PayoutStatus extends Enumeration {
   type PayoutStatus = Value
-  val Pending, Running, Success, Failed, NoBankAccount = Value
+  val Pending, Running, Success, Failed, NoBankAccount, NoSuccessfulCharges = Value
 
   implicit val jsonFormat: Format[PayoutStatus] = new Format[PayoutStatus] {
     override def writes(o: PayoutStatus): JsValue = {
@@ -35,6 +35,10 @@ case class EOMPayout(
 ) extends Transaction with EOMAware
 
 object EOMPayout {
+
+  def empty(user: UserID, yom: YearMonth): EOMPayout = {
+    EOMPayout(user, yom, None, Money.ZERO, PayoutStatus.NoSuccessfulCharges, List.empty)
+  }
 
   implicit val jsonFormat: OFormat[EOMPayout] = Json.format[EOMPayout]
   implicit val writeableJson: Writeable[EOMPayout] = WriteableUtils.jsonToWriteable[EOMPayout]

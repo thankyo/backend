@@ -39,6 +39,7 @@ object EOMCharge {
 
   implicit val jsonFormat: OFormat[EOMCharge] = Json.format[EOMCharge]
   implicit val chargeWriteable: Writeable[EOMCharge] = WriteableUtils.jsonToWriteable[EOMCharge]
+  implicit val writeableJsonCollection: Writeable[List[EOMCharge]] = WriteableUtils.jsonToWriteable[List[EOMCharge]]
 
 }
 

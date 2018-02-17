@@ -1,14 +1,17 @@
 package com.clemble.loveit.dev.service
 
+import java.time.YearMonth
 import javax.inject.Inject
 
 import com.clemble.loveit.auth.model.requests.RegisterRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.EventBusManager
+import com.clemble.loveit.payment.model.EOMStatus
+import com.clemble.loveit.payment.service.EOMPaymentService
 import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, Project}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
-import com.clemble.loveit.thank.service.{PostService, ProjectService}
+import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectService}
 import com.mohiva.play.silhouette.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,6 +33,8 @@ trait DevUserDataService {
   * Service that creates first users and integrations for testing UI and UX
   */
 case class SimpleDevUserDataService @Inject()(
+                                               feedService: ProjectFeedService,
+                                               eomService: EOMPaymentService,
                                                authService: AuthService,
                                                postService: PostService,
                                                supPrjService: ProjectService,
@@ -56,7 +61,8 @@ case class SimpleDevUserDataService @Inject()(
           resource = Resource.from("https://zenpencils.com"),
           title = Some("Zen Pencil"),
           avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
-          tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+          tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
+          rss = Some("https://zenpencils.com/feed")
         ),
         Project(
           user = "",
@@ -170,7 +176,9 @@ case class SimpleDevUserDataService @Inject()(
     (for {
       creators <- ensureCreators(configs.map(_.creator))
       assignedResources <- ensureOwnership(creators.zip(configs.map(_.projects)))
-      posts <- ensurePosts(configs.flatMap(_.ogObjs))
+      _ <- updateFeed(configs.flatMap(_.projects))
+      _ <- ensurePosts(configs.flatMap(_.ogObjs))
+      _ <- ensureEOMProcessed()
     } yield {
       if (!assignedResources) {
         throw new IllegalArgumentException(s"Could not initialize resources")
@@ -217,8 +225,31 @@ case class SimpleDevUserDataService @Inject()(
     Future.sequence(resources).map(seq => seq.forall(_ == true))
   }
 
+  private def updateFeed(projects: Seq[Project]): Future[Seq[Post]] = {
+    val refreshedProjects = for {
+      project <- projects
+    } yield {
+      feedService.refresh(project)
+    }
+    Future.sequence(refreshedProjects).map(_.flatten)
+  }
+
   private def ensurePosts(posts: Seq[OpenGraphObject]): Future[Seq[Post]] = {
     Future.sequence(posts.map(obj => postService.create(obj)))
+  }
+
+  private def ensureEOMProcessed(): Future[Seq[EOMStatus]] = {
+    val start = YearMonth.now().minusYears(1)
+    val eomStatuses = for {
+      i <- 1 to 12
+    } yield {
+      val yom = start.minusMonths(i)
+      eomService.getStatus(yom).flatMap(_ match {
+        case Some(status) => Future.successful(status)
+        case None => eomService.run(yom)
+      })
+    }
+    Future.sequence(eomStatuses)
   }
 
 }

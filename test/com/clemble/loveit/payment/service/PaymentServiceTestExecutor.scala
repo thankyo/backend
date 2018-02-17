@@ -23,11 +23,11 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
   }
 
   override def charges(user: UserID): Seq[EOMCharge] = {
-    eomChargeRepo.findByUser(user).toSeq
+    await(eomChargeRepo.findByUser(user))
   }
 
   override def payouts(user: UserID): Seq[EOMPayout] = {
-    eomPayoutRepo.findByUser(user).toSeq()
+    await(eomPayoutRepo.findByUser(user))
   }
 
   override def getChargeAccount(user: UserID): Option[ChargeAccount] = {

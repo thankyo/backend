@@ -1,18 +1,14 @@
 package com.clemble.loveit.common.mongo
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.user.model.UserAware
 import com.clemble.loveit.user.service.repository.UserAwareRepository
 import play.api.libs.json.{Format, Json}
-import reactivemongo.akkastream.cursorProducer
-import reactivemongo.api.ReadPreference
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait MongoUserAwareRepository[T <: UserAware] extends UserAwareRepository[T] {
 
@@ -33,12 +29,10 @@ trait MongoUserAwareRepository[T <: UserAware] extends UserAwareRepository[T] {
     )
   )
 
-  override def findByUser(user: UserID): Source[T, _] = {
-    collection.
-      find(Json.obj("user" -> user)).
-      sort(Json.obj("created" -> 1)).
-      cursor[T](ReadPreference.nearest).
-      documentSource()
+  override def findByUser(user: UserID): Future[List[T]] = {
+    val selector = Json.obj("user" -> user)
+    val sort = Json.obj("created" -> 1)
+    MongoSafeUtils.collectAll(collection, selector, sort = sort)
   }
 
 

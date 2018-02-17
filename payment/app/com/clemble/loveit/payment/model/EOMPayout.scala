@@ -37,5 +37,6 @@ object EOMPayout {
 
   implicit val jsonFormat: OFormat[EOMPayout] = Json.format[EOMPayout]
   implicit val writeableJson: Writeable[EOMPayout] = WriteableUtils.jsonToWriteable[EOMPayout]
+  implicit val writeableJsonCollection: Writeable[List[EOMPayout]] = WriteableUtils.jsonToWriteable[List[EOMPayout]]
 
 }

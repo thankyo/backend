@@ -18,9 +18,8 @@ class EOMChargeController @Inject()(
                                      implicit val ec: ExecutionContext
                                    ) extends LoveItController(components) {
 
-  def listMy() = silhouette.SecuredAction(req => {
-    val charges = chargeRepo.findByUser(req.identity.id)
-    Ok.chunked(charges)
+  def listMy() = silhouette.SecuredAction.async(req => {
+    chargeRepo.findByUser(req.identity.id).map(Ok(_))
   })
 
 }

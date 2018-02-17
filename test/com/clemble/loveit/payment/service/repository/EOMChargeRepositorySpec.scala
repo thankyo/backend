@@ -31,7 +31,7 @@ class EOMChargeRepositorySpec extends RepositorySpec {
       await(repo.save(charge))
       await(repo.save(charge)) should throwA[RepositoryException]
 
-      val userCharges = repo.findByUser(charge.user).toSeq()
+      val userCharges = await(repo.findByUser(charge.user))
       userCharges.size shouldEqual 1
       userCharges must beEqualTo(Seq(charge))
     }

@@ -23,15 +23,16 @@ object MongoSafeUtils {
     )
   }
 
-  def findAll[T](collection: JSONCollection, selector: JsObject, projection: JsObject = Json.obj())(implicit reads: Reads[T], ec: ExecutionContext, m: Materializer): Source[T, Future[State]] = {
+  def findAll[T](collection: JSONCollection, selector: JsObject, projection: JsObject = Json.obj(), sort: JsObject = Json.obj())(implicit reads: Reads[T], ec: ExecutionContext, m: Materializer): Source[T, Future[State]] = {
     collection.
       find(selector, projection).
+      sort(sort).
       cursor[T](ReadPreference.nearest).
       documentSource(err = ignoreErrorHandler(collection.name, selector))
   }
 
-  def collectAll[T](collection: JSONCollection, selector: JsObject, projection: JsObject = Json.obj())(implicit reads: Reads[T], ec: ExecutionContext, m: Materializer): Future[List[T]] = {
-    val fAll = findAll[T](collection, selector, projection)
+  def collectAll[T](collection: JSONCollection, selector: JsObject, projection: JsObject = Json.obj(), sort: JsObject = Json.obj())(implicit reads: Reads[T], ec: ExecutionContext, m: Materializer): Future[List[T]] = {
+    val fAll = findAll[T](collection, selector, projection, sort)
     fAll
       .runFold(List.empty[T])((l, el) => el :: l)
       .map(_.reverse)

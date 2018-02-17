@@ -19,9 +19,8 @@ case class EOMPayoutController @Inject()(
                                           implicit ec: ExecutionContext
                                         ) extends LoveItController(components) {
 
-  def listMy() = silhouette.SecuredAction(req => {
-    val payouts = payoutRepo.findByUser(req.identity.id)
-    Ok.chunked(payouts)
+  def listMy() = silhouette.SecuredAction.async(req => {
+    payoutRepo.findByUser(req.identity.id).map(Ok(_))
   })
 
 }

@@ -22,7 +22,7 @@ class EOMPayoutRepositorySpec extends RepositorySpec {
 
       await(repo.save(payout)) shouldEqual true
 
-      val userPayouts = repo.findByUser(payout.user).toSeq()
+      val userPayouts = await(repo.findByUser(payout.user))
       userPayouts shouldEqual Seq(payout)
     }
 
@@ -32,7 +32,7 @@ class EOMPayoutRepositorySpec extends RepositorySpec {
       await(repo.save(payout))
       await(repo.save(payout)) should throwA[RepositoryException]
 
-      val userPayouts = repo.findByUser(payout.user).toSeq()
+      val userPayouts = await(repo.findByUser(payout.user))
       userPayouts.size shouldEqual 1
       userPayouts must beEqualTo(Seq(payout))
     }

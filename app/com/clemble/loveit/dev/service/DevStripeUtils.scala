@@ -1,10 +1,10 @@
-package com.clemble.loveit.payment
+package com.clemble.loveit.dev.service
 
 import com.clemble.loveit.payment.model.StripeCustomerToken
 
 import scala.util.Random
 
-trait TestStripeUtils {
+object DevStripeUtils {
 
   private val VALID_USA_TOKENS = List(
     "tok_visa",

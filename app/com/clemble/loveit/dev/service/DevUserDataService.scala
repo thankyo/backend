@@ -4,56 +4,31 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 import com.clemble.loveit.auth.model.requests.RegisterRequest
-import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.EOMPaymentService
-import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, Project}
-import com.clemble.loveit.thank.service.repository.ProjectRepository
-import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectService}
-import com.mohiva.play.silhouette.api._
+import com.clemble.loveit.thank.model.{Post, Project}
+import com.clemble.loveit.thank.service.PostService
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class DevCreatorConfig(
-                             creator: RegisterRequest,
-                             projects: Set[Project],
-                             ogObjs: Set[OpenGraphObject]
-                           )
+import scala.util.Random
 
 trait DevUserDataService {
 
-  def enable(configs: Seq[DevCreatorConfig]): Future[Boolean]
+  def enable(configs: Seq[DevCreatorConfig], supporters: Seq[RegisterRequest]): Future[Boolean]
 
 }
 
+object DevUserDataService {
 
-/**
-  * Service that creates first users and integrations for testing UI and UX
-  */
-case class SimpleDevUserDataService @Inject()(
-                                               feedService: ProjectFeedService,
-                                               eomService: EOMPaymentService,
-                                               authService: AuthService,
-                                               postService: PostService,
-                                               supPrjService: ProjectService,
-                                               prjRepo: ProjectRepository,
-                                               eventBusManager: EventBusManager,
-                                               implicit val ec: ExecutionContext
-                                             ) extends DevUserDataService {
-
-  // quotes, inspirational, motivational, cartoons, comics, webcomic, inspire, inspiring, art, poetry
-
-  val resMap = List(
+  val CREATORS = List(
     DevCreatorConfig(
       RegisterRequest(
         firstName = "Gavin",
         lastName = "Than",
         email = "gavin.than@example.com",
-        password = "1234567890" //,
-        //        id = IDGenerator.generate(),
-        //        link = Some("https://zenpencils.com")
+        password = "1234567890",
       ),
       Set(
         Project(
@@ -65,43 +40,13 @@ case class SimpleDevUserDataService @Inject()(
           rss = Some("https://zenpencils.com/feed")
         ),
         Project(
+          resource = Resource.from("https://personacentral.com"),
+          title = Some("Personal Central"),
           user = "",
-          resource = Resource.from("http://www.gocomics.com/zen-pencils"),
-          title = Some("Zen Pencil on GoComics"),
-          avatar = Some("http://avatar.amuniversal.com/feature_avatars/ubadge_images/features/ch/mid_u-201701251613.png"),
-          tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
+          avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
+          tags = Set("manga", "japan"),
+          rss = Some("https://personacentral.com/feed")
         )
-      ),
-
-      Set(
-        OpenGraphObject(
-          url = "http://zenpencils.com/comic/creative/",
-          title = Some("ZEN PENCILS » 221. 8 tips to be more creative by Zen Pencils"),
-          description = Some("Today is the launch day of my new collection CREATIVE STRUGGLE: Illustrated Advice From Masters of Creativity! Besides including creative advice from greats like Einstein, Van Gogh, Curie and Hemingway, it also features an all-new comic by myself. The comic describes my eight tips to be more creativ…"),
-          image = Some(OpenGraphImage(url = "https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/221_creativestruggle.jpg")),
-          tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry")
-        ),
-        OpenGraphObject(
-          url = "http://www.gocomics.com/zen-pencils",
-          title = Some("Zen Pencils by Gavin Aung Than for Jan 29, 2018 | GoComics.com"),
-          description = Some("Jan 29, 2018"),
-          image = Some(
-            OpenGraphImage(url = "http://assets.amuniversal.com/8b0ddf60d66601350cae005056a9545d", width = Some(900), height = Some(2545))
-          )
-        ),
-        OpenGraphObject(
-          url = "http://zenpencils.com/comic/hustle/",
-          title = Some("ZEN PENCILS » 220. CHRIS GUILLEBEAU: The art of the Side Hustle"),
-          image = Some(
-            OpenGraphImage("https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/220_hustle.jpg")
-          ),
-        ),
-        OpenGraphObject(
-          url = "http://zenpencils.com/comic/poe/",
-          image = Some(
-            OpenGraphImage("https://cdn-zenpencils.netdna-ssl.com/wp-content/uploads/218_poe.jpg")),
-          title = Some("ZEN PENCILS » 218. EDGAR ALLAN POE: Procrastination"),
-          description = Some("Ah procrastination, something I constantly struggle with. Don’t we all? I’m fighting it right now – I don’t really enjoy writing these blog posts underneath each comic and I always put it off to until the last minute. I know I must do it, but I really don’t want to. As I sat down to write this, my c…"))
       )
     ),
     DevCreatorConfig(
@@ -110,8 +55,6 @@ case class SimpleDevUserDataService @Inject()(
         lastName = "Stream",
         email = "manga.stream@example.com",
         password = "1234567890"
-        //        id = IDGenerator.generate(),
-        //        link = Some("https://readms.net")
       ),
       Set(
         Project(
@@ -122,123 +65,80 @@ case class SimpleDevUserDataService @Inject()(
           tags = Set("manga", "japan", "one piece", "naruto", "bleach"),
           rss = Some("https://readms.net/rss")
         )),
-      Set(
-        OpenGraphObject(
-          url = "https://readms.net/r/one_piece/892/4843/1",
-          title = Some("One Piece 892 - Manga Stream"),
-          description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
-          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/51/4843/01.png")),
-          tags = Set("manga", "japan", "comics", "one piece")
-        ),
-        OpenGraphObject(
-          url = "https://readms.net/r/attack_on_titan/101/4812/1",
-          title = Some("Attack on Titan 101 - Manga Stream"),
-          description = Some("Read free manga online like Naruto, Bleach, One Piece, Hunter x Hunter and many more."),
-          image = Some(OpenGraphImage(url = "https://img.mangastream.com/cdn/manga/76/4812/01.png")),
-          tags = Set("manga", "japan", "comics")
-        )
-      )
-    ),
-    DevCreatorConfig(
-      RegisterRequest(
-        firstName = "Personal",
-        lastName = "Central",
-        email = "personal.central@example.com",
-        password = "1234567890",
-        //        id = IDGenerator.generate(),
-        //        link = Some("https://personacentral.com")
-      ),
-      Set(
-        Project(
-          resource = Resource.from("https://personacentral.com"),
-          title = Some("Personal Central"),
-          user = "",
-          avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
-          tags = Set("manga", "japan"),
-          rss = Some("https://personacentral.com/feed")
-        )
-      ),
-      Set(
-        OpenGraphObject(
-          url = "https://personacentral.com/atlus-2018-online-consumer-survey-released/",
-          title = Some("Atlus 2018 Online Consumer Survey Released, Includes Company Collaboration Questions - Persona Central"),
-          description = Some("Atlus has released this year's online consumer survey to know more about what their customers want, including questions about remakes and company collaborations."),
-          image = Some(OpenGraphImage(
-            url = "https://personacentral.com/wp-content/uploads/2018/01/Persona-5-Dancing-Star-Night-Morgana.jpg"
-          )),
-          tags = Set("manga", "japan", "comics")
-        )
-      )
     )
   )
 
-  enable(resMap)
+
+  val POSSIBLE_NAME = List(
+    "James", "Mary",
+    "John", "Patricia",
+    "Robert", "Jennifer",
+    "Michael", "Elizabeth",
+    "William", "Linda",
+    "David", "Barbara",
+    "Richard", "Susan",
+    "Joseph", "Jessica",
+    "Thomas", "Margaret"
+  )
+
+  val SUPPORTERS = 1 to 100 map (i => {
+    val firstName = POSSIBLE_NAME(Random.nextInt(POSSIBLE_NAME.length))
+    val lastName = POSSIBLE_NAME(Random.nextInt(POSSIBLE_NAME.length))
+    RegisterRequest(
+      firstName = firstName,
+      lastName = lastName,
+      email = s"${i}@example.com",
+      password = "1234567890"
+    )
+  })
+
+}
+
+/**
+  * Service that creates first users and integrations for testing UI and UX
+  */
+case class SimpleDevUserDataService @Inject()(
+                                               creatorInitializer: DevCreatorsInitializer,
+                                               supportersInitializer: DevSupportersInitializer,
+                                               postService: PostService,
+                                               eomService: EOMPaymentService,
+                                               eventBusManager: EventBusManager,
+                                               implicit val ec: ExecutionContext
+                                             ) extends DevUserDataService {
+
+  enable(DevUserDataService.CREATORS, DevUserDataService.SUPPORTERS)
 
 
-  override def enable(configs: Seq[DevCreatorConfig]): Future[Boolean] = {
-    (for {
-      creators <- ensureCreators(configs.map(_.creator))
-      assignedResources <- ensureOwnership(creators.zip(configs.map(_.projects)))
-      _ <- updateFeed(configs.flatMap(_.projects))
-      _ <- ensurePosts(configs.flatMap(_.ogObjs))
-      _ <- ensureEOMProcessed()
-    } yield {
-      if (!assignedResources) {
-        throw new IllegalArgumentException(s"Could not initialize resources")
-      }
-      assignedResources
-    }).recover({
-      case t: Throwable => {
+  override def enable(configs: Seq[DevCreatorConfig], supporters: Seq[RegisterRequest]): Future[Boolean] = {
+    (
+      for {
+        supporters <- supportersInitializer.initialize(supporters)
+        posts <- creatorInitializer.initialize(configs)
+        _ <- ensureLoveWasSpread(supporters, posts)
+        _ <- ensureEOMProcessed()
+      } yield {
+        true
+      }).recover({
+      case t => {
         print(t)
         System.exit(1)
-        false
+        ???
       }
     })
   }
 
-  private def ensureCreators(creators: Seq[RegisterRequest]): Future[Seq[UserID]] = {
-    val fCreators = for {
-      creator <- creators
+  private def ensureLoveWasSpread(supporters: Seq[UserID], posts: Seq[Post]): Future[Int] = {
+    val thanked = for {
+      supporter <- supporters
+      post <- posts
     } yield {
-      authService.register(creator).map(authRes => {
-        authRes match {
-          case UserRegister(user, _) =>
-            eventBusManager.publish(SignUpEvent(user, null))
-          case UserLoggedIn(user, _) =>
-            eventBusManager.publish(LoginEvent(user, null))
-        }
-        authRes.user.id
-      })
+      if (Random.nextBoolean()) {
+        postService.thank(supporter, post.resource).map(_ => true)
+      } else {
+        Future.successful(false)
+      }
     }
-    Future.sequence(fCreators)
-  }
-
-  private def ensureOwnership(creatorToRes: Seq[(UserID, Set[Project])]): Future[Boolean] = {
-    val resources = for {
-      (creator, projects) <- creatorToRes
-      project <- projects
-    } yield {
-      supPrjService
-        .findProject(project.resource)
-        .flatMap(_ match {
-          case Some(_) => Future.successful(true)
-          case None => prjRepo.saveProject(project.copy(user = creator))
-        })
-    }
-    Future.sequence(resources).map(seq => seq.forall(_ == true))
-  }
-
-  private def updateFeed(projects: Seq[Project]): Future[Seq[Post]] = {
-    val refreshedProjects = for {
-      project <- projects
-    } yield {
-      feedService.refresh(project)
-    }
-    Future.sequence(refreshedProjects).map(_.flatten)
-  }
-
-  private def ensurePosts(posts: Seq[OpenGraphObject]): Future[Seq[Post]] = {
-    Future.sequence(posts.map(obj => postService.create(obj)))
+    Future.sequence(thanked).map(_.count(_ == true))
   }
 
   private def ensureEOMProcessed(): Future[Seq[EOMStatus]] = {

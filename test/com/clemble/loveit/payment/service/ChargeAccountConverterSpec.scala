@@ -1,12 +1,11 @@
 package com.clemble.loveit.payment.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.payment.TestStripeUtils
-import com.clemble.loveit.payment.model.ChargeAccount
+import com.clemble.loveit.dev.service.DevStripeUtils._
 
 import scala.util.Try
 
-class ChargeAccountConverterSpec extends ServiceSpec with TestStripeUtils{
+class ChargeAccountConverterSpec extends ServiceSpec {
 
   val service: ChargeAccountConverter = dependency[ChargeAccountConverter]
 

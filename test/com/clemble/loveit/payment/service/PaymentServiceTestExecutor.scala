@@ -34,7 +34,7 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
     await(accService.getChargeAccount(user))
   }
 
-  override def addChargeAccount(user: UserID, token: StripeCustomerToken): ChargeAccount = {
+  override def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount = {
     await(accService.updateChargeAccount(user, token))
   }
 

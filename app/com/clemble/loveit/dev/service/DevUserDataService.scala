@@ -117,6 +117,7 @@ case class SimpleDevUserDataService @Inject()(
         _ <- ensureLoveWasSpread(supporters, posts)
         _ <- ensureEOMProcessed()
       } yield {
+        println("Dev user initialization finished")
         true
       }).recover({
       case t => {

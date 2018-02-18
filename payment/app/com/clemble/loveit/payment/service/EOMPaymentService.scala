@@ -99,13 +99,14 @@ case class SimpleEOMPaymentService @Inject()(
 
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
     def createCharge(user: UserPayment): Future[ChargeStatus] = {
-      val status = user.chargeAccount match {
-        case Some(_) => ChargeStatus.Pending
-        case None => ChargeStatus.NoBankDetails
-      }
       val thanks = exchangeService.toThanks(user.monthlyLimit)
       val (satisfied, _) = user.pending.splitAt(thanks.toInt)
       val amount = exchangeService.toAmountWithClientFee(satisfied.size)
+      val status = user.chargeAccount match {
+        case Some(_) => ChargeStatus.Pending
+        case _ if (EOMChargeService.isUnderMin(amount)) => ChargeStatus.UnderMin
+        case None => ChargeStatus.NoBankDetails
+      }
       val charge = EOMCharge(user._id, yom, user.chargeAccount, status, amount, None, satisfied)
       chargeRepo.
         save(charge).

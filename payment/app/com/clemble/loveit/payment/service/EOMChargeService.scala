@@ -24,8 +24,11 @@ sealed trait EOMChargeService {
 
 object EOMChargeService {
 
-  val MIN_CHARGE = Money(1.0, LoveItCurrency.getInstance("USD"))
+  val MIN_CHARGE = Money(5.0, LoveItCurrency.getInstance("USD"))
 
+  def isUnderMin(amount: Money): Boolean = {
+    amount < EOMChargeService.MIN_CHARGE
+  }
 }
 
 import com.stripe.net.RequestOptions
@@ -70,11 +73,19 @@ case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOM
     * Charges user with specified amount
     */
   override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
-    if (charge.amount >= EOMChargeService.MIN_CHARGE) {
-      doCharge(charge)
-    } else {
+    if (EOMChargeService.isUnderMin(charge.amount)) {
       Future.successful(ChargeStatus.UnderMin -> Json.obj())
+    } else {
+      doCharge(charge)
     }
+  }
+
+}
+
+object DevEOMChargeService extends EOMChargeService {
+
+  override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
+    Future.successful(ChargeStatus.Success -> Json.obj())
   }
 
 }

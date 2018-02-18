@@ -3,7 +3,7 @@ package com.clemble.loveit.payment
 import java.util.Currency
 
 import com.clemble.loveit.common.model.Amount
-import com.clemble.loveit.payment.service.repository.{_}
+import com.clemble.loveit.payment.service.repository._
 import com.clemble.loveit.payment.service.repository.mongo._
 import com.clemble.loveit.payment.service._
 import com.clemble.loveit.common.util.LoveItCurrency
@@ -17,7 +17,7 @@ import com.stripe.Stripe
 import com.stripe.net.RequestOptions
 import com.stripe.net.RequestOptions.RequestOptionsBuilder
 import net.codingwell.scalaguice.ScalaModule
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Mode}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -37,7 +37,6 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[UserPaymentRepository].to[MongoPaymentRepository].asEagerSingleton()
 
     bind[ChargeAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
-    bind[ChargeAccountConverter].to[StripeChargeAccountConverter].asEagerSingleton()
     bind[ChargeAccountService].to[SimpleChargeAccountService].asEagerSingleton()
 
     bind[PayoutAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
@@ -50,7 +49,6 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[UserPaymentService].to[SimpleUserPaymentService].asEagerSingleton()
 
     bind[EOMPaymentService].to[SimpleEOMPaymentService].asEagerSingleton()
-    bind[EOMChargeService].to(classOf[StripeEOMChargeService])
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
     bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
 
@@ -61,6 +59,26 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
     bind(classOf[PendingTransactionService]).to(classOf[SimplePendingTransactionService]).asEagerSingleton()
     bind(classOf[PendingTransactionRepository]).to(classOf[MongoPendingTransactionRepository])
+  }
+
+  @Provides
+  @Singleton
+  def chargeAccountConverter(implicit ec: ExecutionContext): ChargeAccountConverter = {
+    if (env.mode == Mode.Dev) {
+      DevChargeAccountConverter
+    } else {
+      StripeChargeAccountConverter()
+    }
+  }
+
+  @Provides
+  @Singleton
+  def eomChargeService(options: RequestOptions): EOMChargeService = {
+    if (env.mode == Mode.Dev) {
+      DevEOMChargeService
+    } else {
+      StripeEOMChargeService(options)
+    }
   }
 
   @Provides

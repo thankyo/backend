@@ -1,25 +1,24 @@
 package com.clemble.loveit.payment.service.repository.mongo
 
+import com.clemble.loveit.common.model._
+
 import java.time.YearMonth
 
 import akka.stream.Materializer
 import com.clemble.loveit.common.mongo.{MongoSafeUtils, MongoUserAwareRepository}
-import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, UserPayment}
+import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge}
 import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
-import play.api.libs.json.{JsObject, JsValue, Json, OFormat}
-import reactivemongo.api.ReadPreference
+import play.api.libs.json.{JsValue, Json, OFormat}
 
 import scala.concurrent.{ExecutionContext, Future}
-import reactivemongo.akkastream.cursorProducer
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
-import com.clemble.loveit.payment.model._
 
 @Singleton
 case class MongoEOMChargeRepository @Inject()(

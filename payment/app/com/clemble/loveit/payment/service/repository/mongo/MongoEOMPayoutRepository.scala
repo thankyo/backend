@@ -8,15 +8,13 @@ import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.mongo.{MongoSafeUtils, MongoUserAwareRepository}
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
-import com.clemble.loveit.payment.model.{ChargeStatus, EOMCharge, EOMPayout, PayoutStatus}
+import com.clemble.loveit.payment.model.{EOMPayout, PayoutStatus}
 import com.clemble.loveit.payment.service.repository.EOMPayoutRepository
 import play.api.libs.json.{JsObject, JsValue, Json, OFormat}
-import reactivemongo.api.ReadPreference
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
-import com.clemble.loveit.payment.model._
 import reactivemongo.play.json._
-import reactivemongo.akkastream.cursorProducer
+import com.clemble.loveit.common.model.yearMonthJsonFormat
 
 import scala.concurrent.{ExecutionContext, Future}
 

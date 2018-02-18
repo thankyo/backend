@@ -7,6 +7,7 @@ import com.clemble.loveit.common.util.WriteableUtils
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
 import play.api.http.Writeable
 import play.api.libs.json._
+import com.clemble.loveit.common.model.yearMonthJsonFormat
 
 case object PayoutStatus extends Enumeration {
   type PayoutStatus = Value
@@ -32,7 +33,7 @@ case class EOMPayout(
                       status: PayoutStatus,
                       transactions: List[PendingTransaction],
                       created: LocalDateTime = LocalDateTime.now()
-) extends Transaction with EOMAware
+                    ) extends Transaction with EOMAware
 
 object EOMPayout {
 

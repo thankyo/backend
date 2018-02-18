@@ -6,7 +6,7 @@ import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, PendingTransaction, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository._
 import com.clemble.loveit.thank.model.Project
-import com.clemble.loveit.thank.service.repository.ProjectRepository
+import com.clemble.loveit.dev.service.DevStripeUtils._
 
 trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
 

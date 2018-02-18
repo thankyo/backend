@@ -7,6 +7,8 @@ import com.clemble.loveit.common.util.WriteableUtils
 import play.api.http.Writeable
 import play.api.libs.json.{Json, OFormat}
 
+import com.clemble.loveit.common.model.yearMonthJsonFormat
+
 /**
   * EOM statistics
   *
@@ -62,7 +64,6 @@ case class EOMStatus(
 object EOMStatus {
 
   implicit val jsonFormat: OFormat[EOMStatus] = Json.format[EOMStatus]
-
   implicit val writeableFormat: Writeable[EOMStatus] = WriteableUtils.jsonToWriteable[EOMStatus]()
 
 }

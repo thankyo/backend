@@ -8,6 +8,8 @@ import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import play.api.http.Writeable
 import play.api.libs.json._
 
+import com.clemble.loveit.common.model.yearMonthJsonFormat
+
 object ChargeStatus extends Enumeration {
   type ChargeStatus = Value
   val Pending, Running, Success, Failed, UnderMin, NoBankDetails, FailedToCreate = Value

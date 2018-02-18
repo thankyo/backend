@@ -12,6 +12,8 @@ import com.clemble.loveit.thank.service.repository.ProjectRepository
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 
+import com.clemble.loveit.dev.service.DevStripeUtils._
+
 trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecutor with PaymentLimitExecutor {
 
   val thankService = dependency[PendingTransactionService]

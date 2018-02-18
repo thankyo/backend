@@ -12,6 +12,7 @@ import play.api.libs.json.{Json, Writes}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
+import com.clemble.loveit.common.model.yearMonthJsonFormat
 
 import scala.concurrent.{ExecutionContext, Future}
 

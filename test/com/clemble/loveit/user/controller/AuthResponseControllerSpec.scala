@@ -1,7 +1,7 @@
 package com.clemble.loveit.user.controller
 
 import com.clemble.loveit.auth.model.AuthResponse
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.common.ControllerSpec
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -13,7 +13,7 @@ import play.api.test.FakeRequest
 class AuthResponseControllerSpec(implicit ee: ExecutionEnv) extends ControllerSpec {
 
   "existing false on new user" in {
-    val profile = someRandom[RegisterRequest]
+    val profile = someRandom[RegistrationRequest]
 
     val req = FakeRequest(POST, "/api/v1/auth/register").withJsonBody(Json.toJson(profile))
     val fRes = route(application, req).get.flatMap(_.body.consumeData).map(_.utf8String)
@@ -24,7 +24,7 @@ class AuthResponseControllerSpec(implicit ee: ExecutionEnv) extends ControllerSp
   }
 
   "existing true on log In" in {
-    val profile = someRandom[RegisterRequest]
+    val profile = someRandom[RegistrationRequest]
 
     val creteReq = FakeRequest(POST, "/api/v1/auth/register").withJsonBody(Json.toJson(profile))
     val createResp = await(route(application, creteReq).get.flatMap(_.body.consumeData).map(_.utf8String).map(str => Json.parse(str).as[AuthResponse]))

@@ -20,13 +20,13 @@ trait PendingTransactionService {
 
   def create(giver: UserID, owner: Project, url: Resource): Future[PendingTransaction]
 
-  def findUsersWithIncoming(): Future[List[UserID]]
+  def findUsersWithPayouts(): Future[List[UserID]]
 
-  def findUsersWithoutOutgoing(): Future[List[UserID]]
+  def findUsersWithoutCharges(): Future[List[UserID]]
 
-  def removeOutgoing(user: UserID, thank: Seq[PendingTransaction]): Future[Boolean]
+  def removeCharges(user: UserID, thank: Seq[PendingTransaction]): Future[Boolean]
 
-  def removeIncoming(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean]
+  def removePayouts(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean]
 }
 
 case class PaymentThankListener(service: PendingTransactionService) extends Actor {
@@ -57,12 +57,12 @@ case class SimplePendingTransactionService @Inject()(
     repo.findIncomingByUser(user)
   }
 
-  override def findUsersWithIncoming(): Future[List[UserID]] = {
-    repo.findUsersWithIncoming()
+  override def findUsersWithPayouts(): Future[List[UserID]] = {
+    repo.findUsersWithPayouts()
   }
 
-  override def findUsersWithoutOutgoing(): Future[List[UserID]] = {
-    repo.findUsersWithoutOutgoing()
+  override def findUsersWithoutCharges(): Future[List[UserID]] = {
+    repo.findUsersWithoutCharges()
   }
 
   override def create(giver: UserID, project: Project, url: Resource): Future[PendingTransaction] = {
@@ -76,11 +76,11 @@ case class SimplePendingTransactionService @Inject()(
     }
   }
 
-  override def removeOutgoing(giver: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
-    repo.removeOutgoing(giver, transactions)
+  override def removeCharges(giver: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
+    repo.removeCharges(giver, transactions)
   }
 
-  override def removeIncoming(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
-    repo.removeOutgoing(user, transactions)
+  override def removePayouts(user: UserID, transactions: Seq[PendingTransaction]): Future[Boolean] = {
+    repo.removePayouts(user, transactions)
   }
 }

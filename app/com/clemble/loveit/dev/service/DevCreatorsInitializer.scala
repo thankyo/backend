@@ -2,7 +2,7 @@ package com.clemble.loveit.dev.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.EventBusManager
@@ -14,7 +14,7 @@ import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
 import scala.concurrent.{ExecutionContext, Future}
 
 case class DevCreatorConfig(
-                             creator: RegisterRequest,
+                             creator: RegistrationRequest,
                              projects: Set[Project]
                            )
 
@@ -39,7 +39,7 @@ case class DevCreatorsInitializer @Inject()(
     }
   }
 
-  private def ensureUserExist(creators: Seq[RegisterRequest]): Future[Seq[UserID]] = {
+  private def ensureUserExist(creators: Seq[RegistrationRequest]): Future[Seq[UserID]] = {
     val fCreators = for {
       creator <- creators
     } yield {

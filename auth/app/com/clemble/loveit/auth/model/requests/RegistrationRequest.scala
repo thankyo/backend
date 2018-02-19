@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import play.api.libs.json.{Json, OFormat}
 
-case class RegisterRequest(
+case class RegistrationRequest(
                           firstName: String,
                           lastName: String,
                           email: Email,
@@ -34,8 +34,8 @@ case class RegisterRequest(
   }
 }
 
-object RegisterRequest {
+object RegistrationRequest {
 
-  implicit val json: OFormat[RegisterRequest] = Json.format[RegisterRequest]
+  implicit val json: OFormat[RegistrationRequest] = Json.format[RegistrationRequest]
 
 }

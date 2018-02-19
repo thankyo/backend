@@ -100,7 +100,7 @@ case class SimpleEOMPaymentService @Inject()(
   private def doCreateCharges(yom: YearMonth): Future[EOMStatistics] = {
     def createCharge(user: UserPayment): Future[ChargeStatus] = {
       val thanks = exchangeService.toThanks(user.monthlyLimit)
-      val (satisfied, _) = user.pending.splitAt(thanks.toInt)
+      val (satisfied, _) = user.charges.splitAt(thanks.toInt)
       val amount = exchangeService.toAmountWithClientFee(satisfied.size)
       val status = user.chargeAccount match {
         case Some(_) => ChargeStatus.Pending
@@ -120,7 +120,7 @@ case class SimpleEOMPaymentService @Inject()(
   }
 
   private def doCreateEmptyCharges(yom: YearMonth): Future[Int] = {
-    transactionService.findUsersWithoutOutgoing().map(_.size)
+    transactionService.findUsersWithoutCharges().map(_.size)
   }
 
   private def doApplyCharges(yom: YearMonth): Future[EOMStatistics] = {
@@ -129,7 +129,7 @@ case class SimpleEOMPaymentService @Inject()(
         (status, details) <- chargeService.process(charge)
         _ <- chargeRepo.updatePending(charge.user, charge.yom, status, details)
       } yield {
-        if (status == ChargeStatus.Success) transactionService.removeOutgoing(charge.user, charge.transactions)
+        if (status == ChargeStatus.Success) transactionService.removeCharges(charge.user, charge.transactions)
         status
       }
     }
@@ -173,7 +173,7 @@ case class SimpleEOMPaymentService @Inject()(
 
   private def doCreateEmptyPayouts(yom: YearMonth): Future[Int] = {
     for {
-      usersWithIncoming <- transactionService.findUsersWithIncoming()
+      usersWithIncoming <- transactionService.findUsersWithPayouts()
       pendingPayouts <- payoutRepo.listCreated(yom)
       userWithNoPayouts = usersWithIncoming.filterNot(pendingPayouts.contains)
       emptyPayouts = userWithNoPayouts.map(user => EOMPayout.empty(user, yom))
@@ -189,7 +189,7 @@ case class SimpleEOMPaymentService @Inject()(
         (status, details) <- payoutService.process(payout)
         _ <- payoutRepo.updatePending(payout.user, payout.yom, status, details)
       } yield {
-        if (status == PayoutStatus.Success) transactionService.removeIncoming(payout.user, payout.transactions)
+        transactionService.removePayouts(payout.user, payout.transactions)
         status
       }
     }

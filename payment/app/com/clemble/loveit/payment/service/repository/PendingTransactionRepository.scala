@@ -12,16 +12,16 @@ trait PendingTransactionRepository {
 
   def save(user: UserID, payment: PendingTransaction): Future[Boolean]
 
-  def findUsersWithIncoming(): Future[List[UserID]]
+  def findUsersWithPayouts(): Future[List[UserID]]
 
-  def findUsersWithoutOutgoing(): Future[List[UserID]]
+  def findUsersWithoutCharges(): Future[List[UserID]]
 
   def findOutgoingByUser(user: UserID): Future[List[PendingTransaction]]
 
   def findIncomingByUser(user: UserID): Future[List[PendingTransaction]]
 
-  def removeOutgoing(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean]
+  def removeCharges(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean]
 
-  def removeIncoming(user: UserID, transaction: Seq[PendingTransaction]): Future[Boolean]
+  def removePayouts(user: UserID, transaction: Seq[PendingTransaction]): Future[Boolean]
 
 }

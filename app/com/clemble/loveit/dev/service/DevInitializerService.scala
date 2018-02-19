@@ -3,7 +3,7 @@ package com.clemble.loveit.dev.service
 import java.time.YearMonth
 import javax.inject.Inject
 
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
@@ -14,17 +14,17 @@ import com.clemble.loveit.thank.service.PostService
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-trait DevUserDataService {
+trait DevInitializerService {
 
-  def enable(configs: Seq[DevCreatorConfig], supporters: Seq[RegisterRequest]): Future[Boolean]
+  def enable(configs: Seq[DevCreatorConfig], supporters: Seq[RegistrationRequest]): Future[Boolean]
 
 }
 
-object DevUserDataService {
+object DevInitializerService {
 
   val CREATORS = List(
     DevCreatorConfig(
-      RegisterRequest(
+      RegistrationRequest(
         firstName = "Gavin",
         lastName = "Than",
         email = "gavin.than@example.com",
@@ -50,7 +50,7 @@ object DevUserDataService {
       )
     ),
     DevCreatorConfig(
-      RegisterRequest(
+      RegistrationRequest(
         firstName = "Manga",
         lastName = "Stream",
         email = "manga.stream@example.com",
@@ -65,6 +65,24 @@ object DevUserDataService {
           tags = Set("manga", "japan", "one piece", "naruto", "bleach"),
           rss = Some("https://readms.net/rss")
         )),
+    ),
+    DevCreatorConfig(
+      RegistrationRequest(
+        firstName = "Science",
+        lastName = "Daily",
+        email = "science.daily@example.com",
+        password = "1234567890"
+      ),
+      Set(
+        Project(
+          resource = Resource.from("https://www.sciencedaily.com"),
+          user = "",
+          title = Some("Science Daily"),
+          avatar = Some("https://www.sciencedaily.com/images/sd-logo.png"),
+          tags = Set("science", "daily", "tech"),
+          rss = Some("https://www.sciencedaily.com/rss/top/science.xml")
+        )
+      )
     )
   )
 
@@ -84,7 +102,7 @@ object DevUserDataService {
   val SUPPORTERS = 1 to 100 map (i => {
     val firstName = POSSIBLE_NAME(Random.nextInt(POSSIBLE_NAME.length))
     val lastName = POSSIBLE_NAME(Random.nextInt(POSSIBLE_NAME.length))
-    RegisterRequest(
+    RegistrationRequest(
       firstName = firstName,
       lastName = lastName,
       email = s"${i}@example.com",
@@ -97,19 +115,19 @@ object DevUserDataService {
 /**
   * Service that creates first users and integrations for testing UI and UX
   */
-case class SimpleDevUserDataService @Inject()(
+case class SimpleDevInitializerService @Inject()(
                                                creatorInitializer: DevCreatorsInitializer,
                                                supportersInitializer: DevSupportersInitializer,
                                                postService: PostService,
                                                eomService: EOMPaymentService,
                                                eventBusManager: EventBusManager,
                                                implicit val ec: ExecutionContext
-                                             ) extends DevUserDataService {
+                                             ) extends DevInitializerService {
 
-  enable(DevUserDataService.CREATORS, DevUserDataService.SUPPORTERS)
+  enable(DevInitializerService.CREATORS, DevInitializerService.SUPPORTERS)
 
 
-  override def enable(configs: Seq[DevCreatorConfig], supporters: Seq[RegisterRequest]): Future[Boolean] = {
+  override def enable(configs: Seq[DevCreatorConfig], supporters: Seq[RegistrationRequest]): Future[Boolean] = {
     (
       for {
         supporters <- supportersInitializer.initialize(supporters)
@@ -133,11 +151,7 @@ case class SimpleDevUserDataService @Inject()(
       supporter <- supporters
       post <- posts
     } yield {
-      if (Random.nextBoolean()) {
-        postService.thank(supporter, post.resource).map(_ => true)
-      } else {
-        Future.successful(false)
-      }
+      postService.thank(supporter, post.resource).map(_ => true)
     }
     Future.sequence(thanked).map(_.count(_ == true))
   }

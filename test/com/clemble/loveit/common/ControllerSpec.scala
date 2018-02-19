@@ -6,7 +6,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.clemble.loveit.auth.model.AuthResponse
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
 import com.clemble.loveit.thank.model.{OpenGraphObject, Project}
@@ -33,7 +33,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
     def readJson[T]()(implicit reader: Reads[T]): Option[T] = Json.parse(read()).asOpt[T]
   }
 
-  override def createUser(profile: RegisterRequest = someRandom[RegisterRequest]): UserID = {
+  override def createUser(profile: RegistrationRequest = someRandom[RegistrationRequest]): UserID = {
     val req = FakeRequest(POST, "/api/v1/auth/register").withJsonBody(Json.toJson(profile))
     val fRes = route(application, req).get
 

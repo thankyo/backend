@@ -2,7 +2,7 @@ package com.clemble.loveit.dev.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.EventBusManager
@@ -16,11 +16,11 @@ import scala.util.Random
 @Singleton
 case class DevSupportersInitializer @Inject()(authService: AuthService, eventBusManager: EventBusManager, accountService: ChargeAccountService, implicit val ec: ExecutionContext)  {
 
-  def initialize(requests: Seq[RegisterRequest]): Future[Seq[UserID]] = {
+  def initialize(requests: Seq[RegistrationRequest]): Future[Seq[UserID]] = {
     ensureUserExist(requests)
   }
 
-  private def ensureUserExist(creators: Seq[RegisterRequest]): Future[Seq[UserID]] = {
+  private def ensureUserExist(creators: Seq[RegistrationRequest]): Future[Seq[UserID]] = {
     val supporters = for {
       creator <- creators
     } yield {
@@ -36,7 +36,7 @@ case class DevSupportersInitializer @Inject()(authService: AuthService, eventBus
     val fUsers = Future.sequence(supporters).map(_.flatten)
 
     fUsers.flatMap(users => {
-      val usersWithCard = users.filter(_ => Random.nextBoolean())
+      val usersWithCard = users//.filter(_ => Random.nextBoolean())
       val fCardTask = Future.sequence(
         usersWithCard.map(user => accountService.updateChargeAccount(user, someValidStripeToken()))
       )

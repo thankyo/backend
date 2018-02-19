@@ -2,7 +2,7 @@ package com.clemble.loveit.auth.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.auth.model.requests.{LogInRequest, RegisterRequest}
+import com.clemble.loveit.auth.model.requests.{LogInRequest, RegistrationRequest}
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model.{Email, UserID}
 import com.clemble.loveit.common.util.IDGenerator
@@ -20,7 +20,7 @@ trait AuthService {
 
   def login(logIn: LogInRequest): Future[AuthServiceResult]
 
-  def register(register: RegisterRequest): Future[AuthServiceResult]
+  def register(register: RegistrationRequest): Future[AuthServiceResult]
 
   def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult]
 
@@ -59,7 +59,7 @@ case class SimpleAuthService @Inject()(
     }
   }
 
-  override def register(register: RegisterRequest): Future[AuthServiceResult] = {
+  override def register(register: RegistrationRequest): Future[AuthServiceResult] = {
     val loginInfo = register.toLoginInfo()
     authInfoRepository.find[PasswordInfo](loginInfo).flatMap {
       case Some(_) =>

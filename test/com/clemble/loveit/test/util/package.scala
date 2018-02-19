@@ -3,7 +3,7 @@ package com.clemble.loveit.test
 import java.time.{LocalDateTime, LocalDate, YearMonth}
 import java.util.Currency
 
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.common.error.{RepositoryException, ThankException, UserException}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
@@ -37,8 +37,8 @@ package object util {
       lastName = Some(random(10))
     )
   }
-  implicit val registerRequest: Generator[RegisterRequest] = () => {
-    RegisterRequest(
+  implicit val registerRequest: Generator[RegistrationRequest] = () => {
+    RegistrationRequest(
       firstName = random(10),
       lastName = random(10),
       email = random(10),

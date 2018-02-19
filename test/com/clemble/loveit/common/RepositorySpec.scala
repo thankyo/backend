@@ -1,6 +1,6 @@
 package com.clemble.loveit.common
 
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.UserPaymentRepository
@@ -17,7 +17,7 @@ trait RepositorySpec extends FunctionalThankSpecification {
   lazy val prjRepo: ProjectRepository = dependency[ProjectRepository]
   lazy val payRepo: UserPaymentRepository = dependency[UserPaymentRepository]
 
-  override def createUser(register: RegisterRequest = someRandom[RegisterRequest]): UserID = {
+  override def createUser(register: RegistrationRequest = someRandom[RegistrationRequest]): UserID = {
     val fUserID = for {
       user <- userRepo.save(register.toUser())
       _ <- payRepo.save(UserPayment from user)

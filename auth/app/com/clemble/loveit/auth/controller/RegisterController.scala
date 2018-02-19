@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.clemble.loveit.common.util.AuthEnv
 import com.mohiva.play.silhouette.api._
-import com.clemble.loveit.auth.model.requests.RegisterRequest
+import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.AuthService
 import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import play.api.i18n.I18nSupport
@@ -34,7 +34,7 @@ class RegisterController @Inject()(
     *
     * @return The result to display.
     */
-  def submit: Action[RegisterRequest] = silhouette.UnsecuredAction.async(parse.json[RegisterRequest]) { implicit req: Request[RegisterRequest] =>
+  def submit: Action[RegistrationRequest] = silhouette.UnsecuredAction.async(parse.json[RegistrationRequest]) { implicit req: Request[RegistrationRequest] =>
     authService.
       register(req.body).
       flatMap(AuthUtils.authResponse)

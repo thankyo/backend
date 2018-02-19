@@ -90,8 +90,8 @@ trait ControllerSpec extends FunctionalThankSpecification {
     userOpt.get
   }
 
-  def getMyPending(user: String): Seq[PendingTransaction] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/pending"))
+  def pendingCharges(user: String): Seq[PendingTransaction] = {
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/pending"))
     val fRes = route(application, req).get
 
     val res = await(fRes)

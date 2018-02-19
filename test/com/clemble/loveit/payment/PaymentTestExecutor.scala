@@ -8,8 +8,6 @@ import com.clemble.loveit.thank.model.Project
 
 trait PaymentTestExecutor extends PaymentLimitExecutor {
 
-  def getBalance(user: UserID): Amount
-
   def charges(user: UserID): Seq[EOMCharge]
 
   def payouts(user: UserID): Seq[EOMPayout]
@@ -24,6 +22,6 @@ trait PaymentTestExecutor extends PaymentLimitExecutor {
 
   def thank(giver: UserID, project: Project, resource: Resource): PendingTransaction
 
-  def outgoingTransactions(giver: UserID): Seq[PendingTransaction]
+  def pendingCharges(giver: UserID): Seq[PendingTransaction]
 
 }

@@ -17,11 +17,6 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
   val eomChargeRepo = dependency[EOMChargeRepository]
   val eomPayoutRepo = dependency[EOMPayoutRepository]
 
-  def getBalance(user: UserID): Amount = {
-    val userOpt = await(payRepo.findById(user))
-    userOpt.map(_.balance).get
-  }
-
   override def charges(user: UserID): Seq[EOMCharge] = {
     await(eomChargeRepo.findByUser(user))
   }
@@ -50,7 +45,7 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
     await(thankTransactionService.create(giver, project, resource))
   }
 
-  override def outgoingTransactions(giver: UserID): Seq[PendingTransaction] = {
+  override def pendingCharges(giver: UserID): Seq[PendingTransaction] = {
     await(thankTransactionService.listCharges(giver))
   }
 

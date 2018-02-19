@@ -11,6 +11,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 
 /**
   * [[PayoutAccount]] integration service
@@ -57,7 +58,7 @@ sealed trait PayoutAccountConverter {
   /**
     * Converts payout token to [[PayoutAccount]]
     */
-  def processPayoutToken(token: String): Future[_ <: PayoutAccount]
+  def processPayoutToken(token: String): Future[PayoutAccount]
 
 }
 
@@ -70,7 +71,7 @@ class StripePayoutAccountConverter @Inject() (wsClient: WSClient, implicit val e
   /**
     * Converts payout token to [[PayoutAccount]]
     */
-  override def processPayoutToken(token: String): Future[_ <: PayoutAccount] = {
+  override def processPayoutToken(token: String): Future[PayoutAccount] = {
     // Step 1. Make a request to PayoutToken
     val fRes = wsClient.url("https://connect.stripe.com/oauth/token").
       addQueryStringParameters(
@@ -87,5 +88,14 @@ class StripePayoutAccountConverter @Inject() (wsClient: WSClient, implicit val e
       val accessToken = (json \ "access_token").as[String]
       PayoutAccount(accountId, refreshToken, accessToken)
     })
+  }
+}
+
+object DevPayoutAccountConverter extends PayoutAccountConverter {
+
+  override def processPayoutToken(token: String): Future[PayoutAccount] = {
+    Future.successful(
+      PayoutAccount(Random.nextLong().toString, Random.nextLong().toString, Random.nextLong().toString)
+    )
   }
 }

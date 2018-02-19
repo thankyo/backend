@@ -19,7 +19,6 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
 
       val giver = createUser()
       val owner = createUser()
-      val ownerBalanceBefore = getBalance(owner)
 
       createProject(owner, HttpResource(masterUrl)) shouldNotEqual None
 
@@ -33,8 +32,6 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
       val updateReq = await(Future.sequence(thanks))
       val allSuccess = updateReq.forall(_ == OK)
       allSuccess should beTrue
-
-      getBalance(owner) shouldEqual ownerBalanceBefore + 1
     }
 
     "create transaction" in {
@@ -47,8 +44,8 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
       val req = sign(giver, FakeRequest(PUT, s"/api/v1/thank/http/${masterUrl}"))
       await(route(application, req).get)
 
-      val giverTransactions = getMyPending(giver)
-      val ownerTransactions = getMyPending(owner)
+      val giverTransactions = pendingCharges(giver)
+      val ownerTransactions = pendingCharges(owner)
 
       giverTransactions.size shouldEqual 1
       ownerTransactions.size shouldEqual 0

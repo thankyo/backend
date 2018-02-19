@@ -69,7 +69,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val user = createUser()
       val owner = createProject()
 
-      1 to 30 map (_ => thank(user, owner, someRandom[Resource]))
+      1 to 50 map (_ => thank(user, owner, someRandom[Resource]))
 
       runAndWait(yom)
 
@@ -77,7 +77,8 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val chargesAfterYom = charges(user)
       chargesAfterYom.size should beGreaterThan(0)
       chargesAfterYom.map(_.yom) should contain(yom)
-      chargesAfterYom.head.amount shouldEqual Money(3.3, LoveItCurrency.DEFAULT)
+      chargesAfterYom.head.amount shouldEqual Money(0, LoveItCurrency.DEFAULT)
+      chargesAfterYom.head.status shouldEqual ChargeStatus.NoBankDetails
     }
 
   }
@@ -86,11 +87,13 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
 
     "EOM creates charges" in {
       val yom = someRandom[YearMonth]
+      val project = createProject()
       val user = createUser()
       addChargeAccount(user)
 
       charges(user) shouldEqual Nil
 
+      1 to 50 map (_ => thank(user, project, someRandom[Resource]))
       runAndWait(yom)
 
       val statusAfter = getStatus(yom)
@@ -110,8 +113,8 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val giver = createUser()
       addChargeAccount(giver)
 
-      val expectedTransactions = 1 to 30 map (_ => thank(giver, owner, someRandom[Resource]))
-      eventually(outgoingTransactions(giver) should containAllOf(expectedTransactions))
+      val expectedTransactions = 1 to 50 map (_ => thank(giver, owner, someRandom[Resource]))
+      eventually(pendingCharges(giver) should containAllOf(expectedTransactions))
 
       runAndWait(yom)
 
@@ -126,7 +129,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       yomCharge.status shouldEqual ChargeStatus.Success
       yomCharge.transactions shouldEqual expectedTransactions
       // If success there should be no pending transactions left
-      eventually(outgoingTransactions(giver) shouldEqual List.empty)
+      eventually(pendingCharges(giver) shouldEqual List.empty)
     }
 
     "EOM charge UnderMin on small thank amount" in {
@@ -137,7 +140,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       addChargeAccount(giver)
 
       val expectedTransactions = 1 to 3 map (_ => thank(giver, owner, someRandom[Resource]))
-      outgoingTransactions(giver) should containAllOf(expectedTransactions)
+      pendingCharges(giver) should containAllOf(expectedTransactions)
 
       runAndWait(yom)
 
@@ -147,7 +150,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       chargeOpt.get.status shouldEqual ChargeStatus.UnderMin
       chargeOpt.get.transactions shouldEqual expectedTransactions
       // If UnderMin there should be no change in pending transactions
-      outgoingTransactions(giver) shouldEqual expectedTransactions
+      pendingCharges(giver) shouldEqual expectedTransactions
     }
   }
 
@@ -164,15 +167,15 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val giverB = createUser()
       addChargeAccount(giverB)
 
-      1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]))
-      1 to 30 map (_ => thank(giverA, owner, someRandom[Resource]))
+      1 to 50 map (_ => thank(giverA, owner, someRandom[Resource]))
+      1 to 50 map (_ => thank(giverA, owner, someRandom[Resource]))
 
       val finalStatus = runAndWait(yom)
 
       finalStatus.createPayout.get.success shouldEqual 1
       val ownerPayouts = payouts(owner.user)
       ownerPayouts.size shouldEqual 1
-      ownerPayouts.head.amount shouldEqual new Money(5.4, "USD")
+      ownerPayouts.head.amount shouldEqual new Money(9.0, "USD")
     }
 
   }

@@ -5,7 +5,7 @@ import java.util.Currency
 import com.clemble.loveit.common.model.Amount
 import com.clemble.loveit.payment.service.repository._
 import com.clemble.loveit.payment.service.repository.mongo._
-import com.clemble.loveit.payment.service._
+import com.clemble.loveit.payment.service.{StripePayoutAccountConverter, _}
 import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
 
@@ -17,6 +17,7 @@ import com.stripe.Stripe
 import com.stripe.net.RequestOptions
 import com.stripe.net.RequestOptions.RequestOptionsBuilder
 import net.codingwell.scalaguice.ScalaModule
+import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment, Mode}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
@@ -40,7 +41,6 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     bind[ChargeAccountService].to[SimpleChargeAccountService].asEagerSingleton()
 
     bind[PayoutAccountRepository].to[MongoPaymentRepository].asEagerSingleton()
-    bind[PayoutAccountConverter].to[StripePayoutAccountConverter].asEagerSingleton()
     bind[PayoutAccountService].to[SimplePayoutAccountService].asEagerSingleton()
 
     bind[PaymentLimitRepository].to[MongoPaymentRepository].asEagerSingleton()
@@ -67,7 +67,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   @Provides
   @Singleton
   def chargeAccountConverter(implicit ec: ExecutionContext): ChargeAccountConverter = {
-    if (env.mode == Mode.Dev) {
+    if (env.mode == Mode.Dev || env.mode == Mode.Test) {
       DevChargeAccountConverter
     } else {
       new StripeChargeAccountConverter()
@@ -77,7 +77,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   @Provides
   @Singleton
   def eomChargeProcessor(options: RequestOptions): EOMChargeProcessor = {
-    if (env.mode == Mode.Dev) {
+    if (env.mode == Mode.Dev || env.mode == Mode.Test) {
       DevEOMChargeProcessor
     } else {
       StripeEOMChargeProcessor(options)
@@ -87,10 +87,20 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   @Provides
   @Singleton
   def eomPayoutProcessor(): EOMPayoutProcessor = {
-    if (env.mode == Mode.Dev) {
+    if (env.mode == Mode.Dev || env.mode == Mode.Test) {
       DevEOMPayoutProcessor
     } else {
       StripeEOMPayoutProcessor
+    }
+  }
+
+  @Provides
+  @Singleton
+  def payoutAccountConverter(wsClient: WSClient, ec: ExecutionContext): PayoutAccountConverter = {
+    if (env.mode == Mode.Dev || env.mode == Mode.Test) {
+      DevPayoutAccountConverter
+    } else {
+      new StripePayoutAccountConverter(wsClient, ec)
     }
   }
 

@@ -22,15 +22,18 @@ case class MongoPendingTransactionRepository @Inject()(
   extends PendingTransactionRepository {
 
   override def save(user: UserID, transaction: PendingTransaction): Future[Boolean] = {
-    val giverSelector = Json.obj("_id" -> user, "pending.resource" -> Json.obj("$ne" -> transaction.resource))
+    val giverSelector = Json.obj("_id" -> user, "charges.resource" -> Json.obj("$ne" -> transaction.resource))
     val giverUpdate = Json.obj("$push" -> Json.obj("charges" -> transaction))
     val updateGiver = MongoSafeUtils.safeSingleUpdate(collection.update(giverSelector, giverUpdate))
 
-    val ownerSelector = Json.obj("_id" -> transaction.user)
-    val ownerUpdate = Json.obj("$push" -> Json.obj("payouts" -> transaction))
-    val updateOwner = MongoSafeUtils.safeSingleUpdate(collection.update(ownerSelector, ownerUpdate))
-
-    Future.sequence(List(updateGiver, updateOwner)).map(_.forall(_ == true))
+    updateGiver.flatMap({
+      case true =>
+        val ownerSelector = Json.obj("_id" -> transaction.user)
+        val ownerUpdate = Json.obj("$push" -> Json.obj("payouts" -> transaction))
+        MongoSafeUtils.safeSingleUpdate(collection.update(ownerSelector, ownerUpdate))
+      case false =>
+        Future.successful(false)
+    })
   }
 
   override def findChargesByUser(user: UserID): Future[List[PendingTransaction]] = {

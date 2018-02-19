@@ -19,22 +19,15 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   val thankService = dependency[PendingTransactionService]
   val projectRepo = dependency[ProjectRepository]
 
-  override def getBalance(user: UserID): Amount = {
-    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/balance"))
-    val amountOpt = res.body.dataStream.readJson[Amount]()
-    amountOpt.get
-  }
-
   override def charges(user: UserID): Seq[EOMCharge] = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge"))
-    val charges = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[EOMCharge])
-    charges.toSeq()
+    res.body.dataStream.readJson[Seq[EOMCharge]].get
   }
 
   override def payouts(user: UserID): Seq[EOMPayout] = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/payout"))
-    val charges = res.body.dataStream.map(byteStream => Json.parse(byteStream.utf8String).as[EOMPayout])
-    charges.toSeq()
+    val payouts = res.body.dataStream.readJson[Seq[EOMPayout]]
+    payouts.get
   }
 
   override def getChargeAccount(user: UserID): Option[ChargeAccount] = {
@@ -75,12 +68,6 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
 
   override def thank(giver: UserID, project: Project, resource: Resource): PendingTransaction = {
     await(thankService.create(giver, project, resource))
-  }
-
-  override def outgoingTransactions(giver: UserID): Seq[PendingTransaction] = {
-    val res = perform(giver, FakeRequest(GET, s"/api/v1/payment/my/pending"))
-    val pending = res.body.consumeData.map(str => Json.parse(str.utf8String).as[List[PendingTransaction]])
-    await(pending)
   }
 
 }

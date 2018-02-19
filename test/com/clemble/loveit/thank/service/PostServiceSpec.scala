@@ -63,46 +63,6 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
   }
 
-
-  "Thank " should {
-
-    "Decrement for the giver" in {
-      val (url, _, giver) = createScene()
-
-      thank(giver, url)
-      eventually(getBalance(url) shouldEqual 1)
-
-      eventually(getBalance(giver) shouldEqual -1)
-    }
-
-    "Increment for the owner" in {
-      val (url, owner, giver) = createScene()
-
-      thank(giver, url)
-      eventually(getBalance(url) shouldEqual 1)
-
-      eventually(getBalance(owner) shouldEqual 1)
-    }
-
-    "Double thank has no effect" in {
-      val (url, owner, giver) = createScene()
-
-      getBalance(owner) shouldEqual 0
-      getBalance(giver) shouldEqual 0
-
-      // Double thank has no effect
-      thank(giver, url)
-      thank(giver, url)
-      thank(giver, url)
-      eventually(getBalance(url) shouldEqual 1)
-
-      // Balance did not change
-      eventually(getBalance(owner) shouldEqual 1)
-      eventually(getBalance(giver) shouldEqual - 1)
-    }
-
-  }
-
   "UPDATE OWNER" should {
 
     "create if missing" in {

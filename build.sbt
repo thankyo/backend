@@ -11,7 +11,7 @@ scalaVersion := "2.12.4"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 val silhouetteVersion = "5.0.3"
-val reactMongoVersion = "0.12.7"
+val reactMongoVersion = "0.13.0"
 val scalaGuiceVersion = "4.1.1"
 val elastic4sVersion = "6.1.3"
 

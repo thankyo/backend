@@ -38,7 +38,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def getChargeAccount(user: UserID): Option[ChargeAccount] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/account"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/account"))
     val fRes = route(application, req).get
 
     val res = await(fRes)
@@ -49,14 +49,14 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def addChargeAccount(user: UserID, token: StripeCustomerToken = someValidStripeToken()): ChargeAccount = {
-    val req = FakeRequest(POST, s"/api/v1/payment/my/account").
+    val req = FakeRequest(POST, s"/api/v1/payment/my/charge/account").
       withJsonBody(JsString(token))
     val res = perform(user, req)
     res.body.dataStream.readJson[ChargeAccount].get
   }
 
   override def getMonthlyLimit(user: UserID): Option[Money] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/limit"))
+    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/limit"))
     val fRes = route(application, req).get
 
     val res = await(fRes)
@@ -67,7 +67,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def setMonthlyLimit(user: UserID, limit: Money): Boolean = {
-    val req = sign(user, FakeRequest(POST, s"/api/v1/payment/my/limit").withJsonBody(Json.toJson(limit)))
+    val req = sign(user, FakeRequest(POST, s"/api/v1/payment/my/charge/limit").withJsonBody(Json.toJson(limit)))
     val res = await(route(application, req).get)
 
     res.body.dataStream.readJson[Money].isDefined

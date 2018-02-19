@@ -28,8 +28,7 @@ class EOMChargeController @Inject()(
           groupBy(_.resource).
           map({
             case (resource, transactions) =>
-              List(charge.yom.toString, transactions.size, resource.stringify()).
-                mkString(",")
+              List(charge.yom.toString, transactions.size, resource.stringify()).mkString(",")
           })
         )
 

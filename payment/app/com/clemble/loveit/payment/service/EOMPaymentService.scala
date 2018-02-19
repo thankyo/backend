@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
-import com.clemble.loveit.common.model.{Amount, UserID}
+import com.clemble.loveit.common.model.{Amount, Money, UserID}
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model.PayoutStatus.PayoutStatus
@@ -103,11 +103,14 @@ case class SimpleEOMPaymentService @Inject()(
       val (satisfied, _) = user.charges.splitAt(thanks.toInt)
       val amount = exchangeService.toAmountWithClientFee(satisfied.size)
       val status = user.chargeAccount match {
+        case _ if satisfied.isEmpty => ChargeStatus.NoContributions
+        case _ if ChargeStatus.isUnderMin(amount) => ChargeStatus.UnderMin
         case Some(_) => ChargeStatus.Pending
-        case _ if (ChargeStatus.isUnderMin(amount)) => ChargeStatus.UnderMin
         case None => ChargeStatus.NoBankDetails
       }
-      val charge = EOMCharge(user._id, yom, user.chargeAccount, status, amount, None, satisfied)
+      // Charge amount should be ZERO if no details were provided
+      val chargeAmount = if (status == ChargeStatus.Pending) amount else Money.ZERO
+      val charge = EOMCharge(user._id, yom, user.chargeAccount, status, chargeAmount, None, satisfied)
       chargeRepo.
         save(charge).
         map(_.status).

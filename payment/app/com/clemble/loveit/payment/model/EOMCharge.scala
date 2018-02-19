@@ -11,7 +11,7 @@ import com.clemble.loveit.common.model.yearMonthJsonFormat
 
 object ChargeStatus extends Enumeration {
   type ChargeStatus = Value
-  val Pending, Running, Success, Failed, UnderMin, NoBankDetails, FailedToCreate = Value
+  val Pending, Running, Success, Failed, UnderMin, NoBankDetails, NoContributions,FailedToCreate = Value
 
   val MIN_CHARGE = Money(5.0, LoveItCurrency.getInstance("USD"))
 

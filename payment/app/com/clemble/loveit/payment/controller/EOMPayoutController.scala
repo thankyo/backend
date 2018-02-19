@@ -1,5 +1,6 @@
 package com.clemble.loveit.payment.controller
 
+import java.time.YearMonth
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.controller.LoveItController
@@ -24,17 +25,12 @@ case class EOMPayoutController @Inject()(
       payouts <- service.findByUser(req.identity.id)
     } yield {
       val csv = payouts.
-        flatMap(payout => payout.
-        transactions.
-        groupBy(_.resource).
-        map({
-          case (resource, transactions) =>
-            List(payout.yom.toString, transactions.size, resource.stringify()).
-              mkString(",")
+        flatMap(payout => payout.transactions.map(transaction => {
+          List(YearMonth.from(transaction.created), transaction.created, payout.status, transaction.resource.stringify()).mkString(",")
         })
       )
 
-      csv.mkString("\n")
+      "YearMont,Time,Payout Status,URL\n" + csv.mkString("\n")
     }
 
     fCSV.map(Ok(_))

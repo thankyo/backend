@@ -90,7 +90,10 @@ case object StripeEOMPayoutProcessor extends EOMPayoutProcessor {
 case object DevEOMPayoutProcessor extends EOMPayoutProcessor {
 
   override def process(payout: EOMPayout): Future[(PayoutStatus, JsValue)] = {
-    Future.successful(PayoutStatus.Success -> Json.obj())
+    payout.destination match {
+      case Some(_) => Future.successful(PayoutStatus.Success -> Json.obj())
+      case None => Future.successful(PayoutStatus.NoBankAccount -> Json.obj())
+    }
   }
 
 }

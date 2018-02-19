@@ -1,7 +1,5 @@
 # Payment related ENDPOINTS
 
-GET         /:user/transaction/outgoing      @com.clemble.loveit.payment.controller.PendingTransactionController.listOutgoing(user)
-GET         /:user/transaction/incoming      @com.clemble.loveit.payment.controller.PendingTransactionController.listIncoming(user)
 
 GET         /my/charge                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 GET         /my/charge/csv                   @com.clemble.loveit.payment.controller.EOMChargeController.getMyCSV()
@@ -9,6 +7,9 @@ GET         /my/charge/csv                   @com.clemble.loveit.payment.control
 GET         /my/charge/account               @com.clemble.loveit.payment.controller.ChargeAccountController.getMyAccount()
 POST        /my/charge/account               @com.clemble.loveit.payment.controller.ChargeAccountController.setMyAccount()
 DELETE      /my/charge/account               @com.clemble.loveit.payment.controller.ChargeAccountController.deleteMyAccount()
+
+GET         /:user/charge/pending            @com.clemble.loveit.payment.controller.PendingTransactionController.listCharges(user)
+GET         /:user/charge/pending/csv        @com.clemble.loveit.payment.controller.PendingTransactionController.getChargesCsv(user)
 
 POST        /my/charge/limit                 @com.clemble.loveit.payment.controller.PaymentLimitController.setMonthlyLimit()
 GET         /:user/charge/limit              @com.clemble.loveit.payment.controller.PaymentLimitController.getMonthlyLimit(user)
@@ -20,6 +21,8 @@ GET         /my/payout/account               @com.clemble.loveit.payment.control
 GET         /my/payout/account/connect       @com.clemble.loveit.payment.controller.PayoutAccountController.connectMyAccount()
 DELETE      /my/payout/account               @com.clemble.loveit.payment.controller.PayoutAccountController.deleteMyAccount()
 
+GET         /:user/payout/pending            @com.clemble.loveit.payment.controller.PendingTransactionController.listPayouts(user)
+GET         /:user/payout/pending/csv        @com.clemble.loveit.payment.controller.PendingTransactionController.getPayoutsCsv(user)
 
 GET         /admin/eom/*yom                  @com.clemble.loveit.payment.controller.AdminEOMController.getStatus(yom: java.time.YearMonth)
 POST        /admin/eom/*yom                  @com.clemble.loveit.payment.controller.AdminEOMController.run(yom: java.time.YearMonth)

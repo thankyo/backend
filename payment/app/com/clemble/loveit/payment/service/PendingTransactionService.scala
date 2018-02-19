@@ -14,9 +14,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PendingTransactionService {
 
-  def listOutgoing(user: UserID): Future[List[PendingTransaction]]
+  def listCharges(user: UserID): Future[List[PendingTransaction]]
 
-  def listIncoming(user: UserID): Future[List[PendingTransaction]]
+  def listPayouts(user: UserID): Future[List[PendingTransaction]]
 
   def create(giver: UserID, owner: Project, url: Resource): Future[PendingTransaction]
 
@@ -49,12 +49,12 @@ case class SimplePendingTransactionService @Inject()(
     thankEventBus.subscribe(subscriber, classOf[ThankEvent])
   }
 
-  override def listOutgoing(user: UserID): Future[List[PendingTransaction]] = {
-    repo.findOutgoingByUser(user)
+  override def listCharges(user: UserID): Future[List[PendingTransaction]] = {
+    repo.findChargesByUser(user)
   }
 
-  override def listIncoming(user: UserID): Future[List[PendingTransaction]] = {
-    repo.findIncomingByUser(user)
+  override def listPayouts(user: UserID): Future[List[PendingTransaction]] = {
+    repo.findPayoutsByUser(user)
   }
 
   override def findUsersWithPayouts(): Future[List[UserID]] = {

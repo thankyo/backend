@@ -18,10 +18,11 @@ val elastic4sVersion = "6.1.3"
 val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.12.4",
   libraryDependencies ++= Seq(
-    "net.codingwell" %% "scala-guice" % scalaGuiceVersion,
+    "net.codingwell" %% "scala-guice" % scalaGuiceVersion
   )
 )
 
+resolvers += Resolver.mavenCentral
 resolvers += "Atlassian Maven Repository" at "https://maven.atlassian.com/content/repositories/atlassian-public/"
 resolvers += Resolver.sbtPluginRepo("releases")
 
@@ -31,7 +32,7 @@ lazy val common = (project in file("./common")).
     libraryDependencies ++= Seq(
       "com.mohiva" %% "play-silhouette" % silhouetteVersion excludeAll (
         ExclusionRule(organization = "com.typesafe.play")
-        ),
+      ),
 
       "com.typesafe.play" %% "play" % "2.6.11" % "provided",
 
@@ -57,8 +58,6 @@ lazy val auth = (project in file("./auth")).
       "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
 
       "com.iheart" %% "ficus" % "1.4.3",
-
-      "com.mohiva" %% "play-silhouette-testkit" % silhouetteVersion % Test
     )
   )
 

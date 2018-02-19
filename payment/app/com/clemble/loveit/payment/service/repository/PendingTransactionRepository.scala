@@ -16,9 +16,9 @@ trait PendingTransactionRepository {
 
   def findUsersWithoutCharges(): Future[List[UserID]]
 
-  def findOutgoingByUser(user: UserID): Future[List[PendingTransaction]]
+  def findChargesByUser(user: UserID): Future[List[PendingTransaction]]
 
-  def findIncomingByUser(user: UserID): Future[List[PendingTransaction]]
+  def findPayoutsByUser(user: UserID): Future[List[PendingTransaction]]
 
   def removeCharges(user: UserID, thanks: Seq[PendingTransaction]): Future[Boolean]
 

@@ -51,7 +51,7 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
   }
 
   override def outgoingTransactions(giver: UserID): Seq[PendingTransaction] = {
-    await(thankTransactionService.listOutgoing(giver))
+    await(thankTransactionService.listCharges(giver))
   }
 
 }

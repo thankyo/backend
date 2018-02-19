@@ -99,7 +99,10 @@ case class StripeEOMChargeProcessor @Inject()(options: RequestOptions) extends E
 object DevEOMChargeProcessor extends EOMChargeProcessor {
 
   override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
-    Future.successful(ChargeStatus.Success -> Json.obj())
+    charge.account match {
+      case Some(_) => Future.successful(ChargeStatus.Success -> Json.obj())
+      case None => Future.successful(ChargeStatus.NoBankDetails -> Json.obj())
+    }
   }
 
 }

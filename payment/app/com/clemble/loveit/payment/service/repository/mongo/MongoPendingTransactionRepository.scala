@@ -33,7 +33,7 @@ case class MongoPendingTransactionRepository @Inject()(
     Future.sequence(List(updateGiver, updateOwner)).map(_.forall(_ == true))
   }
 
-  override def findOutgoingByUser(user: UserID): Future[List[PendingTransaction]] = {
+  override def findChargesByUser(user: UserID): Future[List[PendingTransaction]] = {
     val selector = Json.obj("_id" -> user)
     val projection = Json.obj("charges" -> 1)
     collection.find(selector, projection).
@@ -41,7 +41,7 @@ case class MongoPendingTransactionRepository @Inject()(
       map(_.flatMap(obj => (obj \ "charges").asOpt[List[PendingTransaction]]).getOrElse(List.empty))
   }
 
-  override def findIncomingByUser(user: UserID): Future[List[PendingTransaction]] = {
+  override def findPayoutsByUser(user: UserID): Future[List[PendingTransaction]] = {
     val selector = Json.obj("_id" -> user)
     val projection = Json.obj("payouts" -> 1)
     collection.find(selector, projection).

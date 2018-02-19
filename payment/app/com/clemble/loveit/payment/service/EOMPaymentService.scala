@@ -104,7 +104,7 @@ case class SimpleEOMPaymentService @Inject()(
       val amount = exchangeService.toAmountWithClientFee(satisfied.size)
       val status = user.chargeAccount match {
         case Some(_) => ChargeStatus.Pending
-        case _ if (EOMChargeService.isUnderMin(amount)) => ChargeStatus.UnderMin
+        case _ if (ChargeStatus.isUnderMin(amount)) => ChargeStatus.UnderMin
         case None => ChargeStatus.NoBankDetails
       }
       val charge = EOMCharge(user._id, yom, user.chargeAccount, status, amount, None, satisfied)

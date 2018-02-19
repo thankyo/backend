@@ -10,6 +10,7 @@ POST        /my/account                      @com.clemble.loveit.payment.control
 DELETE      /my/account                      @com.clemble.loveit.payment.controller.ChargeAccountController.deleteMyAccount()
 
 GET         /my/payout                       @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
+GET         /my/payout/csv                   @com.clemble.loveit.payment.controller.EOMPayoutController.getMyCSV()
 GET         /my/payout/account               @com.clemble.loveit.payment.controller.PayoutAccountController.getMyAccount()
 GET         /my/payout/account/connect       @com.clemble.loveit.payment.controller.PayoutAccountController.connectMyAccount()
 DELETE      /my/payout/account               @com.clemble.loveit.payment.controller.PayoutAccountController.deleteMyAccount()

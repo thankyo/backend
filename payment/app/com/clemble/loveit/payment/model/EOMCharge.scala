@@ -3,16 +3,21 @@ package com.clemble.loveit.payment.model
 import java.time.{LocalDateTime, YearMonth}
 
 import com.clemble.loveit.common.model.{Money, UserID}
-import com.clemble.loveit.common.util.WriteableUtils
+import com.clemble.loveit.common.util.{LoveItCurrency, WriteableUtils}
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import play.api.http.Writeable
 import play.api.libs.json._
-
 import com.clemble.loveit.common.model.yearMonthJsonFormat
 
 object ChargeStatus extends Enumeration {
   type ChargeStatus = Value
   val Pending, Running, Success, Failed, UnderMin, NoBankDetails, FailedToCreate = Value
+
+  val MIN_CHARGE = Money(5.0, LoveItCurrency.getInstance("USD"))
+
+  def isUnderMin(amount: Money): Boolean = {
+    amount < MIN_CHARGE
+  }
 
   implicit val jsonFormat: Format[ChargeStatus] = new Format[ChargeStatus] {
     override def writes(o: ChargeStatus): JsValue = {

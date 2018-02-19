@@ -48,6 +48,9 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
     bind[UserPaymentService].to[SimpleUserPaymentService].asEagerSingleton()
 
+    bind[EOMPayoutService].to(classOf[SimpleEOMPayoutService])
+    bind[EOMChargeService].to(classOf[SimpleEOMChargeService])
+
     bind[EOMPaymentService].to[SimpleEOMPaymentService].asEagerSingleton()
     bind[EOMStatusRepository].to[MongoEOMStatusRepository].asEagerSingleton()
     bind[EOMPayoutRepository].to[MongoEOMPayoutRepository].asEagerSingleton()
@@ -67,17 +70,27 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     if (env.mode == Mode.Dev) {
       DevChargeAccountConverter
     } else {
-      StripeChargeAccountConverter()
+      new StripeChargeAccountConverter()
     }
   }
 
   @Provides
   @Singleton
-  def eomChargeService(options: RequestOptions): EOMChargeService = {
+  def eomChargeProcessor(options: RequestOptions): EOMChargeProcessor = {
     if (env.mode == Mode.Dev) {
-      DevEOMChargeService
+      DevEOMChargeProcessor
     } else {
-      StripeEOMChargeService(options)
+      StripeEOMChargeProcessor(options)
+    }
+  }
+
+  @Provides
+  @Singleton
+  def eomPayoutProcessor(): EOMPayoutProcessor = {
+    if (env.mode == Mode.Dev) {
+      DevEOMPayoutProcessor
+    } else {
+      StripeEOMPayoutProcessor
     }
   }
 
@@ -87,12 +100,6 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     (new RequestOptionsBuilder()).
       setApiKey(conf.get[String]("payment.stripe.apiKey")).
       build()
-  }
-
-  @Provides
-  @Singleton
-  def payoutService(): EOMPayoutService = {
-    StripeEOMPayoutService
   }
 
   @Provides

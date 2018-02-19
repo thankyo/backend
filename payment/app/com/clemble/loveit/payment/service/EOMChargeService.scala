@@ -2,10 +2,11 @@ package com.clemble.loveit.payment.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.model.Money
+import com.clemble.loveit.common.model.{Money, UserID}
 import com.clemble.loveit.common.util.LoveItCurrency
 import com.clemble.loveit.payment.model.ChargeStatus.ChargeStatus
 import com.clemble.loveit.payment.model._
+import com.clemble.loveit.payment.service.repository.EOMChargeRepository
 import com.google.common.collect.Maps
 import com.stripe.model.{Charge => StripeCharge, Customer => StripeCustomer}
 import play.api.libs.json.{JsValue, Json}
@@ -15,26 +16,39 @@ import scala.util.{Failure, Success, Try}
 
 sealed trait EOMChargeService {
 
+  def findByUser(user: UserID): Future[List[EOMCharge]]
+
   /**
     * Charges user with specified amount
     */
   def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)]
 
+
 }
 
-object EOMChargeService {
+@Singleton
+case class SimpleEOMChargeService @Inject()(processor: EOMChargeProcessor, repo: EOMChargeRepository) extends EOMChargeService {
 
-  val MIN_CHARGE = Money(5.0, LoveItCurrency.getInstance("USD"))
-
-  def isUnderMin(amount: Money): Boolean = {
-    amount < EOMChargeService.MIN_CHARGE
+  override def findByUser(user: UserID): Future[List[EOMCharge]] = {
+    repo.findByUser(user)
   }
+
+  override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
+    processor.process(charge)
+  }
+
+}
+
+sealed trait EOMChargeProcessor {
+
+  def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)]
+
 }
 
 import com.stripe.net.RequestOptions
 
 @Singleton
-case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOMChargeService {
+case class StripeEOMChargeProcessor @Inject()(options: RequestOptions) extends EOMChargeProcessor {
 
   /**
     * Charges customer with specified charge
@@ -73,7 +87,7 @@ case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOM
     * Charges user with specified amount
     */
   override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
-    if (EOMChargeService.isUnderMin(charge.amount)) {
+    if (ChargeStatus.isUnderMin(charge.amount)) {
       Future.successful(ChargeStatus.UnderMin -> Json.obj())
     } else {
       doCharge(charge)
@@ -82,7 +96,7 @@ case class StripeEOMChargeService @Inject()(options: RequestOptions) extends EOM
 
 }
 
-object DevEOMChargeService extends EOMChargeService {
+object DevEOMChargeProcessor extends EOMChargeProcessor {
 
   override def process(charge: EOMCharge): Future[(ChargeStatus, JsValue)] = {
     Future.successful(ChargeStatus.Success -> Json.obj())

@@ -75,7 +75,7 @@ sealed trait ChargeAccountConverter {
   * Stripe processing service
   */
 @Singleton
-case class StripeChargeAccountConverter @Inject() (implicit val ec: ExecutionContext) extends ChargeAccountConverter {
+class StripeChargeAccountConverter @Inject() (implicit val ec: ExecutionContext) extends ChargeAccountConverter {
   import com.stripe.model.Customer
 
   private def toInternalChargeAccount(customer: Customer): ChargeAccount = {

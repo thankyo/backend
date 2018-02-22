@@ -18,7 +18,13 @@
                         }
                     });
                     fetch(req).
-                        then(function(res) { return res.json() }).
+                        then(function(res) {
+                          if (res.ok) {
+                            return res.json()
+                          } else {
+                            singIn();
+                          }
+                        }).
                         then(function() {
                             document.getElementById("SPAN_1").style.backgroundColor = "#00D1B2";
                         })

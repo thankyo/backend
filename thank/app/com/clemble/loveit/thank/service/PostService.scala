@@ -17,7 +17,7 @@ trait PostService {
 
   def assignTags(uri: Resource, tags: Set[Tag]): Future[Boolean]
 
-  def updateOwner(owner: Project): Future[Boolean]
+  def updateProject(owner: Project): Future[Boolean]
 
   def findByTags(tags: Set[Tag]): Future[List[Post]]
 
@@ -35,19 +35,20 @@ trait PostService {
 case class SimplePostService @Inject()(
                                         thankEventBus: ThankEventBus,
                                         prjService: ProjectService,
+                                        postRefreshService: PostRefreshService,
                                         postRepo: PostRepository,
                                         implicit val ec: ExecutionContext
                                       ) extends PostService {
 
   override def hasSupported(supporter: UserID, res: Resource): Future[Boolean] = {
-    postRepo.isSupportedBy(supporter, res).flatMap(_ match {
-      case Some(thanked) => Future.successful(thanked)
-      case None => Future.successful(false)
-    })
+    getPostOrProject(res) map {
+      case Left(post) => post.thank.isSupportedBy(supporter)
+      case Right(_) => false
+    }
   }
 
   override def getPostOrProject(res: Resource): Future[Either[Post, Project]] = {
-    def createIfMissing(postOpt: Option[Post]): Future[Either[Post, Project]] = {
+    def findProjectIfNoPost(postOpt: Option[Post]): Future[Either[Post, Project]] = {
       postOpt match {
         case Some(post) =>
           Future.successful(Left(post))
@@ -58,7 +59,7 @@ case class SimplePostService @Inject()(
       }
     }
 
-    postRepo.findByResource(res).flatMap(createIfMissing)
+    postRepo.findByResource(res).flatMap(findProjectIfNoPost)
   }
 
 
@@ -90,23 +91,28 @@ case class SimplePostService @Inject()(
     postRepo.assignTags(uri, tags)
   }
 
-  override def updateOwner(project: Project): Future[Boolean] = {
+  override def updateProject(project: Project): Future[Boolean] = {
     postRepo.updateProject(project)
   }
 
   override def thank(giver: UserID, res: Resource): Future[Post] = {
-    for {
-      postOpt <- postRepo.findByResource(res)
-      post = postOpt.getOrElse({ throw ResourceException.ownerMissing() })
-      increased <- postRepo.markSupported(giver, res)
-    } yield {
-      if (increased) {
-        thankEventBus.publish(ThankEvent(giver, post.project, res))
-        post.copy(thank = post.thank.withSupporter(giver))
-      } else {
-        post
-      }
-    }
+    getPostOrProject(res) flatMap {
+      case Left(post) =>
+        Future.successful(post)
+      case Right(_) =>
+        postRefreshService
+          .enrich(OpenGraphObject(url = s"http://${res.uri}"))
+          .flatMap(create)
+    } flatMap (post => {
+      postRepo.markSupported(giver, res).map(increased => {
+        if (increased) {
+          thankEventBus.publish(ThankEvent(giver, post.project, res))
+          post.copy(thank = post.thank.withSupporter(giver))
+        } else {
+          post
+        }
+      })
+    })
   }
 
 }

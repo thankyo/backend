@@ -16,19 +16,19 @@ import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ProjectRefreshService {
+trait ProjectOwnershipService {
 
   def fetch(user: UserID): Future[List[Project]]
 
 }
 
 @Singleton
-case class SimpleProjectRefreshService @Inject()(
+case class SimpleProjectOwnershipService @Inject()(
                                                        userService: UserService,
                                                        oAuthService: UserOAuthService,
                                                        client: WSClient,
                                                        implicit val ec : ExecutionContext
-                                                    ) extends ProjectRefreshService {
+                                                    ) extends ProjectOwnershipService {
 
   private def fetchGoogleResources(user: UserID): Future[List[Project]] = {
     (for {

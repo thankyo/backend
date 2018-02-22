@@ -23,9 +23,10 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   override def configure(): Unit = {
     bind(classOf[PostService]).to(classOf[SimplePostService])
     bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
+    bind(classOf[PostRefreshService]).to(classOf[SimplePostRefreshService])
 
     bind(classOf[ProjectFeedService]).to(classOf[SimpleProjectFeedService])
-    bind(classOf[ProjectRefreshService]).to(classOf[SimpleProjectRefreshService])
+    bind(classOf[ProjectOwnershipService]).to(classOf[SimpleProjectOwnershipService])
 
     bind(classOf[ProjectRepository]).to(classOf[MongoProjectRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()

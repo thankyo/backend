@@ -63,7 +63,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
   }
 
   private def enrichTags(project: Project): Future[Set[Tag]] = {
-    if (!project.tags.isEmpty)
+    if (project.tags.nonEmpty)
       return Future.successful(project.tags)
     wsClient
       .url(s"http://${project.resource.uri}")

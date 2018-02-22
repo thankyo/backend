@@ -13,7 +13,22 @@ case class OpenGraphObject(
                             title: Option[String] = None,
                             description: Option[String] = None,
                             tags: Set[Tag] = Set.empty,
-                          )
+                          ) {
+
+  def merge(ogObjOpt: Option[OpenGraphObject]): OpenGraphObject = {
+    ogObjOpt match {
+      case Some(ogObj) =>
+        copy(
+          image = image.orElse(ogObj.image),
+          title = title.orElse(ogObj.title),
+          description = title.orElse(ogObj.description),
+          tags = tags ++ ogObj.tags
+        )
+      case None => this
+    }
+  }
+
+}
 
 /**
   * OpenGraph Image model

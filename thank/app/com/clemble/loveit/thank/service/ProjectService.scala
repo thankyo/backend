@@ -27,7 +27,7 @@ trait ProjectService {
 class SimpleProjectService @Inject()(
                                       repo: ProjectRepository,
                                       enrichService: ProjectEnrichService,
-                                      refreshService: ProjectRefreshService,
+                                      refreshService: ProjectOwnershipService,
                                       implicit val ec: ExecutionContext
                                              ) extends ProjectService {
 
@@ -37,6 +37,10 @@ class SimpleProjectService @Inject()(
 
   override def findProject(res: Resource): Future[Option[Project]] = {
     repo.findProject(res)
+  }
+
+  override def findProjectsByUser(userID: UserID): Future[List[Project]] = {
+    repo.findProjectsByUser(userID)
   }
 
   override def refresh(user: UserID): Future[List[Project]] = {
@@ -66,12 +70,9 @@ class SimpleProjectService @Inject()(
       updated <- repo.update(project)
       _ = if (!updated) throw RepositoryException.failedToUpdate()
     } yield {
+
       project
     }
-  }
-
-  override def findProjectsByUser(userID: UserID): Future[List[Project]] = {
-    repo.findProjectsByUser(userID)
   }
 
 }

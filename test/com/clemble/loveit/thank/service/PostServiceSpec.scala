@@ -1,5 +1,6 @@
 package com.clemble.loveit.thank.service
 
+import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.model.{OpenGraphObject, Project}
@@ -41,11 +42,12 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
   "thanked" should {
 
-    "return false on random res" in {
+    "return throw Exception on random res" in {
       val user = someRandom[UserID]
       val res = someRandom[Resource]
 
-      await(service.hasSupported(user, res)) shouldEqual false
+      await(service.hasSupported(user, res)) should throwA[ResourceException]
+      await(service.hasSupported(user, res)) should throwA[ResourceException]
     }
 
     "return false on not thanked res" in {

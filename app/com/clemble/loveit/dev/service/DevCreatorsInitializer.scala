@@ -63,10 +63,10 @@ case class DevCreatorsInitializer @Inject()(
     } yield {
       supPrjService
         .findProject(project.resource)
-        .flatMap(_ match {
+        .flatMap {
           case Some(_) => Future.successful(true)
           case None => prjRepo.saveProject(project.copy(user = creator))
-        })
+        }
     }
     Future.sequence(resources).map(seq => seq.forall(_ == true))
   }
@@ -75,7 +75,7 @@ case class DevCreatorsInitializer @Inject()(
     val refreshedProjects = for {
       project <- projects
     } yield {
-      feedService.refresh(project)
+      feedService.refresh(project).recoverWith({ case _ => Future.successful(List.empty)})
     }
     Future.sequence(refreshedProjects).map(_.flatten)
   }

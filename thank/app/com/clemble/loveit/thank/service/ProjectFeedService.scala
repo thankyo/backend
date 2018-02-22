@@ -23,9 +23,9 @@ object ProjectFeedService {
         OpenGraphObject(
           url = link,
           title = Option((item \ "title").text),
-          image = Option(item \ "media:thumbnail").flatMap(img => {
-            val height = Option(img.\@("height")).map(_.toInt)
-            val width = Option(img.\@("width")).map(_.toInt)
+          image = Option(item \ "thumbnail").filter(_.nonEmpty).flatMap(img => {
+            val height = Option(img.\@("height")).filterNot(_.isEmpty).map(_.toInt)
+            val width = Option(img.\@("width")).filterNot(_.isEmpty).map(_.toInt)
             Option(img.\@("url")).map(url => OpenGraphImage(url, height = height, width = width))
           })
         )

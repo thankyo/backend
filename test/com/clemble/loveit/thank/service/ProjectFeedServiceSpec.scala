@@ -33,7 +33,7 @@ class ProjectFeedServiceSpec extends ThankSpecification {
     val rssSource = XML.load(url)
     val rssFeed = ProjectFeedService.readRSS(rssSource)
     rssFeed shouldNotEqual List()
-    rssFeed.map(_.image) shouldNotEqual List()
+    rssFeed.map(_.image).flatten shouldNotEqual List()
   }
 
 }

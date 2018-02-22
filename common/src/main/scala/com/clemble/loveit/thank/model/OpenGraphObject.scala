@@ -61,11 +61,11 @@ object OpenGraphObject {
   implicit val jsonFormat: OFormat[OpenGraphObject] = Json.format[OpenGraphObject]
 
   def getRootUrl(url: String) = {
-    val separator = url.indexOf("/", 6)
+    val separator = url.indexOf("/", 8)
     if (separator == -1) {
       url + "/"
     } else {
-      url.substring(0, url.indexOf("/", 6))
+      url.substring(0, separator + 1)
     }
   }
 

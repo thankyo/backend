@@ -9,7 +9,7 @@ class OpenGraphObjectSpec extends ThankSpecification {
 
   import OpenGraphObject._
 
-  "ROOT of url extraction" should {
+  "ROOT of url extraction" in {
     getRootUrl("https://example.com/some/new") shouldEqual "https://example.com/"
     getRootUrl("https://example.com") shouldEqual "https://example.com/"
 

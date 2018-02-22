@@ -20,4 +20,5 @@ class ProjectEnrichServiceSpec extends ThankSpecification {
     val htmlSource: String = Source.fromURL(url, "UTF-8").mkString
     ProjectEnrichService.readDescription(htmlSource) shouldEqual Some("Cartoon quotes from inspirational folks")
   }
+
 }

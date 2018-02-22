@@ -35,7 +35,7 @@ trait PostService {
 case class SimplePostService @Inject()(
                                         thankEventBus: ThankEventBus,
                                         prjService: ProjectService,
-                                        postRefreshService: PostRefreshService,
+                                        postRefreshService: PostEnrichService,
                                         postRepo: PostRepository,
                                         implicit val ec: ExecutionContext
                                       ) extends PostService {

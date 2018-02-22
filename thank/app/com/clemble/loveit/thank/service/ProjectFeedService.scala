@@ -2,8 +2,8 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.Inject
 
-import com.clemble.loveit.thank.model.{OpenGraphObject, Post, Project}
-import play.api.libs.ws.{WSClient}
+import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject, Post, Project}
+import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.{Elem, XML}
@@ -22,7 +22,12 @@ object ProjectFeedService {
       Option((item \ "link").text).map(link =>
         OpenGraphObject(
           url = link,
-          title = Option((item \ "title").text)
+          title = Option((item \ "title").text),
+          image = Option(item \ "media:thumbnail").flatMap(img => {
+            val height = Option(img.\@("height")).map(_.toInt)
+            val width = Option(img.\@("width")).map(_.toInt)
+            Option(img.\@("url")).map(url => OpenGraphImage(url, height = height, width = width))
+          })
         )
       )
     })
@@ -31,7 +36,7 @@ object ProjectFeedService {
 
 }
 
-case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postRefreshService: PostRefreshService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
+case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postRefreshService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
 
   import ProjectFeedService._
 

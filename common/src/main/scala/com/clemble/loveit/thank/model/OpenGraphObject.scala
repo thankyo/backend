@@ -28,6 +28,19 @@ case class OpenGraphObject(
     }
   }
 
+  def normalize(): OpenGraphObject = {
+    image match {
+      case Some(img) if (img.url.startsWith("/")) =>
+        val root = OpenGraphObject.getRootUrl(url)
+        val normImg = img.copy(
+          url = root + img.url
+        )
+        copy(image = Some(normImg))
+      case _ =>
+        this
+    }
+  }
+
 }
 
 /**
@@ -46,5 +59,14 @@ object OpenGraphObject {
 
   implicit val imageFormat: OFormat[OpenGraphImage] = Json.format[OpenGraphImage];
   implicit val jsonFormat: OFormat[OpenGraphObject] = Json.format[OpenGraphObject]
+
+  def getRootUrl(url: String) = {
+    val separator = url.indexOf("/", 6)
+    if (separator == -1) {
+      url + "/"
+    } else {
+      url.substring(0, url.indexOf("/", 6))
+    }
+  }
 
 }

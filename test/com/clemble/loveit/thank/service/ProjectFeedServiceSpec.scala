@@ -28,4 +28,12 @@ class ProjectFeedServiceSpec extends ThankSpecification {
     ProjectFeedService.readRSS(rssSource) shouldNotEqual List()
   }
 
+  "Read RSS feed from Science" in {
+    val url = getClass.getResource("science.rss.xml")
+    val rssSource = XML.load(url)
+    val rssFeed = ProjectFeedService.readRSS(rssSource)
+    rssFeed shouldNotEqual List()
+    rssFeed.map(_.image) shouldNotEqual List()
+  }
+
 }

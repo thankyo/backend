@@ -10,40 +10,40 @@ import play.api.libs.ws.{WSClient, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait PostRefreshService {
+trait PostEnrichService {
 
   def enrich(post: OpenGraphObject): Future[OpenGraphObject]
 
 }
 
-object PostRefreshService {
+object PostEnrichService {
 
   def openGraphFromHTML(url: String, htmlStr: String): Option[OpenGraphObject] = {
     Option(Jsoup.parse(htmlStr)).map(doc => {
-        val imageUrl = {
-          val ogImage = doc.getElementsByAttributeValue("property", "og:image").first()
-          val imageSrc = doc.getElementsByAttributeValue("property", "og:image:src").first()
-          Option(ogImage).orElse(Option(imageSrc)).map(_.attr("content"))
-        }
+      val imageUrl = {
+        val ogImage = doc.getElementsByAttributeValue("property", "og:image").first()
+        val imageSrc = doc.getElementsByAttributeValue("property", "og:image:src").first()
+        Option(ogImage).orElse(Option(imageSrc)).map(_.attr("content"))
+      }
 
-        val description = {
-          val descriptionProp = doc.getElementsByAttributeValue("property", "og:description").first()
-          Option(descriptionProp).map(_.attr("content"))
-        }
+      val description = {
+        val descriptionProp = doc.getElementsByAttributeValue("property", "og:description").first()
+        Option(descriptionProp).map(_.attr("content"))
+      }
 
-        val title = {
-          val titleProp = doc.getElementsByAttributeValue("property", "og:title").first()
-          val title = Option(doc.getElementsByTag("title").first()).map(_.text())
-          Option(titleProp).map(_.attr("property")).orElse(title)
-        }
+      val title = {
+        val titleProp = doc.getElementsByAttributeValue("property", "og:title").first()
+        val title = Option(doc.getElementsByTag("title").first()).map(_.text())
+        Option(titleProp).map(_.attr("property")).orElse(title)
+      }
 
-        OpenGraphObject(
-          url,
-          description = description,
-          title = title,
-          image = imageUrl.map(OpenGraphImage(_))
-        )
-      })
+      OpenGraphObject(
+        url,
+        description = description,
+        title = title,
+        image = imageUrl.map(OpenGraphImage(_))
+      )
+    })
   }
 
   def openGraphFromFB(url: String, fb: JsValue): Option[OpenGraphObject] = {
@@ -70,13 +70,16 @@ object PostRefreshService {
     val htmlOG = openGraphFromHTML(origGO.url, htmlStr)
     val fbOG = openGraphFromFB(origGO.url, fb)
 
-    origGO.merge(fbOG).merge(htmlOG)
+    origGO.merge(fbOG).merge(htmlOG).normalize()
   }
 
 }
 
 @Singleton
-case class SimplePostRefreshService @Inject()(wsClient: WSClient, implicit val ec: ExecutionContext) extends PostRefreshService {
+case class SimplePostEnrichService @Inject()(
+  wsClient: WSClient,
+  implicit val ec: ExecutionContext
+) extends PostEnrichService {
 
   private def isRedirect(res: WSResponse) = {
     res.status match {
@@ -100,7 +103,7 @@ case class SimplePostRefreshService @Inject()(wsClient: WSClient, implicit val e
             wsClient.url(s"https://graph.facebook.com/?id=${ogObj.url}")
               .get()
               .map(_.json)
-              .map(fb => PostRefreshService.updateOG(ogObj, res.body, fb))
+              .map(fb => PostEnrichService.updateOG(ogObj, res.body, fb))
         }
       })
   }

@@ -8,10 +8,12 @@ import com.clemble.loveit.payment.model.{ChargeAccount, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository.ChargeAccountRepository
 import com.google.common.collect.ImmutableMap
 import com.stripe.model.{Card, Customer}
+import org.slf4j.LoggerFactory
+import play.api.Logger
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Random
+import scala.util.{Failure, Random, Try}
 
 /**
   * [[ChargeAccount]] integration service
@@ -29,6 +31,7 @@ trait ChargeAccountService {
 @Singleton
 case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, converter: ChargeAccountConverter, implicit val ec: ExecutionContext) extends ChargeAccountService {
 
+  val LOG = LoggerFactory.getLogger(getClass())
 
   override def getChargeAccount(user: UserID): Future[Option[ChargeAccount]] = {
     repo.getChargeAccount(user)
@@ -50,7 +53,11 @@ case class SimpleChargeAccountService @Inject()(repo: ChargeAccountRepository, c
       removed <- repo.deleteChargeAccount(user)
     } yield {
       if (customerOpt.isDefined) {
-        Customer.retrieve(customerOpt.get.customer).delete()
+        try {
+          Customer.retrieve(customerOpt.get.customer).delete()
+        } catch {
+          case t: Throwable => LOG.error("Failed to remove customer", t)
+        }
       }
       removed
     }

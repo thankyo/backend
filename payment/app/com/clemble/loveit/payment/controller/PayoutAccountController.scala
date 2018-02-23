@@ -40,7 +40,10 @@ class PayoutAccountController @Inject()(
   def getMyAccount = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id
     payoutAccService.getPayoutAccount(user).
-      map(accOpt => Ok(JsBoolean(accOpt.isDefined)))
+      map(accOpt => accOpt.map(_.accountId) match {
+        case Some(account) => Ok(account)
+        case _ => NoContent
+      })
   })
 
   def connectMyAccount = silhouette.UnsecuredAction.async(implicit req => {
@@ -73,7 +76,7 @@ class PayoutAccountController @Inject()(
   def deleteMyAccount() = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id
     val fDelete = payoutAccService.deletePayoutAccount(user)
-    fDelete.map(removed => Ok(JsBoolean(removed)))
+    fDelete.map(_ => NoContent)
   })
 
 }

@@ -23,7 +23,7 @@ case class ChargeAccountController @Inject()(
     val user = req.identity.id
     chargeAccService.getChargeAccount(user).map(_ match {
       case Some(chAcc) => Ok(chAcc)
-      case None => NotFound
+      case None => NoContent
     })
   })
 
@@ -36,6 +36,6 @@ case class ChargeAccountController @Inject()(
   def deleteMyAccount = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id
     val fDelete = chargeAccService.deleteChargeAccount(user)
-    fDelete.map(removed => Ok(Json.toJson(removed)))
+    fDelete.map(_ => NoContent)
   })
 }

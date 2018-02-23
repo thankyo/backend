@@ -30,7 +30,7 @@ case class EOMPayoutController @Inject()(
         })
       )
 
-      "YearMont,Time,Payout Status,URL\n" + csv.mkString("\n")
+      "Date,Time,Payout Status,URL\n" + csv.mkString("\n")
     }
 
     fCSV.map(Ok(_))

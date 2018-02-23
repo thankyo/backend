@@ -27,7 +27,7 @@ case class PendingTransactionController @Inject()(
     val csv = transactions.map(transaction => {
       List(YearMonth.from(transaction.created), transaction.created, transaction.resource.stringify()).mkString(",")
     })
-    "YearMont,Time,URL\n" + csv.mkString("\n")
+    "Date,Time,URL\n" + csv.mkString("\n")
   }
 
   def getChargesCsv(user: UserID) = silhouette.SecuredAction.async(implicit req => {

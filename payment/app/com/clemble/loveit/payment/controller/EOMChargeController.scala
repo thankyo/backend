@@ -29,7 +29,7 @@ class EOMChargeController @Inject()(
           })
         )
 
-      "YearMont,Time,Charge Status,URL\n" + csv.mkString("\n")
+      "Date,Time,Charge Status,URL\n" + csv.mkString("\n")
     }
 
     fCSV.map(Ok(_))

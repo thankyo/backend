@@ -37,7 +37,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
     val res = await(fRes)
     res.header.status match {
       case 200 => res.body.dataStream.readJson[ChargeAccount]
-      case 404 => None
+      case _ => None
     }
   }
 

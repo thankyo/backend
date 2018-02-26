@@ -17,6 +17,8 @@ trait ProjectService {
 
   def findProjectsByUser(user: UserID): Future[List[Project]]
 
+  def findOwned(user: UserID): Future[List[Project]]
+
   def refresh(user: UserID): Future[List[Project]]
 
   def update(project: Project): Future[Project]
@@ -39,8 +41,12 @@ class SimpleProjectService @Inject()(
     repo.findProject(res)
   }
 
-  override def findProjectsByUser(userID: UserID): Future[List[Project]] = {
-    repo.findProjectsByUser(userID)
+  override def findProjectsByUser(user: UserID): Future[List[Project]] = {
+    repo.findProjectsByUser(user)
+  }
+
+  override def findOwned(user: UserID): Future[List[Project]] = {
+    refreshService.fetch(user)
   }
 
   override def refresh(user: UserID): Future[List[Project]] = {

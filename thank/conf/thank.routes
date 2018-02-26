@@ -1,19 +1,20 @@
 # Thank related ENDPOINTS
-
 GET         /stat/:owner/:year/:month          @com.clemble.loveit.thank.controller.UserStatController.get(owner, year: Int, month: Int)
 
 
 
-
 GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
-GET         /project/:project/feed             @com.clemble.loveit.thank.controller.ProjectController.getProjectFeed(project)
 PUT         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.updateProject(project)
+
+GET         /project/:project/feed             @com.clemble.loveit.thank.controller.ProjectController.getProjectFeed(project)
 
 GET         /user/:user/supported              @com.clemble.loveit.thank.controller.ProjectController.getSupportedByUser(user)
 GET         /user/:user/project                @com.clemble.loveit.thank.controller.ProjectController.getProjectsByUser(user)
 
 GET         /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.getOwnedProjects()
 PUT         /user/my/project                   @com.clemble.loveit.thank.controller.ProjectController.refreshMyProjects()
+
+
 
 GET         /http/*url                         @com.clemble.loveit.thank.controller.PostController.get(url: com.clemble.loveit.common.model.Resource)
 PUT         /http/*url                         @com.clemble.loveit.thank.controller.PostController.thank(url: com.clemble.loveit.common.model.Resource)

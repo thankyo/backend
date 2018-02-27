@@ -10,9 +10,7 @@ import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.error.ResourceException._
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.mvc.{ControllerComponents, Result}
-import com.clemble.loveit.thank.controller.html.hasNotThanked
-import com.clemble.loveit.thank.controller.html.ownerMissing
-import com.clemble.loveit.thank.controller.html.hasThanked
+import com.clemble.loveit.thank.controller.html.post
 import com.clemble.loveit.thank.model.Post
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,17 +38,17 @@ case class PostController @Inject()(
           thanked <- service.hasSupported(giver, res)
         } yield {
           if (thanked) {
-            Ok(hasThanked())
+            Ok(post(None))
           } else {
-            Ok(hasNotThanked(res))
+            Ok(post(Some(res)))
           }
         }
       case None =>
-        Future.successful(Ok(hasNotThanked(res)))
+        Future.successful(Ok(post(Some(res))))
     }
     fResponse.recover({
       case ResourceException(OWNER_MISSING_CODE, _) =>
-        Ok(ownerMissing(res))
+        Ok(post(None, Some(OWNER_MISSING_CODE)))
     })
   }
 

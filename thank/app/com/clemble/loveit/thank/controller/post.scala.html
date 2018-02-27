@@ -1,0 +1,101 @@
+@import com.clemble.loveit.common.model.Resource
+@import scala.Option
+@(res: Option[Resource], err: Option[String] = None)
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <style type="text/css">
+        .loveit-fab {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 5px 7px 0 #b5b5b5;
+            transition: all .2s ease-in-out;
+            padding: 0 0 0 0
+        }
+
+        .loveit-fab:hover {
+            box-shadow: 0 4px 5px 0 #666;
+            transform: scale(1.2)
+        }
+
+        svg {
+            fill: #48c8fe
+        }
+
+        .fab-is-loved {
+            border-radius: 50%;
+            background-color: #48c8fe;
+            fill: #fff
+        }
+
+        .fab-is-error {
+            fill: #fff;
+            border-radius: 50%;
+            background-color: #ff3860;
+        }
+        </style>
+        <script>
+            function tip() {
+                function singIn() {
+                    window.top.location = "https://loveit.tips"
+                }
+                function doTip(token) {
+                    var url = "/api/v1/thank/http/@res.map(_.uri)";
+                    var req = new Request(url, {
+                        method: "PUT",
+                        headers: {
+                            'X-Auth-Token': token
+                        }
+                    });
+                    fetch(req).
+                        then(function(res) {
+                          if (res.ok) {
+                            return res.json()
+                          } else {
+                            singIn();
+                          }
+                        }).
+                        then(function() {
+                            document.getElementById("SPAN_1").style.backgroundColor = "#00D1B2";
+                        })
+                }
+
+                var token = localStorage.getItem("token");
+                if (token === undefined || token === null) {
+                    singIn()
+                } else {
+                    doTip(token)
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div class="loveit-fab ">
+            <svg viewBox="0 0 512 512" onclick="tip()" class="@err.map(_ => "fab-is-error").orElse(res.map(_ => "fab-is-loved")).getOrElse(""))" width="50" height="50" fill="#48c8fe">
+                <g>
+                    <path d="M439.118,246h-23.367C410.572,162.382,340.9,95.939,256,95.939c-88.258,0-160.061,71.804-160.061,160.061
+                S167.742,416.061,256,416.061c84.9,0,154.572-66.444,159.751-150.061h23.367c5.522,0,10-4.477,10-10S444.641,246,439.118,246z
+                 M256,396.061c-77.231,0-140.061-62.831-140.061-140.061S178.769,115.939,256,115.939S396.061,178.769,396.061,256
+                S333.231,396.061,256,396.061z"/>
+                </g>
+                <g>
+                    <path d="M331.507,235.536c-1.272-23.784-20.501-42.416-43.779-42.416c-14.36,0-25.053,9.07-31.535,15.712
+                c-6.467-6.787-17.047-15.712-31.925-15.712c-23.275,0-42.503,18.632-43.774,42.415c-0.77,14.377,4.772,24.586,9.01,31.015
+                c5.81,8.815,20.007,21.991,31.357,31.382c25.318,20.948,32.244,20.948,35.202,20.948c2.737,0,10.008,0,35.196-20.912
+                c11.264-9.351,25.387-22.517,31.247-31.427C326.739,260.103,332.278,249.886,331.507,235.536z M305.795,255.552
+                c-7.747,11.778-39.997,38.776-49.709,43.017c-9.8-4.31-42.175-31.326-49.884-43.025c-4.377-6.642-6.093-12.306-5.738-18.939
+                c0.692-12.949,11.371-23.484,23.804-23.484c9.187,0,16.364,8.172,20.652,13.055c3.057,3.479,5.943,6.767,11.082,6.767
+                c5.145,0,8.125-3.252,11.575-7.017c4.39-4.789,11.737-12.805,20.15-12.805c12.436,0,23.115,10.535,23.808,23.486
+                C311.894,243.315,310.231,248.804,305.795,255.552z"/>
+                </g>
+                <g>
+                    <circle cx="445.563" cy="336.013" r="9.997"></circle>
+                </g>
+
+            </svg>
+        </div>
+    </body>
+</html>

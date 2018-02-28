@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.controller
 
-import com.clemble.loveit.common.model.{ProjectID, Resource}
+import com.clemble.loveit.common.model.{Loved, NotLoved, OwnerMissing, ProjectID, Resource}
 import com.clemble.loveit.thank.service.PostService
 import com.clemble.loveit.common.util.AuthEnv
 import javax.inject.{Inject, Singleton}
@@ -31,25 +31,25 @@ case class PostController @Inject()(
     })
   }
 
-  private def getHtml(giver: Option[String], res: Resource): Future[Result] = {
-    val fResponse = giver match {
+  private def getHtml(giverOpt: Option[String], res: Resource): Future[Result] = {
+    val fStatus = giverOpt match {
       case Some(giver) =>
-        for {
+        (for {
           thanked <- service.hasSupported(giver, res)
         } yield {
           if (thanked) {
-            Ok(post(None))
+            Loved
           } else {
-            Ok(post(Some(res)))
+            NotLoved
           }
-        }
+        }).recover({
+          case ResourceException(OWNER_MISSING_CODE, _) => OwnerMissing
+        })
       case None =>
-        Future.successful(Ok(post(Some(res))))
+        Future.successful(NotLoved)
     }
-    fResponse.recover({
-      case ResourceException(OWNER_MISSING_CODE, _) =>
-        Ok(post(None, Some(OWNER_MISSING_CODE)))
-    })
+
+    fStatus.map(status => Ok(post(res, status)))
   }
 
   def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {

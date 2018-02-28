@@ -1,6 +1,8 @@
 @import com.clemble.loveit.common.model.Resource
-@import scala.Option
-@(res: Option[Resource], err: Option[String] = None)
+@import com.clemble.loveit.common.model.ResourceState
+@import com.clemble.loveit.common.model.Loved
+@import com.clemble.loveit.common.model.OwnerMissing
+@(res: Resource, state: ResourceState)
 
 <!DOCTYPE html>
 <html>
@@ -43,7 +45,8 @@
                     window.top.location = "https://loveit.tips"
                 }
                 function doTip(token) {
-                    var url = "/api/v1/thank/http/@res.map(_.uri)";
+                    document.getElementById("button").class = "fab-is-loved";
+                    var url = "/api/v1/thank/http/@res.uri";
                     var req = new Request(url, {
                         method: "PUT",
                         headers: {
@@ -74,7 +77,7 @@
     </head>
     <body>
         <div class="loveit-fab ">
-            <svg viewBox="0 0 512 512" onclick="tip()" class="@err.map(_ => "fab-is-error").orElse(res.map(_ => "fab-is-loved")).getOrElse(""))" width="50" height="50" fill="#48c8fe">
+            <svg viewBox="0 0 512 512" id="button" onclick="tip()" class="@{state match { case Loved => "fab-is-loved"; case OwnerMissing => "fab-is-error"; case _ => ""  }}" width="50" height="50" fill="#48c8fe">
                 <g>
                     <path d="M439.118,246h-23.367C410.572,162.382,340.9,95.939,256,95.939c-88.258,0-160.061,71.804-160.061,160.061
                 S167.742,416.061,256,416.061c84.9,0,154.572-66.444,159.751-150.061h23.367c5.522,0,10-4.477,10-10S444.641,246,439.118,246z

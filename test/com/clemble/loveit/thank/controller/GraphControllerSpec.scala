@@ -5,12 +5,13 @@ import com.clemble.loveit.payment.controller.PaymentControllerTestExecutor
 import com.clemble.loveit.user.model.ResourceSpec
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 
 @RunWith(classOf[JUnitRunner])
-class PostControllerSpec extends PaymentControllerTestExecutor {
+class GraphControllerSpec extends PaymentControllerTestExecutor {
 
   "UPDATE" should {
 
@@ -22,11 +23,11 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
 
       createProject(owner, HttpResource(masterUrl)) shouldNotEqual None
 
-      val uriVariations = ResourceSpec.generateVariations(masterUrl)
+      val urlVariations = ResourceSpec.generateVariations(masterUrl)
       val thanks = for {
-        uri <- uriVariations
+        url <- urlVariations
       } yield {
-        val req = sign(giver, FakeRequest(PUT, s"/api/v1/thank/http/${uri}"))
+        val req = sign(giver, FakeRequest(POST, s"/api/v1/thank/graph/my/support").withJsonBody(Json.obj("url" -> url)))
         route(application, req).get.map(_.header.status).recover({ case _ => 500 })
       }
       val updateReq = await(Future.sequence(thanks))
@@ -41,7 +42,7 @@ class PostControllerSpec extends PaymentControllerTestExecutor {
       val owner = createUser()
       createProject(getMyUser(owner).id, HttpResource(masterUrl)) shouldNotEqual None
 
-      val req = sign(giver, FakeRequest(PUT, s"/api/v1/thank/http/${masterUrl}"))
+      val req = sign(giver, FakeRequest(POST, s"/api/v1/thank/graph/my/support").withJsonBody(Json.obj("url" -> masterUrl)))
       await(route(application, req).get)
 
       val giverTransactions = pendingCharges(giver)

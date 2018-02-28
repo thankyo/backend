@@ -8,6 +8,7 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post, Project}
 import com.clemble.loveit.thank.service.PostService
 import com.mohiva.play.silhouette.api.Silhouette
+import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.mvc.ControllerComponents
 
 import scala.concurrent.ExecutionContext
@@ -53,6 +54,14 @@ class GraphController @Inject()(
 
   def searchByProject(project: UserID) = silhouette.SecuredAction.async(implicit req => {
     service.findByProject(project).map(posts => Ok(posts))
+  })
+
+  def hasSupported(resource: Resource) = silhouette.SecuredAction.async(implicit req => {
+    service.hasSupported(req.identity.id, resource).map(supported => Ok(JsBoolean(supported)))
+  })
+
+  def support = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "url").map(_.as[String]).map(Resource.from))(implicit req => {
+    service.thank(req.identity.id, req.body).map(Ok(_))
   })
 
 }

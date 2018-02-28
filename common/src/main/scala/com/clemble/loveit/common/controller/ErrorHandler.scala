@@ -2,7 +2,7 @@ package com.clemble.loveit.common.controller
 
 import javax.inject.{Inject, Provider, Singleton}
 
-import com.clemble.loveit.common.error.FieldValidationError
+import com.clemble.loveit.common.error.{FieldValidationError, ResourceException}
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.impl.exceptions.{IdentityNotFoundException, InvalidPasswordException, UnexpectedResponseException}
 import play.api.http.DefaultHttpErrorHandler
@@ -31,6 +31,8 @@ class ErrorHandler @Inject() (
         Future.successful(BadRequest(FieldValidationError("email", "This email was not registered")))
       case ure : UnexpectedResponseException if (ure.getMessage.contains("This authorization code has expired."))=>
         Future.successful(BadRequest(FieldValidationError("authCode", "This authorization code has expired.")))
+      case re: ResourceException =>
+        Future.successful(BadRequest(FieldValidationError("error", re.message)))
       case _: ProviderException =>
         Future.successful(Redirect("/"))
       case exc =>

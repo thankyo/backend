@@ -2,7 +2,6 @@
 GET         /stat/:owner/:year/:month          @com.clemble.loveit.thank.controller.UserStatController.get(owner, year: Int, month: Int)
 
 
-
 GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
 PUT         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.updateProject(project)
 
@@ -15,15 +14,12 @@ GET         /user/my/owned                     @com.clemble.loveit.thank.control
 PUT         /user/my/project                   @com.clemble.loveit.thank.controller.ProjectController.refreshMyProjects()
 
 
-
-GET         /http/*url                         @com.clemble.loveit.thank.controller.PostController.get(url: com.clemble.loveit.common.model.Resource)
-PUT         /http/*url                         @com.clemble.loveit.thank.controller.PostController.thank(url: com.clemble.loveit.common.model.Resource)
-
-
-
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()
 POST        /graph/my                          @com.clemble.loveit.thank.controller.GraphController.createMyPost()
+
+GET         /graph/my/support                  @com.clemble.loveit.thank.controller.GraphController.hasSupported(url: com.clemble.loveit.common.model.Resource)
+POST        /graph/my/support                  @com.clemble.loveit.thank.controller.GraphController.support()
 
 GET         /graph/search                      @com.clemble.loveit.thank.controller.GraphController.searchByTags()
 GET         /graph/author/:author              @com.clemble.loveit.thank.controller.GraphController.searchByAuthor(author)

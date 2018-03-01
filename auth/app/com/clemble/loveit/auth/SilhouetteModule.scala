@@ -2,6 +2,7 @@ package com.clemble.loveit.auth
 
 import javax.inject.Singleton
 
+import com.clemble.loveit.auth.service.{GoogleRefreshableProvider, RefreshableOAuth2Provider}
 import com.clemble.loveit.auth.service.repository.mongo.MongoAuthInfoRepository
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.util.AuthEnv
@@ -237,11 +238,11 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   @Provides
   def googleProvider(httpLayer: HTTPLayer,
                      socialStateHandler: SocialStateHandler,
-                     configuration: Configuration): GoogleProvider = {
+                     configuration: Configuration): GoogleProvider with RefreshableOAuth2Provider = {
     new GoogleProvider(
       httpLayer,
       socialStateHandler,
       configuration.underlying.as[OAuth2Settings]("silhouette.google")
-    )
+    ) with GoogleRefreshableProvider
   }
 }

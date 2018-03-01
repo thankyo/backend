@@ -13,6 +13,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers._
+import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -119,7 +120,23 @@ case class SimpleAuthService @Inject()(
   }
 
   override def findAuthInfo(loginInfo: LoginInfo): Future[Option[OAuth2Info]] = {
-    authInfoRepository.find[OAuth2Info](loginInfo)
+    authInfoRepository.find[OAuth2Info](loginInfo).flatMap({
+      case Some(info) if AuthInfoUtils.hasExpired(info) && info.refreshToken.isDefined => {
+        socialProviderRegistry.get[SocialProvider with RefreshableOAuth2Provider](loginInfo.providerKey) match {
+          case Some(provider: RefreshableOAuth2Provider) =>
+            for {
+              refreshedInfo <- provider.refresh(info.refreshToken.get)
+            } yield {
+              authInfoRepository.update(loginInfo, refreshedInfo)
+              Some(refreshedInfo)
+            }
+          case None =>
+            Future.successful(Some(info))
+        }
+      }
+      case other =>
+        Future.successful(other)
+    })
   }
 
 }

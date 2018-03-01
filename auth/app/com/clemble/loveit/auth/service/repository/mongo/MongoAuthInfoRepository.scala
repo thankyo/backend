@@ -2,13 +2,14 @@ package com.clemble.loveit.auth.service.repository.mongo
 
 import javax.inject.{Inject, Named, Singleton}
 
+import com.clemble.loveit.auth.service.AuthInfoUtils
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import com.mohiva.play.silhouette.api.{AuthInfo, LoginInfo}
 import com.mohiva.play.silhouette.impl.providers.{OAuth1Info, OAuth2Info, OpenIDInfo}
-import reactivemongo.api.indexes.{Index, IndexType}
 import play.api.libs.json._
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -16,9 +17,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
 case class MongoAuthInfo(
-                          loginInfo: LoginInfo,
-                          authInfo: AuthInfo
-                        )
+  loginInfo: LoginInfo,
+  authInfo: AuthInfo
+)
 
 object MongoAuthInfo {
 
@@ -36,17 +37,17 @@ object MongoAuthInfo {
     override def writes(o: AuthInfo) = o match {
       case password: PasswordInfo => passwordFormat.writes(password) + ("type" -> PASSWORD)
       case oauth1: OAuth1Info => oauth1InfoFormat.writes(oauth1) + ("type" -> OAUTH1)
-      case oauth2: OAuth2Info => oauth2InfoFormat.writes(oauth2) + ("type" -> OAUTH2)
+      case oauth2: OAuth2Info => oauth2InfoFormat.writes(AuthInfoUtils.normalize(oauth2)) + ("type" -> OAUTH2)
       case openID: OpenIDInfo => openIDInfoFormat.writes(openID) + ("type" -> OPEN_ID)
     }
 
     override def reads(json: JsValue) = (json \ "type").
       toOption.
       collect({
-        case PASSWORD => passwordFormat.reads (json)
-        case OAUTH1 => oauth1InfoFormat.reads (json)
-        case OAUTH2 => oauth2InfoFormat.reads (json)
-        case OPEN_ID => openIDInfoFormat.reads (json)
+        case PASSWORD => passwordFormat.reads(json)
+        case OAUTH1 => oauth1InfoFormat.reads(json)
+        case OAUTH2 => oauth2InfoFormat.reads(json)
+        case OPEN_ID => openIDInfoFormat.reads(json)
       }).getOrElse(JsError(s"Can't parse ${json} as AuthInfo"))
   }
 
@@ -75,7 +76,8 @@ case class MongoAuthInfoRepository @Inject()(@Named("authInfo") collection: JSON
 
   override def update[T <: AuthInfo](loginInfo: LoginInfo, authInfo: T): Future[T] = {
     val selector = Json.obj("loginInfo" -> loginInfo)
-    val update = Json.obj("$set" -> Json.obj("authInfo" -> MongoAuthInfo.authInfoFormat.writes(authInfo)))
+    val authInfoJson = MongoAuthInfo.authInfoFormat.writes(authInfo)
+    val update = Json.obj("$set" -> Json.obj("authInfo" -> authInfoJson))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update)).
       map(updated => if (updated) authInfo else throw new IllegalArgumentException("Failed to save authentication"))
   }

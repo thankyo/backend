@@ -29,7 +29,7 @@ trait ProjectService {
 class SimpleProjectService @Inject()(
                                       repo: ProjectRepository,
                                       enrichService: ProjectEnrichService,
-                                      refreshService: ProjectOwnershipService,
+                                      ownershipService: ProjectOwnershipService,
                                       implicit val ec: ExecutionContext
                                              ) extends ProjectService {
 
@@ -46,7 +46,7 @@ class SimpleProjectService @Inject()(
   }
 
   override def findOwned(user: UserID): Future[List[Project]] = {
-    refreshService.fetch(user)
+    ownershipService.fetch(user)
   }
 
   override def refresh(user: UserID): Future[List[Project]] = {
@@ -54,7 +54,7 @@ class SimpleProjectService @Inject()(
     val fEnriched = fExisting.map(_.map(enrichService.enrich)).flatMap(Future.sequence(_))
 
     for {
-      owned <- refreshService.fetch(user)
+      owned <- ownershipService.fetch(user)
       existing <- fExisting
       newProjects = owned.filter(project => !existing.exists(_.resource == project.resource))
       _ <- Future.sequence(newProjects.map(repo.saveProject))

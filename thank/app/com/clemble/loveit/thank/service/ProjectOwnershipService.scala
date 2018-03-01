@@ -36,10 +36,11 @@ case class SimpleProjectOwnershipService @Inject()(
       googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
     } yield {
       googleAuthOpt match {
-        case Some(OAuth2Info(accessToken, _, _, _, _)) =>
-          val url = s"https://www.googleapis.com/siteVerification/v1/webResource?access_token=${URLEncoder.encode(accessToken, "UTF-8")}"
+        case Some(info: OAuth2Info) =>
+          val url = s"https://www.googleapis.com/siteVerification/v1/webResource?access_token=${URLEncoder.encode(info.accessToken, "UTF-8")}"
           client
             .url(url)
+            .withHttpHeaders("Authorization" -> s"Bearer ${info.accessToken}")
             .get()
             .map(res => readGoogleResources(user, res.json))
         case None =>
@@ -56,15 +57,13 @@ case class SimpleProjectOwnershipService @Inject()(
       throw new ProfileRetrievalException(SpecifiedProfileError.format(GoogleProvider.ID, errorCode, errorMsg))
     })
 
-    val resources = (json \ "items")
-      .asOpt[List[JsObject]]
-      .map(_.map(_ \ "site" \ "identifier").map(_.asOpt[Resource]).flatten.map(_ match {
-        case url if (url.startsWith("http")) => url
-        case url => s"https://${url}"
-      }))
-      .getOrElse(List.empty[String])
+    val resources = (json \ "items" \\ "site")
+      .map(site => (site \ "identifier").as[Resource] match {
+        case url if url.startsWith("http") => url
+        case url => s"https://${url}/"
+      })
 
-    resources.map(res => Project(res, user))
+    resources.map(res => Project(res, user)).toList
   }
 
   override def fetch(user: UserID): Future[List[Project]] = {

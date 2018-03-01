@@ -58,7 +58,10 @@ case class SimpleProjectOwnershipService @Inject()(
 
     val resources = (json \ "items")
       .asOpt[List[JsObject]]
-      .map(_.map(_ \ "site" \ "identifier").map(_.asOpt[String]).flatten)
+      .map(_.map(_ \ "site" \ "identifier").map(_.asOpt[Resource]).flatten.map(_ match {
+        case url if (url.startsWith("http")) => url
+        case url => s"https://${url}"
+      }))
       .getOrElse(List.empty[String])
 
     resources.map(res => Project(res, user))

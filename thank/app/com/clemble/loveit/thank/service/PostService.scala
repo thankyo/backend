@@ -76,7 +76,7 @@ case class SimplePostService @Inject()(
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {
-    val res = Resource.from(og.url)
+    val res = og.url
     getPostOrProject(res).flatMap(_ match {
       case Left(post) =>
         val updPost = post.withOg(og)
@@ -101,7 +101,7 @@ case class SimplePostService @Inject()(
         Future.successful(post)
       case Right(_) =>
         postRefreshService
-          .enrich(OpenGraphObject(url = s"http://${res.uri}"))
+          .enrich(OpenGraphObject(url = res))
           .flatMap(create)
     } flatMap (post => {
       postRepo.markSupported(giver, res).map(increased => {

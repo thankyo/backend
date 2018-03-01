@@ -18,7 +18,7 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
 
     "same resource transactions ignored" in {
       val giver = createUser()
-      val res = someRandom[Resource]
+      val res = randomResource
 
       val A = createProject()
 
@@ -35,8 +35,8 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
       val A = createProject()
       val B = createProject()
 
-      val transactionA = thank(giver, A, someRandom[Resource])
-      val transactionB = thank(giver, B, someRandom[Resource])
+      val transactionA = thank(giver, A, randomResource)
+      val transactionB = thank(giver, B, randomResource)
 
       val payments = pendingCharges(giver)
       payments must containAllOf(Seq(transactionA, transactionB))
@@ -48,8 +48,8 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
       val A = createProject()
       val B = createProject()
 
-      val transactionA = thank(giver, A, someRandom[Resource])
-      val transactionB = thank(giver, B, someRandom[Resource])
+      val transactionA = thank(giver, A, randomResource)
+      val transactionB = thank(giver, B, randomResource)
 
       await(thankTransService.removeCharges(giver, Seq(transactionB)))
 

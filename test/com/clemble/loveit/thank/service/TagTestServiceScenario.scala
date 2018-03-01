@@ -10,7 +10,7 @@ trait TagTestServiceScenario extends ServiceSpec with TagTestService with PostTe
   "assign tags to user" in {
     val user = createUser()
 
-    val resource = someRandom[Resource]
+    val resource = randomResource
     val project = createProject(user, resource)
 
     val newTags = someRandom[Set[Tag]]

@@ -4,6 +4,8 @@ import java.time.YearMonth
 
 import play.api.libs.json._
 
+import scala.annotation.tailrec
+
 package object model {
 
   type Amount = Long
@@ -13,6 +15,7 @@ package object model {
   type PaymentID = String
   type Tag = String
   type MimeType = String
+  type Resource = String
 
   implicit val yearMonthJsonFormat = new Format[YearMonth] {
     override def reads(json: JsValue): JsResult[YearMonth] = {
@@ -29,6 +32,29 @@ package object model {
     override def writes(o: YearMonth): JsValue = {
       JsString(s"${o.getYear}/${o.getMonthValue}")
     }
+  }
+
+  implicit class ResourceExtensions(url: Resource) {
+
+    def parent(): Option[Resource] = {
+      val parentIndex = url.lastIndexOf("/")
+      if (parentIndex > 0)
+        Some(url.substring(0, parentIndex))
+      else
+        None
+    }
+
+    def parents(): List[Resource] = {
+      @tailrec
+      def toParents(uri: List[String], agg: List[String]): List[String] = {
+        if (uri.isEmpty) agg
+        else toParents(uri.tail, (uri.reverse.mkString("/")) :: agg)
+      }
+
+      val normUri = url.split("\\/").toList
+      toParents(normUri.reverse, List.empty[String]).reverse
+    }
+
   }
 
 }

@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.thank.model.Project
 import org.junit.runner.RunWith
@@ -56,7 +56,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
     "create ownership" in {
       val user = createUser()
-      val res = someRandom[Resource]
+      val res = randomResource
 
       assignOwnership(user, res) shouldEqual true
 
@@ -65,7 +65,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
     "ignore multiple assignments to the same user" in {
       val user = createUser()
-      val res = someRandom[Resource]
+      val res = randomResource
 
       assignOwnership(user, res) shouldEqual true
       assignOwnership(user, res) shouldEqual true
@@ -80,7 +80,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       listOwned(A) shouldEqual List.empty[Resource]
       listOwned(B) shouldEqual List.empty[Resource]
 
-      val res = someRandom[Resource]
+      val res = randomResource
 
       assignOwnership(A, res) shouldEqual true
       assignOwnership(B, res) shouldEqual true
@@ -95,7 +95,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
     "find exact owner" in {
       val owner = createUser()
-      val res = someRandom[Resource]
+      val res = randomResource
 
       assignOwnership(owner, res) shouldEqual true
 
@@ -105,10 +105,10 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
     "find parent owner" in {
       val owner = createUser()
 
-      val parentRes = someRandom[HttpResource]
+      val parentRes = randomResource
       assignOwnership(owner, parentRes) shouldEqual true
 
-      val childRes = HttpResource(s"${parentRes.uri}/${someRandom[Long]}")
+      val childRes = s"${parentRes}/${someRandom[Long]}"
       findOwner(childRes) shouldEqual Some(owner)
     }
 

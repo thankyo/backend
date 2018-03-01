@@ -19,7 +19,7 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
     "same resource transactions saved only once" in {
       val user = createUser()
-      val res = someRandom[Resource]
+      val res = randomResource
       val A = PendingTransaction(someRandom[Project], res)
       val B = PendingTransaction(someRandom[Project], res)
 
@@ -32,8 +32,8 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
     "save all payments for the user" in {
       val user = createUser()
-      val A = PendingTransaction(someRandom[Project], someRandom[Resource])
-      val B = PendingTransaction(someRandom[Project], someRandom[Resource])
+      val A = PendingTransaction(someRandom[Project], randomResource)
+      val B = PendingTransaction(someRandom[Project], randomResource)
 
       await(repo.save(user, A))
       await(repo.save(user, B))
@@ -44,8 +44,8 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
     "remove specified" in {
       val user = createUser()
-      val A = PendingTransaction(someRandom[Project], someRandom[Resource])
-      val B = PendingTransaction(someRandom[Project], someRandom[Resource])
+      val A = PendingTransaction(someRandom[Project], randomResource)
+      val B = PendingTransaction(someRandom[Project], randomResource)
 
       await(repo.save(user, A))
       await(repo.save(user, B))

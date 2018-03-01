@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.model.{OpenGraphObject, Project}
 import com.clemble.loveit.thank.service.repository.PostRepository
@@ -21,9 +21,8 @@ class ProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTe
     val giver = createUser()
 
     val url = s"https://example.com/some/${someRandom[Long]}"
-    val res = Resource.from(url)
 
-    val project = createProject(owner, res)
+    val project = createProject(owner, url)
     await(postService.create(someRandom[OpenGraphObject].copy(url = url)))
 
     (project, owner, giver)

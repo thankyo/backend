@@ -6,18 +6,16 @@ import com.clemble.loveit.thank.model.{OpenGraphObject, Post}
 
 trait PostTestService extends ServiceSpec {
 
-  def someChildResource(res: Resource): Resource = {
-    Resource.from(s"${res.stringify()}/${someRandom[Int]}/${someRandom[Int]}")
-  }
+  def someChildResource(res: Resource): Resource = s"${res}/${someRandom[Int]}/${someRandom[Int]}"
 
-  def createPost(resource: Resource = someRandom[Resource]): Resource = {
+  def createPost(resource: Resource = randomResource): Resource = {
     // Step 1. Create owner & resource to own
     val owner = createUser()
-    val resource = someRandom[Resource]
+    val resource = randomResource
     // Step 2. Assign ownership to resource
     createProject(owner, resource)
     // Step 3. Create OGO with specific resource
-    val ogo = someRandom[OpenGraphObject].copy(url = resource.stringify())
+    val ogo = someRandom[OpenGraphObject].copy(url = resource)
     createPost(ogo)
     // Step 4. Returning original resource
     resource

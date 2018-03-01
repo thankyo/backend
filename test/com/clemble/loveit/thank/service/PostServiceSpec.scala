@@ -21,12 +21,11 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
     val giver = createUser()
 
     val url = s"https://example.com/some/${someRandom[Long]}"
-    val resource = Resource.from(url)
 
-    createProject(owner, resource)
+    createProject(owner, url)
     await(service.create(someRandom[OpenGraphObject].copy(url = url)))
 
-    (resource, owner, giver)
+    (url, owner, giver)
   }
 
   def thank(user: UserID, url: Resource) = {
@@ -44,7 +43,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
     "return throw Exception on random res" in {
       val user = someRandom[UserID]
-      val res = someRandom[Resource]
+      val res = randomResource
 
       await(service.hasSupported(user, res)) should throwA[ResourceException]
       await(service.hasSupported(user, res)) should throwA[ResourceException]
@@ -69,7 +68,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
     "create if missing" in {
       val owner = createUser()
-      val resource = someRandom[Resource]
+      val resource = randomResource
 
       await(service.getPostOrProject(resource)) should throwA()
 
@@ -78,7 +77,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
     }
 
     "update if exists" in {
-      val resource = someRandom[Resource]
+      val resource = randomResource
 
       val A = createUser()
 

@@ -1,6 +1,6 @@
 package com.clemble.loveit.payment
 
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
+import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.dev.service.DevStripeUtils._
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, PendingTransaction, StripeCustomerToken}
 import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor

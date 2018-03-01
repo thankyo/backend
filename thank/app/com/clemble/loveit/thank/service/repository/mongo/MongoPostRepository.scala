@@ -86,8 +86,8 @@ case class MongoPostRepository @Inject()(
   override def updateProject(project: Project): Future[Boolean] = {
     val query = Json.obj(
       "$or" -> Json.arr(
-        Json.obj("resource.uri" -> project.resource.uri),
-        Json.obj("resource.uri" -> Json.obj("$regex" -> s"^${project.resource.uri}/.*"))
+        Json.obj("resource" -> project.resource),
+        Json.obj("resource" -> Json.obj("$regex" -> s"^${project.resource}/.*"))
       )
     )
     val update = Json.obj("$set" -> Json.obj("project" -> project))

@@ -4,6 +4,7 @@ import javax.inject.{Inject, Named}
 
 import akka.stream.Materializer
 import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.Project
 import com.clemble.loveit.thank.model.Project._

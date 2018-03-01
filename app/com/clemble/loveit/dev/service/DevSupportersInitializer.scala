@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.service.ChargeAccountService
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}

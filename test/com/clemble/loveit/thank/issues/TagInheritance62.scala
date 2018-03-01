@@ -14,7 +14,7 @@ trait TagInheritance62 extends ServiceSpec with TagTestService with PostTestServ
     val owner = createUser()
 
     // Step 2. Creating owned resource
-    val resource = someRandom[Resource]
+    val resource = randomResource
     val project = createProject(owner, resource)
 
     // Step 3. Assigning tags
@@ -25,11 +25,11 @@ trait TagInheritance62 extends ServiceSpec with TagTestService with PostTestServ
     getTags(resource) shouldEqual projectTags
 
     // Step 4. Creating post under owned resource
-    val objRes = someChildResource(resource)
-    val ogo = someRandom[OpenGraphObject].copy(url = objRes.stringify(), tags = Set("comics"))
+    val childUrl = someChildResource(resource)
+    val ogo = someRandom[OpenGraphObject].copy(url = childUrl, tags = Set("comics"))
     createPost(ogo)
 
-    getTags(objRes) shouldEqual projectTags ++ Set("comics")
+    getTags(childUrl) shouldEqual projectTags ++ Set("comics")
   }
 
 }

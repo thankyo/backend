@@ -47,11 +47,10 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
   }
 
   private def enrichWebStack(project: Project): Future[Option[WebStack]] = {
-    val uri = project.resource.uri
     for {
-      webStacks <- Future.sequence(List(analyzeWebStack(s"http://${uri}"), analyzeWebStack(s"https://${uri}")))
+      webStack <- analyzeWebStack(project.resource)
     } yield {
-      webStacks.flatten.headOption.orElse(project.webStack)
+      webStack.orElse(project.webStack)
     }
   }
 
@@ -66,7 +65,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     if (project.tags.nonEmpty)
       return Future.successful(project.tags)
     wsClient
-      .url(s"http://${project.resource.uri}")
+      .url(project.resource)
       .get()
       .map(resp => ProjectEnrichService.readTags(resp.body))
   }
@@ -75,7 +74,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     if (project.description.isDefined)
       return Future.successful(project.description)
     wsClient
-      .url(s"http://${project.resource.uri}")
+      .url(project.resource)
       .get()
       .map(resp => ProjectEnrichService.readDescription(resp.body))
   }
@@ -84,11 +83,11 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     if (project.rss.isDefined)
       return Future.successful(project.rss)
     wsClient
-      .url(s"http://${project.resource.uri}/feed")
+      .url(project.resource)
       .get()
       .map(resp => {
         if (resp.status == Status.OK) {
-          Some(s"http://${project.resource.uri}/feed")
+          Some(project.resource)
         } else {
           None
         }
@@ -106,7 +105,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       project.copy(
         webStack = webStack,
         avatar = avatar,
-        title = project.title.orElse(Some(project.resource.uri)),
+        title = project.title.orElse(Some(project.resource)),
         description = description,
         tags = tags,
         rss = rss

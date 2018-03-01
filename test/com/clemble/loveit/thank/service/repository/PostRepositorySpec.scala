@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.{HttpResource, Resource, UserID}
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.thank.model.{Post, Project, Thank}
 import com.clemble.loveit.thank.service.PostService
 import org.junit.runner.RunWith
@@ -30,7 +30,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
     "be NONE for non existent" in {
       val user = someRandom[UserID]
-      val resource = someRandom[Resource]
+      val resource = randomResource
 
       await(postRepo.isSupportedBy(user, resource)) shouldEqual None
     }
@@ -84,7 +84,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   "UPDATE OWNER" should {
 
     "create if missing" in {
-      val resource = someRandom[Resource]
+      val resource = randomResource
       val newProject = someRandom[Project].copy(resource = resource)
       val oldProject = someRandom[Project].copy(resource = resource)
       val post = someRandom[Post].copy(resource = resource, project = oldProject)
@@ -96,7 +96,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "update if exists" in {
-      val resource = someRandom[Resource]
+      val resource = randomResource
 
       val A = someRandom[Project].copy(resource = resource)
       val post = someRandom[Post].copy(resource = resource, project = A)
@@ -111,8 +111,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "update children" in {
-      val parent = someRandom[Resource]
-      val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
+      val parent = randomResource
+      val child = s"${parent}/${someRandom[Long]}"
 
       val A = someRandom[Project].copy(resource = parent)
       val B = someRandom[Project].copy(resource = parent)
@@ -127,8 +127,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "update children correctly" in {
-      val parent = someRandom[HttpResource]
-      val difParent = HttpResource(s"${parent.uri}${someRandom[Long]}")
+      val parent = randomResource
+      val difParent = s"${parent}${someRandom[Long]}"
 
       val A = someRandom[Project].copy(resource = parent)
 
@@ -136,8 +136,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "don't update parent" in {
-      val parent = someRandom[HttpResource]
-      val child = HttpResource(s"${parent.uri}/${someRandom[Long]}")
+      val parent = randomResource
+      val child = s"${parent}/${someRandom[Long]}"
 
       val original = someRandom[Project].copy(resource = parent)
 
@@ -190,7 +190,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     for {
       _ <- 1 to 10
     } yield {
-      val childResource = Resource.from(s"${project.resource.stringify()}/${someRandom[String]}")
+      val childResource = s"${project.resource}/${someRandom[String]}"
       val post = someRandom[Post].copy(project = project, resource = childResource)
       await(postRepo.save(post)) shouldEqual true
       post

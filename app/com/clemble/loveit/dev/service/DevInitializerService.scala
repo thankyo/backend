@@ -33,14 +33,14 @@ object DevInitializerService {
       Set(
         Project(
           user = "",
-          resource = Resource.from("https://zenpencils.com"),
+          resource = "https://zenpencils.com",
           title = Some("Zen Pencil"),
           avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
           rss = Some("https://zenpencils.com/feed")
         ),
         Project(
-          resource = Resource.from("https://personacentral.com"),
+          resource = "https://personacentral.com",
           title = Some("Personal Central"),
           user = "",
           avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
@@ -58,7 +58,7 @@ object DevInitializerService {
       ),
       Set(
         Project(
-          resource = Resource.from("https://readms.net"),
+          resource = "https://readms.net",
           user = "",
           title = Some("Manga Stream"),
           avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
@@ -75,7 +75,7 @@ object DevInitializerService {
       ),
       Set(
         Project(
-          resource = Resource.from("https://www.sciencedaily.com"),
+          resource = "https://www.sciencedaily.com",
           user = "",
           title = Some("Science Daily"),
           avatar = Some("https://www.sciencedaily.com/images/sd-logo.png"),

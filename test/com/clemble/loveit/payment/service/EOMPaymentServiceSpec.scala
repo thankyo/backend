@@ -69,7 +69,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val user = createUser()
       val owner = createProject()
 
-      1 to 50 map (_ => thank(user, owner, someRandom[Resource]))
+      1 to 50 map (_ => thank(user, owner, randomResource))
 
       runAndWait(yom)
 
@@ -93,7 +93,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
 
       charges(user) shouldEqual Nil
 
-      1 to 50 map (_ => thank(user, project, someRandom[Resource]))
+      1 to 50 map (_ => thank(user, project, randomResource))
       runAndWait(yom)
 
       val statusAfter = getStatus(yom)
@@ -113,7 +113,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val giver = createUser()
       addChargeAccount(giver)
 
-      val expectedTransactions = 1 to 50 map (_ => thank(giver, owner, someRandom[Resource]))
+      val expectedTransactions = 1 to 50 map (_ => thank(giver, owner, randomResource))
       eventually(pendingCharges(giver) should containAllOf(expectedTransactions))
 
       runAndWait(yom)
@@ -139,7 +139,7 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val giver = createUser()
       addChargeAccount(giver)
 
-      val expectedTransactions = 1 to 3 map (_ => thank(giver, owner, someRandom[Resource]))
+      val expectedTransactions = 1 to 3 map (_ => thank(giver, owner, randomResource))
       pendingCharges(giver) should containAllOf(expectedTransactions)
 
       runAndWait(yom)
@@ -167,8 +167,8 @@ trait GenericEOMPaymentServiceSpec extends FunctionalThankSpecification with Pay
       val giverB = createUser()
       addChargeAccount(giverB)
 
-      1 to 50 map (_ => thank(giverA, owner, someRandom[Resource]))
-      1 to 50 map (_ => thank(giverA, owner, someRandom[Resource]))
+      1 to 50 map (_ => thank(giverA, owner, randomResource))
+      1 to 50 map (_ => thank(giverA, owner, randomResource))
 
       val finalStatus = runAndWait(yom)
 

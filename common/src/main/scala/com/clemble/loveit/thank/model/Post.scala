@@ -31,7 +31,7 @@ case class Post(
   }
 
   def withUrl(url: String): Post = {
-    copy(resource = Resource.from(url), ogObj = ogObj.copy(url = url))
+    copy(resource = url, ogObj = ogObj.copy(url = url))
   }
 }
 
@@ -44,10 +44,10 @@ object Post {
   implicit val postsWriteable = WriteableUtils.jsonToWriteable[List[Post]]
 
   def from(res: Resource, project: Project): Post = {
-    Post(res, project, OpenGraphObject(url = res.stringify(), tags = project.tags))
+    Post(res, project, OpenGraphObject(url = res, tags = project.tags))
   }
 
   def from(og: OpenGraphObject, project: Project): Post = {
-    Post.from(Resource.from(og.url), project).withOg(og)
+    Post.from(og.url, project).withOg(og)
   }
 }

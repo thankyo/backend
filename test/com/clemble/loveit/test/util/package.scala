@@ -21,15 +21,11 @@ import scala.util.Random
 
 package object util {
 
+  def randomResource = s"http://${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}"
+
   implicit val booleanGenerator: Generator[Boolean] = () => Random.nextBoolean()
   implicit val intGenerator: Generator[Int] = () => Random.nextInt()
 
-  implicit val resourceGenerator: Generator[Resource] = () => {
-    HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
-  }
-  implicit val httpResourceGenerator: Generator[HttpResource] = () => {
-    HttpResource(s"${randomAlphabetic(10)}.${randomAlphabetic(4)}/${randomAlphabetic(3)}/${randomAlphabetic(4)}")
-  }
   implicit val commonSocialProfileGenerator: Generator[CommonSocialProfile] = () => {
     CommonSocialProfile(
       loginInfo = LoginInfo("test", RandomStringUtils.random(10)),
@@ -76,12 +72,12 @@ package object util {
     PayoutAccount(randomNumeric(10), randomNumeric(4), randomNumeric(4))
   }
   implicit val thankTransactionGenerator: Generator[ThankEvent] = () => {
-    ThankEvent(someRandom[UserID], someRandom[Project], someRandom[Resource], someRandom[LocalDateTime])
+    ThankEvent(someRandom[UserID], someRandom[Project], randomResource, someRandom[LocalDateTime])
   }
   implicit val webStackGenerator: Generator[WebStack] = () => WordPress
   implicit val supportedProjectGenerator: Generator[Project] = () => {
     Project(
-      someRandom[Resource],
+      randomResource,
       someRandom[UserID],
       optionRandom[String],
       optionRandom[String],
@@ -91,13 +87,10 @@ package object util {
     )
   }
   implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
-    PendingTransaction(someRandom[Project], someRandom[Resource], someRandom[LocalDateTime])
+    PendingTransaction(someRandom[Project], randomResource, someRandom[LocalDateTime])
   }
   implicit val postGenerator: Generator[Post] = () => {
-    val resource = optionRandom[String] match {
-      case None => someRandom[Resource]
-      case Some(child) => Resource.from(s"${someRandom[Resource].stringify()}/${child}")
-    }
+    val resource = randomResource
     Post(
       resource,
       someRandom[Project].copy(resource = resource),
@@ -165,8 +158,8 @@ package object util {
   implicit val longGenerator: Generator[Long] = () => nextLong(0, Long.MaxValue)
 
   implicit val ogiGenerator: Generator[OpenGraphImage] = () => OpenGraphImage(
-    url = someRandom[Resource].stringify(),
-    secureUrl = optionRandom[Resource].map(_.stringify()),
+    url = randomResource,
+    secureUrl = optionRandom[Resource],
     imageType = optionRandom[MimeType],
     width = optionRandom[Int],
     height = optionRandom[Int],
@@ -174,7 +167,7 @@ package object util {
   )
 
   implicit val ogoGenerator: Generator[OpenGraphObject] = () => OpenGraphObject(
-    url = someRandom[Resource].stringify(),
+    url = randomResource,
     title = optionRandom[String],
     image = optionRandom[OpenGraphImage],
     description = optionRandom[String],

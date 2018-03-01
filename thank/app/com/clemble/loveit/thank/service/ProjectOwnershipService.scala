@@ -61,7 +61,7 @@ case class SimpleProjectOwnershipService @Inject()(
       .map(_.map(_ \ "site" \ "identifier").map(_.asOpt[String]).flatten)
       .getOrElse(List.empty[String])
 
-    resources.map(res => Project(Resource.from(res), user))
+    resources.map(res => Project(res, user))
   }
 
   override def fetch(user: UserID): Future[List[Project]] = {

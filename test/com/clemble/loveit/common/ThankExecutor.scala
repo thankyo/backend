@@ -9,7 +9,7 @@ trait ThankExecutor extends ThankSpecification {
 
   def createUser(profile: RegistrationRequest = someRandom[RegistrationRequest]): UserID
 
-  def createProject(user: UserID = createUser(), resource: Resource = someRandom[Resource]): Project
+  def createProject(user: UserID = createUser(), resource: Resource = randomResource): Project
 
   def getUser(user: UserID): Option[User]
 

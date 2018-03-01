@@ -60,7 +60,7 @@ class GraphController @Inject()(
     service.hasSupported(req.identity.id, resource).map(supported => Ok(JsBoolean(supported)))
   })
 
-  def support = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "url").map(_.as[String]).map(Resource.from))(implicit req => {
+  def support = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "url").map(_.as[Resource]))(implicit req => {
     service.thank(req.identity.id, req.body).map(Ok(_))
   })
 

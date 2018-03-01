@@ -23,9 +23,9 @@ case class MongoPostRepository @Inject()(
 
   MongoPostRepository.ensureMeta(collection)
 
-  override def isSupportedBy(supporter: UserID, resource: Resource): Future[Option[Boolean]] = {
+  override def isSupportedBy(supporter: UserID, url: Resource): Future[Option[Boolean]] = {
     val query = Json.obj(
-      "url" -> resource,
+      "url" -> url,
       "thank.supporters" -> Json.obj("$exists" -> supporter)
     )
     val projection = Json.obj("thank.supporters" -> 1)
@@ -51,8 +51,8 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
-  override def findByResource(resource: Resource): Future[Option[Post]] = {
-    val fSearchResult = collection.find(Json.obj("url" -> resource)).one[Post]
+  override def findByResource(url: Resource): Future[Option[Post]] = {
+    val fSearchResult = collection.find(Json.obj("url" -> url)).one[Post]
     MongoSafeUtils.safe(fSearchResult)
   }
 
@@ -71,9 +71,9 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.collectAll[Post](collection, selector)
   }
 
-  override def markSupported(user: UserID, resource: Resource): Future[Boolean] = {
+  override def markSupported(user: UserID, url: Resource): Future[Boolean] = {
     val query = Json.obj(
-      "url" -> resource,
+      "url" -> url,
       "thank.supporters" -> Json.obj("$ne" -> user)
     )
     val update = Json.obj(

@@ -25,7 +25,7 @@ class EOMChargeController @Inject()(
     } yield {
       val csv = charges.
         flatMap(charge => charge.transactions.map(transaction => {
-            List(YearMonth.from(transaction.created), transaction.created, charge.status, transaction.resource).mkString(",")
+            List(YearMonth.from(transaction.created), transaction.created, charge.status, transaction.url).mkString(",")
           })
         )
 

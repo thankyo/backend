@@ -25,7 +25,7 @@ case class PendingTransactionController @Inject()(
 
   private def asCsv(transactions: List[PendingTransaction]): String = {
     val csv = transactions.map(transaction => {
-      List(YearMonth.from(transaction.created), transaction.created, transaction.resource).mkString(",")
+      List(YearMonth.from(transaction.created), transaction.created, transaction.url).mkString(",")
     })
     "Date,Time,URL\n" + csv.mkString("\n")
   }

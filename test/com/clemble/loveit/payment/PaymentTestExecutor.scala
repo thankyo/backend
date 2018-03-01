@@ -20,7 +20,7 @@ trait PaymentTestExecutor extends PaymentLimitExecutor {
     thank(giver, project, project.url)
   }
 
-  def thank(giver: UserID, project: Project, resource: Resource): PendingTransaction
+  def thank(giver: UserID, project: Project, url: Resource): PendingTransaction
 
   def pendingCharges(giver: UserID): Seq[PendingTransaction]
 

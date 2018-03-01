@@ -22,7 +22,7 @@ case class MongoPendingTransactionRepository @Inject()(
   extends PendingTransactionRepository {
 
   override def save(user: UserID, transaction: PendingTransaction): Future[Boolean] = {
-    val giverSelector = Json.obj("_id" -> user, "charges.resource" -> Json.obj("$ne" -> transaction.resource))
+    val giverSelector = Json.obj("_id" -> user, "charges.url" -> Json.obj("$ne" -> transaction.url))
     val giverUpdate = Json.obj("$push" -> Json.obj("charges" -> transaction))
     val updateGiver = MongoSafeUtils.safeSingleUpdate(collection.update(giverSelector, giverUpdate))
 

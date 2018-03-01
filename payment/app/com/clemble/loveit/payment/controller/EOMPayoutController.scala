@@ -26,7 +26,7 @@ case class EOMPayoutController @Inject()(
     } yield {
       val csv = payouts.
         flatMap(payout => payout.transactions.map(transaction => {
-          List(YearMonth.from(transaction.created), transaction.created, payout.status, transaction.resource).mkString(",")
+          List(YearMonth.from(transaction.created), transaction.created, payout.status, transaction.url).mkString(",")
         })
       )
 

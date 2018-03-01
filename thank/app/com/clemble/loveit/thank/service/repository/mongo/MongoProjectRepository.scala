@@ -53,8 +53,8 @@ case class MongoProjectRepository @Inject()(
     MongoSafeUtils.collectAll[Project](collection, selector)
   }
 
-  override def assignTags(resource: Resource, tags: Set[Tag]): Future[Boolean] = {
-    val selector = Json.obj("url" -> resource)
+  override def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean] = {
+    val selector = Json.obj("url" -> url)
     val update = Json.obj("$set" -> Json.obj("tags" -> tags))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
@@ -79,7 +79,7 @@ object MongoProjectRepository {
       collection,
       Index(
         key = Seq("url" -> IndexType.Ascending),
-        name = Some("user_owns_unique_resource"),
+        name = Some("user_owns_unique_url"),
         unique = true,
         sparse = true
       )

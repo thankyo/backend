@@ -9,7 +9,7 @@ import org.specs2.runner.JUnitRunner
 class ResourceSpec extends Specification {
 
   "generate parent" in {
-    val parts = "http/example.com/some/what".parent()
+    val parts = "http://example.com/some/what".parent()
     parts shouldEqual Some("http://example.com/some")
   }
 

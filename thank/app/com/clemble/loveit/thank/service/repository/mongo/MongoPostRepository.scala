@@ -106,7 +106,7 @@ object MongoPostRepository {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
-        key = Seq("resource.type" -> IndexType.Ascending, "resource.uri" -> IndexType.Ascending),
+        key = Seq("resource" -> IndexType.Ascending),
         name = Some("recourse_is_unique"),
         unique = true
       )

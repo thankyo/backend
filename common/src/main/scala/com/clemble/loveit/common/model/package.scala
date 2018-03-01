@@ -47,12 +47,15 @@ package object model {
     def parents(): List[Resource] = {
       @tailrec
       def toParents(uri: List[String], agg: List[String]): List[String] = {
-        if (uri.isEmpty) agg
-        else toParents(uri.tail, (uri.reverse.mkString("/")) :: agg)
+        if (uri.tail.tail.isEmpty) {
+          agg
+        } else {
+          toParents(uri.tail, (uri.reverse.mkString("/")) :: agg)
+        }
       }
 
-      val normUri = url.split("\\/").toList
-      toParents(normUri.reverse, List.empty[String]).reverse
+      val normParts = url.split("\\/").toList
+      toParents(normParts.reverse, List.empty[String]).reverse
     }
 
   }

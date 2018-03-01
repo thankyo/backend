@@ -35,7 +35,7 @@ case class MongoProjectRepository @Inject()(
   }
 
   override def saveProject(project: Project): Future[Boolean] = {
-    val selector = Json.obj("resource" -> project.resource)
+    val selector = Json.obj("url" -> project.url)
     collection.find(selector).one[Project] flatMap(_ match {
       case Some(existingPrj) => update(project.copy(_id = existingPrj._id))
       case None => MongoSafeUtils.safeSingleUpdate(collection.insert(project))
@@ -54,13 +54,13 @@ case class MongoProjectRepository @Inject()(
   }
 
   override def assignTags(resource: Resource, tags: Set[Tag]): Future[Boolean] = {
-    val selector = Json.obj("resource" -> resource)
+    val selector = Json.obj("url" -> resource)
     val update = Json.obj("$set" -> Json.obj("tags" -> tags))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
   override def findProject(res: Resource): Future[Option[Project]] = {
-    val query = Json.obj("resource" -> Json.obj("$in" -> res.parents()))
+    val query = Json.obj("url" -> Json.obj("$in" -> res.parents()))
     collection.find(query).one[Project]
   }
 
@@ -78,7 +78,7 @@ object MongoProjectRepository {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
-        key = Seq("resource.uri" -> IndexType.Ascending, "resource.type" -> IndexType.Ascending),
+        key = Seq("url" -> IndexType.Ascending),
         name = Some("user_owns_unique_resource"),
         unique = true,
         sparse = true

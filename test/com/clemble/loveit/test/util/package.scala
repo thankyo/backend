@@ -93,7 +93,7 @@ package object util {
     val resource = randomResource
     Post(
       resource,
-      someRandom[Project].copy(resource = resource),
+      someRandom[Project].copy(url = resource),
       someRandom[OpenGraphObject]
     )
   }

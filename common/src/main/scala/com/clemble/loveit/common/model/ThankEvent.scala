@@ -8,6 +8,6 @@ import com.clemble.loveit.user.model.UserAware
 case class ThankEvent(
                        user: UserID,
                        project: Project,
-                       resource: Resource,
+                       url: Resource,
                        created: LocalDateTime = LocalDateTime.now()
                      ) extends ResourceAware with CreatedAware with UserAware

@@ -6,4 +6,4 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ResourceSerializationSpec extends SerializationSpec[Resource]
+class yarnResourceSerializationSpec extends SerializationSpec[Resource]

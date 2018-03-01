@@ -56,7 +56,7 @@ class SimpleProjectService @Inject()(
     for {
       owned <- ownershipService.fetch(user)
       existing <- fExisting
-      newProjects = owned.filter(project => !existing.exists(_.resource == project.resource))
+      newProjects = owned.filter(project => !existing.exists(_.url == project.url))
       _ <- Future.sequence(newProjects.map(repo.saveProject))
       enriched <- fEnriched
       updatedProjects = enriched.filterNot(existing.contains)
@@ -68,7 +68,7 @@ class SimpleProjectService @Inject()(
 
   override def update(project: Project): Future[Project] = {
     for {
-      existingProjectOpt <- findProject(project.resource)
+      existingProjectOpt <- findProject(project.url)
       _ = if (!existingProjectOpt.isDefined) throw ResourceException.noResourceExists()
       existingProject = existingProjectOpt.get
       _ = if (existingProject.user != project.user) throw ResourceException.differentOwner()

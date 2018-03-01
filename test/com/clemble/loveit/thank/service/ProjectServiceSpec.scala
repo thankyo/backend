@@ -44,7 +44,7 @@ class ProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTe
       getSupported(giver) shouldEqual Nil
       getSupported(owner) shouldEqual Nil
 
-      thank(giver, project.resource)
+      thank(giver, project.url)
 
       getSupported(owner) shouldEqual Nil
       eventually(getSupported(giver) shouldEqual List(project))

@@ -15,7 +15,7 @@ case class ResourceException(code: String, message: String) extends ThankExcepti
 
 object UserException {
   def notEnoughFunds() = new UserException("NOT_ENOUGH_FUNDS", "Not enough funds")
-  def resourceAlreadyOwned(user: UserID) = new UserException("RESOURCE_ALREADY_OWNED", s"Resource already owned by ${user}")
+  def resourceAlreadyOwned(user: UserID) = new UserException("URL_ALREADY_OWNED", s"Resource already owned by ${user}")
 }
 
 object PaymentException {
@@ -32,8 +32,8 @@ object ResourceException {
   val VERIFICATION_IN_PROGRESS_CODE = "VERIFICATION_IN_PROGRESS"
   val NO_RESOURCE_EXISTS_CODE = "NO_RESOURCE_EXISTS_CODE"
 
-  def noResourceExists() = ResourceException(NO_RESOURCE_EXISTS_CODE, "Resource does not exist")
-  def verificationAlreadyRequested() = ResourceException(VERIFICATION_IN_PROGRESS_CODE, "Resource verification already in progress")
+  def noResourceExists() = ResourceException(NO_RESOURCE_EXISTS_CODE, "URL was not registered")
+  def verificationAlreadyRequested() = ResourceException(VERIFICATION_IN_PROGRESS_CODE, "URL verification already in progress")
   def ownerMissing() = new ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
   def differentOwner() = new ResourceException(DIFFERENT_OWNER_CODE, "Different owner registered for the project")
   def differentId() = new ResourceException(DIFFERENT_ID_CODE, "Different project id")

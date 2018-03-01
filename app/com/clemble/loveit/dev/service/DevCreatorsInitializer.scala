@@ -62,7 +62,7 @@ case class DevCreatorsInitializer @Inject()(
       project <- projects
     } yield {
       supPrjService
-        .findProject(project.resource)
+        .findProject(project.url)
         .flatMap {
           case Some(_) => Future.successful(true)
           case None => prjRepo.saveProject(project.copy(user = creator))

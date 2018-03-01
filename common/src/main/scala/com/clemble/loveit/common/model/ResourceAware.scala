@@ -1,5 +1,5 @@
 package com.clemble.loveit.common.model
 
 trait ResourceAware {
-  val resource: Resource
+  val url: Resource
 }

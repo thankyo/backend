@@ -15,7 +15,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
   def assignOwnership(user: UserID, res: Resource): Boolean = await(prjRepo.saveProject(Project(res, user)))
 
-  def listOwned(user: UserID): List[Resource] = await(prjRepo.findProjectsByUser(user)).map(_.resource)
+  def listOwned(user: UserID): List[Resource] = await(prjRepo.findProjectsByUser(user)).map(_.url)
 
   def findOwner(res: Resource): Option[UserID] = await(prjRepo.findProject(res)).map(_.user)
 

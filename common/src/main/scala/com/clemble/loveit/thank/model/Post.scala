@@ -7,7 +7,7 @@ import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import play.api.libs.json.{Json, OFormat}
 
 case class Post(
-                 resource: Resource,
+                 url: Resource,
                  project: Project,
 
                  ogObj: OpenGraphObject,
@@ -21,8 +21,8 @@ case class Post(
   def isSupportedBy(user: UserID): Boolean = thank.isSupportedBy(user)
 
   def validate() = {
-    if (!resource.parents().contains(project.resource)) {
-      throw new IllegalArgumentException("Resource should be a child of a project")
+    if (!url.parents().contains(project.url)) {
+      throw new IllegalArgumentException("URL should be a child of a project")
     }
   }
 
@@ -31,7 +31,7 @@ case class Post(
   }
 
   def withUrl(url: String): Post = {
-    copy(resource = url, ogObj = ogObj.copy(url = url))
+    copy(url = url, ogObj = ogObj.copy(url = url))
   }
 }
 

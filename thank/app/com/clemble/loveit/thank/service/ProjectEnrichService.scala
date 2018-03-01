@@ -48,7 +48,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
 
   private def enrichWebStack(project: Project): Future[Option[WebStack]] = {
     for {
-      webStack <- analyzeWebStack(project.resource)
+      webStack <- analyzeWebStack(project.url)
     } yield {
       webStack.orElse(project.webStack)
     }
@@ -65,7 +65,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     if (project.tags.nonEmpty)
       return Future.successful(project.tags)
     wsClient
-      .url(project.resource)
+      .url(project.url)
       .get()
       .map(resp => ProjectEnrichService.readTags(resp.body))
   }
@@ -74,7 +74,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     if (project.description.isDefined)
       return Future.successful(project.description)
     wsClient
-      .url(project.resource)
+      .url(project.url)
       .get()
       .map(resp => ProjectEnrichService.readDescription(resp.body))
   }
@@ -83,11 +83,11 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     if (project.rss.isDefined)
       return Future.successful(project.rss)
     wsClient
-      .url(project.resource)
+      .url(project.url)
       .get()
       .map(resp => {
         if (resp.status == Status.OK) {
-          Some(project.resource)
+          Some(project.url)
         } else {
           None
         }
@@ -105,7 +105,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       project.copy(
         webStack = webStack,
         avatar = avatar,
-        title = project.title.orElse(Some(project.resource)),
+        title = project.title.orElse(Some(project.url)),
         description = description,
         tags = tags,
         rss = rss

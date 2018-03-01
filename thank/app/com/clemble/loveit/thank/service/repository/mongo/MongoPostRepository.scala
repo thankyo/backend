@@ -25,7 +25,7 @@ case class MongoPostRepository @Inject()(
 
   override def isSupportedBy(supporter: UserID, resource: Resource): Future[Option[Boolean]] = {
     val query = Json.obj(
-      "resource" -> resource,
+      "url" -> resource,
       "thank.supporters" -> Json.obj("$exists" -> supporter)
     )
     val projection = Json.obj("thank.supporters" -> 1)
@@ -40,19 +40,19 @@ case class MongoPostRepository @Inject()(
   }
 
   override def update(post: Post): Future[Boolean] = {
-    val selector = Json.obj("resource" -> post.resource)
+    val selector = Json.obj("url" -> post.url)
     val update = Json.toJsObject(post)
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
   override def assignTags(res: Resource, tags: Set[Tag]): Future[Boolean] = {
-    val selector = Json.obj("resource" -> res)
+    val selector = Json.obj("url" -> res)
     val update = Json.obj("$set" -> Json.obj("ogObj.tags" -> tags))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
   override def findByResource(resource: Resource): Future[Option[Post]] = {
-    val fSearchResult = collection.find(Json.obj("resource" -> resource)).one[Post]
+    val fSearchResult = collection.find(Json.obj("url" -> resource)).one[Post]
     MongoSafeUtils.safe(fSearchResult)
   }
 
@@ -73,7 +73,7 @@ case class MongoPostRepository @Inject()(
 
   override def markSupported(user: UserID, resource: Resource): Future[Boolean] = {
     val query = Json.obj(
-      "resource" -> resource,
+      "url" -> resource,
       "thank.supporters" -> Json.obj("$ne" -> user)
     )
     val update = Json.obj(
@@ -86,8 +86,8 @@ case class MongoPostRepository @Inject()(
   override def updateProject(project: Project): Future[Boolean] = {
     val query = Json.obj(
       "$or" -> Json.arr(
-        Json.obj("resource" -> project.resource),
-        Json.obj("resource" -> Json.obj("$regex" -> s"^${project.resource}/.*"))
+        Json.obj("url" -> project.url),
+        Json.obj("url" -> Json.obj("$regex" -> s"^${project.url}/.*"))
       )
     )
     val update = Json.obj("$set" -> Json.obj("project" -> project))
@@ -106,7 +106,7 @@ object MongoPostRepository {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
-        key = Seq("resource" -> IndexType.Ascending),
+        key = Seq("url" -> IndexType.Ascending),
         name = Some("recourse_is_unique"),
         unique = true
       )

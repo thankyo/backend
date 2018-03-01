@@ -15,14 +15,14 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
   val postRepo = dependency[PostRepository]
 
-  def findAll(resources: Seq[Resource]): Future[Seq[Post]] = {
-    val searchQuery: Future[Seq[Option[Post]]] = Future.sequence(resources.map(uri => postRepo.findByResource(uri)))
+  def findAll(urls: Seq[Resource]): Future[Seq[Post]] = {
+    val searchQuery: Future[Seq[Option[Post]]] = Future.sequence(urls.map(uri => postRepo.findByResource(uri)))
     searchQuery.map(_.flatten)
   }
 
   def createParentThank(post: Post) = {
-    val parentResource = post.resource.parents.last
-    val parentProject = Post.from(parentResource, someRandom[Project].copy(resource = parentResource))
+    val parentResource = post.url.parents.last
+    val parentProject = Post.from(parentResource, someRandom[Project].copy(url = parentResource))
     await(postRepo.save(parentProject))
   }
 
@@ -41,7 +41,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val post = someRandom[Post]
       await(postRepo.save(post))
 
-      await(postRepo.isSupportedBy(user, post.resource)) shouldEqual Some(false)
+      await(postRepo.isSupportedBy(user, post.url)) shouldEqual Some(false)
     }
 
     "be true for thanked" in {
@@ -50,8 +50,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val post = someRandom[Post]
       await(postRepo.save(post))
 
-      await(postRepo.markSupported(user, post.resource))
-      await(postRepo.isSupportedBy(user, post.resource)) shouldEqual Some(true)
+      await(postRepo.markSupported(user, post.url))
+      await(postRepo.isSupportedBy(user, post.url)) shouldEqual Some(true)
     }
 
   }
@@ -63,9 +63,9 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       createParentThank(post)
 
       await(postRepo.save(post))
-      await(postRepo.markSupported("some", post.resource)) shouldEqual true
+      await(postRepo.markSupported("some", post.url)) shouldEqual true
 
-      await(postRepo.findByResource(post.resource)).get.thank.given shouldEqual 1
+      await(postRepo.findByResource(post.url)).get.thank.given shouldEqual 1
     }
 
     "increase only once for the user" in {
@@ -73,10 +73,10 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       createParentThank(post)
 
       await(postRepo.save(post))
-      await(postRepo.markSupported("some", post.resource)) shouldEqual true
-      await(postRepo.markSupported("some", post.resource)) shouldEqual false
+      await(postRepo.markSupported("some", post.url)) shouldEqual true
+      await(postRepo.markSupported("some", post.url)) shouldEqual false
 
-      await(postRepo.findByResource(post.resource)).get.thank.given shouldEqual 1
+      await(postRepo.findByResource(post.url)).get.thank.given shouldEqual 1
     }
 
   }
@@ -85,37 +85,37 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
     "create if missing" in {
       val resource = randomResource
-      val newProject = someRandom[Project].copy(resource = resource)
-      val oldProject = someRandom[Project].copy(resource = resource)
-      val post = someRandom[Post].copy(resource = resource, project = oldProject)
+      val newProject = someRandom[Project].copy(url = resource)
+      val oldProject = someRandom[Project].copy(url = resource)
+      val post = someRandom[Post].copy(url = resource, project = oldProject)
 
       await(postRepo.save(post)) should beTrue
 
       await(postRepo.updateProject(newProject)) shouldEqual true
-      await(postRepo.findByResource(post.resource)).map(_.project) shouldEqual Some(newProject)
+      await(postRepo.findByResource(post.url)).map(_.project) shouldEqual Some(newProject)
     }
 
     "update if exists" in {
       val resource = randomResource
 
-      val A = someRandom[Project].copy(resource = resource)
-      val post = someRandom[Post].copy(resource = resource, project = A)
+      val A = someRandom[Project].copy(url = resource)
+      val post = someRandom[Post].copy(url = resource, project = A)
 
       await(postRepo.save(post)) shouldEqual true
       await(postRepo.updateProject(A)) shouldEqual true
 
-      val B = someRandom[Project].copy(resource = resource)
+      val B = someRandom[Project].copy(url = resource)
 
       await(postRepo.updateProject(B)) shouldEqual true
-      await(postRepo.findByResource(post.resource)).map(_.project) shouldEqual Some(B)
+      await(postRepo.findByResource(post.url)).map(_.project) shouldEqual Some(B)
     }
 
     "update children" in {
       val parent = randomResource
       val child = s"${parent}/${someRandom[Long]}"
 
-      val A = someRandom[Project].copy(resource = parent)
-      val B = someRandom[Project].copy(resource = parent)
+      val A = someRandom[Project].copy(url = parent)
+      val B = someRandom[Project].copy(url = parent)
 
       await(postRepo.save(Post.from(parent, A))) shouldEqual true
       await(postRepo.save(Post.from(child, A))) shouldEqual true
@@ -130,7 +130,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = randomResource
       val difParent = s"${parent}${someRandom[Long]}"
 
-      val A = someRandom[Project].copy(resource = parent)
+      val A = someRandom[Project].copy(url = parent)
 
       await(postRepo.save(Post.from(difParent, A))) should throwA
     }
@@ -139,12 +139,12 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val parent = randomResource
       val child = s"${parent}/${someRandom[Long]}"
 
-      val original = someRandom[Project].copy(resource = parent)
+      val original = someRandom[Project].copy(url = parent)
 
       await(postRepo.save(Post.from(parent, original))) shouldEqual true
       await(postRepo.save(Post.from(child, original))) shouldEqual true
 
-      val B = someRandom[Project].copy(resource = child)
+      val B = someRandom[Project].copy(url = child)
 
       await(postRepo.updateProject(B))
 
@@ -190,8 +190,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     for {
       _ <- 1 to 10
     } yield {
-      val childResource = s"${project.resource}/${someRandom[String]}"
-      val post = someRandom[Post].copy(project = project, resource = childResource)
+      val childResource = s"${project.url}/${someRandom[String]}"
+      val post = someRandom[Post].copy(project = project, url = childResource)
       await(postRepo.save(post)) shouldEqual true
       post
     }

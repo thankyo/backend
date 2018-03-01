@@ -22,7 +22,7 @@ case class PendingTransaction(
 object PendingTransaction {
 
   def from(thank: ThankEvent): PendingTransaction = {
-    PendingTransaction(thank.project, thank.resource, thank.created)
+    PendingTransaction(thank.project, thank.url, thank.created)
   }
 
   implicit val jsonFormat = Json.format[PendingTransaction]

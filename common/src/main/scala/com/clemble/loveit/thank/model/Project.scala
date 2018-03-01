@@ -7,7 +7,7 @@ import play.api.http.Writeable
 import play.api.libs.json.{Json, OFormat}
 
 case class Project(
-                             resource: Resource,
+                             url: Resource,
                              user: UserID,
                              title: Option[String] = None,
                              description: Option[String] = None,

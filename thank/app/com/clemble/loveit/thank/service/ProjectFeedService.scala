@@ -55,7 +55,7 @@ case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postRefreshSer
     for {
       fetched <- fetch(project)
       enriched <- Future.sequence(fetched.map(ogObj => postRefreshService.enrich(ogObj)))
-      validPosts = enriched.filter(_.url.contains(project.resource)) // TODO should be startsWith check
+      validPosts = enriched.filter(_.url.contains(project.url)) // TODO should be startsWith check
       created <- Future.sequence(validPosts.map(postService.create))
     } yield {
       created

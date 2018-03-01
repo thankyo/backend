@@ -8,12 +8,12 @@ import play.api.libs.json.{Json, OFormat}
   * TODO We can extend it in future as needed, for now this is enough to get things from the ground
   */
 case class OpenGraphObject(
-                            url: String,
+                            url: Resource,
                             image: Option[OpenGraphImage] = None,
                             title: Option[String] = None,
                             description: Option[String] = None,
                             tags: Set[Tag] = Set.empty,
-                          ) {
+                          ) extends ResourceAware {
 
   def merge(ogObjOpt: Option[OpenGraphObject]): OpenGraphObject = {
     ogObjOpt match {

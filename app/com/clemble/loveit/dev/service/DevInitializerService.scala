@@ -4,7 +4,7 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.EOMPaymentService
@@ -33,14 +33,14 @@ object DevInitializerService {
       Set(
         Project(
           user = "",
-          resource = "https://zenpencils.com",
+          url = "https://zenpencils.com",
           title = Some("Zen Pencil"),
           avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
           rss = Some("https://zenpencils.com/feed")
         ),
         Project(
-          resource = "https://personacentral.com",
+          url = "https://personacentral.com",
           title = Some("Personal Central"),
           user = "",
           avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
@@ -58,7 +58,7 @@ object DevInitializerService {
       ),
       Set(
         Project(
-          resource = "https://readms.net",
+          url = "https://readms.net",
           user = "",
           title = Some("Manga Stream"),
           avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
@@ -75,7 +75,7 @@ object DevInitializerService {
       ),
       Set(
         Project(
-          resource = "https://www.sciencedaily.com",
+          url = "https://www.sciencedaily.com",
           user = "",
           title = Some("Science Daily"),
           avatar = Some("https://www.sciencedaily.com/images/sd-logo.png"),
@@ -151,7 +151,7 @@ case class SimpleDevInitializerService @Inject()(
       supporter <- supporters
       post <- posts
     } yield {
-      postService.thank(supporter, post.resource).map(_ => true)
+      postService.thank(supporter, post.url).map(_ => true)
     }
     Future.sequence(thanked).map(_.count(_ == true))
   }

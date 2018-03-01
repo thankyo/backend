@@ -56,9 +56,9 @@ case class DevCreatorsInitializer @Inject()(
     Future.sequence(fCreators)
   }
 
-  private def ensureCreatorsOwnership(creatorToRes: Seq[(UserID, Set[Project])]): Future[Boolean] = {
+  private def ensureCreatorsOwnership(creatorToProjects: Seq[(UserID, Set[Project])]): Future[Boolean] = {
     val resources = for {
-      (creator, projects) <- creatorToRes
+      (creator, projects) <- creatorToProjects
       project <- projects
     } yield {
       supPrjService

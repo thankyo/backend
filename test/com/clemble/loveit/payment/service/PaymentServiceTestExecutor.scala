@@ -41,8 +41,8 @@ trait PaymentServiceTestExecutor extends ServiceSpec with PaymentTestExecutor {
     await(monLimRepo.setMonthlyLimit(user, limit))
   }
 
-  override def thank(giver: UserID, project: Project, resource: Resource): PendingTransaction = {
-    await(thankTransactionService.create(giver, project, resource))
+  override def thank(giver: UserID, project: Project, url: Resource): PendingTransaction = {
+    await(thankTransactionService.create(giver, project, url))
   }
 
   override def pendingCharges(giver: UserID): Seq[PendingTransaction] = {

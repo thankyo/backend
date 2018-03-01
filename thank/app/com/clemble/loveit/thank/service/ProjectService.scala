@@ -13,7 +13,7 @@ trait ProjectService {
 
   def findById(project: ProjectID): Future[Option[Project]]
 
-  def findProject(res: Resource): Future[Option[Project]]
+  def findProject(url: Resource): Future[Option[Project]]
 
   def findProjectsByUser(user: UserID): Future[List[Project]]
 
@@ -37,8 +37,8 @@ class SimpleProjectService @Inject()(
     repo.findById(project)
   }
 
-  override def findProject(res: Resource): Future[Option[Project]] = {
-    repo.findProject(res)
+  override def findProject(url: Resource): Future[Option[Project]] = {
+    repo.findProject(url)
   }
 
   override def findProjectsByUser(user: UserID): Future[List[Project]] = {

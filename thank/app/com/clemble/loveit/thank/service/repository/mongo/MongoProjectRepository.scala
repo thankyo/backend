@@ -59,8 +59,8 @@ case class MongoProjectRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
-  override def findProject(res: Resource): Future[Option[Project]] = {
-    val query = Json.obj("url" -> Json.obj("$in" -> res.parents()))
+  override def findProject(url: Resource): Future[Option[Project]] = {
+    val query = Json.obj("url" -> Json.obj("$in" -> url.parents()))
     collection.find(query).one[Project]
   }
 

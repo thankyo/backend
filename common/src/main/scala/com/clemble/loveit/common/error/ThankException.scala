@@ -15,11 +15,11 @@ case class ResourceException(code: String, message: String) extends ThankExcepti
 
 object UserException {
   def notEnoughFunds() = new UserException("NOT_ENOUGH_FUNDS", "Not enough funds")
-  def resourceAlreadyOwned(user: UserID) = new UserException("URL_ALREADY_OWNED", s"Resource already owned by ${user}")
+  def urlAlreadyOwned(user: UserID) = new UserException("URL_ALREADY_OWNED", s"Resource already owned by ${user}")
 }
 
 object PaymentException {
-  def alreadyThanked(user: UserID, res: Resource) = PaymentException("ALREADY_THANKED", s"User ${user} already thanked ${res}")
+  def alreadyThanked(user: UserID, url: Resource) = PaymentException("ALREADY_THANKED", s"User ${user} already thanked ${url}")
   def failedToLinkChargeAccount(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link charge account details")
   def failedToLinkPayoutAccount(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link payout account details")
   def limitIsNegative(user: UserID, limit: Money) = PaymentException("LIMIT_IS_NEGATIVE", s"User ${user} limit can't be negative")

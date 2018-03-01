@@ -46,11 +46,11 @@ package object model {
 
     def parents(): List[Resource] = {
       @tailrec
-      def toParents(uri: List[String], agg: List[String]): List[String] = {
-        if (uri.tail.tail.isEmpty) {
+      def toParents(urlParts: List[String], agg: List[String]): List[String] = {
+        if (urlParts.tail.tail.isEmpty) {
           agg
         } else {
-          toParents(uri.tail, (uri.reverse.mkString("/")) :: agg)
+          toParents(urlParts.tail, (urlParts.reverse.mkString("/")) :: agg)
         }
       }
 

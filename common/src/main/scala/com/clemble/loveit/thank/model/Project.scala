@@ -21,7 +21,7 @@ case class Project(
 
 object Project {
 
-  def error(res: Resource): Project = Project(res, User.UNKNOWN, Some("No owner registered for this resource"))
+  def error(url: Resource): Project = Project(url, User.UNKNOWN, Some("No owner registered for this resource"))
 
   implicit val jsonFormat: OFormat[Project] = Json.format[Project]
 

@@ -16,13 +16,13 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   val postRepo = dependency[PostRepository]
 
   def findAll(urls: Seq[Resource]): Future[Seq[Post]] = {
-    val searchQuery: Future[Seq[Option[Post]]] = Future.sequence(urls.map(uri => postRepo.findByResource(uri)))
+    val searchQuery: Future[Seq[Option[Post]]] = Future.sequence(urls.map(url => postRepo.findByResource(url)))
     searchQuery.map(_.flatten)
   }
 
   def createParentThank(post: Post) = {
-    val parentResource = post.url.parents.last
-    val parentProject = Post.from(parentResource, someRandom[Project].copy(url = parentResource))
+    val parentUrl = post.url.parents.last
+    val parentProject = Post.from(parentUrl, someRandom[Project].copy(url = parentUrl))
     await(postRepo.save(parentProject))
   }
 
@@ -30,9 +30,9 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
     "be NONE for non existent" in {
       val user = someRandom[UserID]
-      val resource = randomResource
+      val url = randomResource
 
-      await(postRepo.isSupportedBy(user, resource)) shouldEqual None
+      await(postRepo.isSupportedBy(user, url)) shouldEqual None
     }
 
     "be false for not thanked" in {
@@ -84,10 +84,10 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
   "UPDATE OWNER" should {
 
     "create if missing" in {
-      val resource = randomResource
-      val newProject = someRandom[Project].copy(url = resource)
-      val oldProject = someRandom[Project].copy(url = resource)
-      val post = someRandom[Post].copy(url = resource, project = oldProject)
+      val url = randomResource
+      val newProject = someRandom[Project].copy(url = url)
+      val oldProject = someRandom[Project].copy(url = url)
+      val post = someRandom[Post].copy(url = url, project = oldProject)
 
       await(postRepo.save(post)) should beTrue
 
@@ -96,15 +96,15 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     }
 
     "update if exists" in {
-      val resource = randomResource
+      val url = randomResource
 
-      val A = someRandom[Project].copy(url = resource)
-      val post = someRandom[Post].copy(url = resource, project = A)
+      val A = someRandom[Project].copy(url = url)
+      val post = someRandom[Post].copy(url = url, project = A)
 
       await(postRepo.save(post)) shouldEqual true
       await(postRepo.updateProject(A)) shouldEqual true
 
-      val B = someRandom[Project].copy(url = resource)
+      val B = someRandom[Project].copy(url = url)
 
       await(postRepo.updateProject(B)) shouldEqual true
       await(postRepo.findByResource(post.url)).map(_.project) shouldEqual Some(B)
@@ -190,8 +190,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     for {
       _ <- 1 to 10
     } yield {
-      val childResource = s"${project.url}/${someRandom[String]}"
-      val post = someRandom[Post].copy(project = project, url = childResource)
+      val childUrl = s"${project.url}/${someRandom[String]}"
+      val post = someRandom[Post].copy(project = project, url = childUrl)
       await(postRepo.save(post)) shouldEqual true
       post
     }

@@ -43,8 +43,8 @@ object Post {
 
   implicit val postsWriteable = WriteableUtils.jsonToWriteable[List[Post]]
 
-  def from(res: Resource, project: Project): Post = {
-    Post(res, project, OpenGraphObject(url = res, tags = project.tags))
+  def from(url: Resource, project: Project): Post = {
+    Post(url, project, OpenGraphObject(url = url, tags = project.tags))
   }
 
   def from(og: OpenGraphObject, project: Project): Post = {

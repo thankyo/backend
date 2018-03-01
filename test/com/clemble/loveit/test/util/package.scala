@@ -90,10 +90,10 @@ package object util {
     PendingTransaction(someRandom[Project], randomResource, someRandom[LocalDateTime])
   }
   implicit val postGenerator: Generator[Post] = () => {
-    val resource = randomResource
+    val url = randomResource
     Post(
-      resource,
-      someRandom[Project].copy(url = resource),
+      url,
+      someRandom[Project].copy(url = url),
       someRandom[OpenGraphObject]
     )
   }

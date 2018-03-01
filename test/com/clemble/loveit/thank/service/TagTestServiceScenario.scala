@@ -10,14 +10,14 @@ trait TagTestServiceScenario extends ServiceSpec with TagTestService with PostTe
   "assign tags to user" in {
     val user = createUser()
 
-    val resource = randomResource
-    val project = createProject(user, resource)
+    val url = randomResource
+    val project = createProject(user, url)
 
     val newTags = someRandom[Set[Tag]]
-    newTags shouldNotEqual getProjectTags(resource)
+    newTags shouldNotEqual getProjectTags(url)
 
     assignTags(project, newTags) shouldEqual true
-    getProjectTags(resource) shouldEqual newTags
+    getProjectTags(url) shouldEqual newTags
   }
 
   "assign tags to post" in {

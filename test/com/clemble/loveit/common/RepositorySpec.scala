@@ -28,8 +28,8 @@ trait RepositorySpec extends FunctionalThankSpecification {
     await(fUserID)
   }
 
-  override def createProject(user: UserID = createUser(), resource: Resource = randomResource): Project = {
-    val project = Project(resource, user)
+  override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
+    val project = Project(url, user)
     await(prjRepo.saveProject(project))
     project
   }

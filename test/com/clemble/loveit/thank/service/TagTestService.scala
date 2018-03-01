@@ -11,11 +11,11 @@ trait TagTestService {
 
   def assignTags(project: Project, tags: Set[Tag]): Boolean
 
-  def getProjectTags(resource: Resource): Set[Tag]
+  def getProjectTags(url: Resource): Set[Tag]
 
-  def assignTags(res: Resource, tags: Set[Tag]): Boolean
+  def assignTags(url: Resource, tags: Set[Tag]): Boolean
 
-  def getTags(res: Resource): Set[Tag]
+  def getTags(url: Resource): Set[Tag]
 
 }
 
@@ -31,12 +31,12 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
     return await(prjRepo.findProject(project)).map(_.tags).getOrElse(Set.empty[Tag])
   }
 
-  override def assignTags(res: Resource, tags: Set[Tag]): Boolean = {
-    await(postRepo.assignTags(res, tags))
+  override def assignTags(url: Resource, tags: Set[Tag]): Boolean = {
+    await(postRepo.assignTags(url, tags))
   }
 
-  def getTags(res: Resource): Set[Tag] = {
-    await(postRepo.findByResource(res).map(_.map(_.ogObj.tags).getOrElse(Set.empty[Tag])))
+  def getTags(url: Resource): Set[Tag] = {
+    await(postRepo.findByResource(url).map(_.map(_.ogObj.tags).getOrElse(Set.empty[Tag])))
   }
 
 }
@@ -50,12 +50,12 @@ trait InternalTagTestService extends TagTestService with ServiceSpec {
     await(prjService.update(project.copy(tags = tags)).map(_ => true))
   }
 
-  override def assignTags(res: Resource, tags: Set[Tag]): Boolean = {
-    await(postService.assignTags(res, tags))
+  override def assignTags(url: Resource, tags: Set[Tag]): Boolean = {
+    await(postService.assignTags(url, tags))
   }
 
-  override def getProjectTags(resource: Resource): Set[Tag] = {
-    await(prjService.findProject(resource)).map(_.tags).getOrElse(Set.empty[String])
+  override def getProjectTags(url: Resource): Set[Tag] = {
+    await(prjService.findProject(url)).map(_.tags).getOrElse(Set.empty[String])
   }
 
   override def getTags(res: Resource): Set[Tag] = {

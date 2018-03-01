@@ -11,11 +11,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PostService {
 
-  def getPostOrProject(uri: Resource): Future[Either[Post, Project]]
+  def getPostOrProject(url: Resource): Future[Either[Post, Project]]
 
   def create(og: OpenGraphObject): Future[Post]
 
-  def assignTags(uri: Resource, tags: Set[Tag]): Future[Boolean]
+  def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean]
 
   def updateProject(owner: Project): Future[Boolean]
 
@@ -25,7 +25,7 @@ trait PostService {
 
   def findByProject(project: ProjectID): Future[List[Post]]
 
-  def hasSupported(giver: UserID, uri: Resource): Future[Boolean]
+  def hasSupported(giver: UserID, url: Resource): Future[Boolean]
 
   def thank(supporter: UserID, url: Resource): Future[Post]
 
@@ -40,26 +40,26 @@ case class SimplePostService @Inject()(
                                         implicit val ec: ExecutionContext
                                       ) extends PostService {
 
-  override def hasSupported(supporter: UserID, res: Resource): Future[Boolean] = {
-    getPostOrProject(res) map {
+  override def hasSupported(supporter: UserID, url: Resource): Future[Boolean] = {
+    getPostOrProject(url) map {
       case Left(post) => post.thank.isSupportedBy(supporter)
       case Right(_) => false
     }
   }
 
-  override def getPostOrProject(res: Resource): Future[Either[Post, Project]] = {
+  override def getPostOrProject(url: Resource): Future[Either[Post, Project]] = {
     def findProjectIfNoPost(postOpt: Option[Post]): Future[Either[Post, Project]] = {
       postOpt match {
         case Some(post) =>
           Future.successful(Left(post))
         case None =>
           prjService
-            .findProject(res)
+            .findProject(url)
             .map(_.map(Right(_)).getOrElse({ throw ResourceException.ownerMissing() }))
       }
     }
 
-    postRepo.findByResource(res).flatMap(findProjectIfNoPost)
+    postRepo.findByResource(url).flatMap(findProjectIfNoPost)
   }
 
 
@@ -87,26 +87,26 @@ case class SimplePostService @Inject()(
     })
   }
 
-  override def assignTags(uri: Resource, tags: Set[Tag]): Future[Boolean] = {
-    postRepo.assignTags(uri, tags)
+  override def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean] = {
+    postRepo.assignTags(url, tags)
   }
 
   override def updateProject(project: Project): Future[Boolean] = {
     postRepo.updateProject(project)
   }
 
-  override def thank(giver: UserID, res: Resource): Future[Post] = {
-    getPostOrProject(res) flatMap {
+  override def thank(giver: UserID, url: Resource): Future[Post] = {
+    getPostOrProject(url) flatMap {
       case Left(post) =>
         Future.successful(post)
       case Right(_) =>
         postRefreshService
-          .enrich(OpenGraphObject(url = res))
+          .enrich(OpenGraphObject(url = url))
           .flatMap(create)
     } flatMap (post => {
-      postRepo.markSupported(giver, res).map(increased => {
+      postRepo.markSupported(giver, url).map(increased => {
         if (increased) {
-          thankEventBus.publish(ThankEvent(giver, post.project, res))
+          thankEventBus.publish(ThankEvent(giver, post.project, url))
           post.copy(thank = post.thank.withSupporter(giver))
         } else {
           post

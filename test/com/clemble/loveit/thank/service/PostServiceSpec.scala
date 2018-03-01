@@ -68,28 +68,28 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
     "create if missing" in {
       val owner = createUser()
-      val resource = randomResource
+      val url = randomResource
 
-      await(service.getPostOrProject(resource)) should throwA()
+      await(service.getPostOrProject(url)) should throwA()
 
-      createProject(owner, resource).url shouldEqual resource
-      await(service.getPostOrProject(resource)).right.exists(_.user == owner) should beTrue
+      createProject(owner, url).url shouldEqual url
+      await(service.getPostOrProject(url)).right.exists(_.user == owner) should beTrue
     }
 
     "update if exists" in {
-      val resource = randomResource
+      val url = randomResource
 
       val A = createUser()
 
-      createProject(A, resource).url shouldEqual resource
-      await(service.getPostOrProject(resource)).isRight shouldEqual true
-      await(service.getPostOrProject(resource)).right.exists(_.user == A) should beTrue
+      createProject(A, url).url shouldEqual url
+      await(service.getPostOrProject(url)).isRight shouldEqual true
+      await(service.getPostOrProject(url)).right.exists(_.user == A) should beTrue
 
       val B = createUser()
 
-      createProject(B, resource).url shouldEqual resource
-      await(service.getPostOrProject(resource)).isRight shouldEqual true
-      await(service.getPostOrProject(resource)).right.exists(_.user == B) should beTrue
+      createProject(B, url).url shouldEqual url
+      await(service.getPostOrProject(url)).isRight shouldEqual true
+      await(service.getPostOrProject(url)).right.exists(_.user == B) should beTrue
     }
 
   }

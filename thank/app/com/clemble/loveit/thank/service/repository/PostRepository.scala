@@ -9,11 +9,11 @@ trait PostRepository {
 
   def save(post: Post): Future[Boolean]
 
-  def assignTags(res: Resource, tags: Set[Tag]): Future[Boolean]
+  def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean]
 
   def update(post: Post): Future[Boolean]
 
-  def findByResource(uri: Resource): Future[Option[Post]]
+  def findByResource(url: Resource): Future[Option[Post]]
 
   def findByTags(tags: Set[String]): Future[List[Post]]
 
@@ -25,6 +25,6 @@ trait PostRepository {
 
   def markSupported(user: String, url: Resource): Future[Boolean]
 
-  def isSupportedBy(user: UserID, resource: Resource): Future[Option[Boolean]]
+  def isSupportedBy(user: UserID, url: Resource): Future[Option[Boolean]]
 
 }

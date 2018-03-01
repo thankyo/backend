@@ -20,13 +20,13 @@ class GraphController @Inject()(
                                  implicit val ec: ExecutionContext
                                ) extends LoveItController(components) {
 
-  def get(res: Resource) = silhouette.UnsecuredAction.async(implicit req => {
+  def get(url: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     service
-      .getPostOrProject(res)
-      .recover({ case _ => Left(Post.from(res, Project.error(res))) })
+      .getPostOrProject(url)
+      .recover({ case _ => Left(Post.from(url, Project.error(url))) })
       .map(_ match {
         case Left(post) => Ok(post)
-        case Right(project) => Ok(Post.from(res, project))
+        case Right(project) => Ok(Post.from(url, project))
       })
   })
 
@@ -56,8 +56,8 @@ class GraphController @Inject()(
     service.findByProject(project).map(posts => Ok(posts))
   })
 
-  def hasSupported(resource: Resource) = silhouette.SecuredAction.async(implicit req => {
-    service.hasSupported(req.identity.id, resource).map(supported => Ok(JsBoolean(supported)))
+  def hasSupported(url: Resource) = silhouette.SecuredAction.async(implicit req => {
+    service.hasSupported(req.identity.id, url).map(supported => Ok(JsBoolean(supported)))
   })
 
   def support = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "url").map(_.as[Resource]))(implicit req => {

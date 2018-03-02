@@ -50,7 +50,7 @@ class SimpleProjectService @Inject()(
     val fActive = repo.findProjectsByUser(user)
     for {
       installed <- fActive
-      pending <- fOwned.map(_.filter(prj => installed.exists(_.url == prj.url)))
+      pending <- fOwned.map(_.filterNot(prj => installed.exists(_.url == prj.url)))
     } yield {
       OwnedProjects(pending, installed)
     }

@@ -14,7 +14,6 @@ case class Project(
                              avatar: Option[String] = None,
                              webStack: Option[WebStack] = None,
                              tags: Set[Tag] = Set.empty,
-                             enabled: Boolean = false,
                              rss: Option[String] = None,
                              _id: ProjectID = IDGenerator.generate()
                            ) extends UserAware with ResourceAware
@@ -26,7 +25,7 @@ object Project {
   implicit val jsonFormat: OFormat[Project] = Json.format[Project]
 
   implicit val projectWritable = WriteableUtils.jsonToWriteable[Project]()
-  implicit val projectListWriteable: Writeable[List[Project]] = WriteableUtils.jsonToWriteable[List[Project]]
+  implicit val projectListWriteable: Writeable[Seq[Project]] = WriteableUtils.jsonToWriteable[Seq[Project]]
 
 }
 

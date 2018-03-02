@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectOwnershipService {
 
-  def fetch(user: UserID): Future[List[Project]]
+  def fetch(user: UserID): Future[Seq[Project]]
 
 }
 
@@ -30,7 +30,24 @@ case class SimpleProjectOwnershipService @Inject()(
                                                        implicit val ec : ExecutionContext
                                                     ) extends ProjectOwnershipService {
 
-  private def fetchGoogleResources(user: UserID): Future[List[Project]] = {
+  private def readGoogleResources(user: UserID, json: JsValue): Seq[Project] = {
+    (json \ "error").asOpt[JsObject].foreach(error => {
+      val errorCode = (error \ "code").as[Int]
+      val errorMsg = (error \ "message").as[String]
+
+      throw new ProfileRetrievalException(SpecifiedProfileError.format(GoogleProvider.ID, errorCode, errorMsg))
+    })
+
+    val resources = (json \ "items" \\ "site")
+      .map(site => (site \ "identifier").as[Resource] match {
+        case url if url.startsWith("http") => url
+        case url => s"https://${url}/"
+      })
+
+    resources.map(res => Project(res, user))
+  }
+
+  private def fetchGoogleResources(user: UserID): Future[Seq[Project]] = {
     (for {
       googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
       googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
@@ -49,24 +66,7 @@ case class SimpleProjectOwnershipService @Inject()(
     }).flatten
   }
 
-  private def readGoogleResources(user: UserID, json: JsValue): List[Project] = {
-    (json \ "error").asOpt[JsObject].foreach(error => {
-      val errorCode = (error \ "code").as[Int]
-      val errorMsg = (error \ "message").as[String]
-
-      throw new ProfileRetrievalException(SpecifiedProfileError.format(GoogleProvider.ID, errorCode, errorMsg))
-    })
-
-    val resources = (json \ "items" \\ "site")
-      .map(site => (site \ "identifier").as[Resource] match {
-        case url if url.startsWith("http") => url
-        case url => s"https://${url}/"
-      })
-
-    resources.map(res => Project(res, user)).toList
-  }
-
-  override def fetch(user: UserID): Future[List[Project]] = {
+  override def fetch(user: UserID): Future[Seq[Project]] = {
     fetchGoogleResources(user)
   }
 

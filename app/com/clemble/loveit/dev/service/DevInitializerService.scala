@@ -156,18 +156,12 @@ case class SimpleDevInitializerService @Inject()(
     Future.sequence(thanked).map(_.count(_ == true))
   }
 
-  private def ensureEOMProcessed(): Future[Seq[EOMStatus]] = {
-    val start = YearMonth.now().minusYears(1)
-    val eomStatuses = for {
-      i <- 1 to 12
-    } yield {
-      val yom = start.minusMonths(i)
-      eomService.getStatus(yom).flatMap(_ match {
-        case Some(status) => Future.successful(status)
-        case None => eomService.run(yom)
-      })
-    }
-    Future.sequence(eomStatuses)
+  private def ensureEOMProcessed(): Future[EOMStatus] = {
+    val yom = YearMonth.now().minusMonths(1)
+    eomService.getStatus(yom).flatMap(_ match {
+      case Some(status) => Future.successful(status)
+      case None => eomService.run(yom)
+    })
   }
 
 }

@@ -29,11 +29,10 @@ object ResourceException {
   val OWNER_MISSING_CODE = "OWNER_MISSING_CODE"
   val DIFFERENT_OWNER_CODE = "DIFFERENT_OWNER_CODE"
   val DIFFERENT_ID_CODE = "DIFFERENT_ID_CODE"
-  val VERIFICATION_IN_PROGRESS_CODE = "VERIFICATION_IN_PROGRESS"
   val NO_RESOURCE_EXISTS_CODE = "NO_RESOURCE_EXISTS_CODE"
 
   def noResourceExists() = ResourceException(NO_RESOURCE_EXISTS_CODE, "URL was not registered")
-  def verificationAlreadyRequested() = ResourceException(VERIFICATION_IN_PROGRESS_CODE, "URL verification already in progress")
+  def failedToUpdate() = ResourceException("FAILED_TO_UPDATE", "Failed to update the record")
   def ownerMissing() = new ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
   def differentOwner() = new ResourceException(DIFFERENT_OWNER_CODE, "Different owner registered for the project")
   def differentId() = new ResourceException(DIFFERENT_ID_CODE, "Different project id")

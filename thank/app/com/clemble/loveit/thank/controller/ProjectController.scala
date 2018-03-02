@@ -24,7 +24,9 @@ class ProjectController @Inject()(
                                               ) extends LoveItController(components) {
 
   def getOwnedProjects() = silhouette.SecuredAction.async(implicit req => {
-    service.findOwned(req.identity.id).map(Ok(_))
+    service.findOwned(req.identity.id).map(userProjects => {
+      Ok(userProjects)
+    })
   })
 
   def getProjectsByUser(user: UserID) = silhouette.SecuredAction.async(implicit req => {

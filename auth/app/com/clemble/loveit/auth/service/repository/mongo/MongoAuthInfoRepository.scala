@@ -3,6 +3,8 @@ package com.clemble.loveit.auth.service.repository.mongo
 import javax.inject.{Inject, Named, Singleton}
 
 import com.clemble.loveit.auth.service.AuthInfoUtils
+import com.clemble.loveit.common.error
+import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.PasswordInfo
@@ -58,6 +60,7 @@ object MongoAuthInfo {
 @Singleton
 case class MongoAuthInfoRepository @Inject()(@Named("authInfo") collection: JSONCollection)(implicit ec: ExecutionContext) extends AuthInfoRepository {
 
+  import MongoAuthInfo._
   MongoAuthInfoRepository.ensureMeta(collection)
 
   override def find[T <: AuthInfo](loginInfo: LoginInfo)(implicit tag: ClassTag[T]): Future[Option[T]] = {
@@ -76,10 +79,12 @@ case class MongoAuthInfoRepository @Inject()(@Named("authInfo") collection: JSON
 
   override def update[T <: AuthInfo](loginInfo: LoginInfo, authInfo: T): Future[T] = {
     val selector = Json.obj("loginInfo" -> loginInfo)
-    val authInfoJson = MongoAuthInfo.authInfoFormat.writes(authInfo)
-    val update = Json.obj("$set" -> Json.obj("authInfo" -> authInfoJson))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update)).
-      map(updated => if (updated) authInfo else throw new IllegalArgumentException("Failed to save authentication"))
+    // Update only changed fields
+    val infoUpdate = Json.toJsObject(authInfo.asInstanceOf[AuthInfo]).fields.map({ case (field, value) => s"authInfo.$field" -> value})
+    val update = Json.obj("$set" -> JsObject(infoUpdate))
+    collection.findAndUpdate(selector, update, true).map(_.value.flatMap(_.asOpt[MongoAuthInfo].map(_.authInfo.asInstanceOf[T])).getOrElse({
+      throw ResourceException.failedToUpdate()
+    }))
   }
 
   override def save[T <: AuthInfo](loginInfo: LoginInfo, authInfo: T): Future[T] = {

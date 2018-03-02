@@ -23,7 +23,8 @@ object AuthInfoUtils {
         val expires = oauthInfo.params
           .flatMap(_.get("expires"))
           .map(dateStr => LocalDateTime.parse(dateStr))
-        expires.exists(_.isBefore(LocalDateTime.now()))
+        val hasExpired = expires.exists(_.isBefore(LocalDateTime.now()))
+        hasExpired
       case _ => false
     }
   }

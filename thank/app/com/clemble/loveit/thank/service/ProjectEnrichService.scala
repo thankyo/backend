@@ -50,7 +50,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       })
   }
 
-  private def enrichTags(url: Resource): Future[(Set[Tag], Option[String], Option[String])] = {
+  private def enrichDescription(url: Resource): Future[(Set[Tag], Option[String], Option[String])] = {
     wsClient
       .url(url)
       .get()
@@ -77,10 +77,13 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
   }
 
   override def enrich(user: UserID, url: Resource): Future[Project] = {
+    val fWebStack = enrichWebStack(url)
+    val fDescription = enrichDescription(url)
+    val fRss = enrichRSS(url)
     for {
-      webStack <- enrichWebStack(url)
-      (tags, description, title) <- enrichTags(url)
-      rss <- enrichRSS(url)
+      webStack <- fWebStack
+      (tags, description, title) <- fDescription
+      rss <- fRss
     } yield {
       Project(
         url = url,

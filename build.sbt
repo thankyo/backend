@@ -35,7 +35,7 @@ lazy val common = (project in file("./common")).
         ExclusionRule(organization = "com.typesafe.play")
       ),
 
-      "com.typesafe.play" %% "play" % "2.6.11" % "provided",
+      "com.typesafe.play" %% "play" % "2.6.12" % "provided",
 
       "org.reactivemongo" %% "reactivemongo" % reactMongoVersion,
       "org.reactivemongo" %% "play2-reactivemongo" % s"${reactMongoVersion}-play26",
@@ -91,7 +91,7 @@ lazy val payment = (project in file("./payment")).
   settings(
     libraryDependencies ++= Seq(
       ws,
-      "com.stripe" % "stripe-java" % "5.28.0",
+      "com.stripe" % "stripe-java" % "5.33.2",
       "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion
     )
   )
@@ -113,7 +113,7 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.6.5",
+  "io.sentry" % "sentry-logback" % "1.7.0",
 
   "org.apache.commons" % "commons-text" % "1.2" % Test,
   specs2 % Test

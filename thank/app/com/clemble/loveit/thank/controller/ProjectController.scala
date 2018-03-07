@@ -2,29 +2,30 @@ package com.clemble.loveit.thank.controller
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.model.{ProjectID, UserID}
+import com.clemble.loveit.common.controller.LoveItController
+import com.clemble.loveit.common.model.{ProjectID, Resource, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.service.{ProjectFeedService, ProjectService, ProjectSupportTrackService}
+import com.clemble.loveit.thank.model.Project
+import com.clemble.loveit.thank.service.{ProjectEnrichService, ProjectFeedService, ProjectService, ProjectSupportTrackService}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 
 import scala.concurrent.{ExecutionContext, Future}
-import com.clemble.loveit.common.controller.LoveItController
-import com.clemble.loveit.thank.model.Project
 
 @Singleton
 class ProjectController @Inject()(
-                                   service: ProjectService,
-                                   feedService: ProjectFeedService,
-                                   trackService: ProjectSupportTrackService,
-                                   silhouette: Silhouette[AuthEnv],
-                                   components: ControllerComponents,
-                                   implicit val ec: ExecutionContext
-                                              ) extends LoveItController(components) {
+  service: ProjectService,
+  enrichService: ProjectEnrichService,
+  feedService: ProjectFeedService,
+  trackService: ProjectSupportTrackService,
+  silhouette: Silhouette[AuthEnv],
+  components: ControllerComponents,
+  implicit val ec: ExecutionContext
+) extends LoveItController(components) {
 
   def getOwnedProjects() = silhouette.SecuredAction.async(implicit req => {
-    service.findOwned(req.identity.id).map(userProjects => {
+    service.getOwned(req.identity.id).map(userProjects => {
       Ok(userProjects)
     })
   })
@@ -51,11 +52,6 @@ class ProjectController @Inject()(
     })
   })
 
-  def refreshMyProjects = silhouette.SecuredAction.async(implicit req => {
-    val user = req.identity.id
-    service.refresh(user).map(Ok(_))
-  })
-
   def getSupportedByUser(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {
     trackService.
       getSupported(idOrMe(supporter)).
@@ -67,6 +63,10 @@ class ProjectController @Inject()(
       case Some(prj) => Ok(prj)
       case None => NotFound
     })
+  })
+
+  def enrich(res: Resource) = silhouette.SecuredAction.async(implicit req => {
+    enrichService.enrich(req.identity.id, res).map(Ok(_))
   })
 
 }

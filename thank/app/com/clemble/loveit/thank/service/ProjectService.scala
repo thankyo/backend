@@ -17,9 +17,7 @@ trait ProjectService {
 
   def findProjectsByUser(user: UserID): Future[List[Project]]
 
-  def findOwned(user: UserID): Future[OwnedProjects]
-
-  def refresh(user: UserID): Future[Seq[Project]]
+  def getOwned(user: UserID): Future[OwnedProjects]
 
   def update(project: Project): Future[Project]
 
@@ -28,7 +26,6 @@ trait ProjectService {
 @Singleton
 class SimpleProjectService @Inject()(
                                       repo: ProjectRepository,
-                                      enrichService: ProjectEnrichService,
                                       ownershipService: ProjectOwnershipService,
                                       implicit val ec: ExecutionContext
                                              ) extends ProjectService {
@@ -45,7 +42,7 @@ class SimpleProjectService @Inject()(
     repo.findProjectsByUser(user)
   }
 
-  override def findOwned(user: UserID): Future[OwnedProjects] = {
+  override def getOwned(user: UserID): Future[OwnedProjects] = {
     val fOwned = ownershipService.fetch(user)
     val fActive = repo.findProjectsByUser(user)
     for {
@@ -53,23 +50,6 @@ class SimpleProjectService @Inject()(
       pending <- fOwned.map(_.filterNot(prj => installed.exists(_.url == prj.url)))
     } yield {
       OwnedProjects(pending, installed)
-    }
-  }
-
-  override def refresh(user: UserID): Future[Seq[Project]] = {
-    val fExisting = findProjectsByUser(user)
-    val fEnriched = fExisting.map(_.map(enrichService.enrich)).flatMap(Future.sequence(_))
-
-    for {
-      owned <- ownershipService.fetch(user)
-      existing <- fExisting
-      newProjects = owned.filter(project => !existing.exists(_.url == project.url))
-      _ <- Future.sequence(newProjects.map(repo.saveProject))
-      enriched <- fEnriched
-      updatedProjects = enriched.filterNot(existing.contains)
-      _ <- Future.sequence(updatedProjects.map(update))
-    } yield {
-      newProjects ++ enriched
     }
   }
 
@@ -83,7 +63,6 @@ class SimpleProjectService @Inject()(
       updated <- repo.update(project)
       _ = if (!updated) throw RepositoryException.failedToUpdate()
     } yield {
-
       project
     }
   }

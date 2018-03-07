@@ -2,9 +2,8 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.Inject
 
-import com.clemble.loveit.common.model.Tag
+import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.thank.model.{Project, WebStack}
-import com.clemble.loveit.user.service.UserService
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
 import play.api.libs.ws.WSClient
@@ -14,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectEnrichService {
 
-  def enrich(project: Project): Future[Project]
+  def enrich(user: UserID, url: Resource): Future[Project]
 
 }
 
@@ -30,11 +29,16 @@ object ProjectEnrichService {
     description.flatMap(keywords => Option(keywords.attr("content")))
   }
 
+  def readTitle(html: String): Option[String] = {
+    val title = Option(Jsoup.parse(html).getElementsByTag("title").first())
+    title.flatMap(title => Option(title.`val`()))
+  }
+
 }
 
-case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient, userService: UserService)(implicit ec: ExecutionContext) extends ProjectEnrichService {
+case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient)(implicit ec: ExecutionContext) extends ProjectEnrichService {
 
-  private def analyzeWebStack(url: String): Future[Option[WebStack]] = {
+  private def enrichWebStack(url: Resource): Future[Option[WebStack]] = {
     wsClient.url(lookupUrl)
       .addQueryStringParameters("url" -> url)
       .execute()
@@ -46,66 +50,43 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       })
   }
 
-  private def enrichWebStack(project: Project): Future[Option[WebStack]] = {
-    for {
-      webStack <- analyzeWebStack(project.url)
-    } yield {
-      webStack.orElse(project.webStack)
-    }
-  }
-
-  private def enrichAvatar(project: Project): Future[Option[String]] = {
-    if (project.avatar.isDefined) {
-      return Future.successful(project.avatar)
-    }
-    userService.findById(project.user).map(_.flatMap(_.avatar))
-  }
-
-  private def enrichTags(project: Project): Future[Set[Tag]] = {
-    if (project.tags.nonEmpty)
-      return Future.successful(project.tags)
+  private def enrichTags(url: Resource): Future[(Set[Tag], Option[String], Option[String])] = {
     wsClient
-      .url(project.url)
+      .url(url)
       .get()
-      .map(resp => ProjectEnrichService.readTags(resp.body))
+      .map(resp => {
+        val tags = ProjectEnrichService.readTags(resp.body)
+        val description = ProjectEnrichService.readDescription(resp.body)
+        val title = ProjectEnrichService.readTitle(resp.body)
+
+        (tags, description, title)
+      })
   }
 
-  private def enrichDescription(project: Project): Future[Option[String]] = {
-    if (project.description.isDefined)
-      return Future.successful(project.description)
+  private def enrichRSS(url: Resource): Future[Option[String]] = {
     wsClient
-      .url(project.url)
-      .get()
-      .map(resp => ProjectEnrichService.readDescription(resp.body))
-  }
-
-  private def enrichRSS(project: Project): Future[Option[String]] = {
-    if (project.rss.isDefined)
-      return Future.successful(project.rss)
-    wsClient
-      .url(project.url)
+      .url(url)
       .get()
       .map(resp => {
         if (resp.status == Status.OK) {
-          Some(project.url)
+          Some(url)
         } else {
           None
         }
       })
   }
 
-  override def enrich(project: Project): Future[Project] = {
+  override def enrich(user: UserID, url: Resource): Future[Project] = {
     for {
-      webStack <- enrichWebStack(project)
-      avatar <- enrichAvatar(project)
-      tags <- enrichTags(project)
-      description <- enrichDescription(project)
-      rss <- enrichRSS(project)
+      webStack <- enrichWebStack(url)
+      (tags, description, title) <- enrichTags(url)
+      rss <- enrichRSS(url)
     } yield {
-      project.copy(
+      Project(
+        url = url,
+        user = user,
         webStack = webStack,
-        avatar = avatar,
-        title = project.title.orElse(Some(project.url)),
+        title = title.orElse(Some(url)),
         description = description,
         tags = tags,
         rss = rss

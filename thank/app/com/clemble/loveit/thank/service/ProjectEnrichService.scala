@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.Inject
 
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
-import com.clemble.loveit.thank.model.{Project, WebStack}
+import com.clemble.loveit.thank.model.{Project, ProjectConstructor, ProjectLike, WebStack}
 import com.clemble.loveit.user.service.UserService
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectEnrichService {
 
-  def enrich(user: UserID, url: Resource): Future[Project]
+  def enrich(user: UserID, url: Resource): Future[ProjectLike]
 
 }
 
@@ -41,7 +41,7 @@ object ProjectEnrichService {
 
 case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient, userService: UserService)(implicit ec: ExecutionContext) extends ProjectEnrichService {
 
-  val cache = new mutable.WeakHashMap[String, Project]()
+  val cache = new mutable.WeakHashMap[String, ProjectLike]()
 
   private def enrichWebStack(url: Resource): Future[Option[WebStack]] = {
     wsClient.url(lookupUrl)
@@ -79,7 +79,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1.status == Status.OK).map(_._2))
   }
 
-  override def enrich(user: UserID, url: Resource): Future[Project] = {
+  override def enrich(user: UserID, url: Resource): Future[ProjectLike] = {
     val fRes = cache.get(url) match {
       case Some(prj) => Future.successful(prj)
       case None =>
@@ -93,10 +93,9 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
           avatar <- fAvatar
           rss <- fRss
         } yield {
-          Project(
+          ProjectConstructor(
             url = url,
             avatar = avatar,
-            user = user,
             webStack = webStack,
             title = Some(title),
             description = description,

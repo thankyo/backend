@@ -36,9 +36,8 @@ case class MongoProjectRepository @Inject()(
   }
 
   override def save(project: Project): Future[Project] = {
-    val projectToSave = project.copy(_id = IDGenerator.generate())
-    val fSave = MongoSafeUtils.safeSingleUpdate(collection.insert(projectToSave))
-    fSave.filter(_ == true).map(_ => projectToSave)
+    val fSave = MongoSafeUtils.safeSingleUpdate(collection.insert(project))
+    fSave.filter(_ == true).map(_ => project)
   }
 
   override def update(project: Project): Future[Boolean] = {

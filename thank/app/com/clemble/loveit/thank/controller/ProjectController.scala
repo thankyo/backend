@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.{ProjectID, Resource, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.thank.model.Project
+import com.clemble.loveit.thank.model.{Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.{ProjectEnrichService, ProjectFeedService, ProjectService, ProjectSupportTrackService}
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.Json
@@ -69,8 +69,8 @@ class ProjectController @Inject()(
     enrichService.enrich(req.identity.id, res).map(Ok(_))
   })
 
-  def create() = silhouette.SecuredAction.async(parse.json[Project])(implicit req => {
-    service.create(req.body).map(Ok(_))
+  def create() = silhouette.SecuredAction.async(parse.json[ProjectConstructor])(implicit req => {
+    service.create(req.identity.id, req.body).map(Ok(_))
   })
 
   def delete(id: ProjectID) = silhouette.SecuredAction.async(implicit req => {

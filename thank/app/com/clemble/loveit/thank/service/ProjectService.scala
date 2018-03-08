@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.thank.model.{OwnedProjects, Project}
+import com.clemble.loveit.thank.model.{OwnedProjects, Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,7 +20,7 @@ trait ProjectService {
 
   def getOwned(user: UserID): Future[OwnedProjects]
 
-  def create(project: Project): Future[Project]
+  def create(user: UserID, project: ProjectConstructor): Future[Project]
 
   def delete(user: UserID, id: ProjectID): Future[Boolean]
 
@@ -59,11 +59,13 @@ class SimpleProjectService @Inject()(
   }
 
 
-  override def create(project: Project): Future[Project] = {
+  override def create(user: UserID, project: ProjectConstructor): Future[Project] = {
     for {
       existingProjectOpt <- findProject(project.url)
       _ = if (existingProjectOpt.isDefined) throw ResourceException.projectAlreadyCreated()
-      save <- repo.save(project.copy(_id = IDGenerator.generate()))
+      owned <- ownershipService.fetch(user)
+      _ = if (!owned.contains(project.url)) throw ResourceException.ownershipNotVerified()
+      save <- repo.save(Project.from(user, project))
     } yield {
       save
     }

@@ -4,14 +4,14 @@ import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.common.util.WriteableUtils
 import play.api.libs.json.Json
 
-case class OwnedProjects(
+case class UserProjects(
   pending: Seq[Resource],
   installed: Seq[Project]
 )
 
-object OwnedProjects {
+object UserProjects {
 
-  implicit val jsonFormat = Json.format[OwnedProjects]
-  implicit val writeable = WriteableUtils.jsonToWriteable[OwnedProjects]
+  implicit val jsonFormat = Json.format[UserProjects]
+  implicit val writeable = WriteableUtils.jsonToWriteable[UserProjects]
 
 }

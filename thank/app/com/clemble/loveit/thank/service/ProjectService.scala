@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.thank.model.{OwnedProjects, Project, ProjectConstructor}
+import com.clemble.loveit.thank.model.{UserProjects, Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -18,7 +18,7 @@ trait ProjectService {
 
   def findProjectsByUser(user: UserID): Future[List[Project]]
 
-  def getOwned(user: UserID): Future[OwnedProjects]
+  def getOwned(user: UserID): Future[UserProjects]
 
   def create(user: UserID, project: ProjectConstructor): Future[Project]
 
@@ -47,14 +47,14 @@ class SimpleProjectService @Inject()(
     repo.findByUser(user)
   }
 
-  override def getOwned(user: UserID): Future[OwnedProjects] = {
+  override def getOwned(user: UserID): Future[UserProjects] = {
     val fOwned = ownershipService.fetch(user)
     val fActive = repo.findByUser(user)
     for {
       installed <- fActive
-      pending <- fOwned.map(_.filterNot(ownedUrl => installed.exists(_.url == ownedUrl)))
+      pending <- fOwned
     } yield {
-      OwnedProjects(pending, installed)
+      UserProjects(pending, installed)
     }
   }
 

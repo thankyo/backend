@@ -41,7 +41,7 @@ object ProjectEnrichService {
 
 case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient, userService: UserService)(implicit ec: ExecutionContext) extends ProjectEnrichService {
 
-  val cache = new mutable.WeakHashMap[String, ProjectLike]()
+  val cache = new mutable.WeakHashMap[String, ProjectConstructor]()
 
   private def enrichWebStack(url: Resource): Future[Option[WebStack]] = {
     wsClient.url(lookupUrl)

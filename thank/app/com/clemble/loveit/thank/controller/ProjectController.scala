@@ -8,7 +8,7 @@ import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.model.{Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.{ProjectEnrichService, ProjectFeedService, ProjectService, ProjectSupportTrackService}
 import com.mohiva.play.silhouette.api.Silhouette
-import play.api.libs.json.Json
+import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.ControllerComponents
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -74,7 +74,7 @@ class ProjectController @Inject()(
   })
 
   def delete(id: ProjectID) = silhouette.SecuredAction.async(implicit req => {
-    service.delete(req.identity.id, id).map(if (_) Ok else InternalServerError)
+    service.delete(req.identity.id, id).map(if (_) Ok(JsBoolean(true)) else InternalServerError)
   })
 
 }

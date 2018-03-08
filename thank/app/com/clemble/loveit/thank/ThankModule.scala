@@ -82,13 +82,12 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     new JcaCrypter(config)
   }
 
-
   @Provides
   @Singleton
   def projectEnrichService(wsClient: WSClient, userService: UserService)(implicit ec: ExecutionContext): ProjectEnrichService = {
     val host = conf.get[String]("thank.resource.analyzer.host")
     val port = conf.get[Int]("thank.resource.analyzer.port")
-    SimpleProjectEnrichService(s"http://${host}:${port}/lookup/v1/", wsClient)
+    SimpleProjectEnrichService(s"http://${host}:${port}/lookup/v1/", wsClient, userService)
   }
 
 }

@@ -24,11 +24,11 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
   private val postRepo = dependency[PostRepository]
 
   override def assignTags(project: Project, tags: Set[Tag]): Boolean = {
-    await(prjRepo.assignTags(project.url, tags))
+    await(prjRepo.update(project.copy(tags = tags)))
   }
 
   override def getProjectTags(project: Resource): Set[Tag] = {
-    return await(prjRepo.findProject(project)).map(_.tags).getOrElse(Set.empty[Tag])
+    await(prjRepo.findByUrl(project)).map(_.tags).getOrElse(Set.empty[Tag])
   }
 
   override def assignTags(url: Resource, tags: Set[Tag]): Boolean = {

@@ -36,7 +36,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
 
   def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
     val project = Project(url, user)
-    await(prjRepo.saveProject(project))
+    await(prjRepo.save(project))
     project
   }
 

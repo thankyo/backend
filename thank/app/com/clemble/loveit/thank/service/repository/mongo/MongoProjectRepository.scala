@@ -6,6 +6,7 @@ import akka.stream.Materializer
 import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.mongo.MongoSafeUtils
+import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.thank.model.Project
 import com.clemble.loveit.thank.model.Project._
 import com.clemble.loveit.thank.service.repository.ProjectRepository
@@ -34,12 +35,10 @@ case class MongoProjectRepository @Inject()(
     MongoSafeUtils.collectAll[Project](collection, selector)
   }
 
-  override def saveProject(project: Project): Future[Boolean] = {
-    val selector = Json.obj("url" -> project.url)
-    collection.find(selector).one[Project] flatMap(_ match {
-      case Some(existingPrj) => update(project.copy(_id = existingPrj._id))
-      case None => MongoSafeUtils.safeSingleUpdate(collection.insert(project))
-    })
+  override def save(project: Project): Future[Project] = {
+    val projectToSave = project.copy(_id = IDGenerator.generate())
+    val fSave = MongoSafeUtils.safeSingleUpdate(collection.insert(projectToSave))
+    fSave.filter(_ == true).map(_ => projectToSave)
   }
 
   override def update(project: Project): Future[Boolean] = {
@@ -48,22 +47,20 @@ case class MongoProjectRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
-  override def findProjectsByUser(owner: UserID): Future[List[Project]] = {
+  override def findByUser(owner: UserID): Future[List[Project]] = {
     val selector = Json.obj("user" -> owner)
     MongoSafeUtils.collectAll[Project](collection, selector)
   }
 
-  override def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean] = {
-    val selector = Json.obj("url" -> url)
-    val update = Json.obj("$set" -> Json.obj("tags" -> tags))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
-  }
-
-  override def findProject(url: Resource): Future[Option[Project]] = {
+  override def findByUrl(url: Resource): Future[Option[Project]] = {
     val query = Json.obj("url" -> Json.obj("$in" -> url.parents()))
     collection.find(query).one[Project]
   }
 
+  override def delete(id: ProjectID): Future[Boolean] = {
+    val selector = Json.obj("_id" -> id)
+    MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
+  }
 }
 
 

@@ -65,7 +65,7 @@ case class DevCreatorsInitializer @Inject()(
         .findProject(project.url)
         .flatMap {
           case Some(_) => Future.successful(true)
-          case None => prjRepo.saveProject(project.copy(user = creator))
+          case None => prjRepo.save(project.copy(user = creator))
         }
     }
     Future.sequence(resources).map(seq => seq.forall(_ == true))

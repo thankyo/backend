@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
 import com.clemble.loveit.common.model._
+import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.thank.model.{OwnedProjects, Project}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 
@@ -18,6 +19,10 @@ trait ProjectService {
   def findProjectsByUser(user: UserID): Future[List[Project]]
 
   def getOwned(user: UserID): Future[OwnedProjects]
+
+  def create(project: Project): Future[Project]
+
+  def delete(user: UserID, id: ProjectID): Future[Boolean]
 
   def update(project: Project): Future[Project]
 
@@ -35,21 +40,32 @@ class SimpleProjectService @Inject()(
   }
 
   override def findProject(url: Resource): Future[Option[Project]] = {
-    repo.findProject(url)
+    repo.findByUrl(url)
   }
 
   override def findProjectsByUser(user: UserID): Future[List[Project]] = {
-    repo.findProjectsByUser(user)
+    repo.findByUser(user)
   }
 
   override def getOwned(user: UserID): Future[OwnedProjects] = {
     val fOwned = ownershipService.fetch(user)
-    val fActive = repo.findProjectsByUser(user)
+    val fActive = repo.findByUser(user)
     for {
       installed <- fActive
-      pending <- fOwned.map(_.filterNot(prj => installed.exists(_.url == prj.url)))
+      pending <- fOwned.map(_.filterNot(ownedUrl => installed.exists(_.url == ownedUrl)))
     } yield {
       OwnedProjects(pending, installed)
+    }
+  }
+
+
+  override def create(project: Project): Future[Project] = {
+    for {
+      existingProjectOpt <- findProject(project.url)
+      _ = if (existingProjectOpt.isDefined) throw ResourceException.projectAlreadyCreated()
+      save <- repo.save(project.copy(_id = IDGenerator.generate()))
+    } yield {
+      save
     }
   }
 
@@ -64,6 +80,17 @@ class SimpleProjectService @Inject()(
       _ = if (!updated) throw RepositoryException.failedToUpdate()
     } yield {
       project
+    }
+  }
+
+  override def delete(user: UserID, id: ProjectID): Future[Boolean] = {
+    for {
+      projectOpt <- repo.findById(id)
+      _ = if (!projectOpt.isDefined) throw ResourceException.noResourceExists()
+      _ = if (!projectOpt.forall(_.user == user)) throw ResourceException.differentOwner()
+      removed <- repo.delete(id)
+    } yield {
+      removed
     }
   }
 

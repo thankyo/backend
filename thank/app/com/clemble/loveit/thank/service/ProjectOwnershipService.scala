@@ -5,7 +5,6 @@ import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.service.{UserOAuthService}
 import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.model.{Project}
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
@@ -18,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectOwnershipService {
 
-  def fetch(user: UserID): Future[Seq[Project]]
+  def fetch(user: UserID): Future[Seq[Resource]]
 
 }
 
@@ -30,7 +29,7 @@ case class SimpleProjectOwnershipService @Inject()(
                                                        implicit val ec : ExecutionContext
                                                     ) extends ProjectOwnershipService {
 
-  private def readGoogleResources(user: UserID, json: JsValue): Seq[Project] = {
+  private def readGoogleResources(user: UserID, json: JsValue): Seq[Resource] = {
     (json \ "error").asOpt[JsObject].foreach(error => {
       val errorCode = (error \ "code").as[Int]
       val errorMsg = (error \ "message").as[String]
@@ -44,10 +43,10 @@ case class SimpleProjectOwnershipService @Inject()(
         case url => s"https://${url}/"
       })
 
-    resources.map(res => Project(res, user))
+    resources
   }
 
-  private def fetchGoogleResources(user: UserID): Future[Seq[Project]] = {
+  private def fetchGoogleResources(user: UserID): Future[Seq[Resource]] = {
     (for {
       googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
       googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
@@ -61,12 +60,12 @@ case class SimpleProjectOwnershipService @Inject()(
             .get()
             .map(res => readGoogleResources(user, res.json))
         case None =>
-          Future.successful(List.empty[Project])
+          Future.successful(Seq.empty[Resource])
       }
     }).flatten
   }
 
-  override def fetch(user: UserID): Future[Seq[Project]] = {
+  override def fetch(user: UserID): Future[Seq[Resource]] = {
     fetchGoogleResources(user)
   }
 

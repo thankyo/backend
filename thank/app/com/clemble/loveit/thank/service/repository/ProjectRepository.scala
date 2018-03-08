@@ -11,14 +11,14 @@ trait ProjectRepository {
 
   def findAll(ids: List[ProjectID]): Future[List[Project]]
 
-  def findProject(url: Resource): Future[Option[Project]]
+  def findByUrl(url: Resource): Future[Option[Project]]
 
-  def saveProject(project: Project): Future[Boolean]
+  def findByUser(user: UserID): Future[List[Project]]
+
+  def save(project: Project): Future[Project]
 
   def update(project: Project): Future[Boolean]
 
-  def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean]
-
-  def findProjectsByUser(user: UserID): Future[List[Project]]
+  def delete(id: ProjectID): Future[Boolean]
 
 }

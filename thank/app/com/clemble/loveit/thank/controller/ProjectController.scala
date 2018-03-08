@@ -69,4 +69,12 @@ class ProjectController @Inject()(
     enrichService.enrich(req.identity.id, res).map(Ok(_))
   })
 
+  def create() = silhouette.SecuredAction.async(parse.json[Project])(implicit req => {
+    service.create(req.body).map(Ok(_))
+  })
+
+  def delete(id: ProjectID) = silhouette.SecuredAction.async(implicit req => {
+    service.delete(req.identity.id, id).map(if (_) Ok else InternalServerError)
+  })
+
 }

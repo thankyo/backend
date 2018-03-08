@@ -33,6 +33,7 @@ object ResourceException {
 
   def noResourceExists() = ResourceException(NO_RESOURCE_EXISTS_CODE, "URL was not registered")
   def failedToUpdate() = ResourceException("FAILED_TO_UPDATE", "Failed to update the record")
+  def projectAlreadyCreated() = ResourceException("PROJECT_ALREADY_CREATED", "Project with specified URL already exists")
   def ownerMissing() = new ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
   def differentOwner() = new ResourceException(DIFFERENT_OWNER_CODE, "Different owner registered for the project")
   def differentId() = new ResourceException(DIFFERENT_ID_CODE, "Different project id")

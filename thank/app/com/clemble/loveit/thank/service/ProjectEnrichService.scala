@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectEnrichService {
 
-  def enrich(user: UserID, url: Resource): Future[ProjectLike]
+  def enrich(user: UserID, url: Resource): Future[ProjectConstructor]
 
 }
 
@@ -79,7 +79,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
     possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1.status == Status.OK).map(_._2))
   }
 
-  override def enrich(user: UserID, url: Resource): Future[ProjectLike] = {
+  override def enrich(user: UserID, url: Resource): Future[ProjectConstructor] = {
     val fRes = cache.get(url) match {
       case Some(prj) => Future.successful(prj)
       case None =>

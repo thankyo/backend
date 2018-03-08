@@ -28,16 +28,6 @@ case class Project(
                              _id: ProjectID = IDGenerator.generate()
                            ) extends UserAware with ResourceAware with ProjectLike
 
-case class ProjectConstructor(
-  url: Resource,
-  title: Option[String] = None,
-  description: Option[String] = None,
-  avatar: Option[String] = None,
-  webStack: Option[WebStack] = None,
-  tags: Set[Tag] = Set.empty,
-  rss: Option[String] = None
-) extends ProjectLike
-
 object Project {
 
   def error(url: Resource): Project = Project(url, User.UNKNOWN, Some("No owner registered for this resource"))
@@ -59,5 +49,22 @@ object Project {
       rss = constructor.rss
     )
   }
+}
+
+case class ProjectConstructor(
+  url: Resource,
+  title: Option[String] = None,
+  description: Option[String] = None,
+  avatar: Option[String] = None,
+  webStack: Option[WebStack] = None,
+  tags: Set[Tag] = Set.empty,
+  rss: Option[String] = None
+) extends ProjectLike
+
+object ProjectConstructor {
+
+  implicit val jsonFormat = Json.format[ProjectConstructor]
+  implicit val projectWriteable = WriteableUtils.jsonToWriteable[ProjectConstructor]
+
 }
 

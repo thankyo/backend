@@ -1,6 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
+import com.clemble.loveit.common.error.ResourceException
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.thank.model.Project
@@ -58,7 +59,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val user = createUser()
       val res = randomResource
 
-      assignOwnership(user, res) shouldEqual true
+      assignOwnership(user, res)
 
       listOwned(user) shouldEqual List(res)
     }
@@ -67,8 +68,8 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val user = createUser()
       val res = randomResource
 
-      assignOwnership(user, res) shouldEqual true
-      assignOwnership(user, res) shouldEqual true
+      assignOwnership(user, res)
+      assignOwnership(user, res) should throwA[ResourceException]
 
       listOwned(user) shouldEqual List(res)
     }
@@ -82,11 +83,11 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
       val res = randomResource
 
-      assignOwnership(A, res) shouldEqual true
-      assignOwnership(B, res) shouldEqual true
+      assignOwnership(A, res)
+      assignOwnership(B, res) should throwA[ResourceException]
 
-      listOwned(A) shouldEqual List.empty[Resource]
-      listOwned(B) shouldEqual List(res)
+      listOwned(A) shouldEqual List(res)
+      listOwned(B) shouldEqual List.empty[Resource]
     }
 
   }
@@ -97,7 +98,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val owner = createUser()
       val res = randomResource
 
-      assignOwnership(owner, res) shouldEqual true
+      assignOwnership(owner, res)
 
       findOwner(res) shouldEqual Some(owner)
     }
@@ -106,7 +107,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val owner = createUser()
 
       val parentRes = randomResource
-      assignOwnership(owner, parentRes) shouldEqual true
+      assignOwnership(owner, parentRes)
 
       val childRes = s"${parentRes}/${someRandom[Long]}"
       findOwner(childRes) shouldEqual Some(owner)

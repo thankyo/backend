@@ -76,7 +76,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
       await(service.getPostOrProject(url)).right.exists(_.user == owner) should beTrue
     }
 
-    "update if exists" in {
+    "forbid second creation" in {
       val url = randomResource
 
       val A = createUser()
@@ -87,9 +87,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
 
       val B = createUser()
 
-      createProject(B, url).url shouldEqual url
-      await(service.getPostOrProject(url)).isRight shouldEqual true
-      await(service.getPostOrProject(url)).right.exists(_.user == B) should beTrue
+      createProject(B, url) should throwA[ResourceException]
     }
 
   }

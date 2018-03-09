@@ -37,7 +37,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
   }
 
   def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    await(prjService.create(user, ProjectConstructor(url, someRandom[String])))
+    await(prjService.create(user, ProjectConstructor(url, someRandom[String], someRandom[String])))
   }
 
 }

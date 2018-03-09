@@ -80,7 +80,7 @@ package object util {
       randomResource,
       someRandom[UserID],
       someRandom[String],
-      optionRandom[String],
+      someRandom[String],
       optionRandom[String],
       optionRandom[WebStack],
       someRandom[Set[Tag]]

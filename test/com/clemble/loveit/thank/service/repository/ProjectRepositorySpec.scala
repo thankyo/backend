@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.error.ResourceException
+import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
 import com.clemble.loveit.common.model.{Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.thank.model.Project
@@ -14,7 +14,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
   val trackRepo = dependency[ProjectSupportTrackRepository]
 
-  def assignOwnership(user: UserID, url: Resource): Project = await(prjRepo.save(Project(url, user, url)))
+  def assignOwnership(user: UserID, url: Resource): Project = await(prjRepo.save(Project(url, user, someRandom[String], someRandom[String])))
 
   def listOwned(user: UserID): List[Resource] = await(prjRepo.findByUser(user)).map(_.url)
 
@@ -69,7 +69,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val res = randomResource
 
       assignOwnership(user, res)
-      assignOwnership(user, res) should throwA[ResourceException]
+      assignOwnership(user, res) should throwA[RepositoryException]
 
       listOwned(user) shouldEqual List(res)
     }
@@ -84,7 +84,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val res = randomResource
 
       assignOwnership(A, res)
-      assignOwnership(B, res) should throwA[ResourceException]
+      assignOwnership(B, res) should throwA[RepositoryException]
 
       listOwned(A) shouldEqual List(res)
       listOwned(B) shouldEqual List.empty[Resource]

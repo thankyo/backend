@@ -55,13 +55,13 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       })
   }
 
-  private def enrichDescription(url: Resource): Future[(Set[Tag], Option[String], String)] = {
+  private def enrichDescription(url: Resource): Future[(Set[Tag], String, String)] = {
     wsClient
       .url(url)
       .get()
       .map(resp => {
         val tags = ProjectEnrichService.readTags(resp.body)
-        val description = ProjectEnrichService.readDescription(resp.body)
+        val description = ProjectEnrichService.readDescription(resp.body).getOrElse(url)
         val title = ProjectEnrichService.readTitle(resp.body).getOrElse({
           if (url.startsWith("https"))
             url.substring(8, url.length - 1)

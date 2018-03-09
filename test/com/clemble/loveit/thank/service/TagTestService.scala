@@ -43,7 +43,6 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
 
 trait InternalTagTestService extends TagTestService with ServiceSpec {
 
-  private val prjService = dependency[ProjectService]
   private val postService = dependency[PostService]
 
   override def assignTags(project: Project, tags: Set[Tag]): Boolean = {

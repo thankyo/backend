@@ -13,7 +13,6 @@ class ProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTe
 
   val postService = dependency[PostService]
   val thankRepo = dependency[PostRepository]
-  val prjService = dependency[ProjectService]
   val trackService = dependency[ProjectSupportTrackService]
 
   def createScene():(Project, UserID, UserID) = {

@@ -12,7 +12,7 @@ import com.mohiva.play.silhouette.api.crypto.Crypter
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.WSClient
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Mode}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -36,6 +36,16 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[UserStatService]).to(classOf[SimpleUserStatService]).asEagerSingleton()
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
+  }
+
+  @Provides
+  @Singleton
+  def projectOwnershipVerificationService(ownershipSvc: ProjectOwnershipService, ec: ExecutionContext): ProjectOwnershipVerificationService = {
+    if (env.mode == Mode.Test) {
+      TestProjectOwnershipVerificationService
+    } else {
+      SimpleProjectOwnershipVerificationService(ownershipSvc, ec)
+    }
   }
 
   @Provides

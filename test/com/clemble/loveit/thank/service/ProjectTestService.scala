@@ -21,8 +21,6 @@ trait RepoProjectTestService extends ServiceSpec with ProjectTestService {
 
 trait InternalProjectTestService extends ServiceSpec with ProjectTestService {
 
-  val prjService = dependency[ProjectService]
-
   override def getProjectsByUser(user: UserID): List[Project] = {
     await(prjService.findProjectsByUser(user))
   }

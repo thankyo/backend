@@ -8,7 +8,7 @@ import play.api.libs.json.{Json, OFormat}
 
 trait ProjectLike {
   val url: Resource
-  val title: Option[String]
+  val title: String
   val description: Option[String]
   val avatar: Option[String]
   val webStack: Option[WebStack]
@@ -19,7 +19,7 @@ trait ProjectLike {
 case class Project(
                              url: Resource,
                              user: UserID,
-                             title: Option[String] = None,
+                             title: String,
                              description: Option[String] = None,
                              avatar: Option[String] = None,
                              webStack: Option[WebStack] = None,
@@ -30,7 +30,7 @@ case class Project(
 
 object Project {
 
-  def error(url: Resource): Project = Project(url, User.UNKNOWN, Some("No owner registered for this resource"))
+  def error(url: Resource): Project = Project(url, User.UNKNOWN, "No owner registered for this resource")
 
   implicit val jsonFormat: OFormat[Project] = Json.format[Project]
 
@@ -53,7 +53,7 @@ object Project {
 
 case class ProjectConstructor(
   url: Resource,
-  title: Option[String] = None,
+  title: String,
   description: Option[String] = None,
   avatar: Option[String] = None,
   webStack: Option[WebStack] = None,

@@ -97,7 +97,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
             url = url,
             avatar = avatar,
             webStack = webStack,
-            title = Some(title),
+            title = title,
             description = description,
             tags = tags,
             rss = rss

@@ -67,8 +67,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    val project = Project(url, user)
-    await(prjRepo.save(Project(url, user)))
+    val project = await(prjRepo.save(Project(url, user, someRandom[String])))
 
     val ogObj = someRandom[OpenGraphObject].copy(url = url)
     val createOgObjReq = FakeRequest(POST, "/api/v1/thank/graph").withJsonBody(Json.toJson(ogObj))

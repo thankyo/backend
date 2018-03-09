@@ -4,11 +4,11 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{UserID}
+import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.EOMPaymentService
-import com.clemble.loveit.thank.model.{Post, Project}
+import com.clemble.loveit.thank.model.{Post, Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.PostService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,18 +31,16 @@ object DevInitializerService {
         password = "1234567890",
       ),
       Set(
-        Project(
-          user = "",
+        ProjectConstructor(
           url = "https://zenpencils.com",
-          title = Some("Zen Pencil"),
+          title = "Zen Pencil",
           avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
           rss = Some("https://zenpencils.com/feed")
         ),
-        Project(
+        ProjectConstructor(
           url = "https://personacentral.com",
-          title = Some("Personal Central"),
-          user = "",
+          title = "Personal Central",
           avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
           tags = Set("manga", "japan"),
           rss = Some("https://personacentral.com/feed")
@@ -57,10 +55,9 @@ object DevInitializerService {
         password = "1234567890"
       ),
       Set(
-        Project(
+        ProjectConstructor(
           url = "https://readms.net",
-          user = "",
-          title = Some("Manga Stream"),
+          title = "Manga Stream",
           avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
           tags = Set("manga", "japan", "one piece", "naruto", "bleach"),
           rss = Some("https://readms.net/rss")
@@ -74,10 +71,9 @@ object DevInitializerService {
         password = "1234567890"
       ),
       Set(
-        Project(
+        ProjectConstructor(
           url = "https://www.sciencedaily.com",
-          user = "",
-          title = Some("Science Daily"),
+          title = "Science Daily Blog",
           avatar = Some("https://www.sciencedaily.com/images/sd-logo.png"),
           tags = Set("science", "daily", "tech"),
           rss = Some("https://www.sciencedaily.com/rss/top/science.xml")

@@ -6,7 +6,7 @@ import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.EventBusManager
-import com.clemble.loveit.thank.model.{Post, Project}
+import com.clemble.loveit.thank.model.{Post, Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectService}
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case class DevCreatorConfig(
                              creator: RegistrationRequest,
-                             projects: Set[Project]
+                             projects: Set[ProjectConstructor]
                            )
 
 @Singleton
@@ -32,8 +32,8 @@ case class DevCreatorsInitializer @Inject()(
   def initialize(configs: Seq[DevCreatorConfig]): Future[Seq[Post]] = {
     for {
       creators <- ensureUserExist(configs.map(_.creator))
-      assignedResources <- ensureCreatorsOwnership(creators.zip(configs.map(_.projects))) if (assignedResources)
-      posts <- updateProjectsFeed(configs.flatMap(_.projects))
+      projects <- ensureCreatorsOwnership(creators.zip(configs.map(_.projects)))
+      posts <- updateProjectsFeed(projects)
     } yield {
       posts
     }
@@ -56,7 +56,7 @@ case class DevCreatorsInitializer @Inject()(
     Future.sequence(fCreators)
   }
 
-  private def ensureCreatorsOwnership(creatorToProjects: Seq[(UserID, Set[Project])]): Future[Boolean] = {
+  private def ensureCreatorsOwnership(creatorToProjects: Seq[(UserID, Set[ProjectConstructor])]): Future[Seq[Project]] = {
     val resources = for {
       (creator, projects) <- creatorToProjects
       project <- projects
@@ -64,11 +64,11 @@ case class DevCreatorsInitializer @Inject()(
       supPrjService
         .findProject(project.url)
         .flatMap {
-          case Some(_) => Future.successful(true)
-          case None => prjRepo.save(project.copy(user = creator))
+          case Some(prj) => Future.successful(prj)
+          case None => supPrjService.create(creator, project)
         }
     }
-    Future.sequence(resources).map(seq => seq.forall(_ == true))
+    Future.sequence(resources)
   }
 
   private def updateProjectsFeed(projects: Seq[Project]): Future[Seq[Post]] = {

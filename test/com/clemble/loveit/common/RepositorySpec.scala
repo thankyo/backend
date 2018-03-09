@@ -29,9 +29,7 @@ trait RepositorySpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    val project = Project(url, user)
-    await(prjRepo.save(project))
-    project
+    await(prjRepo.save(Project(url, user, someRandom[String])))
   }
 
   override def getUser(user: UserID): Option[User] = {

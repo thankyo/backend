@@ -13,7 +13,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
   val trackRepo = dependency[ProjectSupportTrackRepository]
 
-  def assignOwnership(user: UserID, url: Resource): Project = await(prjRepo.save(Project(url, user)))
+  def assignOwnership(user: UserID, url: Resource): Project = await(prjRepo.save(Project(url, user, url)))
 
   def listOwned(user: UserID): List[Resource] = await(prjRepo.findByUser(user)).map(_.url)
 

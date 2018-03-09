@@ -79,7 +79,7 @@ package object util {
     Project(
       randomResource,
       someRandom[UserID],
-      optionRandom[String],
+      someRandom[String],
       optionRandom[String],
       optionRandom[String],
       optionRandom[WebStack],

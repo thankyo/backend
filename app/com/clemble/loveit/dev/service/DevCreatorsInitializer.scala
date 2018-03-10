@@ -8,26 +8,27 @@ import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.thank.model.{Post, Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
-import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectService}
+import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectLookupService, ProjectService}
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 case class DevCreatorConfig(
-                             creator: RegistrationRequest,
-                             projects: Set[ProjectConstructor]
-                           )
+  creator: RegistrationRequest,
+  projects: Set[ProjectConstructor]
+)
 
 @Singleton
 case class DevCreatorsInitializer @Inject()(
-                                             feedService: ProjectFeedService,
-                                             authService: AuthService,
-                                             postService: PostService,
-                                             supPrjService: ProjectService,
-                                             prjRepo: ProjectRepository,
-                                             eventBusManager: EventBusManager,
-                                             implicit val ec: ExecutionContext
-                                           ) {
+  feedService: ProjectFeedService,
+  authService: AuthService,
+  postService: PostService,
+  prjLookupService: ProjectLookupService,
+  prjService: ProjectService,
+  prjRepo: ProjectRepository,
+  eventBusManager: EventBusManager,
+  implicit val ec: ExecutionContext
+) {
 
   def initialize(configs: Seq[DevCreatorConfig]): Future[Seq[Post]] = {
     for {
@@ -61,11 +62,11 @@ case class DevCreatorsInitializer @Inject()(
       (creator, projects) <- creatorToProjects
       project <- projects
     } yield {
-      supPrjService
-        .findProject(project.url)
+      prjLookupService
+        .findByUrl(project.url)
         .flatMap {
           case Some(prj) => Future.successful(prj)
-          case None => supPrjService.create(creator, project)
+          case None => prjService.create(creator, project)
         }
     }
     Future.sequence(resources)
@@ -75,7 +76,7 @@ case class DevCreatorsInitializer @Inject()(
     val refreshedProjects = for {
       project <- projects
     } yield {
-      feedService.refresh(project).recoverWith({ case _ => Future.successful(List.empty)})
+      feedService.refresh(project).recoverWith({ case _ => Future.successful(List.empty) })
     }
     Future.sequence(refreshedProjects).map(_.flatten)
   }

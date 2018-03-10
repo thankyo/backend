@@ -219,4 +219,31 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
     await(postRepo.findByProject(projectB._id)) should containAllOf(postsProjectB)
   }
 
+  "DELETE" should {
+
+    "REMOVE all" in {
+      val user = createUser()
+
+      val prj = createProject(user)
+      val posts = createPostsWithProject(prj)
+
+      await(postRepo.deleteAll(user, prj.url)) shouldEqual true
+
+      val postsAfterDelete = posts.map(post => await(postRepo.findByResource(post.url)))
+      postsAfterDelete.forall(_.isEmpty) shouldEqual true
+    }
+
+    "IGNORE REMOVE from different user" in {
+      val prj = createProject()
+      val posts = createPostsWithProject(prj)
+
+      val user = createUser()
+      await(postRepo.deleteAll(user, prj.url)) shouldEqual true
+
+      val postsAfterDelete = posts.map(post => await(postRepo.findByResource(post.url)))
+      postsAfterDelete.forall(_.isDefined) shouldEqual true
+    }
+
+  }
+
 }

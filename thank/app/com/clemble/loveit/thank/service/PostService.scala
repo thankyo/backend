@@ -11,6 +11,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PostService {
 
+  def findByTags(tags: Set[Tag]): Future[List[Post]]
+
+  def findByAuthor(author: UserID): Future[List[Post]]
+
+  def findByProject(project: ProjectID): Future[List[Post]]
+
   def getPostOrProject(url: Resource): Future[Either[Post, Project]]
 
   def create(og: OpenGraphObject): Future[Post]
@@ -19,11 +25,7 @@ trait PostService {
 
   def updateProject(owner: Project): Future[Boolean]
 
-  def findByTags(tags: Set[Tag]): Future[List[Post]]
-
-  def findByAuthor(author: UserID): Future[List[Post]]
-
-  def findByProject(project: ProjectID): Future[List[Post]]
+  def delete(project: Project): Future[Boolean]
 
   def hasSupported(giver: UserID, url: Resource): Future[Boolean]
 
@@ -33,12 +35,12 @@ trait PostService {
 
 @Singleton
 case class SimplePostService @Inject()(
-                                        thankEventBus: ThankEventBus,
-                                        prjService: ProjectService,
-                                        postRefreshService: PostEnrichService,
-                                        postRepo: PostRepository,
-                                        implicit val ec: ExecutionContext
-                                      ) extends PostService {
+  thankEventBus: ThankEventBus,
+  lookupService: ProjectLookupService,
+  postRefreshService: PostEnrichService,
+  repo: PostRepository,
+  implicit val ec: ExecutionContext
+) extends PostService {
 
   override def hasSupported(supporter: UserID, url: Resource): Future[Boolean] = {
     getPostOrProject(url) map {
@@ -53,26 +55,28 @@ case class SimplePostService @Inject()(
         case Some(post) =>
           Future.successful(Left(post))
         case None =>
-          prjService
-            .findProject(url)
-            .map(_.map(Right(_)).getOrElse({ throw ResourceException.ownerMissing() }))
+          lookupService
+            .findByUrl(url)
+            .map(_.map(Right(_)).getOrElse({
+              throw ResourceException.ownerMissing()
+            }))
       }
     }
 
-    postRepo.findByResource(url).flatMap(findProjectIfNoPost)
+    repo.findByResource(url).flatMap(findProjectIfNoPost)
   }
 
 
   override def findByTags(tags: Set[Tag]): Future[List[Post]] = {
-    postRepo.findByTags(tags)
+    repo.findByTags(tags)
   }
 
   override def findByAuthor(author: UserID): Future[List[Post]] = {
-    postRepo.findByAuthor(author)
+    repo.findByAuthor(author)
   }
 
   override def findByProject(project: ProjectID): Future[List[Post]] = {
-    postRepo.findByProject(project)
+    repo.findByProject(project)
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {
@@ -80,19 +84,23 @@ case class SimplePostService @Inject()(
     getPostOrProject(res).flatMap(_ match {
       case Left(post) =>
         val updPost = post.withOg(og)
-        postRepo.update(updPost).filter(_ == true).map(_ => updPost)
+        repo.update(updPost).filter(_ == true).map(_ => updPost)
       case Right(project) =>
         val post = Post.from(og, project)
-        postRepo.save(post).filter(_ == true).map((_) => post)
+        repo.save(post).filter(_ == true).map((_) => post)
     })
   }
 
   override def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean] = {
-    postRepo.assignTags(url, tags)
+    repo.assignTags(url, tags)
   }
 
   override def updateProject(project: Project): Future[Boolean] = {
-    postRepo.updateProject(project)
+    repo.updateProject(project)
+  }
+
+  override def delete(project: Project): Future[Boolean] = {
+    repo.deleteAll(project.user, project.url)
   }
 
   override def thank(giver: UserID, url: Resource): Future[Post] = {
@@ -104,7 +112,7 @@ case class SimplePostService @Inject()(
           .enrich(OpenGraphObject(url = url))
           .flatMap(create)
     } flatMap (post => {
-      postRepo.markSupported(giver, url).map(increased => {
+      repo.markSupported(giver, url).map(increased => {
         if (increased) {
           thankEventBus.publish(ThankEvent(giver, post.project, url))
           post.copy(thank = post.thank.withSupporter(giver))

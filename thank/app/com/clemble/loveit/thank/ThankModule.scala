@@ -2,6 +2,7 @@ package com.clemble.loveit.thank
 
 import javax.inject.{Inject, Named, Singleton}
 
+import akka.actor.{ActorSystem, Scheduler}
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
@@ -25,6 +26,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
     bind(classOf[PostEnrichService]).to(classOf[SimplePostEnrichService])
 
+    bind(classOf[ProjectLookupService]).to(classOf[SimpleProjectLookupService])
     bind(classOf[ProjectFeedService]).to(classOf[SimpleProjectFeedService])
     bind(classOf[ProjectOwnershipService]).to(classOf[SimpleProjectOwnershipService])
 
@@ -94,10 +96,10 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
   @Provides
   @Singleton
-  def projectEnrichService(wsClient: WSClient, userService: UserService)(implicit ec: ExecutionContext): ProjectEnrichService = {
+  def projectEnrichService(wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext): ProjectEnrichService = {
     val host = conf.get[String]("thank.resource.analyzer.host")
     val port = conf.get[Int]("thank.resource.analyzer.port")
-    SimpleProjectEnrichService(s"http://${host}:${port}/lookup/v1/", wsClient, userService)
+    SimpleProjectEnrichService(s"http://${host}:${port}/lookup/v1/", wsClient, userService, actorSystem.scheduler)
   }
 
 }

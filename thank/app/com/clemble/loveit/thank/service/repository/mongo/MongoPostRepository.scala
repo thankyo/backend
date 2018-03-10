@@ -45,6 +45,14 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
   }
 
+  override def deleteAll(user: UserID, url: Resource): Future[Boolean] = {
+    val selector = Json.obj("project.user" -> user, "url" -> Json.obj("$regex" -> s"${url}.*"))
+    collection.remove(selector)
+      .map(res => {
+        res.ok
+      })
+  }
+
   override def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean] = {
     val selector = Json.obj("url" -> url)
     val update = Json.obj("$set" -> Json.obj("ogObj.tags" -> tags))

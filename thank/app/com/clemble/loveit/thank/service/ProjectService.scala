@@ -11,10 +11,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectService {
 
-  def findById(project: ProjectID): Future[Option[Project]]
-
-  def findProject(url: Resource): Future[Option[Project]]
-
   def findProjectsByUser(user: UserID): Future[List[Project]]
 
   def getOwned(user: UserID): Future[UserProjects]
@@ -30,18 +26,11 @@ trait ProjectService {
 @Singleton
 class SimpleProjectService @Inject()(
   repo: ProjectRepository,
+  postService: PostService,
   ownershipService: ProjectOwnershipService,
   verificationService: ProjectOwnershipVerificationService,
   implicit val ec: ExecutionContext
 ) extends ProjectService {
-
-  override def findById(project: ProjectID): Future[Option[Project]] = {
-    repo.findById(project)
-  }
-
-  override def findProject(url: Resource): Future[Option[Project]] = {
-    repo.findByUrl(url)
-  }
 
   override def findProjectsByUser(user: UserID): Future[List[Project]] = {
     repo.findByUser(user)
@@ -61,7 +50,7 @@ class SimpleProjectService @Inject()(
 
   override def create(user: UserID, project: ProjectConstructor): Future[Project] = {
     for {
-      existingProjectOpt <- findProject(project.url)
+      existingProjectOpt <- repo.findByUrl(project.url)
       _ = if (existingProjectOpt.isDefined) throw ResourceException.projectAlreadyCreated()
       owned <- verificationService.verify(user, project.url)
       _ = if (!owned) throw ResourceException.ownershipNotVerified()
@@ -73,7 +62,7 @@ class SimpleProjectService @Inject()(
 
   override def update(project: Project): Future[Project] = {
     for {
-      existingProjectOpt <- findProject(project.url)
+      existingProjectOpt <- repo.findByUrl(project.url)
       _ = if (!existingProjectOpt.isDefined) throw ResourceException.noResourceExists()
       existingProject = existingProjectOpt.get
       _ = if (existingProject.user != project.user) throw ResourceException.differentOwner()
@@ -91,8 +80,9 @@ class SimpleProjectService @Inject()(
       _ = if (!projectOpt.isDefined) throw ResourceException.noResourceExists()
       _ = if (!projectOpt.forall(_.user == user)) throw ResourceException.differentOwner()
       removed <- repo.delete(id)
+      removedPosts <- postService.delete(projectOpt.get)
     } yield {
-      removed
+      removed && removedPosts
     }
   }
 

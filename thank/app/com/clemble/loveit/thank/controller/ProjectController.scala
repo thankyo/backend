@@ -6,7 +6,7 @@ import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.{ProjectID, Resource, UserID}
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.model.{Project, ProjectConstructor}
-import com.clemble.loveit.thank.service.{ProjectEnrichService, ProjectFeedService, ProjectService, ProjectSupportTrackService}
+import com.clemble.loveit.thank.service._
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.ControllerComponents
@@ -18,6 +18,7 @@ class ProjectController @Inject()(
   service: ProjectService,
   enrichService: ProjectEnrichService,
   feedService: ProjectFeedService,
+  lookupService: ProjectLookupService,
   trackService: ProjectSupportTrackService,
   silhouette: Silhouette[AuthEnv],
   components: ControllerComponents,
@@ -31,8 +32,8 @@ class ProjectController @Inject()(
   })
 
   def getProjectsByUser(user: UserID) = silhouette.SecuredAction.async(implicit req => {
-    service
-      .findProjectsByUser(idOrMe(user))
+    lookupService
+      .findByUser(idOrMe(user))
       .map(Ok(_))
   })
 
@@ -44,7 +45,7 @@ class ProjectController @Inject()(
 
   def getProjectFeed(id: ProjectID) = silhouette.SecuredAction.async(implicit req => {
     val requester = req.identity.id
-    service.findById(id).flatMap(_ match {
+    lookupService.findById(id).flatMap(_ match {
       case Some(project) if (project.user == requester) =>
         feedService.refresh(project).map(Ok(_))
       case _ =>
@@ -59,7 +60,7 @@ class ProjectController @Inject()(
   })
 
   def getProject(project: ProjectID) = silhouette.SecuredAction.async(implicit req => {
-    service.findById(project).map(_ match {
+    lookupService.findById(project).map(_ match {
       case Some(prj) => Ok(prj)
       case None => NotFound
     })

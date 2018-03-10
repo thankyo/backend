@@ -13,6 +13,8 @@ trait PostRepository {
 
   def update(post: Post): Future[Boolean]
 
+  def deleteAll(user: UserID, url: Resource): Future[Boolean]
+
   def findByResource(url: Resource): Future[Option[Post]]
 
   def findByTags(tags: Set[String]): Future[List[Post]]

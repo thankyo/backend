@@ -9,7 +9,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-case class AuthInfoRepositorySpec(implicit ecEnv: ExecutionEnv ) extends RepositorySpec {
+class AuthInfoRepositorySpec(implicit ecEnv: ExecutionEnv ) extends RepositorySpec {
 
   val repo = dependency[AuthInfoRepository]
 

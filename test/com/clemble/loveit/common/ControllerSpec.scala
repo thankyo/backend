@@ -55,7 +55,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
     }
   }
 
-  def sign[A](user: UserID, req: FakeRequest[A]) = {
+  def sign[A](user: UserID, req: FakeRequest[A]): FakeRequest[A] = {
     val userAuth = ControllerSpec.getUser(user)
     req.withHeaders(userAuth:_*)
   }
@@ -80,8 +80,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
   }
 
   def getMyUser(user: UserID): User = {
-    val readReq = sign(user, FakeRequest(GET, s"/api/v1/user/my/profile"))
-    val resp = await(route(application, readReq).get)
+    val resp = perform(user, FakeRequest(GET, s"/api/v1/user/my/profile"))
     val userOpt = resp.header.status match {
       case NOT_FOUND => None
       case OK => Json.parse(await(resp.body.consumeData).utf8String).asOpt[User]

@@ -22,8 +22,8 @@ case class StatisticsController @Inject()(
     implicit val cookieUtils: CookieUtils
   ) extends LoveItController(components) {
 
-  def getContributions(user: UserID) = silhouette.SecuredAction.async(req => {
-    contributionStatistics.find(user).map(Ok(_))
+  def getContributions(user: UserID) = silhouette.SecuredAction.async(implicit req => {
+    contributionStatistics.find(idOrMe(user)).map(Ok(_))
   })
 
 }

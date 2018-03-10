@@ -40,8 +40,7 @@ class GraphControllerSpec extends PaymentControllerTestExecutor {
       val owner = createUser()
       createProject(getMyUser(owner).id, masterUrl) shouldNotEqual None
 
-      val req = sign(giver, FakeRequest(POST, s"/api/v1/thank/graph/my/support").withJsonBody(Json.obj("url" -> masterUrl)))
-      await(route(application, req).get)
+      perform(giver, FakeRequest(POST, s"/api/v1/thank/graph/my/support").withJsonBody(Json.obj("url" -> masterUrl)))
 
       val giverTransactions = pendingCharges(giver)
       val ownerTransactions = pendingCharges(owner)

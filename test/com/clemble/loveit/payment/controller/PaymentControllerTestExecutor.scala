@@ -31,10 +31,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def getChargeAccount(user: UserID): Option[ChargeAccount] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/account"))
-    val fRes = route(application, req).get
-
-    val res = await(fRes)
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge/account"))
     res.header.status match {
       case 200 => res.body.dataStream.readJson[ChargeAccount]
       case _ => None
@@ -49,10 +46,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def getMonthlyLimit(user: UserID): Option[Money] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/limit"))
-    val fRes = route(application, req).get
-
-    val res = await(fRes)
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge/limit"))
     res.header.status match {
       case 200 => res.body.dataStream.readJson[Money]
       case 404 => None
@@ -60,8 +54,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   }
 
   override def setMonthlyLimit(user: UserID, limit: Money): Boolean = {
-    val req = sign(user, FakeRequest(POST, s"/api/v1/payment/my/charge/limit").withJsonBody(Json.toJson(limit)))
-    val res = await(route(application, req).get)
+    val res = perform(user, FakeRequest(POST, s"/api/v1/payment/my/charge/limit").withJsonBody(Json.toJson(limit)))
 
     res.body.dataStream.readJson[Money].isDefined
   }

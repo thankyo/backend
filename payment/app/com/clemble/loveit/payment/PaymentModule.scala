@@ -62,6 +62,9 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
 
     bind(classOf[PendingTransactionService]).to(classOf[SimplePendingTransactionService]).asEagerSingleton()
     bind(classOf[PendingTransactionRepository]).to(classOf[MongoPendingTransactionRepository])
+
+    bind(classOf[ContributionStatisticsService]).to(classOf[SimpleContributionStatisticsService])
+    bind(classOf[ContributionStatisticsRepository]).to(classOf[MongoContributionStatisticsRepository])
   }
 
   @Provides

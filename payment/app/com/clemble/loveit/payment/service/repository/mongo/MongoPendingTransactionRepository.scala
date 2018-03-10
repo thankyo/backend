@@ -5,7 +5,6 @@ import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.payment.service.repository.PendingTransactionRepository
 import javax.inject.{Inject, Named, Singleton}
 
-import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.model.{UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
 import play.api.libs.json.{JsObject, Json}

@@ -4,6 +4,8 @@
 GET         /my/charge                       @com.clemble.loveit.payment.controller.EOMChargeController.listMy()
 GET         /my/charge/csv                   @com.clemble.loveit.payment.controller.EOMChargeController.getMyCSV()
 
+GET         /statistic/:user/contribution    @com.clemble.loveit.payment.controller.StatisticsController.getContributions(user)
+
 GET         /my/charge/account               @com.clemble.loveit.payment.controller.ChargeAccountController.getMyAccount()
 POST        /my/charge/account               @com.clemble.loveit.payment.controller.ChargeAccountController.setMyAccount()
 DELETE      /my/charge/account               @com.clemble.loveit.payment.controller.ChargeAccountController.deleteMyAccount()
@@ -11,8 +13,8 @@ DELETE      /my/charge/account               @com.clemble.loveit.payment.control
 GET         /:user/charge/pending            @com.clemble.loveit.payment.controller.PendingTransactionController.listCharges(user)
 GET         /:user/charge/pending/csv        @com.clemble.loveit.payment.controller.PendingTransactionController.getChargesCsv(user)
 
-POST        /my/charge/limit                 @com.clemble.loveit.payment.controller.PaymentLimitController.setMonthlyLimit()
 GET         /:user/charge/limit              @com.clemble.loveit.payment.controller.PaymentLimitController.getMonthlyLimit(user)
+POST        /my/charge/limit                 @com.clemble.loveit.payment.controller.PaymentLimitController.setMonthlyLimit()
 
 GET         /my/payout                       @com.clemble.loveit.payment.controller.EOMPayoutController.listMy()
 GET         /my/payout/csv                   @com.clemble.loveit.payment.controller.EOMPayoutController.getMyCSV()

@@ -41,7 +41,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Provides
   @Singleton
   def projectOwnershipVerificationService(ownershipSvc: ProjectOwnershipService, ec: ExecutionContext): ProjectOwnershipVerificationService = {
-    if (env.mode == Mode.Test) {
+    if (env.mode == Mode.Test || env.mode == Mode.Dev) {
       TestProjectOwnershipVerificationService
     } else {
       SimpleProjectOwnershipVerificationService(ownershipSvc, ec)

@@ -58,6 +58,15 @@ package object model {
       toParents(normParts.reverse, List.empty[String]).reverse
     }
 
+    def normalize(): Resource = url match {
+      case url if url.startsWith("http") =>
+        if (url.endsWith("/")) {
+          url.substring(0, url.length - 1)
+        } else {
+          url
+        }
+      case url if !url.startsWith("http") => s"https://${url}"
+    }
   }
 
 }

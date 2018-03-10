@@ -4,7 +4,7 @@ import java.net.URLEncoder
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.auth.service.{UserOAuthService}
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model._
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
@@ -37,11 +37,7 @@ case class SimpleProjectOwnershipService @Inject()(
       throw new ProfileRetrievalException(SpecifiedProfileError.format(GoogleProvider.ID, errorCode, errorMsg))
     })
 
-    val resources = (json \ "items" \\ "site")
-      .map(site => (site \ "identifier").as[Resource] match {
-        case url if url.startsWith("http") => url.substring(0, url.length - 1)
-        case url => s"https://${url}"
-      })
+    val resources = (json \ "items" \\ "site").map(site => (site \ "identifier").as[Resource].normalize())
 
     resources
   }

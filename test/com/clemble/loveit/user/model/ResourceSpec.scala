@@ -22,4 +22,9 @@ class ResourceSpec extends Specification {
     ))
   }
 
+  "normalize" in {
+    "example.com".normalize() shouldEqual "https://example.com"
+    "https://example.com/".normalize() shouldEqual "https://example.com"
+  }
+
 }

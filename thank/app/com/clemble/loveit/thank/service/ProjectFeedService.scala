@@ -16,23 +16,7 @@ trait ProjectFeedService {
 
 object ProjectFeedService {
 
-  def readRSS(feed: Elem): List[OpenGraphObject] = {
-    val items = feed \ "channel" \ "item"
-    val ogObj = items.map(item => {
-      Option((item \ "link").text).map(link =>
-        OpenGraphObject(
-          url = link,
-          title = Option((item \ "title").text),
-          image = Option(item \ "thumbnail").filter(_.nonEmpty).flatMap(img => {
-            val height = Option(img.\@("height")).filterNot(_.isEmpty).map(_.toInt)
-            val width = Option(img.\@("width")).filterNot(_.isEmpty).map(_.toInt)
-            Option(img.\@("url")).map(url => OpenGraphImage(url, height = height, width = width))
-          })
-        )
-      )
-    })
-    ogObj.flatten.toList
-  }
+  def readRSS(feed: Elem): List[OpenGraphObject] = FeedParser.parse(feed).toList
 
 }
 

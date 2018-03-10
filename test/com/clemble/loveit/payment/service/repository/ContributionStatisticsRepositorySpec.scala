@@ -7,7 +7,6 @@ import com.clemble.loveit.payment.controller.PaymentControllerTestExecutor
 import com.clemble.loveit.payment.model.{ContributionStatistics, PendingTransaction}
 import com.clemble.loveit.payment.service.{ContributionStatisticsService, PendingTransactionService}
 import com.clemble.loveit.thank.model.Project
-import com.clemble.loveit.user.model.User
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -37,6 +36,11 @@ trait ContributionStatisticsScenario extends ThankScenario {
     getContributions(user) shouldEqual ContributionStatistics(user, 0)
   }
 
+}
+
+// Need this separation, because there is no way to make unauthorized request without existing user
+trait InternalContributionStatisticsScenario extends ContributionStatisticsScenario {
+
   "contributions on fake" in {
     val user = IDGenerator.generate()
 
@@ -46,7 +50,7 @@ trait ContributionStatisticsScenario extends ThankScenario {
 }
 
 @RunWith(classOf[JUnitRunner])
-class ContributionStatisticsRepositorySpec(implicit ee: ExecutionEnv) extends ContributionStatisticsScenario with RepositorySpec {
+class ContributionStatisticsRepositorySpec(implicit ee: ExecutionEnv) extends InternalContributionStatisticsScenario with RepositorySpec {
 
   val repo = dependency[PendingTransactionRepository]
   val statRepo = dependency[ContributionStatisticsRepository]
@@ -62,7 +66,7 @@ class ContributionStatisticsRepositorySpec(implicit ee: ExecutionEnv) extends Co
 }
 
 @RunWith(classOf[JUnitRunner])
-class ContributionStatisticsServiceSpec(implicit ee: ExecutionEnv) extends ContributionStatisticsScenario with ServiceSpec {
+class ContributionStatisticsServiceSpec(implicit ee: ExecutionEnv) extends InternalContributionStatisticsScenario with ServiceSpec {
 
   val trService = dependency[PendingTransactionService]
   val statService = dependency[ContributionStatisticsService]

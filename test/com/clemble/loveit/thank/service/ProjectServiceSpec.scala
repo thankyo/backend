@@ -11,7 +11,6 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ProjectServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
 
-  val postService = dependency[PostService]
   val thankRepo = dependency[PostRepository]
   val trackService = dependency[ProjectSupportTrackService]
 

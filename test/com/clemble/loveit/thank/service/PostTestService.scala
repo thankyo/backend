@@ -26,8 +26,6 @@ trait PostTestService extends ServiceSpec {
 
 trait InternalPostTestService extends ServiceSpec with PostTestService {
 
-  lazy val postService = dependency[PostService]
-
   override def createPost(ogo: OpenGraphObject): Post = {
     await(postService.create(ogo))
   }

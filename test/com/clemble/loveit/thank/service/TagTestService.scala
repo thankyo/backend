@@ -21,7 +21,7 @@ trait TagTestService {
 
 trait RepoTagTestService extends TagTestService with ServiceSpec {
 
-  private val postRepo = dependency[PostRepository]
+  lazy val postRepo = dependency[PostRepository]
 
   override def assignTags(project: Project, tags: Set[Tag]): Boolean = {
     await(prjRepo.update(project.copy(tags = tags)))
@@ -43,8 +43,7 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
 
 trait InternalTagTestService extends TagTestService with ServiceSpec {
 
-  private val postService = dependency[PostService]
-  private val lookupService = dependency[ProjectLookupService]
+  lazy val lookupService = dependency[ProjectLookupService]
 
   override def assignTags(project: Project, tags: Set[Tag]): Boolean = {
     await(prjService.update(project.copy(tags = tags)).map(_ => true))

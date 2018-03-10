@@ -113,3 +113,7 @@ case class SimplePostEnrichService @Inject()(
   }
 
 }
+
+case object TestPostEnrichService extends PostEnrichService {
+  override def enrich(post: OpenGraphObject): Future[OpenGraphObject] = Future.successful(post)
+}

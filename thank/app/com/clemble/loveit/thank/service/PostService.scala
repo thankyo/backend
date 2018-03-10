@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.common.error.ResourceException
+import com.clemble.loveit.common.error.{PaymentException, ResourceException}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post, Project}
 import com.clemble.loveit.thank.service.repository.PostRepository
@@ -37,7 +37,7 @@ trait PostService {
 case class SimplePostService @Inject()(
   thankEventBus: ThankEventBus,
   lookupService: ProjectLookupService,
-  postRefreshService: PostEnrichService,
+  enrichService: PostEnrichService,
   repo: PostRepository,
   implicit val ec: ExecutionContext
 ) extends PostService {
@@ -108,10 +108,13 @@ case class SimplePostService @Inject()(
       case Left(post) =>
         Future.successful(post)
       case Right(_) =>
-        postRefreshService
+        enrichService
           .enrich(OpenGraphObject(url = url))
           .flatMap(create)
     } flatMap (post => {
+      if (post.project.user == giver)
+        throw PaymentException.selfLovingIsForbidden()
+
       repo.markSupported(giver, url).map(increased => {
         if (increased) {
           thankEventBus.publish(ThankEvent(giver, post.project, url))

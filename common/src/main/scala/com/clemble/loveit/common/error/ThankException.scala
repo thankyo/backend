@@ -23,6 +23,7 @@ object PaymentException {
   def failedToLinkChargeAccount(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link charge account details")
   def failedToLinkPayoutAccount(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link payout account details")
   def limitIsNegative(user: UserID, limit: Money) = PaymentException("LIMIT_IS_NEGATIVE", s"User ${user} limit can't be negative")
+  def selfLovingIsForbidden() = PaymentException("SELF_LOVING_IS_FORBIDDEN", "No self loving allowed around here")
 }
 
 object ResourceException {
@@ -34,10 +35,10 @@ object ResourceException {
   def noResourceExists() = ResourceException(NO_RESOURCE_EXISTS_CODE, "URL was not registered")
   def failedToUpdate() = ResourceException("FAILED_TO_UPDATE", "Failed to update the record")
   def projectAlreadyCreated() = ResourceException("PROJECT_ALREADY_CREATED", "Project with specified URL already exists")
-  def ownerMissing() = new ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
-  def ownershipNotVerified() = new ResourceException("OWNERSHIP_NOT_VERIFIED", "Can't verify ownership of resource")
-  def differentOwner() = new ResourceException(DIFFERENT_OWNER_CODE, "Different owner registered for the project")
-  def differentId() = new ResourceException(DIFFERENT_ID_CODE, "Different project id")
+  def ownerMissing() = ResourceException(OWNER_MISSING_CODE, "No owner for the resource registered")
+  def ownershipNotVerified() = ResourceException("OWNERSHIP_NOT_VERIFIED", "Can't verify ownership of resource")
+  def differentOwner() = ResourceException(DIFFERENT_OWNER_CODE, "Different owner registered for the project")
+  def differentId() = ResourceException(DIFFERENT_ID_CODE, "Different project id")
 }
 
 object RepositoryException {

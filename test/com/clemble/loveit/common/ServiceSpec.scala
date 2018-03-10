@@ -19,9 +19,9 @@ trait ServiceSpec extends FunctionalThankSpecification {
   lazy val userService: UserService = dependency[UserService]
   lazy val userPayService: UserPaymentService = dependency[UserPaymentService]
   lazy val userRep: UserRepository = dependency[UserRepository]
-  lazy val prjRepo = dependency[ProjectRepository]
-  lazy val prjService = dependency[ProjectService]
-  lazy val postService = dependency[PostService]
+  lazy val prjRepo: ProjectRepository = dependency[ProjectRepository]
+  lazy val prjService: ProjectService = dependency[ProjectService]
+  lazy val postService: PostService = dependency[PostService]
 
   override def createUser(register: RegistrationRequest = someRandom[RegistrationRequest]): UserID = {
     val fUserID = for {

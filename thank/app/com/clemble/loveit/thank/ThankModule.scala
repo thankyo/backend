@@ -24,7 +24,6 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   override def configure(): Unit = {
     bind(classOf[PostService]).to(classOf[SimplePostService])
     bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
-    bind(classOf[PostEnrichService]).to(classOf[SimplePostEnrichService])
 
     bind(classOf[ProjectLookupService]).to(classOf[SimpleProjectLookupService])
     bind(classOf[ProjectFeedService]).to(classOf[SimpleProjectFeedService])
@@ -47,6 +46,16 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
       TestProjectOwnershipVerificationService
     } else {
       SimpleProjectOwnershipVerificationService(ownershipSvc, ec)
+    }
+  }
+
+  @Provides
+  @Singleton
+  def postEnrichService(wsClient: WSClient, ec: ExecutionContext): PostEnrichService = {
+    if (env.mode == Mode.Test) {
+      TestPostEnrichService
+    } else {
+      SimplePostEnrichService(wsClient, ec)
     }
   }
 

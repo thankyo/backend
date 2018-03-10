@@ -58,7 +58,7 @@ case class SimplePostService @Inject()(
           lookupService
             .findByUrl(url)
             .map(_.map(Right(_)).getOrElse({
-              throw ResourceException.ownerMissing()
+              throw ResourceException.ownerMissing(url)
             }))
       }
     }

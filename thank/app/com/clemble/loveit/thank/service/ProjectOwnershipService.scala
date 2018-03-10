@@ -39,8 +39,8 @@ case class SimpleProjectOwnershipService @Inject()(
 
     val resources = (json \ "items" \\ "site")
       .map(site => (site \ "identifier").as[Resource] match {
-        case url if url.startsWith("http") => url
-        case url => s"https://${url}/"
+        case url if url.startsWith("http") => url.substring(0, url.length - 1)
+        case url => s"https://${url}"
       })
 
     resources

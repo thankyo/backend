@@ -20,7 +20,7 @@ object ProjectFeedService {
 
 }
 
-case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postRefreshService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
+case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postEnrichService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
 
   import ProjectFeedService._
 
@@ -38,7 +38,7 @@ case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postRefreshSer
   override def refresh(project: Project): Future[List[Post]] = {
     for {
       fetched <- fetch(project)
-      enriched <- Future.sequence(fetched.map(ogObj => postRefreshService.enrich(ogObj)))
+      enriched <- Future.sequence(fetched.map(ogObj => postEnrichService.enrich(ogObj)))
       validPosts = enriched.filter(_.url.contains(project.url)) // TODO should be startsWith check
       created <- Future.sequence(validPosts.map(postService.create))
     } yield {

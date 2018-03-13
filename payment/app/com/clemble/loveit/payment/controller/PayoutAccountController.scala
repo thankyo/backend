@@ -9,6 +9,7 @@ import com.clemble.loveit.payment.service.PayoutAccountService
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.crypto.{Base64, Crypter}
 import play.api.Configuration
+import play.api.libs.json.Json
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,8 +40,8 @@ class PayoutAccountController @Inject()(
   def getMyAccount = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id
     payoutAccService.getPayoutAccount(user).
-      map(accOpt => accOpt.map(_.accountId) match {
-        case Some(account) => Ok(account)
+      map({
+        case Some(account) => Ok(Json.obj("account" -> account.accountId))
         case _ => NoContent
       })
   })

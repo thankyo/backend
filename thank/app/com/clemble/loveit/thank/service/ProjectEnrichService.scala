@@ -45,7 +45,7 @@ object ProjectEnrichService {
 case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient, userService: UserService, scheduler: Scheduler)(implicit ec: ExecutionContext) extends ProjectEnrichService {
 
   val cache = new mutable.WeakHashMap[String, ProjectConstructor]()
-  val DELAY = 3.second
+  val DELAY: FiniteDuration = 3.second
 
   private def enrichWebStack(url: Resource): Future[Option[WebStack]] = {
     wsClient.url(lookupUrl)
@@ -57,6 +57,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
         val appNames = apps.map(_ \ "name").map(_.asOpt[WebStack]).flatten
         appNames.headOption
       })
+      .recover({ case t => None })
   }
 
   private def descriptionFromUrl(url: Resource): (Set[Tag], String, String) = {
@@ -83,7 +84,7 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
   }
 
   private def enrichRSS(url: Resource): Future[Option[String]] = {
-    val rssUrls = List(s"${url}feed", s"${url}rss")
+    val rssUrls = List(s"${url}/feed", s"${url}/rss")
     val possibleFeeds = Future.sequence(rssUrls.map(rssUrl => wsClient.url(rssUrl).get()))
     possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1.status == Status.OK).map(_._2))
   }

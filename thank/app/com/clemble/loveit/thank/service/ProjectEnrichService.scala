@@ -62,9 +62,9 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
 
   private def descriptionFromUrl(url: Resource): (Set[Tag], String, String) = {
     val title = if (url.startsWith("https"))
-      url.substring(8, url.length - 1)
+      url.substring(8, url.length)
     else
-      url.substring(7, url.length - 1)
+      url.substring(7, url.length)
 
     (Set.empty, title, url)
   }

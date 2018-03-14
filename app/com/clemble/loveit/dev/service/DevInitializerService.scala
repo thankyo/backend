@@ -34,7 +34,8 @@ object DevInitializerService {
         ProjectConstructor(
           url = "https://zenpencils.com",
           title = "Zen Pencil",
-          description = "My personal blog",
+          shortDescription = "My personal blog",
+          description = Some("Personal blog for zenpencils"),
           avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
           rss = Some("https://zenpencils.com/feed")
@@ -42,7 +43,8 @@ object DevInitializerService {
         ProjectConstructor(
           url = "https://personacentral.com",
           title = "Personal Central",
-          description = "My side japan project",
+          shortDescription = "My side japan project",
+          description = Some("Once I was in Japan"),
           avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
           tags = Set("manga", "japan"),
           rss = Some("https://personacentral.com/feed")
@@ -60,7 +62,8 @@ object DevInitializerService {
         ProjectConstructor(
           url = "https://readms.net",
           title = "Manga Stream",
-          description = "Awesome scanlation group",
+          shortDescription = "Awesome scanlation group",
+          description = Some("We do what we do, because we love it"),
           avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
           tags = Set("manga", "japan", "one piece", "naruto", "bleach"),
           rss = Some("https://readms.net/rss")
@@ -77,7 +80,8 @@ object DevInitializerService {
         ProjectConstructor(
           url = "https://www.sciencedaily.com",
           title = "Science Daily Blog",
-          description = "Science Daily Blog",
+          shortDescription = "Science Daily Blog",
+          description = Some("This is a small blog for science hungry people"),
           avatar = Some("https://www.sciencedaily.com/images/sd-logo.png"),
           tags = Set("science", "daily", "tech"),
           rss = Some("https://www.sciencedaily.com/rss/top/science.xml")

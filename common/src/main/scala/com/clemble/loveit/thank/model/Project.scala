@@ -9,7 +9,8 @@ import play.api.libs.json.{Json, OFormat}
 trait ProjectLike {
   val url: Resource
   val title: String
-  val description: String
+  val shortDescription: String
+  val description: Option[String]
   val avatar: Option[String]
   val webStack: Option[WebStack]
   val tags: Set[Tag]
@@ -17,16 +18,17 @@ trait ProjectLike {
 }
 
 case class Project(
-                             url: Resource,
-                             user: UserID,
-                             title: String,
-                             description: String,
-                             avatar: Option[String] = None,
-                             webStack: Option[WebStack] = None,
-                             tags: Set[Tag] = Set.empty,
-                             rss: Option[String] = None,
-                             _id: ProjectID = IDGenerator.generate()
-                           ) extends UserAware with ResourceAware with ProjectLike
+  url: Resource,
+  user: UserID,
+  title: String,
+  shortDescription: String,
+  description: Option[String] = None,
+  avatar: Option[String] = None,
+  webStack: Option[WebStack] = None,
+  tags: Set[Tag] = Set.empty,
+  rss: Option[String] = None,
+  _id: ProjectID = IDGenerator.generate()
+) extends UserAware with ResourceAware with ProjectLike
 
 object Project {
 
@@ -42,6 +44,7 @@ object Project {
       user = user,
       url = constructor.url,
       title = constructor.title,
+      shortDescription = constructor.shortDescription,
       description = constructor.description,
       avatar = constructor.avatar,
       webStack = constructor.webStack,
@@ -54,7 +57,8 @@ object Project {
 case class ProjectConstructor(
   url: Resource,
   title: String,
-  description: String,
+  shortDescription: String,
+  description: Option[String] = None,
   avatar: Option[String] = None,
   webStack: Option[WebStack] = None,
   tags: Set[Tag] = Set.empty,

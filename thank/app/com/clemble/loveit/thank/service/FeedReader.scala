@@ -19,7 +19,7 @@ trait FeedParser {
     }
   }
 
-  def getDate(x: String)(implicit format: DateTimeFormatter): Option[LocalDateTime] = {
+  def parseDate(x: String)(implicit format: DateTimeFormatter): Option[LocalDateTime] = {
     Try(LocalDateTime.parse(x.toCharArray, format)).toOption
   }
 
@@ -62,7 +62,8 @@ case object RSSParser extends FeedParser {
             val height = Option(img.\@("height")).filterNot(_.isEmpty).map(_.toInt)
             val width = Option(img.\@("width")).filterNot(_.isEmpty).map(_.toInt)
             Option(img.\@("url")).map(url => OpenGraphImage(url, height = height, width = width))
-          })
+          }),
+          pubDate = from(_pubDate).flatMap(parseDate)
         )
       })
     }
@@ -117,7 +118,8 @@ case object AtomParser extends FeedParser {
           OpenGraphObject(
             url = url,
             title = from(_title),
-            description = from(_summary)
+            description = from(_summary),
+            pubDate = from(_updated).flatMap(parseDate)
           )
         })
     }

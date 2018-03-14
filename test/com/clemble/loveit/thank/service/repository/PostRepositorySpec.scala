@@ -1,5 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
+import java.time.LocalDateTime
+
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.thank.model.{Post, Project, Thank}
@@ -242,6 +244,58 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       val postsAfterDelete = posts.map(post => await(postRepo.findByResource(post.url)))
       postsAfterDelete.forall(_.isDefined) shouldEqual true
+    }
+
+  }
+
+  "Search order" should {
+
+    "order by project & author return in publish date order" in {
+      val prj = createProject()
+
+      val posts = for {
+        minusDays <- 1 to 5
+      } yield {
+        val childUrl = s"${prj.url}/${someRandom[String]}"
+        val post = someRandom[Post]
+        val modPost = post.copy(
+          project = prj,
+          url = childUrl,
+          ogObj = post.ogObj.copy(pubDate = Some(LocalDateTime.now().minusDays(minusDays)))
+        )
+        await(postRepo.save(modPost)) shouldEqual true
+        modPost
+      }
+
+      val authorPosts = await(postRepo.findByAuthor(prj.user))
+      authorPosts.map(_.ogObj.pubDate.get).zipWithIndex shouldEqual posts.map(_.ogObj.pubDate.get).zipWithIndex
+
+      val projectPosts = await(postRepo.findByProject(prj._id))
+      projectPosts.map(_.ogObj.pubDate.get).zipWithIndex shouldEqual posts.map(_.ogObj.pubDate.get).zipWithIndex
+    }
+
+    "order by tag return in publish date order" in {
+      val tag = someRandom[String]
+      val posts = for {
+        minusDays <- 1 to 5
+      } yield {
+        val prj = createProject()
+        val childUrl = s"${prj.url}/${someRandom[String]}"
+        val post = someRandom[Post]
+        val modPost = post.copy(
+          project = prj,
+          url = childUrl,
+          ogObj = post.ogObj.copy(
+            pubDate = Some(LocalDateTime.now().minusDays(minusDays)),
+            tags = Set(tag)
+          )
+        )
+        await(postRepo.save(modPost)) shouldEqual true
+        modPost
+      }
+
+      val tagPosts = await(postRepo.findByTags(Set(tag)))
+      tagPosts.map(_.ogObj.pubDate.get).zipWithIndex shouldEqual posts.map(_.ogObj.pubDate.get).zipWithIndex
     }
 
   }

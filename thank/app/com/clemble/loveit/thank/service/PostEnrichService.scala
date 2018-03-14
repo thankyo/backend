@@ -1,5 +1,6 @@
 package com.clemble.loveit.thank.service
 
+import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
 
 import com.clemble.loveit.thank.model.{OpenGraphImage, OpenGraphObject}
@@ -48,17 +49,19 @@ object PostEnrichService {
 
   def openGraphFromFB(url: String, fb: JsValue): Option[OpenGraphObject] = {
 
-    val possibleImageUrl = (fb \ "og_object" \ "image" \ "src").asOpt[String]
-    val possibleDescription = (fb \ "og_object" \ "description").asOpt[String]
-    val possibleTitle = (fb \ "og_object" \ "title").asOpt[String]
+    val imageUrl = (fb \ "og_object" \ "image" \ "src").asOpt[String]
+    val description = (fb \ "og_object" \ "description").asOpt[String]
+    val title = (fb \ "og_object" \ "title").asOpt[String]
+    val pubDate = (fb \ "og_object" \ "update_date").asOpt[LocalDateTime]
 
-    if (possibleImageUrl.isDefined || possibleDescription.isDefined || possibleTitle.isDefined) {
+    if (imageUrl.isDefined || description.isDefined || title.isDefined) {
       Some(
         OpenGraphObject(
           url,
-          image = possibleImageUrl.map(OpenGraphImage(_)),
-          description = possibleDescription,
-          title = possibleTitle
+          image = imageUrl.map(OpenGraphImage(_)),
+          description = description,
+          title = title,
+          pubDate = pubDate
         )
       )
     } else {

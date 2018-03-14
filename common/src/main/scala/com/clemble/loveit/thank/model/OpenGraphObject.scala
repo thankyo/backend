@@ -1,5 +1,7 @@
 package com.clemble.loveit.thank.model
 
+import java.time.LocalDateTime
+
 import com.clemble.loveit.common.model._
 import play.api.libs.json.{Json, OFormat}
 
@@ -8,12 +10,13 @@ import play.api.libs.json.{Json, OFormat}
   * TODO We can extend it in future as needed, for now this is enough to get things from the ground
   */
 case class OpenGraphObject(
-                            url: Resource,
-                            image: Option[OpenGraphImage] = None,
-                            title: Option[String] = None,
-                            description: Option[String] = None,
-                            tags: Set[Tag] = Set.empty,
-                          ) extends ResourceAware {
+  url: Resource,
+  image: Option[OpenGraphImage] = None,
+  title: Option[String] = None,
+  description: Option[String] = None,
+  tags: Set[Tag] = Set.empty,
+  pubDate: Option[LocalDateTime] = None
+) extends ResourceAware {
 
   def merge(ogObjOpt: Option[OpenGraphObject]): OpenGraphObject = {
     ogObjOpt match {
@@ -22,7 +25,8 @@ case class OpenGraphObject(
           image = image.orElse(ogObj.image),
           title = title.orElse(ogObj.title),
           description = title.orElse(ogObj.description),
-          tags = tags ++ ogObj.tags
+          tags = tags ++ ogObj.tags,
+          pubDate = pubDate.orElse(ogObjOpt.flatMap(_.pubDate))
         )
       case None => this
     }
@@ -47,13 +51,13 @@ case class OpenGraphObject(
   * OpenGraph Image model
   */
 case class OpenGraphImage(
-                           url: String,
-                           secureUrl: Option[String] = None,
-                           imageType: Option[MimeType] = None,
-                           width: Option[Int] = None,
-                           height: Option[Int] = None,
-                           alt: Option[String] = None,
-                         )
+  url: String,
+  secureUrl: Option[String] = None,
+  imageType: Option[MimeType] = None,
+  width: Option[Int] = None,
+  height: Option[Int] = None,
+  alt: Option[String] = None,
+)
 
 object OpenGraphObject {
 

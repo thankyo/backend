@@ -66,17 +66,17 @@ case class MongoPostRepository @Inject()(
 
   override def findByTags(tags: Set[String]): Future[List[Post]] = {
     val selector = Json.obj("ogObj.tags" -> Json.obj("$in" -> tags))
-    MongoSafeUtils.collectAll[Post](collection, selector)
+    MongoSafeUtils.collectAll[Post](collection, selector, sort = Json.obj("ogObj.pubDate" -> -1))
   }
 
   override def findByProject(project: ProjectID): Future[List[Post]] = {
     val selector = Json.obj("project._id" -> project)
-    MongoSafeUtils.collectAll[Post](collection, selector)
+    MongoSafeUtils.collectAll[Post](collection, selector, sort = Json.obj("ogObj.pubDate" -> -1))
   }
 
   override def findByAuthor(author: UserID): Future[List[Post]] = {
     val selector = Json.obj("project.user" -> author)
-    MongoSafeUtils.collectAll[Post](collection, selector)
+    MongoSafeUtils.collectAll[Post](collection, selector, sort = Json.obj("ogObj.pubDate" -> -1))
   }
 
   override def markSupported(user: UserID, url: Resource): Future[Boolean] = {

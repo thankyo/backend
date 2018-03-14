@@ -5,7 +5,7 @@ import com.clemble.loveit.common.util.WriteableUtils
 import play.api.libs.json.Json
 
 case class UserProjects(
-  pending: Seq[Resource],
+  owned: Seq[Resource],
   installed: Seq[Project]
 )
 

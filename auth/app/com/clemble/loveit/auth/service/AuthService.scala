@@ -61,6 +61,8 @@ case class SimpleAuthService @Inject()(
   }
 
   override def register(register: RegistrationRequest): Future[AuthServiceResult] = {
+    register.validate()
+
     val loginInfo = register.toLoginInfo()
     authInfoRepository.find[PasswordInfo](loginInfo).flatMap {
       case Some(_) =>

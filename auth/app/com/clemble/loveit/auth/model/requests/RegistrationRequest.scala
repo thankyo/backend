@@ -1,5 +1,6 @@
 package com.clemble.loveit.auth.model.requests
 
+import com.clemble.loveit.common.error.{FieldValidationError, ResourceException}
 import com.clemble.loveit.common.model.Email
 import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.user.model.{User, UserSocialConnections}
@@ -32,6 +33,9 @@ case class RegistrationRequest(
   def toLogIn(): LogInRequest = {
     LogInRequest(email, password)
   }
+
+  def validate() = FieldValidationError.validatePassword(password)
+
 }
 
 object RegistrationRequest {

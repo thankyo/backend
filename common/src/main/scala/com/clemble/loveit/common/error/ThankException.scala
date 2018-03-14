@@ -8,6 +8,14 @@ sealed trait ThankException extends RuntimeException
 
 case class FieldValidationError(field: String, error: String) extends ThankException
 
+object FieldValidationError {
+
+  def validatePassword(password: String) = {
+    if (password.length > 65) throw FieldValidationError("password", "Max size is 64 characters")
+  }
+
+}
+
 case class RepositoryException(code: String, message: String) extends RuntimeException(message) with ThankException
 case class UserException(code: String, message: String) extends RuntimeException(message) with ThankException
 case class PaymentException(code: String, message: String) extends ThankException

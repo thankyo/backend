@@ -43,9 +43,10 @@ class ChangePasswordController @Inject()(
     */
   def submit = silhouette.SecuredAction.async(parse.json[ChangePasswordRequest])({
     request => {
-      val (currentPassword, newPassword) = ChangePasswordRequest.unapply(request.body).get
+      request.body.validate()
+      val (currentPassword, password) = ChangePasswordRequest.unapply(request.body).get
       val credentials = Credentials(request.identity.email, currentPassword)
-      val passwordInfo = passwordHasherRegistry.current.hash(newPassword)
+      val passwordInfo = passwordHasherRegistry.current.hash(password)
       for {
         loginInfo <- credentialsProvider.authenticate(credentials)
         update <- authInfoRepository.update[PasswordInfo](loginInfo, passwordInfo)

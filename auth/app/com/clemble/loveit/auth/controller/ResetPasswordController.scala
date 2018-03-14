@@ -49,6 +49,8 @@ class ResetPasswordController @Inject()(
     * @return The result to display.
     */
   def submit(token: UUID) = silhouette.UnsecuredAction.async(parse.json[RestorePasswordRequest]) { implicit request =>
+    request.body.validate()
+
     val passwordInfo = passwordHasherRegistry.current.hash(request.body.password)
     for {
       authTokenOpt <- authTokenService.validate(token)

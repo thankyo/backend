@@ -39,6 +39,11 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.insert(post))
   }
 
+  override def findById(id: String): Future[Option[Post]] = {
+    val selector = Json.obj("_id" -> id)
+    collection.find(selector).one[Post]
+  }
+
   override def update(post: Post): Future[Boolean] = {
     val selector = Json.obj("url" -> post.url)
     val update = Json.toJsObject(post)

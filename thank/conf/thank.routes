@@ -1,6 +1,7 @@
 # Thank related ENDPOINTS
 GET         /stat/:owner/:year/:month          @com.clemble.loveit.thank.controller.UserStatController.get(owner, year: Int, month: Int)
 
+GET         /post/:post                        @com.clemble.loveit.thank.controller.PostController.get(post)
 
 GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
 POST        /project                           @com.clemble.loveit.thank.controller.ProjectController.create()

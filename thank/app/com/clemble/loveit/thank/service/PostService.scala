@@ -11,6 +11,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PostService {
 
+  def findById(id: String): Future[Option[Post]]
+
   def findByTags(tags: Set[Tag]): Future[List[Post]]
 
   def findByAuthor(author: UserID): Future[List[Post]]
@@ -47,6 +49,10 @@ case class SimplePostService @Inject()(
       case Left(post) => post.thank.isSupportedBy(supporter)
       case Right(_) => false
     }
+  }
+
+  override def findById(id: String): Future[Option[Post]] = {
+    repo.findById(id)
   }
 
   override def getPostOrProject(url: Resource): Future[Either[Post, Project]] = {

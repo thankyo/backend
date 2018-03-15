@@ -15,6 +15,8 @@ trait PostRepository {
 
   def deleteAll(user: UserID, url: Resource): Future[Boolean]
 
+  def findById(id: String): Future[Option[Post]]
+
   def findByResource(url: Resource): Future[Option[Post]]
 
   def findByTags(tags: Set[String]): Future[List[Post]]

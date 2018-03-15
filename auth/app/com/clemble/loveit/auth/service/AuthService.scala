@@ -6,7 +6,7 @@ import com.clemble.loveit.auth.model.requests.{LogInRequest, RegistrationRequest
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model.{Email, UserID}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.user.model.User
+import com.clemble.loveit.user.model.{CommonSocialProfileWithDOB, User}
 import com.clemble.loveit.user.service.UserService
 import com.mohiva.play.silhouette.api.{AuthInfo, LoginInfo}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
@@ -23,7 +23,7 @@ trait AuthService {
 
   def register(register: RegistrationRequest): Future[AuthServiceResult]
 
-  def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult]
+  def registerSocial(p: SocialProvider)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult]
 
 }
 
@@ -88,7 +88,7 @@ case class SimpleAuthService @Inject()(
     }
   }
 
-  override def registerSocial(p: SocialProvider with CommonSocialProfileBuilder)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult] = {
+  override def registerSocial(p: SocialProvider)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult] = {
     for {
       profile <- p.retrieveProfile(authInfo)
       result <- createOrUpdateUser(profile, authInfo, userOpt)
@@ -97,11 +97,16 @@ case class SimpleAuthService @Inject()(
     }
   }
 
-  private def createOrUpdateUser(profile: CommonSocialProfile, authInfo: AuthInfo, userOpt: Option[UserID]): Future[AuthServiceResult] = {
+  private def createOrUpdateUser(profile: SocialProfile, authInfo: AuthInfo, userOpt: Option[UserID]): Future[AuthServiceResult] = {
+    val profileEmail = profile match {
+      case cs: CommonSocialProfile => cs.email
+      case cswd: CommonSocialProfileWithDOB => cswd.email
+      case _ => None
+    }
     for {
       userById <- userOpt.map(user => userService.findById(user)).getOrElse(Future.successful(None))
       userByLogin <- userService.retrieve(profile.loginInfo)
-      userByEmail <- profile.email.map(userService.findByEmail).getOrElse(Future.successful(None))
+      userByEmail <- profileEmail.map(userService.findByEmail).getOrElse(Future.successful(None))
       result <- userById.orElse(userByLogin).orElse(userByEmail) match {
         case Some(user: User) => {
           for {
@@ -112,7 +117,7 @@ case class SimpleAuthService @Inject()(
           }
         }
         case _ => {
-          val newUser = User(id = IDGenerator.generate(), email = profile.email.get).link(profile)
+          val newUser = User(id = IDGenerator.generate(), email = profileEmail.get).link(profile)
           createUser(newUser, profile.loginInfo, authInfo)
         }
       }

@@ -2,7 +2,7 @@ package com.clemble.loveit.auth
 
 import javax.inject.Singleton
 
-import com.clemble.loveit.auth.service.{GoogleRefreshableProvider, RefreshableOAuth2Provider}
+import com.clemble.loveit.auth.service.{FacebookProviderWithDOB, GoogleRefreshableProvider, RefreshableOAuth2Provider}
 import com.clemble.loveit.auth.service.repository.mongo.MongoAuthInfoRepository
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.util.AuthEnv
@@ -137,7 +137,7 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
    */
   @Provides
   def provideSocialProviderRegistry(
-    facebookProvider: FacebookProvider,
+    facebookProvider: FacebookProviderWithDOB,
     googleProvider: GoogleProvider
   ): SocialProviderRegistry = {
 
@@ -226,9 +226,10 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   def provideFacebookProvider(
     httpLayer: HTTPLayer,
     socialStateHandler: SocialStateHandler,
-    configuration: Configuration): FacebookProvider = {
+    configuration: Configuration)
+    ( implicit ec: ExecutionContext): FacebookProviderWithDOB = {
 
-    new FacebookProvider(
+    new FacebookProviderWithDOB(
       httpLayer,
       socialStateHandler,
       configuration.underlying.as[OAuth2Settings]("silhouette.facebook")

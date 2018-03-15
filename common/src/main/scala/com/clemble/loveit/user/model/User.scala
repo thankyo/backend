@@ -5,16 +5,16 @@ import java.time.{LocalDate, LocalDateTime}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.WriteableUtils
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, CredentialsProvider}
 import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
+import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, CredentialsProvider, SocialProfile}
 import play.api.http.Writeable
 import play.api.libs.json.{Json, OFormat}
 
 case class UserSocialConnections(
-                                  credentials: Option[String] = None,
-                                  facebook: Option[String] = None,
-                                  google: Option[String] = None
-                                ) {
+  credentials: Option[String] = None,
+  facebook: Option[String] = None,
+  google: Option[String] = None
+) {
 
   def asGoogleLogin() = google.map(LoginInfo(GoogleProvider.ID, _))
 
@@ -34,16 +34,16 @@ case class UserSocialConnections(
   *    - receives thanks from owned urls
   */
 case class User(
-                 id: UserID,
-                 firstName: Option[String] = None,
-                 lastName: Option[String] = None,
-                 email: Email,
-                 avatar: Option[String] = None,
-                 bio: Option[String] = None,
-                 dateOfBirth: Option[LocalDate] = None,
-                 profiles: UserSocialConnections = UserSocialConnections(),
-                 created: LocalDateTime = LocalDateTime.now()
-               ) extends Identity with CreatedAware {
+  id: UserID,
+  firstName: Option[String] = None,
+  lastName: Option[String] = None,
+  email: Email,
+  avatar: Option[String] = None,
+  bio: Option[String] = None,
+  dateOfBirth: Option[LocalDate] = None,
+  profiles: UserSocialConnections = UserSocialConnections(),
+  created: LocalDateTime = LocalDateTime.now()
+) extends Identity with CreatedAware {
 
   /**
     * Tries to construct a name.
@@ -63,17 +63,34 @@ case class User(
     }
   }
 
-  def link(socialProfile: CommonSocialProfile): User = {
-    this.copy(
-      firstName = firstName.orElse(socialProfile.firstName),
-      lastName = lastName.orElse(socialProfile.lastName),
-      // following #60 we should ignore avatar from profile for now
-      profiles = socialProfile.loginInfo.providerID match {
-        case FacebookProvider.ID => profiles.copy(facebook = Some(socialProfile.loginInfo.providerKey))
-        case GoogleProvider.ID => profiles.copy(google = Some(socialProfile.loginInfo.providerKey))
-        case CredentialsProvider.ID => profiles.copy(credentials = Some(socialProfile.loginInfo.providerKey))
-      }
-    )
+  def link(socialProfile: SocialProfile): User = {
+    val updatedProfiles = socialProfile.loginInfo.providerID match {
+      case FacebookProvider.ID => profiles.copy(facebook = Some(socialProfile.loginInfo.providerKey))
+      case GoogleProvider.ID => profiles.copy(google = Some(socialProfile.loginInfo.providerKey))
+      case CredentialsProvider.ID => profiles.copy(credentials = Some(socialProfile.loginInfo.providerKey))
+    }
+
+    socialProfile match {
+      case csp: CommonSocialProfile =>
+        this.copy(
+          firstName = firstName.orElse(csp.firstName),
+          lastName = lastName.orElse(csp.lastName),
+          profiles = updatedProfiles
+        )
+      case cspd: CommonSocialProfileWithDOB =>
+        this.copy(
+          firstName = firstName.orElse(cspd.firstName),
+          lastName = lastName.orElse(cspd.lastName),
+          profiles = updatedProfiles,
+          dateOfBirth = cspd.dateOfBirth
+        )
+      case sp: SocialProfile =>
+        this.copy(profiles = updatedProfiles)
+    }
+  }
+
+  def clean(): User = {
+    copy(email = "hidden@exampl.com", profiles = UserSocialConnections(), dateOfBirth = None)
   }
 
 }

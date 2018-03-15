@@ -44,7 +44,7 @@ class SocialAuthController @Inject()(
       val providerOpt = socialProviderRegistry.get[SocialProvider](provider)
       val user = cookieUtils.readUser(req)
       providerOpt match {
-        case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
+        case Some(p: SocialProvider) =>
           p.authenticate().flatMap({
             case Left(redirect) =>
               Future.successful(redirect)

@@ -20,4 +20,8 @@ abstract class LoveItController(controllerComponents: ControllerComponents) exte
     }
   }
 
+  def isMe(id: UserID)(implicit req: SecuredRequest[AuthEnv, _]): Boolean = {
+    id == MY || req.identity.id == id
+  }
+
 }

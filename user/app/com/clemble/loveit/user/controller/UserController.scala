@@ -20,10 +20,14 @@ case class UserController @Inject()(
                                      implicit val ec: ExecutionContext
                                    ) extends LoveItController(components) {
 
-  def get(user: UserID) = silhouette.SecuredAction.async(implicit req => {
-    val realId = idOrMe(user)
+  def get(id: UserID) = silhouette.SecuredAction.async(implicit req => {
+    val realId = idOrMe(id)
     val fUserOpt = userService.findById(realId)
-    fUserOpt.map(userOpt => Ok(userOpt.get))
+    fUserOpt.map({
+      case Some(user) if isMe(id) => Ok(user)
+      case Some(user) => Ok(user.clean())
+      case None => NotFound
+    })
   })
 
   def updateMyProfile() = silhouette.SecuredAction.async(parse.json[User])(implicit req => {

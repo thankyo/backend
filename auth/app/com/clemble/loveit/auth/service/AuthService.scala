@@ -13,7 +13,6 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.providers._
-import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,6 +23,8 @@ trait AuthService {
   def register(register: RegistrationRequest): Future[AuthServiceResult]
 
   def registerSocial(p: SocialProvider)(authInfo: p.A, userOpt: Option[UserID]): Future[AuthServiceResult]
+
+  def removeSocial(user: UserID, provider: String): Future[Option[User]]
 
 }
 
@@ -144,6 +145,17 @@ case class SimpleAuthService @Inject()(
       }
       case other =>
         Future.successful(other)
+    })
+  }
+
+  override def removeSocial(user: UserID, provider: String): Future[Option[User]] = {
+    userService.findById(user).flatMap({
+      case Some(user) if user.hasProvider(provider) =>
+        val loginInfo = user.profiles.get(provider).get
+        authInfoRepository.remove(loginInfo)
+        userService.update(user.remove(provider)).map(Some(_))
+      case res =>
+        Future.successful(res)
     })
   }
 

@@ -2,6 +2,7 @@ package com.clemble.loveit.user.model
 
 import java.time.{LocalDate, LocalDateTime}
 
+import com.clemble.loveit.common.error.{FieldValidationError, UserException}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.WriteableUtils
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
@@ -21,6 +22,32 @@ case class UserSocialConnections(
   def asFacebookLogin() = facebook.map(LoginInfo(FacebookProvider.ID, _))
 
   def asCredentialsLogin() = credentials.map(LoginInfo(CredentialsProvider.ID, _))
+
+  def get(provider: String): Option[LoginInfo] = {
+    provider match {
+      case GoogleProvider.ID => asGoogleLogin()
+      case FacebookProvider.ID => asFacebookLogin()
+      case CredentialsProvider.ID => asCredentialsLogin()
+      case _ => None
+    }
+  }
+
+  def add(loginInfo: LoginInfo): UserSocialConnections = {
+    loginInfo.providerID match {
+      case FacebookProvider.ID => copy(facebook = Some(loginInfo.providerKey))
+      case GoogleProvider.ID => copy(google = Some(loginInfo.providerKey))
+      case CredentialsProvider.ID => copy(credentials = Some(loginInfo.providerKey))
+    }
+  }
+
+  def remove(provider: String): UserSocialConnections = {
+    provider match {
+      case GoogleProvider.ID => copy(google = None)
+      case FacebookProvider.ID => copy(facebook = None)
+      case CredentialsProvider.ID => copy(credentials = None)
+      case _ => this
+    }
+  }
 
 }
 
@@ -55,20 +82,17 @@ case class User(
     case (_, _) => firstName.orElse(lastName)
   }
 
-  def hasProvider(providerID: String): Boolean = {
-    providerID match {
-      case FacebookProvider.ID => profiles.facebook.isDefined
-      case GoogleProvider.ID => profiles.google.isDefined
-      case CredentialsProvider.ID => profiles.credentials.isDefined
-    }
+  def hasProvider(providerID: String): Boolean = profiles.get(providerID).isDefined
+
+  def remove(providerID: String): User = {
+    val userWithoutProvider = copy(profiles = profiles.remove(providerID))
+    if (!userWithoutProvider.hasProvider(FacebookProvider.ID) && !userWithoutProvider.hasProvider(CredentialsProvider.ID))
+      throw FieldValidationError(s"profiles.${providerID}", "You won't be able to login")
+    userWithoutProvider
   }
 
   def link(socialProfile: SocialProfile): User = {
-    val updatedProfiles = socialProfile.loginInfo.providerID match {
-      case FacebookProvider.ID => profiles.copy(facebook = Some(socialProfile.loginInfo.providerKey))
-      case GoogleProvider.ID => profiles.copy(google = Some(socialProfile.loginInfo.providerKey))
-      case CredentialsProvider.ID => profiles.copy(credentials = Some(socialProfile.loginInfo.providerKey))
-    }
+    val updatedProfiles = profiles.add(socialProfile.loginInfo)
 
     socialProfile match {
       case csp: CommonSocialProfile =>

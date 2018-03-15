@@ -8,3 +8,5 @@ POST        /password/change                 com.clemble.loveit.auth.controller.
 GET         /logout                          com.clemble.loveit.auth.controller.LogoutController.logout()
 
 GET         /social/:provider                com.clemble.loveit.auth.controller.SocialAuthController.authenticate(provider)
+
+DELETE      /user/my/:provider               com.clemble.loveit.auth.controller.UnRegisterController.removeProvider(provider)

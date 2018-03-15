@@ -11,6 +11,7 @@ import com.mohiva.play.silhouette.impl.providers.oauth2.FacebookProvider.ID
 import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
+import scala.util.Try
 
 class FacebookProfileParserWithDOB extends SocialProfileParser[JsValue, CommonSocialProfileWithDOB, OAuth2Info] {
 
@@ -21,7 +22,13 @@ class FacebookProfileParserWithDOB extends SocialProfileParser[JsValue, CommonSo
     val fullName = (json \ "name").asOpt[String]
     val avatarURL = (json \ "picture" \ "data" \ "url").asOpt[String]
     val email = (json \ "email").asOpt[String]
-    val dob = (json \ "birthday").asOpt[LocalDate]
+    val dob = (json \ "birthday").asOpt[String].flatMap(dob => Try({
+      val parts = dob.split("/")
+      val month = if (parts.length >= 1) parts(0).toInt else 1980
+      val day = if (parts.length >= 2) parts(1).toInt else 1
+      val year = if (parts.length >= 3) parts(2).toInt else 1
+      LocalDate.of(year, month, day)
+    }).toOption)
 
     CommonSocialProfileWithDOB(
       loginInfo = LoginInfo(ID, userID),

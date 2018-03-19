@@ -1,9 +1,9 @@
 package com.clemble.loveit.thank
 
 import javax.inject.{Inject, Named, Singleton}
-
 import akka.actor.{ActorSystem, Scheduler}
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.thank.model.WordPress
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
 import com.clemble.loveit.thank.service.repository.mongo._
@@ -18,6 +18,7 @@ import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext
+import scala.io.Source
 
 class ThankModule @Inject()(env: Environment, conf: Configuration) extends ScalaModule {
 
@@ -31,6 +32,8 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[ProjectRepository]).to(classOf[MongoProjectRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
+
+    bind(classOf[ProjectEnrichService]).to(classOf[SimpleProjectEnrichService]).asEagerSingleton()
 
     bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()
     bind(classOf[ProjectSupportTrackService]).to(classOf[SimpleProjectSupportTrackService]).asEagerSingleton()
@@ -105,10 +108,12 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
   @Provides
   @Singleton
-  def projectEnrichService(wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext): ProjectEnrichService = {
-    val host = conf.get[String]("thank.resource.analyzer.host")
-    val port = conf.get[Int]("thank.resource.analyzer.port")
-    SimpleProjectEnrichService(s"http://${host}:${port}/lookup/v1/", wsClient, userService, actorSystem.scheduler)
+  def projectWebStackAnalysis(wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext): ProjectWebStackAnalysis = {
+    //    val host = conf.get[String]("thank.resource.analyzer.host")
+    //    val port = conf.get[Int]("thank.resource.analyzer.port")
+    //    WappalyzerWebStackAnalyzer(s"http://${host}:${port}/lookup/v1/", wsClient)
+    val analyzed = Source.fromResource("analysis/wordPress.txt").getLines().map(url => url -> WordPress).toMap
+    StaticWebStackAnalyzer(analyzed)
   }
 
 }

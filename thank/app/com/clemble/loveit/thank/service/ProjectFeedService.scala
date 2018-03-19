@@ -16,7 +16,9 @@ trait ProjectFeedService {
 
 object ProjectFeedService {
 
-  def readRSS(feed: Elem): List[OpenGraphObject] = FeedParser.parse(feed).toList
+  def readFeed(xml: String): List[OpenGraphObject] = readFeed(XML.loadString(xml))
+
+  def readFeed(feed: Elem): List[OpenGraphObject] = FeedParser.parse(feed).toList
 
 }
 
@@ -28,7 +30,7 @@ case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postEnrichServ
     project.rss match {
       case Some(feedUrl) =>
         wsClient.url(feedUrl).get()
-          .map(feed => readRSS(XML.loadString(feed.body)))
+          .map(feed => readFeed(feed.body))
           .map(_.map(ogObj => if (ogObj.tags.isEmpty) ogObj.copy(tags = project.tags) else ogObj))
       case None =>
         Future.successful(List.empty)

@@ -1,20 +1,19 @@
 package com.clemble.loveit.thank.service
 
-import javax.inject.Inject
-
-import akka.actor.Scheduler
+import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.thank.model.{ProjectConstructor, WebStack}
 import com.clemble.loveit.user.service.UserService
+import javax.inject.Inject
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
 import play.api.libs.ws.WSClient
 import play.mvc.Http.Status
 
 import scala.concurrent.duration._
-import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 trait ProjectEnrichService {
 
@@ -42,12 +41,15 @@ object ProjectEnrichService {
 
 }
 
-case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSClient, userService: UserService, scheduler: Scheduler)(implicit ec: ExecutionContext) extends ProjectEnrichService {
+trait ProjectWebStackAnalysis {
 
-  val cache = new mutable.WeakHashMap[String, ProjectConstructor]()
-  val DELAY: FiniteDuration = 3.second
+  def analyze(url: Resource): Future[Option[WebStack]]
 
-  private def enrichWebStack(url: Resource): Future[Option[WebStack]] = {
+}
+
+case class WappalyzerWebStackAnalyzer(lookupUrl: String, wsClient: WSClient)(implicit ec: ExecutionContext) extends ProjectWebStackAnalysis {
+
+  override def analyze(url: Resource): Future[Option[WebStack]] = {
     wsClient.url(lookupUrl)
       .addQueryStringParameters("url" -> url)
       .execute()
@@ -59,6 +61,20 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       })
       .recover({ case t => None })
   }
+
+}
+
+case class StaticWebStackAnalyzer(analyzedUrls: Map[Resource, WebStack]) extends ProjectWebStackAnalysis {
+
+  override def analyze(url: Resource): Future[Option[WebStack]] = {
+    Future.successful(analyzedUrls.get(url))
+  }
+
+}
+
+case class SimpleProjectEnrichService @Inject()(webStackAnalyzer: ProjectWebStackAnalysis, wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext) extends ProjectEnrichService {
+
+  val DELAY: FiniteDuration = 3.second
 
   private def descriptionFromUrl(url: Resource): (Set[Tag], String, String) = {
     val title = if (url.startsWith("https"))
@@ -83,41 +99,49 @@ case class SimpleProjectEnrichService @Inject()(lookupUrl: String, wsClient: WSC
       })
   }
 
+  private def isValidFeed(feedUrl: Resource): Future[Boolean] = {
+    wsClient
+      .url(feedUrl)
+      .get()
+      .map(res => {
+        if (res.status != Status.OK) {
+          false
+        } else {
+          Try(ProjectFeedService.readFeed(res.body)).isSuccess
+        }
+      })
+      .recover({ case _ => false })
+  }
+
   private def enrichRSS(url: Resource): Future[Option[String]] = {
     val rssUrls = List(s"${url}/feed", s"${url}/rss")
-    val possibleFeeds = Future.sequence(rssUrls.map(rssUrl => wsClient.url(rssUrl).get()))
-    possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1.status == Status.OK).map(_._2))
+    val possibleFeeds = Future.sequence(rssUrls.map(isValidFeed))
+    possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1 == true).map(_._2))
   }
 
   override def enrich(user: UserID, url: Resource): Future[ProjectConstructor] = {
-    val fRes = cache.get(url) match {
-      case Some(prj) => Future.successful(prj)
-      case None =>
-        val fNone = pattern.after[Option[Nothing]](DELAY, scheduler)(Future.successful(None))
-        val fWebStack = Future.firstCompletedOf(Seq(enrichWebStack(url), fNone))
-        val fDescription = Future.firstCompletedOf(Seq(enrichDescription(url), fNone.map(_ => descriptionFromUrl(url))))
-        val fRss = Future.firstCompletedOf(Seq(enrichRSS(url), fNone))
-        val fAvatar = userService.findById(user).map(_.flatMap(_.avatar))
-        for {
-          webStack <- fWebStack
-          (tags, description, title) <- fDescription
-          avatar <- fAvatar
-          rss <- fRss
-        } yield {
-          ProjectConstructor(
-            url = url,
-            avatar = avatar,
-            webStack = webStack,
-            title = title,
-            shortDescription = description,
-            description = None,
-            tags = tags,
-            rss = rss
-          )
-        }
+    val fNone = pattern.after[Option[Nothing]](DELAY, actorSystem.scheduler)(Future.successful(None))
+    val fWebStack = Future.firstCompletedOf(Seq(webStackAnalyzer.analyze(url), fNone))
+    val fDescription = Future.firstCompletedOf(Seq(enrichDescription(url), fNone.map(_ => descriptionFromUrl(url))))
+    val fRss = Future.firstCompletedOf(Seq(enrichRSS(url), fNone))
+    val fAvatar = userService.findById(user).map(_.flatMap(_.avatar))
+    for {
+      webStack <- fWebStack
+      (tags, description, title) <- fDescription
+      avatar <- fAvatar
+      rss <- fRss
+    } yield {
+      ProjectConstructor(
+        url = url,
+        avatar = avatar,
+        webStack = webStack,
+        title = title,
+        shortDescription = description,
+        description = None,
+        tags = tags,
+        rss = rss
+      )
     }
-    fRes.foreach(prj => cache.put(url, prj))
-    fRes
   }
 
 }

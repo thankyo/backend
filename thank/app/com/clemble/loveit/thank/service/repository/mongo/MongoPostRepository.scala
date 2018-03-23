@@ -1,9 +1,8 @@
 package com.clemble.loveit.thank.service.repository.mongo
 
 import javax.inject.{Inject, Named, Singleton}
-
 import akka.stream.Materializer
-import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
+import com.clemble.loveit.common.model.{PostID, ProjectID, Resource, Tag, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.{Post, Project}
 import com.clemble.loveit.thank.service.repository.PostRepository
@@ -37,6 +36,11 @@ case class MongoPostRepository @Inject()(
   override def save(post: Post): Future[Boolean] = {
     post.validate()
     MongoSafeUtils.safeSingleUpdate(collection.insert(post))
+  }
+
+  override def delete(id: PostID): Future[Boolean] = {
+    val selector = Json.obj("_id" -> id)
+    MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
   }
 
   override def findById(id: String): Future[Option[Post]] = {

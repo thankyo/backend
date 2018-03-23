@@ -33,8 +33,8 @@ class ErrorHandler @Inject() (
         Future.successful(BadRequest(FieldValidationError("authCode", "This authorization code has expired.")))
       case re: ResourceException =>
         Future.successful(BadRequest(FieldValidationError("error", re.message)))
-      case _: ProviderException =>
-        Future.successful(Redirect("/"))
+      case pe: ProviderException =>
+        Future.successful(InternalServerError(pe.getMessage))
       case exc =>
         super.onServerError(request, exc)
     }

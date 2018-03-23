@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service.repository
 
-import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
+import com.clemble.loveit.common.model.{PostID, ProjectID, Resource, Tag, UserID}
 import com.clemble.loveit.thank.model.{Post, Project}
 
 import scala.concurrent.Future
@@ -13,9 +13,11 @@ trait PostRepository {
 
   def update(post: Post): Future[Boolean]
 
+  def delete(id: PostID): Future[Boolean]
+
   def deleteAll(user: UserID, url: Resource): Future[Boolean]
 
-  def findById(id: String): Future[Option[Post]]
+  def findById(id: PostID): Future[Option[Post]]
 
   def findByResource(url: Resource): Future[Option[Post]]
 

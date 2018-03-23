@@ -15,7 +15,7 @@ case class Post(
                  thank: Thank = Thank(),
 
                  created: LocalDateTime = LocalDateTime.now(),
-                 _id: String = IDGenerator.generate()
+                 _id: PostID = IDGenerator.generate()
                ) extends CreatedAware with ResourceAware {
 
   def isSupportedBy(user: UserID): Boolean = thank.isSupportedBy(user)

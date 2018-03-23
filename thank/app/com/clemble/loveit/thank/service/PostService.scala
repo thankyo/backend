@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PostService {
 
-  def findById(id: String): Future[Option[Post]]
+  def findById(id: PostID): Future[Option[Post]]
 
   def findByTags(tags: Set[Tag]): Future[List[Post]]
 
@@ -26,6 +26,8 @@ trait PostService {
   def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean]
 
   def updateProject(owner: Project): Future[Boolean]
+
+  def delete(id: PostID): Future[Boolean]
 
   def delete(project: Project): Future[Boolean]
 
@@ -51,8 +53,12 @@ case class SimplePostService @Inject()(
     }
   }
 
-  override def findById(id: String): Future[Option[Post]] = {
+  override def findById(id: PostID): Future[Option[Post]] = {
     repo.findById(id)
+  }
+
+  override def delete(id: PostID): Future[Boolean] = {
+    repo.delete(id)
   }
 
   override def getPostOrProject(url: Resource): Future[Either[Post, Project]] = {

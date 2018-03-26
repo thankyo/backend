@@ -17,7 +17,7 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
 
   "CREATE" should {
 
-    "same resource transactions saved only once" in {
+    "same resource saved more, then once" in {
       val user = createUser()
       val res = randomResource
       val A = PendingTransaction(someRandom[Project], res)
@@ -27,7 +27,7 @@ class PendingTransactionRepositorySpec(implicit ee: ExecutionEnv) extends Reposi
       await(repo.save(user, B))
 
       val userTransactions = await(repo.findChargesByUser(user))
-      userTransactions.size shouldEqual 1
+      userTransactions.size shouldEqual 2
     }
 
     "save all payments for the user" in {

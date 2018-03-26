@@ -1,12 +1,9 @@
 package com.clemble.loveit.payment.service
 
-import com.clemble.loveit.common.model.Resource
 import com.clemble.loveit.user.service.repository.UserRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
-
-import scala.util.Try
 
 @RunWith(classOf[JUnitRunner])
 class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentServiceTestExecutor {
@@ -16,17 +13,17 @@ class PendingTransactionServiceSpec(implicit ee: ExecutionEnv) extends PaymentSe
 
   "PAYMENT" should {
 
-    "same resource transactions ignored" in {
+    "same resource allows multiple transactions" in {
       val giver = createUser()
       val res = randomResource
 
       val A = createProject()
 
       thank(giver, A, res)
-      Try(thank(giver, A, res))
+      thank(giver, A, res)
 
       val payments = pendingCharges(giver)
-      payments.size must beEqualTo(1)
+      payments.size must beEqualTo(2)
     }
 
     "list all transactions" in {

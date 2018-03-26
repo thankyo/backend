@@ -15,11 +15,7 @@ case class Thank(
   def isSupportedBy(user: UserID): Boolean = supporters.contains(user)
 
   def withSupporter(supporter: UserID): Thank = {
-    if (!supporters.contains(supporter)) {
-      Thank(supporters = supporters + supporter, given = given + 1)
-    } else {
-      this
-    }
+    Thank(supporters = supporters + supporter, given = given + 1)
   }
 
 }

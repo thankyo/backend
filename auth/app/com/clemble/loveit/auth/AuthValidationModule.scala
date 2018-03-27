@@ -27,7 +27,7 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
   /**
     * Configures the module.
     */
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind[AuthService].to[SimpleAuthService]
     bind[UserOAuthService].to[SimpleAuthService]
     bind[AuthTokenRepository].to[MongoAuthTokenRepository]

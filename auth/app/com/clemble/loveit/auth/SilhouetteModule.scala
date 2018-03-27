@@ -42,7 +42,7 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   /**
    * Configures the module.
    */
-  def configure() {
+  override def configure() {
     bind[Silhouette[AuthEnv]].to[SilhouetteProvider[AuthEnv]]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))

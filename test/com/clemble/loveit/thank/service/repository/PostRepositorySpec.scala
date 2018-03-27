@@ -76,9 +76,9 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       await(postRepo.save(post))
       await(postRepo.markSupported("some", post.url)) shouldEqual true
-      await(postRepo.markSupported("some", post.url)) shouldEqual false
+      await(postRepo.markSupported("some", post.url)) shouldEqual true
 
-      await(postRepo.findByResource(post.url)).get.thank.given shouldEqual 1
+      await(postRepo.findByResource(post.url)).get.thank.given shouldEqual 2
     }
 
   }

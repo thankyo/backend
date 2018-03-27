@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.error.{PaymentException, ResourceException}
+import com.clemble.loveit.common.error.{PaymentException, ResourceException, SelfLovingForbiddenException}
 import com.clemble.loveit.common.model.{Amount, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post}
@@ -60,7 +60,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
     "can't thank one self" in {
       val project = createProject()
 
-      thank(project.user, project.url) should throwA[PaymentException]
+      thank(project.user, project.url) should throwA[SelfLovingForbiddenException]
     }
 
   }

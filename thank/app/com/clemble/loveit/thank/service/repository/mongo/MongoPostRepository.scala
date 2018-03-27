@@ -90,8 +90,7 @@ case class MongoPostRepository @Inject()(
 
   override def markSupported(user: UserID, url: Resource): Future[Boolean] = {
     val query = Json.obj(
-      "url" -> url,
-      "thank.supporters" -> Json.obj("$ne" -> user)
+      "url" -> url
     )
     val update = Json.obj(
       "$inc" -> Json.obj("thank.given" -> 1),

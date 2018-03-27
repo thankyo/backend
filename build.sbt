@@ -152,7 +152,7 @@ javaOptions in Test ++= Seq("-Dconfig.resource=application.test.conf")
 
 version in Docker := "latest"
 maintainer in Docker := "antono@loveit.tips"
-dockerBaseImage := "openjdk:8u151-jre"
+dockerBaseImage := "openjdk:8u162-jre-slim"
 dockerRepository := Some("loveit")
-dockerExposedPorts := Seq(9000, 9443)
+dockerExposedPorts := Seq(9000)
 

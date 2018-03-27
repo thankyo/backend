@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/backend
+    docker:
+      - image: codestar/circleci-scala-sbt-git:scala-2.12.5-sbt-1.1.1
+      - image: mongo:3.4.9
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - backend-{{ checksum "project/plugins.sbt" }}-{{ checksum "build.sbt" }}
+            - backend
+
+      - run:
+          command:
+            sbt compile test:compile exit
+
+      - save_cache:
+          key: backend-{{ checksum "project/build.sbt" }}-{{ checksum "build.sbt" }}
+          paths:
+            - target/resolution-cache
+            - target/streams
+            - project/target/resolution-cache
+            - project/target/streams
+            - ~/.sbt
+            - ~/.iv2/cache
+            - ~/.m2
+
+      - save_cache:
+          # Changing this to a different key is the only way to remove old dependencies from the cache and/or generate a more up-to-date cache
+          key: backend
+          paths:
+            - ~/.sbt
+            - ~/.iv2/cache
+            - ~/.m2
+
+      - run:
+          command:
+            sbt test exit
+
+      - store_test_results:
+          path: target/test-reports

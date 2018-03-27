@@ -19,6 +19,7 @@ object FieldValidationError {
 case class RepositoryException(code: String, message: String) extends RuntimeException(message) with ThankException
 case class UserException(code: String, message: String) extends RuntimeException(message) with ThankException
 case class PaymentException(code: String, message: String) extends ThankException
+case class SelfLovingForbiddenException(message: String) extends ThankException
 case class ResourceException(code: String, message: String) extends ThankException
 
 object UserException {
@@ -31,7 +32,7 @@ object PaymentException {
   def failedToLinkChargeAccount(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link charge account details")
   def failedToLinkPayoutAccount(user: UserID) = PaymentException("BANK_DETAILS_LINK", s"User ${user} failed to link payout account details")
   def limitIsNegative(user: UserID, limit: Money) = PaymentException("LIMIT_IS_NEGATIVE", s"User ${user} limit can't be negative")
-  def selfLovingIsForbidden() = PaymentException("SELF_LOVING_IS_FORBIDDEN", "No self loving allowed around here")
+  def selfLovingIsForbidden() = SelfLovingForbiddenException("No self loving allowed around here")
 }
 
 object ResourceException {

@@ -1,8 +1,8 @@
 package com.clemble.loveit.thank.controller
 
 import javax.inject.Inject
-
 import com.clemble.loveit.common.controller.LoveItController
+import com.clemble.loveit.common.error.{PaymentException, SelfLovingForbiddenException}
 import com.clemble.loveit.common.model.{Resource, Tag, UserID}
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post, Project}

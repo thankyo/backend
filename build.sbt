@@ -7,12 +7,12 @@ name := "backend"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.5"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 val silhouetteVersion = "5.0.3"
 val reactMongoVersion = "0.13.0"
-val scalaGuiceVersion = "4.1.1"
+val scalaGuiceVersion = "4.2.0"
 val elastic4sVersion = "6.1.3"
 
 val commonSettings: Seq[Setting[_]] = Seq(
@@ -91,7 +91,7 @@ lazy val payment = (project in file("./payment")).
   settings(
     libraryDependencies ++= Seq(
       ws,
-      "com.stripe" % "stripe-java" % "5.33.2",
+      "com.stripe" % "stripe-java" % "5.33.3",
       "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion
     )
   )
@@ -113,7 +113,7 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.7.0",
+  "io.sentry" % "sentry-logback" % "1.7.2",
 
   "org.apache.commons" % "commons-text" % "1.2" % Test,
   specs2 % Test

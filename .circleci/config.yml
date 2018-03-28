@@ -47,6 +47,10 @@ jobs:
           path: target/test-reports
 
       - run:
+          name: Add docker
+            apk add --no-cache docker
+
+      - run:
           name: Create local docker image
           command:
             sbt docker:publishLocal

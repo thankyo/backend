@@ -48,6 +48,7 @@ jobs:
 
       - run:
           name: Add docker
+          command:
             apk add --no-cache docker
 
       - run:

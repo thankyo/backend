@@ -8,6 +8,9 @@ jobs:
     steps:
       - checkout
 
+      - setup_remote_docker:   # (2)
+        docker_layer_caching: true # (3)
+
       - restore_cache:
           keys:
             - backend-{{ checksum "project/plugins.sbt" }}-{{ checksum "build.sbt" }}

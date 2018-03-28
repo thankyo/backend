@@ -43,8 +43,16 @@ jobs:
       - store_test_results:
           path: target/test-reports
 
-      - deploy:
-          name: Publish to Docker Hub
+      - run:
+          name: Create local docker image
           command:
-              docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASSWORD}
-              sbt docker:publish
+            sbt docker:publishLocal
+
+      - run:
+          name: Login to Docker
+          command: docker login -u $DOCKER_USER -p $DOCKER_PASS
+
+
+      - run:
+          name: Publish Docker image
+          command: docker push loveit/backend

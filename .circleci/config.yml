@@ -48,9 +48,3 @@ jobs:
           command:
               docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASSWORD}
               sbt docker:publish
-
-workflows:
-  version: 2
-  build_and_deploy
-    jobs
-      - build

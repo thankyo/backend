@@ -59,7 +59,7 @@ class ProjectController @Inject()(
       map(projects => Ok(Json.toJson(projects)))
   })
 
-  def getProject(project: ProjectID) = silhouette.SecuredAction.async(implicit req => {
+  def getProject(project: ProjectID) = silhouette.UnsecuredAction.async(implicit req => {
     lookupService.findById(project).map {
       case Some(prj) => Ok(prj)
       case None => NotFound

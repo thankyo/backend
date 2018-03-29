@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.controller
 import javax.inject.Inject
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.error.{PaymentException, SelfLovingForbiddenException}
-import com.clemble.loveit.common.model.{Resource, Tag, UserID}
+import com.clemble.loveit.common.model.{ProjectID, Resource, Tag, UserID}
 import com.clemble.loveit.common.util.AuthEnv
 import com.clemble.loveit.thank.model.{OpenGraphObject, Post, Project}
 import com.clemble.loveit.thank.service.PostService
@@ -52,7 +52,7 @@ class GraphController @Inject()(
     service.findByAuthor(idOrMe(author)).map(posts => Ok(posts))
   })
 
-  def searchByProject(project: UserID) = silhouette.SecuredAction.async(implicit req => {
+  def searchByProject(project: ProjectID) = silhouette.UnsecuredAction.async(implicit req => {
     service.findByProject(project).map(posts => Ok(posts))
   })
 

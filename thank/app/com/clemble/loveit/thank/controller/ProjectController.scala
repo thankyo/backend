@@ -45,12 +45,12 @@ class ProjectController @Inject()(
 
   def getProjectFeed(id: ProjectID) = silhouette.SecuredAction.async(implicit req => {
     val requester = req.identity.id
-    lookupService.findById(id).flatMap(_ match {
-      case Some(project) if (project.user == requester) =>
+    lookupService.findById(id).flatMap {
+      case Some(project) if project.user == requester =>
         feedService.refresh(project).map(Ok(_))
       case _ =>
         Future.successful(BadRequest)
-    })
+    }
   })
 
   def getSupportedByUser(supporter: UserID) = silhouette.SecuredAction.async(implicit req => {
@@ -60,10 +60,10 @@ class ProjectController @Inject()(
   })
 
   def getProject(project: ProjectID) = silhouette.SecuredAction.async(implicit req => {
-    lookupService.findById(project).map(_ match {
+    lookupService.findById(project).map {
       case Some(prj) => Ok(prj)
       case None => NotFound
-    })
+    }
   })
 
   def enrich(res: Resource) = silhouette.SecuredAction.async(implicit req => {

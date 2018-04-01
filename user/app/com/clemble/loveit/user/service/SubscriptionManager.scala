@@ -61,15 +61,15 @@ case class MailgunSubscriptionManager @Inject()(apiKey: String, ws: WSClient, ev
       withAuth("api", apiKey, BASIC).
       post(data).
       map(res => {
-        val isValid = 200 <= res.status && res.status < 400
-        if (!isValid)
+        val isStatusValid = 200 <= res.status && res.status < 400
+        if (!isStatusValid && !res.body.contains("Address already exists")) {
           logger.error(s"Failed to add user, because of ${res.body}")
-        isValid
+          false
+        } else {
+          true
+        }
       }).
       recover({
-        case alreadyExists if (alreadyExists.getMessage.contains("Address already exists")) =>
-          logger.info("Ignoring already exists error");
-          true
         case t =>
           logger.error(s"Failed to add to ${list}", t)
           false

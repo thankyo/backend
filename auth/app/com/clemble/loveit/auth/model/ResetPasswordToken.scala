@@ -13,14 +13,14 @@ import play.api.libs.json.{Json, OFormat}
  * @param token The unique token ID.
  * @param user The unique ID of the user the token is associated with.
  */
-case class AuthToken(
+case class ResetPasswordToken(
                       token: UUID,
                       user: UserID,
                       created: LocalDateTime = LocalDateTime.now()
 ) extends CreatedAware with UserAware
 
-object AuthToken {
+object ResetPasswordToken {
 
-  implicit val jsonFormat: OFormat[AuthToken] = Json.format[AuthToken]
+  implicit val jsonFormat: OFormat[ResetPasswordToken] = Json.format[ResetPasswordToken]
 
 }

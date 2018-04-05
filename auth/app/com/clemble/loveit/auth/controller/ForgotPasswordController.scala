@@ -1,18 +1,17 @@
 package com.clemble.loveit.auth.controller
 
-import javax.inject.Inject
-
-import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.user.service.UserService
-import com.mohiva.play.silhouette.api._
 import com.clemble.loveit.auth.model.requests.ForgotPasswordRequest
-import com.clemble.loveit.auth.service.AuthTokenService
+import com.clemble.loveit.auth.service.{ResetPasswordTokenService, EmailService}
 import com.clemble.loveit.auth.views.html.emails.resetPassword
 import com.clemble.loveit.auth.views.txt.emails
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.error.FieldValidationError
+import com.clemble.loveit.common.util.AuthEnv
+import com.clemble.loveit.user.service.UserService
+import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
-import org.matthicks.mailgun.{EmailAddress, Mailgun, Message}
+import javax.inject.Inject
+import org.matthicks.mailgun.{EmailAddress, Message}
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.JsBoolean
 import play.api.mvc._
@@ -26,19 +25,18 @@ import scala.concurrent.{ExecutionContext, Future}
   * @param silhouette       The Silhouette stack.
   * @param userService      The user service implementation.
   * @param authTokenService The auth token service implementation.
-  * @param mailerClient     The mailer client.
   * @param ex               The execution context.
   */
 class ForgotPasswordController @Inject()(
-                                          components: ControllerComponents,
-                                          silhouette: Silhouette[AuthEnv],
-                                          userService: UserService,
-                                          authTokenService: AuthTokenService,
-                                          mailerClient: Mailgun
-                                        )(
-                                          implicit
-                                          ex: ExecutionContext
-                                        ) extends LoveItController(components) with I18nSupport {
+  components: ControllerComponents,
+  silhouette: Silhouette[AuthEnv],
+  userService: UserService,
+  authTokenService: ResetPasswordTokenService,
+  emailService: EmailService
+)(
+  implicit
+  ex: ExecutionContext
+) extends LoveItController(components) with I18nSupport {
 
   /**
     * Sends an email with password reset instructions.
@@ -53,31 +51,23 @@ class ForgotPasswordController @Inject()(
       val loginInfo = request.body.toLoginInfo
 
       for {
-        user <- userService.retrieve(loginInfo).flatMap(_ match {
+        user <- userService.retrieve(loginInfo).flatMap({
           case Some(user) => Future.successful(user)
           case None => userService.
             findByEmail(request.body.email).
-            map(_ match {
+            map({
               case Some(user) =>
                 import user.profiles._
-                throw FieldValidationError("email", s"You are registered through FB ${facebook.isDefined}, Google ${google.isDefined}, Credentials ${credentials.isDefined}")
+                val regStr = List(facebook.map(_ => "FB"), google.map(_ => "Google"), credentials.map(_ => "Credentials")).flatten.mkString(", ")
+                throw FieldValidationError("email", s"You are registered through ${regStr}")
               case None =>
                 throw new IdentityNotFoundException(s"No user with ${loginInfo.providerKey}")
             })
         })
         authToken <- authTokenService.create(user.id)
+        emailSent <- emailService.sendResetPasswordEmail(user, authToken)
       } yield {
-        val url = s"https://loveit.tips/auth/reset/${authToken.token}"
-        mailerClient.send(
-          Message.simple(
-            subject = Messages("email.reset.password.subject"),
-            from = EmailAddress(Messages("email.from"), "Love it"),
-            to = EmailAddress(loginInfo.providerKey),
-            text = emails.resetPassword(user, url).body,
-            html = resetPassword(user, url).body
-          )
-        )
-        Ok(JsBoolean(true))
+        Ok(JsBoolean(emailSent))
       }
     }
   })

@@ -3,8 +3,8 @@ package com.clemble.loveit.auth.service
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
-import com.clemble.loveit.auth.model.AuthToken
-import com.clemble.loveit.auth.service.repository.AuthTokenRepository
+import com.clemble.loveit.auth.model.ResetPasswordToken
+import com.clemble.loveit.auth.service.repository.ResetPasswordTokenRepository
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.UserID
 
@@ -18,27 +18,27 @@ import scala.language.postfixOps
   * @param ex   The execution context.
   */
 @Singleton
-case class SimpleAuthTokenService @Inject()(
-                                             repo: AuthTokenRepository
+case class SimpleResetPasswordTokenService @Inject()(
+                                             repo: ResetPasswordTokenRepository
                                            )(
                                              implicit
                                              ex: ExecutionContext
-                                           ) extends AuthTokenService {
+                                           ) extends ResetPasswordTokenService {
 
   /**
     * Creates a new auth token and saves it in the backing store.
     *
-    * @param userID The user ID for which the token should be created.
+    * @param user The user ID for which the token should be created.
     * @return The saved auth token.
     */
-  def create(userID: UserID): Future[AuthToken] = {
-    val token = AuthToken(UUID.randomUUID(), userID)
+  def create(user: UserID): Future[ResetPasswordToken] = {
+    val token = ResetPasswordToken(UUID.randomUUID(), user)
     repo.
       save(token).
       recoverWith({
         case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
           for {
-            remove <- repo.removeByUser(userID) if (remove)
+            _ <- repo.removeByUser(user)
             savedToken <- repo.save(token)
           } yield {
             savedToken
@@ -52,7 +52,7 @@ case class SimpleAuthTokenService @Inject()(
     * @param token The token ID to validate.
     * @return The token if it's valid, None otherwise.
     */
-  def validate(token: UUID): Future[Option[AuthToken]] = {
+  def validate(token: UUID): Future[Option[ResetPasswordToken]] = {
     val findRes = repo.find(token)
     repo.remove(token)
     findRes

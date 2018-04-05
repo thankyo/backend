@@ -43,7 +43,7 @@ class GraphController @Inject()(
       .map(Ok(_))
   })
 
-  def searchByTags() = silhouette.SecuredAction.async(implicit req => {
+  def searchByTags() = silhouette.UnsecuredAction.async(implicit req => {
     val tags: Set[Tag] = req.queryString.get("tags").map(_.toSet).getOrElse(Set.empty[Tag])
     service.findByTags(tags).map(posts => Ok(posts))
   })

@@ -3,8 +3,8 @@ package com.clemble.loveit.auth.service.repository.mongo
 import java.util.UUID
 import javax.inject.{Inject, Named, Singleton}
 
-import com.clemble.loveit.auth.model.AuthToken
-import com.clemble.loveit.auth.service.repository.AuthTokenRepository
+import com.clemble.loveit.auth.model.ResetPasswordToken
+import com.clemble.loveit.auth.service.repository.ResetPasswordTokenRepository
 import com.clemble.loveit.common.model.UserID
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import play.api.libs.json._
@@ -16,12 +16,12 @@ import reactivemongo.play.json.collection.JSONCollection
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * Give access to the [[AuthToken]] object.
+ * Give access to the [[ResetPasswordToken]] object.
  */
 @Singleton
-case class MongoAuthTokenRepository @Inject()(@Named("authToken") collection: JSONCollection)(implicit ec: ExecutionContext) extends AuthTokenRepository {
+case class MongoResetPasswordTokenRepository @Inject()(@Named("resetToken") collection: JSONCollection)(implicit ec: ExecutionContext) extends ResetPasswordTokenRepository {
 
-  MongoAuthTokenRepository.ensureMeta(collection)
+  MongoResetPasswordTokenRepository.ensureMeta(collection)
 
   /**
    * Finds a token by its ID.
@@ -29,9 +29,9 @@ case class MongoAuthTokenRepository @Inject()(@Named("authToken") collection: JS
    * @param token The unique token ID.
    * @return The found token or None if no token for the given ID could be found.
    */
-  def find(token: UUID): Future[Option[AuthToken]] = {
+  def find(token: UUID): Future[Option[ResetPasswordToken]] = {
     val selector = Json.obj("token" -> token)
-    collection.find(selector).one[AuthToken]
+    collection.find(selector).one[ResetPasswordToken]
   }
 
   /**
@@ -40,8 +40,8 @@ case class MongoAuthTokenRepository @Inject()(@Named("authToken") collection: JS
    * @param token The token to save.
    * @return The saved token.
    */
-  def save(token: AuthToken): Future[AuthToken] = {
-    MongoSafeUtils.safe(token, collection.insert[AuthToken](token))
+  def save(token: ResetPasswordToken): Future[ResetPasswordToken] = {
+    MongoSafeUtils.safe(token, collection.insert[ResetPasswordToken](token))
   }
 
   /**
@@ -55,9 +55,9 @@ case class MongoAuthTokenRepository @Inject()(@Named("authToken") collection: JS
     MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
   }
 
-  override def removeByUser(user: UserID) = {
+  override def removeByUser(user: UserID): Future[Boolean] = {
     val selector = Json.obj("user" -> user)
-    MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
+    collection.remove(selector).map(_.ok)
   }
 
 }
@@ -65,7 +65,7 @@ case class MongoAuthTokenRepository @Inject()(@Named("authToken") collection: JS
 /**
  * The companion object.
  */
-object MongoAuthTokenRepository {
+object MongoResetPasswordTokenRepository {
 
   def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
     ensureIndexes(collection)

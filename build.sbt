@@ -16,7 +16,7 @@ val scalaGuiceVersion = "4.2.0"
 val elastic4sVersion = "6.1.3"
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.5",
   libraryDependencies ++= Seq(
     "net.codingwell" %% "scala-guice" % scalaGuiceVersion
   )

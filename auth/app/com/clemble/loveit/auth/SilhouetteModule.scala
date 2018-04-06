@@ -1,8 +1,7 @@
 package com.clemble.loveit.auth
 
 import javax.inject.Singleton
-
-import com.clemble.loveit.auth.service.{FacebookProviderWithDOB, GoogleRefreshableProvider, RefreshableOAuth2Provider}
+import com.clemble.loveit.auth.service.{FacebookProviderWithDOB, GoogleRefreshableProvider, RefreshableOAuth2Provider, TumblrProvider}
 import com.clemble.loveit.auth.service.repository.mongo.MongoAuthInfoRepository
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.util.AuthEnv
@@ -17,6 +16,8 @@ import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings, JcaSigner, JcaSignerSettings}
 import com.mohiva.play.silhouette.impl.authenticators._
+import com.mohiva.play.silhouette.impl.providers.oauth1.secrets.{CookieSecretProvider, CookieSecretSettings}
+import com.mohiva.play.silhouette.impl.providers.oauth1.services.PlayOAuth1Service
 import com.mohiva.play.silhouette.impl.providers.{SocialStateHandler, _}
 import com.mohiva.play.silhouette.impl.providers.oauth2._
 import com.mohiva.play.silhouette.impl.services._
@@ -129,6 +130,31 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
     )
   }
 
+
+  @Provides @Named("oauth1-token-secret-signer")
+  def oAuth1TokenSecretSigner(): Signer = {
+    val config = conf.underlying.as[JcaSignerSettings]("silhouette.oauth1TokenSecretProvider.signer")
+
+    new JcaSigner(config)
+  }
+
+  @Provides @Named("oauth1-token-secret-crypter")
+  def oAuth1TokenSecretCrypter(): Crypter = {
+    val config = conf.underlying.as[JcaCrypterSettings]("silhouette.oauth1TokenSecretProvider.crypter")
+
+    new JcaCrypter(config)
+  }
+
+  @Provides
+  def oAuth1TokenSecretProvider(
+    @Named("oauth1-token-secret-signer") signer: Signer,
+    @Named("oauth1-token-secret-crypter") crypter: Crypter,
+    clock: Clock): OAuth1TokenSecretProvider = {
+
+    val settings = conf.underlying.as[CookieSecretSettings]("silhouette.oauth1TokenSecretProvider")
+    new CookieSecretProvider(settings, signer, crypter, clock)
+  }
+
   /**
    * Provides the social provider registry.
    *
@@ -138,24 +164,25 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   @Provides
   def provideSocialProviderRegistry(
     facebookProvider: FacebookProviderWithDOB,
-    googleProvider: GoogleProvider
+    googleProvider: GoogleProvider,
+    tumblrProvider: TumblrProvider
   ): SocialProviderRegistry = {
 
     SocialProviderRegistry(Seq(
       facebookProvider,
-      googleProvider
+      googleProvider,
+      tumblrProvider
     ))
   }
 
   /**
    * Provides the signer for the CSRF state item handler.
-   *
-   * @param configuration The Play configuration.
+   * .
    * @return The signer for the CSRF state item handler.
    */
   @Provides @Named("csrf-state-item-signer")
-  def provideCSRFStateItemSigner(configuration: Configuration): Signer = {
-    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.csrfStateItemHandler.signer")
+  def provideCSRFStateItemSigner(): Signer = {
+    val config = conf.underlying.as[JcaSignerSettings]("silhouette.csrfStateItemHandler.signer")
 
     new JcaSigner(config)
   }
@@ -163,12 +190,11 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   /**
    * Provides the signer for the social state handler.
    *
-   * @param configuration The Play configuration.
    * @return The signer for the social state handler.
    */
   @Provides @Named("social-state-signer")
-  def provideSocialStateSigner(configuration: Configuration): Signer = {
-    val config = configuration.underlying.as[JcaSignerSettings]("silhouette.socialStateHandler.signer")
+  def provideSocialStateSigner(): Signer = {
+    val config = conf.underlying.as[JcaSignerSettings]("silhouette.socialStateHandler.signer")
 
     new JcaSigner(config)
   }
@@ -214,36 +240,36 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
     new DefaultSocialStateHandler(Set.empty, signer)
   }
 
-  /**
-   * Provides the Facebook provider.
-   *
-   * @param httpLayer The HTTP layer implementation.
-   * @param socialStateHandler The social state handler implementation.
-   * @param configuration The Play configuration.
-   * @return The Facebook provider.
-   */
   @Provides
-  def provideFacebookProvider(
+  def facebookProvider(
     httpLayer: HTTPLayer,
-    socialStateHandler: SocialStateHandler,
-    configuration: Configuration)
+    socialStateHandler: SocialStateHandler)
     ( implicit ec: ExecutionContext): FacebookProviderWithDOB = {
 
     new FacebookProviderWithDOB(
       httpLayer,
       socialStateHandler,
-      configuration.underlying.as[OAuth2Settings]("silhouette.facebook")
+      conf.underlying.as[OAuth2Settings]("silhouette.facebook")
     )
   }
 
   @Provides
-  def googleProvider(httpLayer: HTTPLayer,
-                     socialStateHandler: SocialStateHandler,
-                     configuration: Configuration): GoogleProvider with RefreshableOAuth2Provider = {
+  def googleProvider(httpLayer: HTTPLayer, socialStateHandler: SocialStateHandler): GoogleProvider with RefreshableOAuth2Provider = {
     new GoogleProvider(
       httpLayer,
       socialStateHandler,
-      configuration.underlying.as[OAuth2Settings]("silhouette.google")
+      conf.underlying.as[OAuth2Settings]("silhouette.google")
     ) with GoogleRefreshableProvider
+  }
+
+  @Provides
+  def tumblrProvider(httpLayer: HTTPLayer, tokenSecretProvider: OAuth1TokenSecretProvider): TumblrProvider = {
+    val settings = conf.underlying.as[OAuth1Settings]("silhouette.tumblr")
+    new TumblrProvider(
+      httpLayer,
+      new PlayOAuth1Service(settings),
+      tokenSecretProvider,
+      settings
+    )
   }
 }

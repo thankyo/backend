@@ -1,20 +1,20 @@
 package com.clemble.loveit.dev.service
 
-import javax.inject.{Inject, Singleton}
-
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
+import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.EventBusManager
+import com.clemble.loveit.dev.service.DevStripeUtils._
 import com.clemble.loveit.payment.service.ChargeAccountService
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
-import DevStripeUtils._
 import scala.util.Random
 
 @Singleton
-case class DevSupportersInitializer @Inject()(authService: AuthService, eventBusManager: EventBusManager, accountService: ChargeAccountService, implicit val ec: ExecutionContext)  {
+case class DevSupportersInitializer @Inject()(authService: AuthService, eventBusManager: EventBusManager, accountService: ChargeAccountService, implicit val ec: ExecutionContext) {
 
   def initialize(requests: Seq[RegistrationRequest]): Future[Seq[UserID]] = {
     ensureUserExist(requests)
@@ -31,12 +31,15 @@ case class DevSupportersInitializer @Inject()(authService: AuthService, eventBus
         case UserLoggedIn(user, _) =>
           eventBusManager.publish(LoginEvent(user, null))
           None
+      }).recover({
+        case _: FieldValidationError => None
       })
     }
     val fUsers = Future.sequence(supporters).map(_.flatten)
 
     fUsers.flatMap(users => {
-      val usersWithCard = users//.filter(_ => Random.nextBoolean())
+      val usersWithCard = users
+      //.filter(_ => Random.nextBoolean())
       val fCardTask = Future.sequence(
         usersWithCard.map(user => accountService.updateChargeAccount(user, someValidStripeToken()))
       )
@@ -44,7 +47,7 @@ case class DevSupportersInitializer @Inject()(authService: AuthService, eventBus
       val usersWithoutCard = users.filterNot(usersWithCard.contains)
       val usersWithInvalidCards = usersWithoutCard.filter(_ => Random.nextBoolean())
       val fInvalidCardsTask = Future.sequence(
-        usersWithInvalidCards.map(user => accountService.updateChargeAccount(user, someValidStripeToken()).recover({ case _ => true}))
+        usersWithInvalidCards.map(user => accountService.updateChargeAccount(user, someValidStripeToken()).recover({ case _ => true }))
       )
 
       Future.sequence(List(fCardTask, fInvalidCardsTask)).map(_ => users)

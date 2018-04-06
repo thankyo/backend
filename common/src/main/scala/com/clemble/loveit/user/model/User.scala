@@ -2,6 +2,7 @@ package com.clemble.loveit.user.model
 
 import java.time.{LocalDate, LocalDateTime}
 
+import com.clemble.loveit.auth.service.TumblrProvider
 import com.clemble.loveit.common.error.{FieldValidationError, UserException}
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.WriteableUtils
@@ -14,20 +15,24 @@ import play.api.libs.json.{Json, OFormat}
 case class UserSocialConnections(
   credentials: Option[String] = None,
   facebook: Option[String] = None,
-  google: Option[String] = None
+  google: Option[String] = None,
+  tumblr: Option[String] = None
 ) {
 
-  def asGoogleLogin() = google.map(LoginInfo(GoogleProvider.ID, _))
+  def asGoogleLogin(): Option[LoginInfo] = google.map(LoginInfo(GoogleProvider.ID, _))
 
-  def asFacebookLogin() = facebook.map(LoginInfo(FacebookProvider.ID, _))
+  def asFacebookLogin(): Option[LoginInfo] = facebook.map(LoginInfo(FacebookProvider.ID, _))
 
-  def asCredentialsLogin() = credentials.map(LoginInfo(CredentialsProvider.ID, _))
+  def asCredentialsLogin(): Option[LoginInfo] = credentials.map(LoginInfo(CredentialsProvider.ID, _))
+
+  def asTumblrLogin(): Option[LoginInfo] = tumblr.map(LoginInfo(TumblrProvider.ID, _))
 
   def get(provider: String): Option[LoginInfo] = {
     provider match {
       case GoogleProvider.ID => asGoogleLogin()
       case FacebookProvider.ID => asFacebookLogin()
       case CredentialsProvider.ID => asCredentialsLogin()
+      case TumblrProvider.ID => asTumblrLogin()
       case _ => None
     }
   }
@@ -37,6 +42,7 @@ case class UserSocialConnections(
       case FacebookProvider.ID => copy(facebook = Some(loginInfo.providerKey))
       case GoogleProvider.ID => copy(google = Some(loginInfo.providerKey))
       case CredentialsProvider.ID => copy(credentials = Some(loginInfo.providerKey))
+      case TumblrProvider.ID => copy(tumblr = Some(loginInfo.providerKey))
     }
   }
 
@@ -45,6 +51,7 @@ case class UserSocialConnections(
       case GoogleProvider.ID => copy(google = None)
       case FacebookProvider.ID => copy(facebook = None)
       case CredentialsProvider.ID => copy(credentials = None)
+      case TumblrProvider.ID => copy(tumblr = None)
       case _ => this
     }
   }

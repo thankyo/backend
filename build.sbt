@@ -30,6 +30,8 @@ lazy val common = (project in file("./common")).
   settings(commonSettings).
   settings(
     libraryDependencies ++= Seq(
+      ws,
+
       "net.minidev" % "json-smart" % "2.3",
       "com.mohiva" %% "play-silhouette" % silhouetteVersion excludeAll (
         ExclusionRule(organization = "com.typesafe.play")

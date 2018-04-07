@@ -37,7 +37,7 @@ lazy val common = (project in file("./common")).
         ExclusionRule(organization = "com.typesafe.play")
       ),
 
-      "com.typesafe.play" %% "play" % "2.6.12" % "provided",
+      "com.typesafe.play" %% "play" % "2.6.13" % "provided",
 
       "org.reactivemongo" %% "reactivemongo" % reactMongoVersion,
       "org.reactivemongo" %% "play2-reactivemongo" % s"${reactMongoVersion}-play26",

@@ -126,9 +126,9 @@ case class SimpleAuthService @Inject()(
     }
   }
 
-  override def findAuthInfo(loginInfo: LoginInfo): Future[Option[OAuth2Info]] = {
-    authInfoRepository.find[OAuth2Info](loginInfo).flatMap({
-      case Some(info) if info.refreshToken.isDefined && AuthInfoUtils.hasExpired(info) => {
+  override def findAuthInfo(loginInfo: LoginInfo): Future[Option[AuthInfo]] = {
+    authInfoRepository.find[AuthInfo](loginInfo).flatMap({
+      case Some(info: OAuth2Info) if info.refreshToken.isDefined && AuthInfoUtils.hasExpired(info) => {
         val providerOpt = socialProviderRegistry.get[SocialProvider with RefreshableOAuth2Provider](loginInfo.providerID)
         providerOpt match {
           case Some(provider: RefreshableOAuth2Provider) =>

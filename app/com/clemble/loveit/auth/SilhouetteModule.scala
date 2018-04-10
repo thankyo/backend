@@ -149,7 +149,7 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   def oAuth1TokenSecretProvider(
     @Named("oauth1-token-secret-signer") signer: Signer,
     @Named("oauth1-token-secret-crypter") crypter: Crypter,
-    clock: Clock): OAuth1TokenSecretProvider = {
+    clock: Clock): CookieSecretProvider = {
 
     val settings = conf.underlying.as[CookieSecretSettings]("silhouette.oauth1TokenSecretProvider")
     new CookieSecretProvider(settings, signer, crypter, clock)
@@ -263,11 +263,11 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   }
 
   @Provides
-  def tumblrProvider(httpLayer: HTTPLayer, tokenSecretProvider: OAuth1TokenSecretProvider): TumblrProvider = {
+  def tumblrProvider(httpLayer: HTTPLayer, tokenSecretProvider: CookieSecretProvider): TumblrProvider = {
     val settings = conf.underlying.as[OAuth1Settings]("silhouette.tumblr")
     new TumblrProvider(
       httpLayer,
-      new AnotherPlayOAuth1Service(settings),
+      new PlayOAuth1Service(settings),
       tokenSecretProvider,
       settings
     )

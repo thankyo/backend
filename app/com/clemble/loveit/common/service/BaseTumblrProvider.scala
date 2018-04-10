@@ -64,12 +64,10 @@ class TumblrProfileParser extends SocialProfileParser[JsValue, CommonSocialProfi
     * @return The social profile from given result.
     */
   override def parse(json: JsValue, authInfo: OAuth1Info) = Future.successful {
-    val userID = (json \ "id").as[Long]
-    val fullName = (json \ "name").asOpt[String]
+    val name = (json \ "response" \ "user" \ "name").as[String]
 
     CommonSocialProfile(
-      loginInfo = LoginInfo(ID, userID.toString),
-      fullName = fullName
+      loginInfo = LoginInfo(ID, name)
     )
   }
 }

@@ -5,16 +5,19 @@ import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.service.TumblrProvider
 import com.clemble.loveit.common.util.AuthEnv
+import com.github.scribejava.apis.TumblrApi
+import com.github.scribejava.core.model.{OAuth1AccessToken, OAuth1RequestToken, OAuthAsyncRequestCallback}
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
+import com.mohiva.play.silhouette.api.util.ExtractableRequest
 import com.mohiva.play.silhouette.impl.providers._
+import com.mohiva.play.silhouette.impl.providers.oauth1.secrets.{CookieSecret, CookieSecretProvider}
 import javax.inject.{Inject, Singleton}
-import play.api.libs.oauth._
-import play.api.libs.ws.{EmptyBody, WSClient}
+import org.joda.time.DateTime
+import play.api.libs.ws.WSClient
 import play.api.mvc._
-import scalaj.http.{Http, Token}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 /**
   * The social auth controller.
@@ -27,6 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SocialAuthController @Inject()(
   wsClient: WSClient,
   authService: AuthService,
+  tokenSecretProvider: CookieSecretProvider,
   authInfoRepository: AuthInfoRepository,
   socialProviderRegistry: SocialProviderRegistry,
   components: ControllerComponents,
@@ -47,44 +51,53 @@ class SocialAuthController @Inject()(
       val providerOpt = socialProviderRegistry.get[SocialProvider](provider)
       val user = cookieUtils.readUser(req)
       providerOpt match {
-        case Some(p: TumblrProvider) if (req.queryString.isEmpty) =>
+        case Some(p: TumblrProvider) =>
           val settings = p.settings
-          val consumer = Token(settings.consumerKey, settings.consumerSecret)
-          val response = Http(settings.requestTokenURL)
-            .postForm(Seq("oauth_callback" -> settings.callbackURL))
-            .oauth(consumer)
-            .asString
+          import com.github.scribejava.core.builder.ServiceBuilder
+          val service = new ServiceBuilder(settings.consumerKey)
+            .apiSecret(settings.consumerSecret)
+            .callback(settings.callbackURL)
+            .build(TumblrApi.instance())
 
-          val consumerKey = ConsumerKey(settings.consumerKey, settings.consumerSecret)
-          val token = RequestToken(null, null)
-          val oAuthCalculator = OAuthCalculator(consumerKey, token)
 
-          wsClient.url(settings.requestTokenURL)
-            .sign(oAuthCalculator)
-            .withHttpHeaders("Content-Length" -> "0")
-            .post(Map.empty[String, String])
-            .map(res => {
-              println(response)
-              println(res.body)
-            }).map(_ => {
-              BadRequest
+          if (req.queryString.isEmpty) {
+            val fRequestToken = Promise[OAuth1RequestToken]()
+
+            service.getRequestTokenAsync(new OAuthAsyncRequestCallback[OAuth1RequestToken] {
+              override def onCompleted(response: OAuth1RequestToken): Unit = fRequestToken success response
+              override def onThrowable(t: Throwable): Unit = fRequestToken failure t
             })
 
-//          val oauth = OAuth(ServiceInfo(
-//            settings.requestTokenURL,
-//            settings.accessTokenURL,
-//            settings.authorizationURL, consumerKey),
-//            true
-//          )
-//
-//          oauth.retrieveRequestToken(settings.callbackURL) match {
-//            case Right(t) =>
-//              // We received the unauthorized tokens in the OAuth object - store it before we proceed
-//              Redirect(oauth.redirectUrl(t.token))
-//            case Left(e) =>
-//              throw e
-//          }
-        //Future.successful(Redirect(s"${p.settings.authorizationURL}?oauth_token=${response.body.key}"))
+            for {
+              token <- fRequestToken.future
+              secret <- tokenSecretProvider.build(OAuth1Info(token.getToken, token.getTokenSecret))
+            } yield {
+              val redirect = Redirect(service.getAuthorizationUrl(token))
+              tokenSecretProvider.publish(redirect, secret)
+            }
+          } else {
+            val extrReq: ExtractableRequest[_] = req
+            val token = extrReq.extractString(OAuth1Provider.OAuthToken)
+            val verifier = extrReq.extractString(OAuth1Provider.OAuthVerifier)
+
+            val fAccessToken = Promise[OAuth1AccessToken]()
+            tokenSecretProvider.retrieve.map(tokenSecret => {
+              service.getAccessTokenAsync(new OAuth1RequestToken(token.get, tokenSecret.value), verifier.get, new OAuthAsyncRequestCallback[OAuth1AccessToken] {
+                override def onCompleted(accessToken: OAuth1AccessToken): Unit = {
+                  fAccessToken success accessToken
+                }
+                override def onThrowable(t: Throwable): Unit = {
+                  fAccessToken failure t
+                }
+              })
+            })
+
+            fAccessToken.future.flatMap(accessToken => {
+              val authInfo = OAuth1Info(accessToken.getToken, accessToken.getTokenSecret)
+              val fSocialReg = authService.registerSocial(p)(authInfo, user)
+              fSocialReg.flatMap(AuthUtils.authResponse)
+            })
+          }
         case Some(p: SocialProvider) =>
           p.authenticate().flatMap({
             case Left(redirect) =>

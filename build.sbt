@@ -63,9 +63,11 @@ libraryDependencies ++= Seq(
   // auth dependencies
   // ws,
 
-  "org.scalaj" %% "scalaj-http" % "2.3.0",
+  "com.github.scribejava" % "scribejava-apis" % "5.3.0",
 
   "org.matthicks" %% "mailgun4s" % "1.0.9",
+
+  "com.typesafe.play" %% "play-json-joda" % "2.6.9",
 
   "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,

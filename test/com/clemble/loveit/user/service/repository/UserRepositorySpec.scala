@@ -1,7 +1,7 @@
 package com.clemble.loveit.user.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.user.model.User
+import com.clemble.loveit.common.model.User
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.payment.model.ChargeAccount
 import com.clemble.loveit.payment.service.repository.{ChargeAccountRepository}

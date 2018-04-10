@@ -1,14 +1,14 @@
 package com.clemble.loveit.dev.service
 
 import java.time.YearMonth
-import javax.inject.Inject
 
+import javax.inject.Inject
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Post, ProjectConstructor, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.EOMPaymentService
-import com.clemble.loveit.thank.model.{Post, Project, ProjectConstructor}
+import com.clemble.loveit.common.model.{Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.PostService
 
 import scala.concurrent.{ExecutionContext, Future}

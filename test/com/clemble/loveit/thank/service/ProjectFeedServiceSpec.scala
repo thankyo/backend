@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ThankSpecification
-import com.clemble.loveit.thank.model.Project
+import com.clemble.loveit.common.model.Project
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 

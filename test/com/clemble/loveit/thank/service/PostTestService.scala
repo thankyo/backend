@@ -1,8 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.Resource
-import com.clemble.loveit.thank.model.{OpenGraphObject, Post}
+import com.clemble.loveit.common.model.{OpenGraphObject, Post, Resource}
 
 trait PostTestService extends ServiceSpec {
 

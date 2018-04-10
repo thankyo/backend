@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.issues
 
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.thank.model.{OpenGraphObject, Post, Project}
+import com.clemble.loveit.common.model.Project
 import com.clemble.loveit.thank.service._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner

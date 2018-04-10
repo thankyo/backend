@@ -1,8 +1,7 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{OpenGraphObject, Project, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
-import com.clemble.loveit.thank.model.{OpenGraphObject, Project}
 import com.clemble.loveit.thank.service.repository.PostRepository
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv

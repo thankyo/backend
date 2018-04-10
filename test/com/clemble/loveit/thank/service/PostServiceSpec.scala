@@ -1,9 +1,8 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.error.{PaymentException, ResourceException, SelfLovingForbiddenException}
-import com.clemble.loveit.common.model.{Amount, Resource, UserID}
+import com.clemble.loveit.common.model.{Amount, OpenGraphObject, Post, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
-import com.clemble.loveit.thank.model.{OpenGraphObject, Post}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner

@@ -7,12 +7,11 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.clemble.loveit.auth.model.AuthResponse
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{OpenGraphObject, Project, Resource, UserID}
 import com.clemble.loveit.payment.model.PendingTransaction
-import com.clemble.loveit.thank.model.{OpenGraphObject, Project}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
-import com.clemble.loveit.user.model.User.socialProfileJsonFormat
-import com.clemble.loveit.user.model._
+import com.clemble.loveit.common.model.User.socialProfileJsonFormat
+import com.clemble.loveit.common.model._
 import com.nimbusds.jose.JWSObject
 import play.api.http.Writeable
 import play.api.libs.json.{Json, Reads}

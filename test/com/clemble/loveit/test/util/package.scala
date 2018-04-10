@@ -9,7 +9,7 @@ import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.util.{IDGenerator, LoveItCurrency}
 import com.clemble.loveit.payment.model._
 import com.clemble.loveit.thank.model._
-import com.clemble.loveit.user.model.User
+import com.clemble.loveit.common.model.User
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import org.apache.commons.lang3.RandomStringUtils

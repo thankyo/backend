@@ -1,12 +1,11 @@
 package com.clemble.loveit.dev.service
 
 import javax.inject.{Inject, Singleton}
-
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
-import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.model.{Post, Project, ProjectConstructor, UserID}
 import com.clemble.loveit.common.util.EventBusManager
-import com.clemble.loveit.thank.model.{Post, Project, ProjectConstructor}
+import com.clemble.loveit.common.model.{Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectLookupService, ProjectService}
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}

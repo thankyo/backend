@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.thank.model.{Post, Project, Thank}
+import com.clemble.loveit.common.model.Thank
 import com.clemble.loveit.thank.service.PostService
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv

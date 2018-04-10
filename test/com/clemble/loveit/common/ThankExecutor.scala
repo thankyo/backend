@@ -1,9 +1,8 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{Resource, UserID}
-import com.clemble.loveit.thank.model.Project
-import com.clemble.loveit.user.model.User
+import com.clemble.loveit.common.model.{Project, Resource, UserID}
+import com.clemble.loveit.common.model.User
 
 trait ThankExecutor extends ThankSpecification {
 

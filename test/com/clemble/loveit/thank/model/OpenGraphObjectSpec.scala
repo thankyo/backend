@@ -7,7 +7,7 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class OpenGraphObjectSpec extends ThankSpecification {
 
-  import OpenGraphObject._
+  import com.clemble.loveit.common.model.OpenGraphObject._
 
   "ROOT of url extraction" in {
     getRootUrl("https://example.com/some/new") shouldEqual "https://example.com/"

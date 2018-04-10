@@ -2,16 +2,14 @@ package com.clemble.loveit.payment.controller
 
 
 import com.clemble.loveit.common.ControllerSpec
-import com.clemble.loveit.common.model._
+import com.clemble.loveit.common.model.{Project, _}
 import com.clemble.loveit.payment.PaymentTestExecutor
 import com.clemble.loveit.payment.model.{ChargeAccount, EOMCharge, EOMPayout, PendingTransaction, StripeCustomerToken}
 import com.clemble.loveit.payment.service.PendingTransactionService
 import com.clemble.loveit.payment.service.repository.PaymentLimitExecutor
-import com.clemble.loveit.thank.model.Project
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
-
 import com.clemble.loveit.dev.service.DevStripeUtils._
 
 trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecutor with PaymentLimitExecutor {

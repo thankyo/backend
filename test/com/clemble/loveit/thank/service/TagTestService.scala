@@ -1,8 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.{Resource, Tag}
-import com.clemble.loveit.thank.model.Project
+import com.clemble.loveit.common.model.{Project, Resource, Tag}
 import com.clemble.loveit.thank.service.repository.{PostRepository, ProjectRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -1,8 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.thank.model.Project
+import com.clemble.loveit.common.model.{Project, UserID}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 
 trait ProjectTestService {

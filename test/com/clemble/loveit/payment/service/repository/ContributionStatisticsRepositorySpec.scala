@@ -1,12 +1,11 @@
 package com.clemble.loveit.payment.service.repository
 
 import com.clemble.loveit.common.{ControllerSpec, RepositorySpec, ServiceSpec, ThankScenario}
-import com.clemble.loveit.common.model.{Resource, UserID}
+import com.clemble.loveit.common.model.{Project, Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.payment.controller.PaymentControllerTestExecutor
 import com.clemble.loveit.payment.model.{ContributionStatistics, PendingTransaction}
 import com.clemble.loveit.payment.service.{ContributionStatisticsService, PendingTransactionService}
-import com.clemble.loveit.thank.model.Project
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner

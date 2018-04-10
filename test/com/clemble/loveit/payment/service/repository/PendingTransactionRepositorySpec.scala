@@ -1,9 +1,8 @@
 package com.clemble.loveit.payment.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.{Resource}
+import com.clemble.loveit.common.model.{Project, Resource}
 import com.clemble.loveit.payment.model.PendingTransaction
-import com.clemble.loveit.thank.model.Project
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner

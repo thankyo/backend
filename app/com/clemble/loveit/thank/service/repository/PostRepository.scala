@@ -9,9 +9,9 @@ trait PostRepository {
 
   def save(post: Post): Future[Boolean]
 
-  def update(post: Post): Future[Boolean]
+  def update(post: Post): Future[Option[Post]]
 
-  def delete(id: PostID): Future[Boolean]
+  def delete(id: PostID): Future[Option[Post]]
 
   def deleteAll(user: UserID, url: Resource): Future[Boolean]
 

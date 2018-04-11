@@ -38,9 +38,9 @@ case class MongoPostRepository @Inject()(
     MongoSafeUtils.safeSingleUpdate(collection.insert(post))
   }
 
-  override def delete(id: PostID): Future[Boolean] = {
+  override def delete(id: PostID): Future[Option[Post]] = {
     val selector = Json.obj("_id" -> id)
-    MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
+    collection.findAndRemove(selector).map(_.result[Post])
   }
 
   override def findById(id: String): Future[Option[Post]] = {
@@ -48,10 +48,10 @@ case class MongoPostRepository @Inject()(
     collection.find(selector).one[Post]
   }
 
-  override def update(post: Post): Future[Boolean] = {
+  override def update(post: Post): Future[Option[Post]] = {
     val selector = Json.obj("url" -> post.url)
     val update = Json.toJsObject(post)
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[Post])
   }
 
   override def deleteAll(user: UserID, url: Resource): Future[Boolean] = {

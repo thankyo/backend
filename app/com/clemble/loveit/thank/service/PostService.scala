@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.{PaymentException, ResourceException}
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.service.ThankEventBus
+import com.clemble.loveit.common.service._
 import com.clemble.loveit.common.model.Project
 import com.clemble.loveit.thank.service.repository.PostRepository
 
@@ -37,6 +37,7 @@ trait PostService {
 
 @Singleton
 case class SimplePostService @Inject()(
+  postEventBus: PostEventBus,
   thankEventBus: ThankEventBus,
   lookupService: ProjectLookupService,
   enrichService: PostEnrichService,
@@ -56,7 +57,13 @@ case class SimplePostService @Inject()(
   }
 
   override def delete(id: PostID): Future[Boolean] = {
-    repo.delete(id)
+    repo.delete(id).map({
+      case Some(post) =>
+        postEventBus.publish(PostRemoved(post))
+        true
+      case None =>
+        true
+    })
   }
 
   override def getPostOrProject(url: Resource): Future[Either[Post, Project]] = {
@@ -92,13 +99,17 @@ case class SimplePostService @Inject()(
 
   override def create(og: OpenGraphObject): Future[Post] = {
     val res = og.url
-    getPostOrProject(res).flatMap(_ match {
-      case Left(post) =>
-        val updPost = post.withOg(og)
-        repo.update(updPost).filter(_ == true).map(_ => updPost)
+    getPostOrProject(res).flatMap({
+      case Left(oldPost) =>
+        val newPost = oldPost.withOg(og)
+        val saveNewPost = repo.update(newPost).map(_.get)
+        saveNewPost.map(PostUpdated(oldPost, _)).foreach(postEventBus.publish)
+        saveNewPost
       case Right(project) =>
         val post = Post.from(og, project)
-        repo.save(post).filter(_ == true).map((_) => post)
+        val saveNewPost = repo.save(post).filter(_ == true).map((_) => post)
+        saveNewPost.map(PostCreated).foreach(postEventBus.publish)
+        saveNewPost
     })
   }
 
@@ -107,7 +118,12 @@ case class SimplePostService @Inject()(
   }
 
   override def delete(project: Project): Future[Boolean] = {
-    repo.deleteAll(project.user, project.url)
+    repo.
+      findByProject(project._id).
+      flatMap(posts => {
+        posts.map(PostRemoved).foreach(postEventBus.publish(_))
+        repo.deleteAll(project.user, project.url)
+      })
   }
 
   override def thank(giver: UserID, url: Resource): Future[Post] = {

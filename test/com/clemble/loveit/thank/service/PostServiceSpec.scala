@@ -1,5 +1,6 @@
 package com.clemble.loveit.thank.service
 
+import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.error.{PaymentException, ResourceException, SelfLovingForbiddenException}
 import com.clemble.loveit.common.model.{Amount, OpenGraphObject, Post, Resource, UserID}
 import com.clemble.loveit.payment.service.PaymentServiceTestExecutor
@@ -8,7 +9,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestExecutor {
+class PostServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
   def createScene():(Resource, UserID, UserID) = {
     val owner = createUser()
@@ -33,7 +34,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends PaymentServiceTestE
     }
   }
 
-  "thanked" should {
+  "supported" should {
 
     "return throw Exception on random res" in {
       val user = someRandom[UserID]

@@ -3,13 +3,15 @@ package com.clemble.loveit.common.service
 import akka.actor.ActorRef
 import akka.event.{ActorEventBus, SubchannelClassification}
 import akka.util.Subclassification
-import com.clemble.loveit.common.model.{Post}
+import com.clemble.loveit.common.model.Post
+import javax.inject.Singleton
 
 sealed trait PostEvent
-case class PostCreated(post: Post)
-case class PostUpdated(old: Post, newPost: Post)
-case class PostRemoved(post: Post)
+case class PostCreated(post: Post) extends PostEvent
+case class PostUpdated(old: Post, newPost: Post) extends PostEvent
+case class PostRemoved(post: Post) extends PostEvent
 
+@Singleton
 class PostEventBus extends ActorEventBus with SubchannelClassification {
 
   override protected implicit def subclassification: Subclassification[Classifier] = new Subclassification[Classifier] {

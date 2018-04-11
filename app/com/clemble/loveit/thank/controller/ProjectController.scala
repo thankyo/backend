@@ -65,10 +65,6 @@ class ProjectController @Inject()(
     }
   })
 
-  def enrich(res: Resource) = silhouette.SecuredAction.async(implicit req => {
-    enrichService.enrich(req.identity.id, res).map(Ok(_))
-  })
-
   def create() = silhouette.SecuredAction.async(parse.json[ProjectConstructor])(implicit req => {
     service.create(req.identity.id, req.body).map(Ok(_))
   })

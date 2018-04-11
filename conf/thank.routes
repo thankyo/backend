@@ -15,7 +15,6 @@ GET         /user/:user/supported              @com.clemble.loveit.thank.control
 GET         /user/:user/project                @com.clemble.loveit.thank.controller.ProjectController.getProjectsByUser(user)
 
 GET         /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.getOwnedProjects()
-GET         /enrich                            @com.clemble.loveit.thank.controller.ProjectController.enrich(url: com.clemble.loveit.common.model.Resource)
 
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()

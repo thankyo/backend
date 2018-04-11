@@ -9,8 +9,6 @@ trait PostRepository {
 
   def save(post: Post): Future[Boolean]
 
-  def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean]
-
   def update(post: Post): Future[Boolean]
 
   def delete(id: PostID): Future[Boolean]

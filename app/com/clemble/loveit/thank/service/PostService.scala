@@ -23,8 +23,6 @@ trait PostService {
 
   def create(og: OpenGraphObject): Future[Post]
 
-  def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean]
-
   def updateProject(owner: Project): Future[Boolean]
 
   def delete(id: PostID): Future[Boolean]
@@ -102,10 +100,6 @@ case class SimplePostService @Inject()(
         val post = Post.from(og, project)
         repo.save(post).filter(_ == true).map((_) => post)
     })
-  }
-
-  override def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean] = {
-    repo.assignTags(url, tags)
   }
 
   override def updateProject(project: Project): Future[Boolean] = {

@@ -62,12 +62,6 @@ case class MongoPostRepository @Inject()(
       })
   }
 
-  override def assignTags(url: Resource, tags: Set[Tag]): Future[Boolean] = {
-    val selector = Json.obj("url" -> url)
-    val update = Json.obj("$set" -> Json.obj("ogObj.tags" -> tags))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
-  }
-
   override def findByResource(url: Resource): Future[Option[Post]] = {
     val fSearchResult = collection.find(Json.obj("url" -> url)).one[Post]
     MongoSafeUtils.safe(fSearchResult)

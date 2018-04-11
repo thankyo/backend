@@ -17,7 +17,6 @@ GET         /user/:user/project                @com.clemble.loveit.thank.control
 GET         /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.getOwnedProjects()
 
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
-POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()
 POST        /graph/my                          @com.clemble.loveit.thank.controller.GraphController.createMyPost()
 
 GET         /graph/my/support                  @com.clemble.loveit.thank.controller.GraphController.hasSupported(url: com.clemble.loveit.common.model.Resource)

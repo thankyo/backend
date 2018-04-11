@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.ServiceSpec
 import com.clemble.loveit.common.model.{Project, Resource, Tag}
-import com.clemble.loveit.thank.service.repository.{PostRepository, ProjectRepository}
+import com.clemble.loveit.thank.service.repository.PostRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -49,7 +49,14 @@ trait InternalTagTestService extends TagTestService with ServiceSpec {
   }
 
   override def assignTags(url: Resource, tags: Set[Tag]): Boolean = {
-    await(postService.assignTags(url, tags))
+    await(
+      postService.getPostOrProject(url).flatMap({
+        case Left(post) =>
+          postService.create(post.ogObj.copy(tags = tags))
+        case Right(prj) =>
+          throw new IllegalArgumentException("No post exists with this URL")
+      })
+    )
   }
 
   override def getProjectTags(url: Resource): Set[Tag] = {

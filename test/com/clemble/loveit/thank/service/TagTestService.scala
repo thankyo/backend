@@ -5,6 +5,7 @@ import com.clemble.loveit.common.model.{Project, Resource, Tag}
 import com.clemble.loveit.thank.service.repository.PostRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait TagTestService {
 
@@ -31,7 +32,14 @@ trait RepoTagTestService extends TagTestService with ServiceSpec {
   }
 
   override def assignTags(url: Resource, tags: Set[Tag]): Boolean = {
-    await(postRepo.assignTags(url, tags))
+    val fPostUpdated = postService.getPostOrProject(url).flatMap({
+      case Left(post) =>
+        postService.create(post.ogObj.copy(tags = tags)).map(_ => true)
+      case Right(_) =>
+        Future.successful(false)
+    })
+
+    await(fPostUpdated)
   }
 
   def getTags(url: Resource): Set[Tag] = {
@@ -49,14 +57,14 @@ trait InternalTagTestService extends TagTestService with ServiceSpec {
   }
 
   override def assignTags(url: Resource, tags: Set[Tag]): Boolean = {
-    await(
-      postService.getPostOrProject(url).flatMap({
-        case Left(post) =>
-          postService.create(post.ogObj.copy(tags = tags))
-        case Right(prj) =>
-          throw new IllegalArgumentException("No post exists with this URL")
-      })
-    )
+    val fPostUpdated = postService.getPostOrProject(url).flatMap({
+      case Left(post) =>
+        postService.create(post.ogObj.copy(tags = tags)).map(_ => true)
+      case Right(_) =>
+        Future.successful(false)
+    })
+
+    await(fPostUpdated)
   }
 
   override def getProjectTags(url: Resource): Set[Tag] = {

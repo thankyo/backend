@@ -21,7 +21,44 @@ trait ProjectOwnershipService {
 }
 
 @Singleton
-case class SimpleProjectOwnershipService @Inject()(
+case class TumblrProjectOwnershipService @Inject()(
+  userService: UserService,
+  oAuthService: UserOAuthService,
+  tumblrProvider: TumblrProvider,
+  client: WSClient,
+  implicit val ec: ExecutionContext
+) extends ProjectOwnershipService {
+
+  private def readTumblrResources(user: UserID, json: JsValue): Seq[Resource] = {
+    val blogs = (json \ "response" \ "user" \ "blogs").asOpt[List[JsObject]].getOrElse(List.empty[JsObject])
+    blogs
+      .filter(blog => (blog \ "admin").asOpt[Boolean].getOrElse(false))
+      .map(blog => (blog \ "url").asOpt[Resource].map(_.normalize()))
+      .flatten
+  }
+
+  override def fetch(user: UserID): Future[Seq[Resource]] = {
+    (for {
+      tumblrLogin <- userService.findById(user).map(_.flatMap(_.profiles.asTumblrLogin()))
+      tumblrAuthOpt <- tumblrLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
+    } yield {
+      tumblrAuthOpt match {
+        case Some(info: OAuth1Info) =>
+          val url = s"https://api.tumblr.com/v2/user/info"
+          client
+            .url(url)
+            .sign(tumblrProvider.service.sign(info))
+            .get()
+            .map(res => readTumblrResources(user, res.json))
+        case _ =>
+          Future.successful(Seq.empty[Resource])
+      }
+    }).flatten
+  }
+
+}
+
+case class GoogleProjectOwnershipService @Inject()(
   userService: UserService,
   oAuthService: UserOAuthService,
   tumblrProvider: TumblrProvider,
@@ -42,7 +79,7 @@ case class SimpleProjectOwnershipService @Inject()(
     resources
   }
 
-  private def fetchGoogleResources(user: UserID): Future[Seq[Resource]] = {
+  override def fetch(user: UserID): Future[Seq[Resource]] = {
     (for {
       googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
       googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
@@ -61,37 +98,18 @@ case class SimpleProjectOwnershipService @Inject()(
     }).flatten
   }
 
-  private def readTumblrResources(user: UserID, json: JsValue): Seq[Resource] = {
-    val blogs = (json \ "response" \ "user" \ "blogs").asOpt[List[JsObject]].getOrElse(List.empty[JsObject])
-    blogs
-      .filter(blog => (blog \ "admin").asOpt[Boolean].getOrElse(false))
-      .map(blog => (blog \ "url").asOpt[Resource].map(_.normalize()))
-      .flatten
-  }
+}
 
-  private def fetchTumblrResources(user: UserID): Future[Seq[Resource]] = {
-    (for {
-      tumblrLogin <- userService.findById(user).map(_.flatMap(_.profiles.asTumblrLogin()))
-      tumblrAuthOpt <- tumblrLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
-    } yield {
-      tumblrAuthOpt match {
-        case Some(info: OAuth1Info) =>
-          val url = s"https://api.tumblr.com/v2/user/info"
-          client
-            .url(url)
-            .sign(tumblrProvider.service.sign(info))
-            .get()
-            .map(res => readTumblrResources(user, res.json))
-        case _ =>
-          Future.successful(Seq.empty[Resource])
-      }
-    }).flatten
-  }
+@Singleton
+case class SimpleProjectOwnershipService @Inject()(
+  googleOwnershipService: GoogleProjectOwnershipService,
+  tumblrOwnershipService: TumblrProjectOwnershipService,
+  implicit val ec: ExecutionContext
+) extends ProjectOwnershipService {
 
   override def fetch(user: UserID): Future[Seq[Resource]] = {
-    val googleRes = fetchGoogleResources(user)
-    val tumblrRes = fetchTumblrResources(user)
-    Future.sequence(Seq(googleRes, tumblrRes)).map(_.flatten)
+    val fResources = Seq(googleOwnershipService, tumblrOwnershipService).map(_.fetch(user))
+    Future.sequence(fResources).map(_.flatten)
   }
 
 }

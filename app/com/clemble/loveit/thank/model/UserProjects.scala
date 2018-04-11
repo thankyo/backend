@@ -1,11 +1,11 @@
 package com.clemble.loveit.thank.model
 
-import com.clemble.loveit.common.model.{Project, Resource}
+import com.clemble.loveit.common.model.{Project, ProjectConstructor, Resource}
 import com.clemble.loveit.common.util.WriteableUtils
 import play.api.libs.json.Json
 
 case class UserProjects(
-  owned: Seq[Resource],
+  owned: Seq[ProjectConstructor],
   installed: Seq[Project]
 )
 

@@ -15,7 +15,7 @@ trait ProjectOwnershipVerificationService {
 case class SimpleProjectOwnershipVerificationService @Inject()(ownershipService: ProjectOwnershipService, implicit val ec: ExecutionContext) extends ProjectOwnershipVerificationService {
 
   override def verify(user: UserID, url: Resource): Future[Boolean] = {
-    ownershipService.fetch(user).map(_.exists(res => url.startsWith(res)))
+    ownershipService.fetch(user).map(_.exists(prj => url.startsWith(prj.url)))
   }
 
 }

@@ -24,7 +24,6 @@ trait ProjectEnrichService {
 
 object ProjectEnrichService {
 
-
   def readTags(html: String): Set[Tag] = {
     val keywords = Option(Jsoup.parse(html).getElementsByAttributeValue("name", "keywords").first())
     keywords.flatMap(keywords => Option(keywords.attr("content"))).map(_.split(",").map(_.trim).toSet[String]).getOrElse(Set.empty)

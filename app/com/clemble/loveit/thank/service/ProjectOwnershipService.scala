@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectOwnershipService {
 
-  def fetch(user: UserID): Future[Seq[Resource]]
+  def fetch(user: UserID): Future[Seq[ProjectConstructor]]
 
 }
 
@@ -29,18 +29,34 @@ case class TumblrProjectOwnershipService @Inject()(
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
 
-  private def readTumblrResources(user: UserID, json: JsValue): Seq[Resource] = {
+  private def readTumblrResources(user: User, json: JsValue): Seq[ProjectConstructor] = {
     val blogs = (json \ "response" \ "user" \ "blogs").asOpt[List[JsObject]].getOrElse(List.empty[JsObject])
+
     blogs
       .filter(blog => (blog \ "admin").asOpt[Boolean].getOrElse(false))
-      .map(blog => (blog \ "url").asOpt[Resource].map(_.normalize()))
-      .flatten
+      .map(blog => {
+
+        val url = (blog \ "url").as[Resource].normalize()
+        val title = (blog \ "title").asOpt[String].getOrElse("")
+        val shortDescription = (blog \ "description").asOpt[String].getOrElse("")
+        val rss = url + "/rss"
+
+        ProjectConstructor(
+          url = url,
+          title = title,
+          shortDescription = shortDescription,
+          webStack = Some(Tumblr),
+          rss = Some(rss),
+          avatar = user.avatar
+        )
+      })
   }
 
-  override def fetch(user: UserID): Future[Seq[Resource]] = {
+  override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
     (for {
-      tumblrLogin <- userService.findById(user).map(_.flatMap(_.profiles.asTumblrLogin()))
-      tumblrAuthOpt <- tumblrLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
+      userOpt <- userService.findById(user)
+      tumblrLoginOpt = userOpt.flatMap(_.profiles.asTumblrLogin())
+      tumblrAuthOpt <- tumblrLoginOpt.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
     } yield {
       tumblrAuthOpt match {
         case Some(info: OAuth1Info) =>
@@ -49,9 +65,9 @@ case class TumblrProjectOwnershipService @Inject()(
             .url(url)
             .sign(tumblrProvider.service.sign(info))
             .get()
-            .map(res => readTumblrResources(user, res.json))
+            .map(res => readTumblrResources(userOpt.get, res.json))
         case _ =>
-          Future.successful(Seq.empty[Resource])
+          Future.successful(Seq.empty[ProjectConstructor])
       }
     }).flatten
   }
@@ -62,6 +78,7 @@ case class GoogleProjectOwnershipService @Inject()(
   userService: UserService,
   oAuthService: UserOAuthService,
   tumblrProvider: TumblrProvider,
+  enrichService: ProjectEnrichService,
   client: WSClient,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
@@ -79,7 +96,7 @@ case class GoogleProjectOwnershipService @Inject()(
     resources
   }
 
-  override def fetch(user: UserID): Future[Seq[Resource]] = {
+  override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
     (for {
       googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
       googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
@@ -92,8 +109,9 @@ case class GoogleProjectOwnershipService @Inject()(
             .withHttpHeaders("Authorization" -> s"Bearer ${info.accessToken}")
             .get()
             .map(res => readGoogleResources(user, res.json))
-        case None =>
-          Future.successful(Seq.empty[Resource])
+            .flatMap(resources => Future.sequence(resources.map(enrichService.enrich(user, _))))
+        case _ =>
+          Future.successful(Seq.empty[ProjectConstructor])
       }
     }).flatten
   }
@@ -107,7 +125,7 @@ case class SimpleProjectOwnershipService @Inject()(
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
 
-  override def fetch(user: UserID): Future[Seq[Resource]] = {
+  override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
     val fResources = Seq(googleOwnershipService, tumblrOwnershipService).map(_.fetch(user))
     Future.sequence(fResources).map(_.flatten)
   }

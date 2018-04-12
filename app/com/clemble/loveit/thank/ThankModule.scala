@@ -30,6 +30,8 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[ProjectFeedService]).to(classOf[SimpleProjectFeedService])
     bind(classOf[ProjectOwnershipService]).to(classOf[SimpleProjectOwnershipService])
 
+    bind(classOf[TumblrIntegrationService]).to(classOf[SimpleTumblrIntegrationService]).asEagerSingleton()
+
     bind(classOf[ProjectRepository]).to(classOf[MongoProjectRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
 

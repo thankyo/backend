@@ -22,33 +22,6 @@ object ProjectFeedService {
 
 }
 
-class RSSProjectFeedService @Inject()(wsClient: WSClient, postEnrichService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
-
-  import ProjectFeedService._
-
-  private def fetch(project: Project): Future[List[OpenGraphObject]] = {
-    project.rss match {
-      case Some(feedUrl) =>
-        wsClient.url(feedUrl).get()
-          .map(feed => readFeed(feed.body))
-          .map(_.map(ogObj => if (ogObj.tags.isEmpty) ogObj.copy(tags = project.tags) else ogObj))
-      case None =>
-        Future.successful(List.empty)
-    }
-  }
-
-  override def refresh(project: Project): Future[List[Post]] = {
-    for {
-      fetched <- fetch(project)
-      enriched <- Future.sequence(fetched.map(ogObj => postEnrichService.enrich(ogObj)))
-      validPosts = enriched.filter(_.url.contains(project.url)) // TODO should be startsWith check
-      created <- Future.sequence(validPosts.map(postService.create))
-    } yield {
-      created
-    }
-  }
-}
-
 case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postEnrichService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
 
   import ProjectFeedService._

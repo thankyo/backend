@@ -5,11 +5,10 @@ import java.time.LocalDateTime
 import com.clemble.loveit.common.model
 import com.clemble.loveit.common.model.{OpenGraphImage, OpenGraphObject}
 import javax.inject.{Inject, Singleton}
-import com.clemble.loveit.common.model.OpenGraphImage
 import org.jsoup.Jsoup
 import play.api.http.Status
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.libs.json.{JsValue}
+import play.api.libs.ws.{WSClient}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,9 +18,43 @@ trait PostEnrichService {
 
 }
 
-object PostEnrichService {
+@Singleton
+class FacebookPostEnrichService @Inject()(client: WSClient, implicit val ec: ExecutionContext) extends PostEnrichService {
 
-  def openGraphFromHTML(url: String, htmlStr: String): Option[OpenGraphObject] = {
+  private def openGraphFromFB(url: String, fb: JsValue): Option[OpenGraphObject] = {
+    val imageUrl = (fb \ "og_object" \ "image" \ "src").asOpt[String]
+    val description = (fb \ "og_object" \ "description").asOpt[String]
+    val title = (fb \ "og_object" \ "title").asOpt[String]
+    val pubDate = (fb \ "og_object" \ "update_date").asOpt[LocalDateTime]
+
+    if (imageUrl.isDefined || description.isDefined || title.isDefined) {
+      Some(
+        model.OpenGraphObject(
+          url,
+          image = imageUrl.map(OpenGraphImage(_)),
+          description = description,
+          title = title,
+          pubDate = pubDate
+        )
+      )
+    } else {
+      None
+    }
+  }
+
+  override def enrich(post: OpenGraphObject): Future[OpenGraphObject] = {
+    client.url(s"https://graph.facebook.com/?id=${post.url}")
+      .get()
+      .map(_.json)
+      .map(fb => post.merge(openGraphFromFB(post.url, fb)))
+  }
+
+}
+
+@Singleton
+class HtmlPostEnrichService @Inject()(client: WSClient, implicit val ec: ExecutionContext) extends PostEnrichService {
+
+  private def openGraphFromHTML(url: String, htmlStr: String): Option[OpenGraphObject] = {
     Option(Jsoup.parse(htmlStr)).map(doc => {
       val imageUrl = {
         val ogImage = doc.getElementsByAttributeValue("property", "og:image").first()
@@ -49,45 +82,8 @@ object PostEnrichService {
     })
   }
 
-  def openGraphFromFB(url: String, fb: JsValue): Option[OpenGraphObject] = {
-
-    val imageUrl = (fb \ "og_object" \ "image" \ "src").asOpt[String]
-    val description = (fb \ "og_object" \ "description").asOpt[String]
-    val title = (fb \ "og_object" \ "title").asOpt[String]
-    val pubDate = (fb \ "og_object" \ "update_date").asOpt[LocalDateTime]
-
-    if (imageUrl.isDefined || description.isDefined || title.isDefined) {
-      Some(
-        model.OpenGraphObject(
-          url,
-          image = imageUrl.map(OpenGraphImage(_)),
-          description = description,
-          title = title,
-          pubDate = pubDate
-        )
-      )
-    } else {
-      None
-    }
-  }
-
-  def updateOG(origGO: OpenGraphObject, htmlStr: String, fb: JsValue = Json.obj()): OpenGraphObject = {
-    val htmlOG = openGraphFromHTML(origGO.url, htmlStr)
-    val fbOG = openGraphFromFB(origGO.url, fb)
-
-    origGO.merge(fbOG).merge(htmlOG).normalize()
-  }
-
-}
-
-@Singleton
-case class SimplePostEnrichService @Inject()(
-  wsClient: WSClient,
-  implicit val ec: ExecutionContext
-) extends PostEnrichService {
-
-  private def isRedirect(res: WSResponse) = {
-    res.status match {
+  private def isRedirect(status: Int) = {
+    status match {
       case Status.MOVED_PERMANENTLY => true
       case Status.TEMPORARY_REDIRECT => true
       case Status.PERMANENT_REDIRECT => true
@@ -95,30 +91,59 @@ case class SimplePostEnrichService @Inject()(
     }
   }
 
-  private def doEnrich(ogObj: OpenGraphObject, allowRedirect: Boolean = true): Future[OpenGraphObject] = {
-    wsClient
-      .url(ogObj.url).withFollowRedirects(false)
+  private def getPostHtml(postUrl: String, allowRedirect: Boolean = true): Future[Option[String]] = {
+    client
+      .url(postUrl).withFollowRedirects(false)
       .get
       .flatMap(res => {
-        res.header("Location").headOption match {
-          case Some(url) if (isRedirect(res) && allowRedirect) =>
-            val normUrl = if (url.indexOf("?") != -1) url.substring(0, url.indexOf("?")) else url
-            doEnrich(ogObj.copy(url = normUrl), false)
-          case None =>
-            wsClient.url(s"https://graph.facebook.com/?id=${ogObj.url}")
-              .get()
-              .map(_.json)
-              .map(fb => PostEnrichService.updateOG(ogObj, res.body, fb))
+        if (res.status == Status.OK) {
+          Future.successful(Some(res.body))
+        } else {
+          res.header("Location") match {
+            case Some(redirect) if isRedirect(res.status) && allowRedirect =>
+              val normRedirect = if (redirect.indexOf("?") != -1) redirect.substring(0, redirect.indexOf("?")) else redirect
+              getPostHtml(normRedirect, false)
+            case _ =>
+              Future.successful(Option.empty[String])
+          }
         }
       })
   }
 
   override def enrich(post: OpenGraphObject): Future[OpenGraphObject] = {
-    doEnrich(post)
+    getPostHtml(post.url).
+      map(htmlOpt => {
+        val htmlGraph = htmlOpt.flatMap(openGraphFromHTML(post.url, _))
+        post.merge(htmlGraph)
+      })
+  }
+
+}
+
+
+@Singleton
+case class SimplePostEnrichService @Inject()(
+  fbEnrichService: FacebookPostEnrichService,
+  htmlEnrichService: HtmlPostEnrichService,
+  implicit val ec: ExecutionContext
+) extends PostEnrichService {
+
+  override def enrich(post: OpenGraphObject): Future[OpenGraphObject] = {
+    val fbGraph = fbEnrichService.enrich(post)
+    val htmlGraph = htmlEnrichService.enrich(post)
+
+    for {
+      fb <- fbGraph
+      html <- htmlGraph
+    } yield {
+      fb.merge(Some(html))
+    }
   }
 
 }
 
 case object TestPostEnrichService extends PostEnrichService {
-  override def enrich(post: OpenGraphObject): Future[OpenGraphObject] = Future.successful(post)
+  override def enrich(post: OpenGraphObject): Future[OpenGraphObject] = {
+    Future.successful(post)
+  }
 }

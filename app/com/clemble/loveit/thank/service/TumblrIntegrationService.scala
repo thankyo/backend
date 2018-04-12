@@ -75,9 +75,10 @@ case class SimpleTumblrIntegrationService @Inject()(
   }
 
   private def generateIntegration(post: Post): String = {
-    """
+    val parts = post.url.split("/")
+    s"""
            <iframe
-              src="https://loveit.tips/integration"
+              src="https://loveit.tips/integration?post=${parts(4)}"
               width="80"
               height="100"
               class="like_toggle"

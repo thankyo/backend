@@ -42,25 +42,17 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[UserStatService]).to(classOf[SimpleUserStatService]).asEagerSingleton()
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
-  }
 
-  @Provides
-  @Singleton
-  def projectOwnershipVerificationService(ownershipSvc: ProjectOwnershipService, ec: ExecutionContext): ProjectOwnershipVerificationService = {
-    if (env.mode == Mode.Test || env.mode == Mode.Dev) {
-      TestProjectOwnershipVerificationService
-    } else {
-      SimpleProjectOwnershipVerificationService(ownershipSvc, ec)
-    }
-  }
-
-  @Provides
-  @Singleton
-  def postEnrichService(wsClient: WSClient, ec: ExecutionContext): PostEnrichService = {
     if (env.mode == Mode.Test) {
-      TestPostEnrichService
+      bind(classOf[PostEnrichService]).toInstance(TestPostEnrichService)
     } else {
-      SimplePostEnrichService(wsClient, ec)
+      bind(classOf[PostEnrichService]).to(classOf[SimplePostEnrichService])
+    }
+
+    if (env.mode == Mode.Test || env.mode == Mode.Dev) {
+      bind(classOf[ProjectOwnershipVerificationService]).toInstance(TestProjectOwnershipVerificationService)
+    } else {
+      bind(classOf[ProjectOwnershipVerificationService]).to(classOf[SimpleProjectOwnershipVerificationService])
     }
   }
 
@@ -111,9 +103,6 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Provides
   @Singleton
   def projectWebStackAnalysis(wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext): ProjectWebStackAnalysis = {
-    //    val host = conf.get[String]("thank.resource.analyzer.host")
-    //    val port = conf.get[Int]("thank.resource.analyzer.port")
-    //    WappalyzerWebStackAnalyzer(s"http://${host}:${port}/lookup/v1/", wsClient)
     val analyzed = Source.fromResource("thank/analysis/wordPress.txt").getLines().map(url => url -> WordPress).toMap
     StaticWebStackAnalyzer(analyzed)
   }

@@ -1,11 +1,11 @@
 package com.clemble.loveit.thank.service
 
 import akka.actor.{Actor, ActorSystem, Props}
-import com.clemble.loveit.common.model.{Post, ProjectConstructor, Tumblr, UserID}
+import com.clemble.loveit.common.model.{Post, Tumblr, UserID}
 import com.clemble.loveit.common.service._
 import com.mohiva.play.silhouette.impl.providers.OAuth1Info
 import javax.inject.Inject
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.libs.ws.{WSClient, WSSignatureCalculator}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -74,6 +74,25 @@ case class SimpleTumblrIntegrationService @Inject()(
     s"https://api.tumblr.com/v2/blog/${parts(2)}/post/edit?id=${parts(4)}"
   }
 
+  private def perform(post: Post, changeOp: (Post, JsObject) => Option[JsObject]) = {
+    for {
+      signerOpt <- getSigner(post.project.user)
+      signer = signerOpt.get
+      existingPostOpt <- client.url(getPostUrl(post)).sign(signer).get().
+        map(res => if (res.status == 200) (res.json \ "response" \ "posts").as[List[JsObject]].headOption else None)
+      change = existingPostOpt.flatMap(changeOp(post, _))
+      updated <- change.map(op =>
+        client.url(updatePostUrl(post)).
+          sign(signer).
+          post(op).
+          map(res => (res.json \ "meta" \ "status").asOpt[Int].contains(200))
+      ).getOrElse(Future.successful(false))
+    } yield {
+      updated
+    }
+  }
+
+
   private def generateIntegration(post: Post): String = {
     val parts = post.url.split("/")
     s"""
@@ -88,24 +107,20 @@ case class SimpleTumblrIntegrationService @Inject()(
     """
   }
 
-  private def addIntegrationUpdate(integration: String, post: JsObject): JsObject = {
-    val oldCaption = (post \ "caption").asOpt[String].getOrElse("")
-    Json.obj("caption" -> (oldCaption + integration), "type" -> "photo", "id" -> (post \ "id").as[JsValue])
+  private def addIntegrationUpdate(post: Post, tumblrPost: JsObject): Option[JsObject] = {
+    val integration = generateIntegration(post)
+    val oldCaption = (tumblrPost \ "caption").asOpt[String].getOrElse("")
+    if (oldCaption.indexOf("<iframe") == -1) {
+      Some(
+        Json.obj("caption" -> (oldCaption + integration), "type" -> "photo", "id" -> (tumblrPost \ "id").as[JsValue])
+      )
+    } else {
+      None
+    }
   }
 
   override def integrateWithLoveIt(post: Post): Future[Boolean] = {
-    for {
-      signerOpt <- getSigner(post.project.user)
-      signer = signerOpt.get
-      existingPostOpt <- client.url(getPostUrl(post)).sign(signer).get().
-        map(res => if (res.status == 200) Some((res.json \ "response" \ "posts").as[List[JsObject]].head) else None)
-      existingPost = existingPostOpt.get
-      addIntegration = addIntegrationUpdate(generateIntegration(post), existingPost)
-      updated <- client.url(updatePostUrl(post)).sign(signer).post(addIntegration).map(res => res.json)
-    } yield {
-      println(updated)
-      (updated \ "meta" \ "status").asOpt[Int] == Some(200)
-    }
+    perform(post, addIntegrationUpdate)
   }
 
   private def cleanCaption(caption: String): String = {
@@ -118,24 +133,20 @@ case class SimpleTumblrIntegrationService @Inject()(
     }
   }
 
-  private def removeIntegrationUpdate(post: JsObject): JsObject = {
-    val caption = cleanCaption((post \ "caption").asOpt[String].getOrElse(""))
-    Json.obj("caption" -> caption, "type" -> "photo", "id" -> (post \ "id").as[JsValue])
+  private def removeIntegrationUpdate(post: Post, tumblrPost: JsObject): Option[JsObject] = {
+    val origCaption = (tumblrPost \ "caption").asOpt[String].getOrElse("")
+    val caption = cleanCaption((tumblrPost \ "caption").asOpt[String].getOrElse(""))
+    if (origCaption == caption) {
+      None
+    } else {
+      Some(
+        Json.obj("caption" -> caption, "type" -> "photo", "id" -> (tumblrPost \ "id").as[JsValue])
+      )
+    }
   }
 
   override def removeIntegration(post: Post): Future[Boolean] = {
-    for {
-      signerOpt <- getSigner(post.project.user)
-      signer = signerOpt.get
-      existingPostOpt <- client.url(getPostUrl(post)).sign(signer).get().
-        map(res => if (res.status == 200) Some((res.json \ "response" \ "posts").as[List[JsObject]].head) else None)
-      existingPost = existingPostOpt.get
-      removeIntegrationPost = removeIntegrationUpdate(existingPost)
-      updated <- client.url(updatePostUrl(post)).sign(signer).post(removeIntegrationPost).map(res => res.json)
-    } yield {
-      println(updated)
-      (updated \ "meta" \ "status").asOpt[Int] == Some(200)
-    }
+    perform(post, removeIntegrationUpdate)
   }
 
 }

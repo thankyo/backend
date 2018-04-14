@@ -4,6 +4,7 @@ import com.clemble.loveit.common.model.{Post, UserID}
 import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, UserService}
 import com.mohiva.play.silhouette.impl.providers.OAuth1Info
 import javax.inject.{Inject, Singleton}
+import org.slf4j.LoggerFactory
 import play.api.libs.json.JsObject
 import play.api.libs.ws.{WSClient, WSSignatureCalculator}
 
@@ -27,6 +28,8 @@ case class SimpleTumblrAPI @Inject()(
   userOAuth: UserOAuthService,
   implicit val ec: ExecutionContext
 ) extends TumblrAPI {
+
+  val LOG = LoggerFactory.getLogger(classOf[TumblrAPI])
 
   private def getSigner(user: UserID): Future[Option[WSSignatureCalculator]] = {
     for {
@@ -67,7 +70,13 @@ case class SimpleTumblrAPI @Inject()(
           url(s"https://api.tumblr.com/v2/blog/${blog}/post/edit?id=${post}").
           sign(signer).
           post(op).
-          map(res => (res.json \ "meta" \ "status").asOpt[Int].contains(200))
+          map(res => {
+            val ok = (res.json \ "meta" \ "status").asOpt[Int].contains(200)
+            if (!ok) {
+              LOG.error(s"Error updating post ${res.json}")
+            }
+            ok
+          })
       ).getOrElse(Future.successful(false))
     } yield {
       updated

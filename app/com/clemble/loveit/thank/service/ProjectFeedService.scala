@@ -70,8 +70,7 @@ case class SimpleProjectFeedService @Inject()(rssFeedReader: RSSFeedReader, wsCl
       feed <- rssFeedReader.read(prj.rss.get)
       lastPost <- postService.findLastByProject(prj._id)
       newPosts = onlyNew(feed, lastPost)
-      newEnrichedPosts <- Future.sequence(newPosts.map(postEnrichService.enrich(prj, _)))
-      created <- Future.sequence(newEnrichedPosts.map(postService.create))
+      created <- Future.sequence(newPosts.map(postEnrichService.enrich(prj, _).flatMap(postService.create)))
     } yield {
       created
     }

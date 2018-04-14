@@ -51,7 +51,8 @@ class FacebookPostEnrichService @Inject()(client: WSClient, implicit val ec: Exe
         } else {
           post
         }
-      })
+      }).
+      recover({ case _ => post })
   }
 
 }
@@ -120,7 +121,8 @@ class HtmlPostEnrichService @Inject()(client: WSClient, implicit val ec: Executi
       map(htmlOpt => {
         val htmlGraph = htmlOpt.flatMap(openGraphFromHTML(post.url, _))
         post.merge(htmlGraph)
-      })
+      }).
+      recover({ case _ => post})
   }
 
 }
@@ -147,12 +149,15 @@ case class TumblrPostEnrichService @Inject()(tumblrAPI: TumblrAPI, implicit val 
       return Future.successful(post)
     }
     val parts = post.url.split("/")
+    val blog = parts(2)
+    val postId = parts(4)
     tumblrAPI
-      .findPost(prj.user, parts(2), parts(4))
+      .findPost(prj.user, blog, postId)
       .map({
         case Some(jsObj) => post.merge(openGraphFromTumblr(post.url, jsObj))
         case None => post
-      })
+      }).
+      recover({ case _ => post})
   }
 
 }

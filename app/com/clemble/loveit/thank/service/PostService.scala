@@ -19,6 +19,8 @@ trait PostService {
 
   def findByProject(project: ProjectID): Future[List[Post]]
 
+  def findLastByProject(project: ProjectID): Future[Option[Post]]
+
   def getPostOrProject(url: Resource): Future[Either[Post, Project]]
 
   def create(og: OpenGraphObject): Future[Post]
@@ -95,6 +97,10 @@ case class SimplePostService @Inject()(
 
   override def findByProject(project: ProjectID): Future[List[Post]] = {
     repo.findByProject(project)
+  }
+
+  override def findLastByProject(project: ProjectID): Future[Option[Post]] = {
+    repo.findLastByProject(project)
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {

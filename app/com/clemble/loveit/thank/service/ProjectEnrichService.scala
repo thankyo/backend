@@ -10,11 +10,9 @@ import javax.inject.Inject
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
 import play.api.libs.ws.WSClient
-import play.mvc.Http.Status
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 trait ProjectEnrichService {
 
@@ -72,7 +70,7 @@ case class StaticWebStackAnalyzer(analyzedUrls: Map[Resource, WebStack]) extends
 
 }
 
-case class SimpleProjectEnrichService @Inject()(webStackAnalyzer: ProjectWebStackAnalysis, wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext) extends ProjectEnrichService {
+case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, webStackAnalyzer: ProjectWebStackAnalysis, wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext) extends ProjectEnrichService {
 
   val DELAY: FiniteDuration = 3.second
 
@@ -100,17 +98,7 @@ case class SimpleProjectEnrichService @Inject()(webStackAnalyzer: ProjectWebStac
   }
 
   private def isValidFeed(feedUrl: Resource): Future[Boolean] = {
-    wsClient
-      .url(feedUrl)
-      .get()
-      .map(res => {
-        if (res.status != Status.OK) {
-          false
-        } else {
-          Try(ProjectFeedService.readFeed(res.body)).isSuccess
-        }
-      })
-      .recover({ case _ => false })
+    rssFeedReader.read(feedUrl).map(_.nonEmpty)
   }
 
   private def enrichRSS(url: Resource): Future[Option[String]] = {

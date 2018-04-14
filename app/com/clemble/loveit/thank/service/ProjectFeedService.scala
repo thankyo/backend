@@ -1,8 +1,10 @@
 package com.clemble.loveit.thank.service
 
+import java.time.LocalDateTime
+
 import com.clemble.loveit.common.model.{OpenGraphObject, Post, Project}
-import javax.inject.Inject
-import com.clemble.loveit.common.model.{OpenGraphImage, Project}
+import javax.inject.{Inject, Singleton}
+import play.api.http.Status
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,63 +16,60 @@ trait ProjectFeedService {
 
 }
 
-object ProjectFeedService {
+object RSSFeedReader {
 
   def readFeed(xml: String): List[OpenGraphObject] = readFeed(XML.loadString(xml))
 
   def readFeed(feed: Elem): List[OpenGraphObject] = FeedParser.parse(feed).toList
 
-}
-
-case class DefaultProjectFeedService @Inject()(wsClient: WSClient, postEnrichService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
-
-  import ProjectFeedService._
-
-  private def fetch(project: Project): Future[List[OpenGraphObject]] = {
-    project.rss match {
-      case Some(feedUrl) =>
-        wsClient.url(feedUrl).get()
-          .map(feed => readFeed(feed.body))
-          .map(_.map(ogObj => if (ogObj.tags.isEmpty) ogObj.copy(tags = project.tags) else ogObj))
-      case None =>
-        Future.successful(List.empty)
-    }
-  }
-
-  override def refresh(project: Project): Future[List[Post]] = {
-    for {
-      fetched <- fetch(project)
-      enriched <- Future.sequence(fetched.map(ogObj => postEnrichService.enrich(ogObj)))
-      validPosts = enriched.filter(_.url.contains(project.url)) // TODO should be startsWith check
-      created <- Future.sequence(validPosts.map(postService.create))
-    } yield {
-      created
-    }
+  implicit val pubDateOrdering: Ordering[Option[LocalDateTime]] = (x: Option[LocalDateTime], y: Option[LocalDateTime]) => {
+    y.getOrElse(LocalDateTime.MIN).compareTo(x.getOrElse(LocalDateTime.MIN))
   }
 
 }
 
-case class SimpleProjectFeedService @Inject()(wsClient: WSClient, postEnrichService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
+@Singleton
+case class RSSFeedReader @Inject()(wsClient: WSClient, implicit val ec: ExecutionContext) {
 
-  import ProjectFeedService._
+  import RSSFeedReader._
 
-  private def fetch(project: Project): Future[List[OpenGraphObject]] = {
-    project.rss match {
-      case Some(feedUrl) =>
-        wsClient.url(feedUrl).get()
-          .map(feed => readFeed(feed.body))
-          .map(_.map(ogObj => if (ogObj.tags.isEmpty) ogObj.copy(tags = project.tags) else ogObj))
-      case None =>
-        Future.successful(List.empty)
+  def read(feedUrl: String): Future[List[OpenGraphObject]] = {
+    wsClient.url(feedUrl).get()
+      .map(feed => {
+        if (feed.status == Status.OK) {
+          readFeed(feed.body).sortBy(_.pubDate)
+        } else {
+          List.empty
+        }
+      })
+  }
+
+}
+
+case class SimpleProjectFeedService @Inject()(rssFeedReader: RSSFeedReader, wsClient: WSClient, postEnrichService: PostEnrichService, postService: PostService, implicit val ec: ExecutionContext) extends ProjectFeedService {
+
+  private def onlyNew(feed: List[OpenGraphObject], last: Option[Post]): List[OpenGraphObject] = {
+    if (last.isEmpty) {
+      return feed;
+    }
+    val hasLast = feed.indexWhere(_.url == last.get.url)
+    if (hasLast == -1) {
+      feed
+    } else {
+      feed.take(hasLast)
     }
   }
 
   override def refresh(project: Project): Future[List[Post]] = {
+    if (project.rss.isEmpty)
+      return Future.successful(List.empty)
+
     for {
-      fetched <- fetch(project)
-      enriched <- Future.sequence(fetched.map(ogObj => postEnrichService.enrich(ogObj)))
-      validPosts = enriched.filter(_.url.contains(project.url)) // TODO should be startsWith check
-      created <- Future.sequence(validPosts.map(postService.create))
+      feed <- rssFeedReader.read(project.rss.get)
+      lastPost <- postService.findLastByProject(project._id)
+      newPosts = onlyNew(feed, lastPost)
+      newEnrichedPosts <- Future.sequence(newPosts.map(postEnrichService.enrich))
+      created <- Future.sequence(newEnrichedPosts.map(postService.create))
     } yield {
       created
     }

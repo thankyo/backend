@@ -25,6 +25,8 @@ trait PostRepository {
 
   def findByProject(project: ProjectID): Future[List[Post]]
 
+  def findLastByProject(project: ProjectID): Future[Option[Post]]
+
   def updateProject(project: Project): Future[Boolean]
 
   def markSupported(user: String, url: Resource): Future[Boolean]

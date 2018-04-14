@@ -17,23 +17,26 @@ case class OpenGraphObject(
   pubDate: Option[LocalDateTime] = None
 ) extends ResourceAware {
 
+  def merge(ogObj: OpenGraphObject): OpenGraphObject = {
+    copy(
+      image = image.orElse(ogObj.image),
+      title = title.orElse(ogObj.title),
+      description = title.orElse(ogObj.description),
+      tags = tags ++ ogObj.tags,
+      pubDate = pubDate.orElse(ogObj.pubDate)
+    )
+  }
+
   def merge(ogObjOpt: Option[OpenGraphObject]): OpenGraphObject = {
     ogObjOpt match {
-      case Some(ogObj) =>
-        copy(
-          image = image.orElse(ogObj.image),
-          title = title.orElse(ogObj.title),
-          description = title.orElse(ogObj.description),
-          tags = tags ++ ogObj.tags,
-          pubDate = pubDate.orElse(ogObjOpt.flatMap(_.pubDate))
-        )
+      case Some(ogObj) => merge(ogObj)
       case None => this
     }
   }
 
   def normalize(): OpenGraphObject = {
     image match {
-      case Some(img) if (img.url.startsWith("/")) =>
+      case Some(img) if img.url.startsWith("/") =>
         val root = OpenGraphObject.getRootUrl(url)
         val normImg = img.copy(
           url = root + img.url

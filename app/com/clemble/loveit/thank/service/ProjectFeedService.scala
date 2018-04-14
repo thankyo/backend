@@ -60,15 +60,15 @@ case class SimpleProjectFeedService @Inject()(rssFeedReader: RSSFeedReader, wsCl
     }
   }
 
-  override def refresh(project: Project): Future[List[Post]] = {
-    if (project.rss.isEmpty)
+  override def refresh(prj: Project): Future[List[Post]] = {
+    if (prj.rss.isEmpty)
       return Future.successful(List.empty)
 
     for {
-      feed <- rssFeedReader.read(project.rss.get)
-      lastPost <- postService.findLastByProject(project._id)
+      feed <- rssFeedReader.read(prj.rss.get)
+      lastPost <- postService.findLastByProject(prj._id)
       newPosts = onlyNew(feed, lastPost)
-      newEnrichedPosts <- Future.sequence(newPosts.map(postEnrichService.enrich))
+      newEnrichedPosts <- Future.sequence(newPosts.map(postEnrichService.enrich(prj, _)))
       created <- Future.sequence(newEnrichedPosts.map(postService.create))
     } yield {
       created

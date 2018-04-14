@@ -136,9 +136,9 @@ case class SimplePostService @Inject()(
     getPostOrProject(url) flatMap {
       case Left(post) =>
         Future.successful(post)
-      case Right(_) =>
+      case Right(prj) =>
         enrichService
-          .enrich(OpenGraphObject(url = url))
+          .enrich(prj, OpenGraphObject(url = url))
           .flatMap(create)
     } flatMap (post => {
       if (post.project.user == giver)

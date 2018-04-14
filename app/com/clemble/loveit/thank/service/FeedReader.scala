@@ -3,8 +3,7 @@ package com.clemble.loveit.thank.service
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import com.clemble.loveit.common.model
-import com.clemble.loveit.common.model.{OpenGraphImage, OpenGraphObject}
+import com.clemble.loveit.common.model.{OpenGraphObject}
 import com.clemble.loveit.common.model.OpenGraphImage
 
 import scala.util.Try
@@ -54,9 +53,10 @@ case object RSSParser extends FeedParser {
   implicit val format = DateTimeFormatter.RFC_1123_DATE_TIME
 
   override def parse(x: Elem): Iterable[Option[OpenGraphObject]] = {
-    (x \\ _item).map { implicit item =>
-      from(_link).map(url => {
-        model.OpenGraphObject(
+    val items = x \\ _item
+    items.map({ implicit item =>
+      val opOpt = from(_link).map(url => {
+        OpenGraphObject(
           url = url,
           title = from(_title),
           description = from(_description),
@@ -68,8 +68,10 @@ case object RSSParser extends FeedParser {
           pubDate = from(_pubDate).flatMap(parseDate)
         )
       })
-    }
+      opOpt
+    })
   }
+
 }
 
 case object AtomParser extends FeedParser {
@@ -114,7 +116,8 @@ case object AtomParser extends FeedParser {
       None
     }
 
-    (x \ _entry).map { implicit entry =>
+    val items = (x \ _entry)
+    items.map({ implicit entry =>
       getLinks(entry)
         .map(url => {
           OpenGraphObject(
@@ -124,6 +127,7 @@ case object AtomParser extends FeedParser {
             pubDate = from(_updated).flatMap(parseDate)
           )
         })
-    }
+    })
   }
+
 }

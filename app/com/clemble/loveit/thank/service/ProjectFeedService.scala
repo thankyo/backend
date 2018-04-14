@@ -52,7 +52,7 @@ case class SimpleProjectFeedService @Inject()(rssFeedReader: RSSFeedReader, wsCl
 
   private def onlyNew(feed: List[OpenGraphObject], last: Option[Post]): List[OpenGraphObject] = {
     if (last.isEmpty) {
-      return feed;
+      return feed
     }
     val hasLast = feed.indexWhere(_.url == last.get.url)
     if (hasLast == -1) {

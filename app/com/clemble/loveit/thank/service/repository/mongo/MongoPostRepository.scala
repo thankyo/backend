@@ -79,7 +79,7 @@ case class MongoPostRepository @Inject()(
 
   override def findLastByProject(project: ProjectID): Future[Option[Post]] = {
     val selector = Json.obj("project._id" -> project)
-    val byPubDate = Json.obj("ogObj.pubDate" -> 1)
+    val byPubDate = Json.obj("ogObj.pubDate" -> -1)
     collection.find(selector).sort(byPubDate).one[Post]
   }
 

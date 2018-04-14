@@ -37,6 +37,8 @@ case class SimpleTumblrIntegrationService @Inject()(
   implicit val ec: ExecutionContext
 ) extends TumblrIntegrationService {
 
+  val TUMBLR_PHOTO = "photo"
+
   {
     val listener = actorSystem.actorOf(Props(TumblrIntegrationListener(this)))
     postEventBus.subscribe(listener, classOf[PostCreated])
@@ -59,14 +61,18 @@ case class SimpleTumblrIntegrationService @Inject()(
 
   private def addIntegrationUpdate(post: Post): JsObject => Option[JsObject] = {
     (tumblrPost: JsObject) => {
-      val integration = generateIntegration(post)
-      val oldCaption = (tumblrPost \ "caption").asOpt[String].getOrElse("")
-      if (oldCaption.indexOf("<iframe") == -1) {
-        Some(
-          Json.obj("caption" -> (oldCaption + integration), "type" -> "photo", "id" -> (tumblrPost \ "id").as[JsValue])
-        )
-      } else {
-        None
+      (tumblrPost \ "type").asOpt[String].getOrElse("") match {
+        case TUMBLR_PHOTO =>
+          val integration = generateIntegration(post)
+          val oldCaption = (tumblrPost \ "caption").asOpt[String].getOrElse("")
+          if (oldCaption.indexOf("<iframe") == -1) {
+            Some(
+              Json.obj("caption" -> (oldCaption + integration), "type" -> "photo", "id" -> (tumblrPost \ "id").as[JsValue])
+            )
+          } else {
+            None
+          }
+        case _ => None
       }
     }
   }
@@ -91,14 +97,17 @@ case class SimpleTumblrIntegrationService @Inject()(
 
   private def removeIntegrationUpdate(post: Post): JsObject => Option[JsObject] = {
     (tumblrPost: JsObject) => {
-      val origCaption = (tumblrPost \ "caption").asOpt[String].getOrElse("")
-      val caption = cleanCaption((tumblrPost \ "caption").asOpt[String].getOrElse(""))
-      if (origCaption == caption) {
-        None
-      } else {
-        Some(
-          Json.obj("caption" -> caption, "type" -> "photo", "id" -> (tumblrPost \ "id").as[JsValue])
-        )
+      (tumblrPost \ "type").asOpt[String].getOrElse("") match {
+        case TUMBLR_PHOTO =>
+          val origCaption = (tumblrPost \ "caption").asOpt[String].getOrElse("")
+          val caption = cleanCaption((tumblrPost \ "caption").asOpt[String].getOrElse(""))
+          if (origCaption == caption) {
+            None
+          } else {
+            Some(
+              Json.obj("caption" -> caption, "type" -> "photo", "id" -> (tumblrPost \ "id").as[JsValue])
+            )
+          }
       }
     }
   }

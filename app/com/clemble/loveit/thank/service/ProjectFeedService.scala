@@ -41,6 +41,8 @@ case class RSSFeedReader @Inject()(wsClient: WSClient, implicit val ec: Executio
         } else {
           List.empty
         }
+      }).recover({
+        case _ => List.empty[OpenGraphObject]
       })
   }
 

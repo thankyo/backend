@@ -98,7 +98,7 @@ case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, we
   }
 
   private def isValidFeed(feedUrl: Resource): Future[Boolean] = {
-    rssFeedReader.read(feedUrl).map(_.nonEmpty)
+    rssFeedReader.read(feedUrl).map(_.nonEmpty).recover({ case _ => false })
   }
 
   private def enrichRSS(url: Resource): Future[Option[String]] = {

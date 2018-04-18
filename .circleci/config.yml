@@ -68,7 +68,7 @@ jobs:
       - run:
           name: Update Sentry Release
           command: >
-            curl https://sentry.io/api/hooks/release/builtin/200194/beb76b4a2cfa2e29c4231a284f2b4f5dd573c242a2a4223b7ba1f0226a8e838d
+            curl https://sentry.io/api/hooks/release/builtin/200194/beb76b4a2cfa2e29c4231a284f2b4f5dd573c242a2a4223b7ba1f0226a8e838d/
             -X POST
             -H 'Content-Type: application/json'
             -d '{"version": "'$CIRCLE_BUILD_NUM'"}'

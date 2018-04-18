@@ -51,9 +51,8 @@ class SimpleProjectService @Inject()(
     for {
       existingProjectOpt <- repo.findByUrl(project.url)
       _ = if (existingProjectOpt.isDefined) throw ResourceException.projectAlreadyCreated()
-      owned <- verificationService.verify(user, project.url)
-      _ = if (!owned) throw ResourceException.ownershipNotVerified()
-      save <- repo.save(Project.from(user, project))
+      verification <- verificationService.verify(user, project.url)
+      save <- repo.save(Project.from(user, project.copy(verification = verification)))
     } yield {
       save
     }

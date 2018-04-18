@@ -3,9 +3,8 @@ package com.clemble.loveit.thank.service
 import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern
 import com.clemble.loveit.common.model
-import com.clemble.loveit.common.model.{ProjectConstructor, Resource, Tag, UserID, WebStack}
+import com.clemble.loveit.common.model.{DibbsVerification, ProjectConstructor, Resource, Tag, UserID, WebStack}
 import com.clemble.loveit.common.service.UserService
-import com.clemble.loveit.common.model.WebStack
 import javax.inject.Inject
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
@@ -125,6 +124,7 @@ case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, we
         webStack = webStack,
         title = title,
         shortDescription = description,
+        verification = DibbsVerification,
         description = None,
         tags = tags,
         rss = rss

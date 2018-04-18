@@ -2,8 +2,9 @@ package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
-import com.clemble.loveit.common.model.{Project, Resource, UserID}
+import com.clemble.loveit.common.model.{Project, Resource, UserID, Verification}
 import com.clemble.loveit.common.util.IDGenerator
+import com.clemble.loveit.test
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -13,7 +14,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
   val trackRepo = dependency[ProjectSupportTrackRepository]
 
-  def assignOwnership(user: UserID, url: Resource): Project = await(prjRepo.save(Project(url, user, someRandom[String], someRandom[String])))
+  def assignOwnership(user: UserID, url: Resource): Project = await(prjRepo.save(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
 
   def listOwned(user: UserID): List[Resource] = await(prjRepo.findByUser(user)).map(_.url)
 

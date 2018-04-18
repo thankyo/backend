@@ -74,13 +74,26 @@ package object util {
   implicit val thankTransactionGenerator: Generator[ThankEvent] = () => {
     ThankEvent(someRandom[UserID], someRandom[Project], randomResource, someRandom[LocalDateTime])
   }
-  implicit val webStackGenerator: Generator[WebStack] = () => WordPress
+  implicit val webStackGenerator: Generator[WebStack] = () => {
+    nextInt(0, 2) match {
+      case 0 => WordPress
+      case 1 => Tumblr
+    }
+  }
+  implicit val verificationGenerator: Generator[Verification] = () => {
+    nextInt(0, 3) match {
+      case 0 => GoogleVerification
+      case 1 => TumblrVerification
+      case 2 => DibbsVerification
+    }
+  }
   implicit val supportedProjectGenerator: Generator[Project] = () => {
     Project(
       randomResource,
       someRandom[UserID],
       someRandom[String],
       someRandom[String],
+      someRandom[Verification],
       optionRandom[String],
       optionRandom[String],
       optionRandom[WebStack],

@@ -2,12 +2,10 @@ package com.clemble.loveit.common
 
 import com.clemble.loveit.auth.controller.SocialAuthController
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{Project, ProjectConstructor, Resource, UserID}
+import com.clemble.loveit.common.model.{Project, ProjectConstructor, Resource, User, UserID, Verification}
 import com.clemble.loveit.payment.service.UserPaymentService
-import com.clemble.loveit.common.model.ProjectConstructor
 import com.clemble.loveit.thank.service.{PostService, ProjectService}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
-import com.clemble.loveit.common.model.User
 import com.clemble.loveit.common.service.UserService
 import com.clemble.loveit.user.service.repository.UserRepository
 
@@ -38,7 +36,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
   }
 
   def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    await(prjService.create(user, ProjectConstructor(url, someRandom[String], someRandom[String])))
+    await(prjService.create(user, ProjectConstructor(url, someRandom[String], someRandom[String], someRandom[Verification])))
   }
 
 }

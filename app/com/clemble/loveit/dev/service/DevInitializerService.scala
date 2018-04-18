@@ -4,11 +4,10 @@ import java.time.YearMonth
 
 import javax.inject.Inject
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{Post, ProjectConstructor, UserID}
+import com.clemble.loveit.common.model.{DibbsVerification, Post, Project, ProjectConstructor, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.EOMPaymentService
-import com.clemble.loveit.common.model.{Project, ProjectConstructor}
 import com.clemble.loveit.thank.service.PostService
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,6 +35,7 @@ object DevInitializerService {
           title = "Zen Pencil",
           shortDescription = "My personal blog",
           description = Some("Personal blog for zenpencils"),
+          verification = DibbsVerification,
           avatar = Some("https://pbs.twimg.com/profile_images/493961823763181568/mb_2vK6y_400x400.jpeg"),
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
           rss = Some("https://zenpencils.com/feed")
@@ -47,6 +47,7 @@ object DevInitializerService {
           description = Some("Once I was in Japan"),
           avatar = Some("https://pbs.twimg.com/profile_images/741421578370572288/l1pjJGbp_400x400.jpg"),
           tags = Set("manga", "japan"),
+          verification = DibbsVerification,
           rss = Some("https://personacentral.com/feed")
         )
       )
@@ -63,6 +64,7 @@ object DevInitializerService {
           url = "https://readms.net",
           title = "Manga Stream",
           shortDescription = "Awesome scanlation group",
+          verification = DibbsVerification,
           description = Some("We do what we do, because we love it"),
           avatar = Some("https://pbs.twimg.com/profile_images/544145066/twitterpic_400x400.png"),
           tags = Set("manga", "japan", "one piece", "naruto", "bleach"),
@@ -81,6 +83,7 @@ object DevInitializerService {
           url = "https://www.sciencedaily.com",
           title = "Science Daily Blog",
           shortDescription = "Science Daily Blog",
+          verification = DibbsVerification,
           description = Some("This is a small blog for science hungry people"),
           avatar = Some("https://www.sciencedaily.com/images/sd-logo.png"),
           tags = Set("science", "daily", "tech"),

@@ -47,6 +47,7 @@ case class TumblrProjectOwnershipService @Inject()(
           shortDescription = shortDescription,
           webStack = Some(Tumblr),
           rss = Some(rss),
+          verification = TumblrVerification,
           avatar = user.avatar
         )
       })
@@ -110,6 +111,7 @@ case class GoogleProjectOwnershipService @Inject()(
             .get()
             .map(res => readGoogleResources(user, res.json))
             .flatMap(resources => Future.sequence(resources.map(enrichService.enrich(user, _))))
+            .map(_.map(_.copy(verification = GoogleVerification)))
         case _ =>
           Future.successful(Seq.empty[ProjectConstructor])
       }

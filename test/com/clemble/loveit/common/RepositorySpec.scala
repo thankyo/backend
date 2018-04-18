@@ -1,11 +1,10 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{Project, Resource, UserID}
+import com.clemble.loveit.common.model.{Project, Resource, User, UserID, Verification}
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.UserPaymentRepository
 import com.clemble.loveit.thank.service.repository.ProjectRepository
-import com.clemble.loveit.common.model.User
 import com.clemble.loveit.user.service.repository.UserRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,7 +27,7 @@ trait RepositorySpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    await(prjRepo.save(Project(url, user, someRandom[String], someRandom[String])))
+    await(prjRepo.save(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
   }
 
   override def getUser(user: UserID): Option[User] = {

@@ -15,7 +15,7 @@ trait WSClientAware {
 
 object WSClientAware {
 
-  implicit case class ExtendedWSClient(client: WSClient) {
+  implicit class ExtendedWSClient(client: WSClient) {
 
     def isAlive(url: Resource)(implicit ec: ExecutionContext): Future[Boolean] = {
       client.url(url)

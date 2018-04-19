@@ -103,7 +103,7 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
     if (env.mode == Mode.Dev || env.mode == Mode.Test) {
       DevPayoutAccountConverter
     } else {
-      new StripePayoutAccountConverter()(wsClient, ec)
+      new StripePayoutAccountConverter(wsClient, ec)
     }
   }
 

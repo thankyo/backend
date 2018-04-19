@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service
 
-import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.ActorSystem
 import akka.pattern
 import com.clemble.loveit.common.model.{DibsVerification, ProjectConstructor, Resource, Tag, UserID, WebStack}
 import com.clemble.loveit.common.service.{UserService, WSClientAware}
@@ -8,6 +8,7 @@ import javax.inject.Inject
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
 import play.api.libs.ws.WSClient
+import WSClientAware._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -72,7 +73,13 @@ case class StaticWebStackAnalyzer(analyzedUrls: Map[Resource, WebStack]) extends
 
 }
 
-case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, webStackAnalyzer: ProjectWebStackAnalysis, http: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext) extends ProjectEnrichService {
+case class SimpleProjectEnrichService @Inject()(
+  rssFeedReader: RSSFeedReader,
+  webStackAnalyzer: ProjectWebStackAnalysis,
+  client: WSClient,
+  userService: UserService,
+  actorSystem: ActorSystem
+)(implicit ec: ExecutionContext) extends ProjectEnrichService with WSClientAware {
 
   val DELAY: FiniteDuration = 3.second
 
@@ -86,7 +93,7 @@ case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, we
   }
 
   private def enrichDescription(url: Resource): Future[(Set[Tag], String, String)] = {
-    http
+    client
       .url(url)
       .get()
       .map(resp => {
@@ -109,7 +116,7 @@ case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, we
     possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1 == true).map(_._2))
   }
 
-  override def enrich(user: UserID, url: Resource): Future[ProjectConstructor] = {
+  private def doEnrich(user: UserID, url: Resource): Future[ProjectConstructor] = {
     val fNone = pattern.after[Option[Nothing]](DELAY, actorSystem.scheduler)(Future.successful(None))
     val fWebStack = Future.firstCompletedOf(Seq(webStackAnalyzer.analyze(url), fNone))
     val fDescription = Future.firstCompletedOf(Seq(enrichDescription(url), fNone.map(_ => descriptionFromUrl(url))))
@@ -132,6 +139,18 @@ case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, we
         tags = tags,
         rss = rss
       )
+    }
+  }
+
+  override def enrich(user: UserID, url: Resource): Future[ProjectConstructor] = {
+    if (url.startsWith("http")) {
+      doEnrich(user, url)
+    } else {
+      val urlWithHttps = s"https://${url}"
+      client.isAlive(urlWithHttps).flatMap({
+        case true => doEnrich(user, urlWithHttps)
+        case false => doEnrich(user, s"http://${url}")
+      })
     }
   }
 

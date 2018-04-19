@@ -2,7 +2,6 @@ package com.clemble.loveit.thank.service
 
 import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern
-import com.clemble.loveit.common.model
 import com.clemble.loveit.common.model.{DibsVerification, ProjectConstructor, Resource, Tag, UserID, WebStack}
 import com.clemble.loveit.common.service.UserService
 import javax.inject.Inject
@@ -44,10 +43,10 @@ trait ProjectWebStackAnalysis {
 
 }
 
-case class WappalyzerWebStackAnalyzer(lookupUrl: String, wsClient: WSClient)(implicit ec: ExecutionContext) extends ProjectWebStackAnalysis {
+case class WappalyzerWebStackAnalyzer(lookupUrl: String, http: WSClient)(implicit ec: ExecutionContext) extends ProjectWebStackAnalysis {
 
   override def analyze(url: Resource): Future[Option[WebStack]] = {
-    wsClient.url(lookupUrl)
+    http.url(lookupUrl)
       .addQueryStringParameters("url" -> url)
       .execute()
       .filter(_.status == 200)
@@ -69,7 +68,7 @@ case class StaticWebStackAnalyzer(analyzedUrls: Map[Resource, WebStack]) extends
 
 }
 
-case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, webStackAnalyzer: ProjectWebStackAnalysis, wsClient: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext) extends ProjectEnrichService {
+case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, webStackAnalyzer: ProjectWebStackAnalysis, http: WSClient, userService: UserService, actorSystem: ActorSystem)(implicit ec: ExecutionContext) extends ProjectEnrichService {
 
   val DELAY: FiniteDuration = 3.second
 
@@ -83,7 +82,7 @@ case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, we
   }
 
   private def enrichDescription(url: Resource): Future[(Set[Tag], String, String)] = {
-    wsClient
+    http
       .url(url)
       .get()
       .map(resp => {
@@ -118,7 +117,7 @@ case class SimpleProjectEnrichService @Inject()(rssFeedReader: RSSFeedReader, we
       avatar <- fAvatar
       rss <- fRss
     } yield {
-      model.ProjectConstructor(
+      ProjectConstructor(
         url = url,
         avatar = avatar,
         webStack = webStack,

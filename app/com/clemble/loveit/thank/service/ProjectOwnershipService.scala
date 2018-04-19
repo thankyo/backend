@@ -9,6 +9,7 @@ import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider.SpecifiedProfileError
 import com.mohiva.play.silhouette.impl.providers.{OAuth1Info, OAuth2Info}
 import javax.inject.{Inject, Singleton}
+import play.api.http.Status
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.WSClient
 
@@ -80,9 +81,13 @@ case class GoogleProjectOwnershipService @Inject()(
   oAuthService: UserOAuthService,
   tumblrProvider: TumblrProvider,
   enrichService: ProjectEnrichService,
-  client: WSClient,
+  http: WSClient,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
+
+  val ANDROID_APP = "ANDROID_APP"
+  val INET_DOMAIN = "INET_DOMAIN"
+  val SITE = "SITE"
 
   private def readGoogleResources(user: UserID, json: JsValue): Seq[Resource] = {
     (json \ "error").asOpt[JsObject].foreach(error => {
@@ -92,9 +97,29 @@ case class GoogleProjectOwnershipService @Inject()(
       throw new ProfileRetrievalException(SpecifiedProfileError.format(GoogleProvider.ID, errorCode, errorMsg))
     })
 
-    val resources = (json \ "items" \\ "site").map(site => (site \ "identifier").as[Resource].normalize())
+    val resources = (json \ "items" \\ "site").flatMap(site => {
+      (site \ "type").as[String] match {
+        case INET_DOMAIN =>
+          val domain = (site \ "identifier").as[String]
+          List(s"http://${domain}", s"https://${domain}")
+        case SITE =>
+          val url = (site \ "identifier").as[Resource].normalize()
+          List(url)
+        case _ =>
+          List.empty
+      }
+    })
 
     resources
+  }
+
+  private def isAlive(url: Resource): Future[Boolean] = {
+    http.url(url)
+      .withFollowRedirects(false)
+      .get()
+      .filter(res => res.status == Status.OK)
+      .map(_ => true)
+      .recover({ case _ => false })
   }
 
   override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
@@ -105,12 +130,20 @@ case class GoogleProjectOwnershipService @Inject()(
       googleAuthOpt match {
         case Some(info: OAuth2Info) =>
           val url = s"https://www.googleapis.com/siteVerification/v1/webResource?access_token=${URLEncoder.encode(info.accessToken, "UTF-8")}"
-          client
+          http
             .url(url)
             .withHttpHeaders("Authorization" -> s"Bearer ${info.accessToken}")
             .get()
             .map(res => readGoogleResources(user, res.json))
-            .flatMap(resources => Future.sequence(resources.map(enrichService.enrich(user, _))))
+            .flatMap(urls => {
+              val enrichedUrls = urls.map(url => {
+                isAlive(url).flatMap({
+                  case true => enrichService.enrich(user, url).map(Some(_))
+                  case false => Future.successful(None)
+                })
+              })
+              Future.sequence(enrichedUrls).map(_.flatten)
+            })
             .map(_.map(_.copy(verification = GoogleVerification)))
         case _ =>
           Future.successful(Seq.empty[ProjectConstructor])

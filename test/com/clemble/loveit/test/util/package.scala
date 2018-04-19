@@ -84,7 +84,7 @@ package object util {
     nextInt(0, 3) match {
       case 0 => GoogleVerification
       case 1 => TumblrVerification
-      case 2 => DibbsVerification
+      case 2 => DibsVerification
     }
   }
   implicit val supportedProjectGenerator: Generator[Project] = () => {

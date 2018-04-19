@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import javax.inject.Inject
-import com.clemble.loveit.common.model.{DibbsVerification, Resource, UserID, Verification}
+import com.clemble.loveit.common.model.{DibsVerification, Resource, UserID, Verification}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -14,7 +14,7 @@ trait ProjectOwnershipVerificationService {
 case class SimpleProjectOwnershipVerificationService @Inject()(ownershipService: ProjectOwnershipService, implicit val ec: ExecutionContext) extends ProjectOwnershipVerificationService {
 
   override def verify(user: UserID, url: Resource): Future[Verification] = {
-    ownershipService.fetch(user).map(_.find(prj => url.startsWith(prj.url)).map(_.verification).getOrElse(DibbsVerification))
+    ownershipService.fetch(user).map(_.find(prj => url.startsWith(prj.url)).map(_.verification).getOrElse(DibsVerification))
   }
 
 }
@@ -22,7 +22,7 @@ case class SimpleProjectOwnershipVerificationService @Inject()(ownershipService:
 case object TestProjectOwnershipVerificationService extends ProjectOwnershipVerificationService {
 
   override def verify(user: UserID, url: Resource): Future[Verification] = {
-    Future.successful(DibbsVerification)
+    Future.successful(DibsVerification)
   }
 
 }

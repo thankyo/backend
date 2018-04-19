@@ -7,7 +7,7 @@ import play.api.libs.json._
 sealed trait Verification
 case object GoogleVerification extends Verification
 case object TumblrVerification extends Verification
-case object DibbsVerification extends Verification
+case object DibsVerification extends Verification
 
 object Verification {
 
@@ -15,12 +15,12 @@ object Verification {
 
     val GOOGLE = JsString("google")
     val TUMBLR = JsString("tumblr")
-    val DIBBS = JsString("dibbs")
+    val DIBS = JsString("dibs")
 
     override def reads(json: JsValue): JsResult[Verification] = json match {
       case GOOGLE => JsSuccess(GoogleVerification)
       case TUMBLR => JsSuccess(TumblrVerification)
-      case DIBBS => JsSuccess(DibbsVerification)
+      case DIBS => JsSuccess(DibsVerification)
       case _ => JsError("Unknown verification type")
     }
 
@@ -28,7 +28,7 @@ object Verification {
       o match {
         case GoogleVerification => GOOGLE
         case TumblrVerification => TUMBLR
-        case DibbsVerification => DIBBS
+        case DibsVerification => DIBS
       }
     }
   }
@@ -63,7 +63,7 @@ case class Project(
 
 object Project {
 
-  def error(url: Resource): Project = Project(url, User.UNKNOWN, "No owner registered for this resource", "Error on project location", DibbsVerification)
+  def error(url: Resource): Project = Project(url, User.UNKNOWN, "No owner registered for this resource", "Error on project location", DibsVerification)
 
   implicit val jsonFormat: OFormat[Project] = Json.format[Project]
 

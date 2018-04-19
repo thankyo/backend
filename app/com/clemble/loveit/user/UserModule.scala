@@ -52,7 +52,7 @@ class UserModule(env: PlayEnvironment, conf: Configuration) extends ScalaModule 
       TestSubscriptionManager
     } else {
       val apiKey = conf.get[String]("email.mailgun.api.key")
-      MailgunSubscriptionManager(apiKey, ws, eventBusManager, ec)
+      MailgunSubscriptionManager(apiKey, eventBusManager, ws, ec)
     }
   }
 

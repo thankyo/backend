@@ -41,8 +41,8 @@ case class SubscriptionOnSignUpListener(subscriptionManager: SubscriptionManager
 @Singleton
 case class MailgunSubscriptionManager @Inject()(
   apiKey: String,
-  client: WSClient,
   eventBusManager: EventBusManager,
+  client: WSClient,
   implicit val ec: ExecutionContext
 ) extends SubscriptionManager with Logger with WSClientAware {
 

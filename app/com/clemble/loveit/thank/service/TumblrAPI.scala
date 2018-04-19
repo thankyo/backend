@@ -24,8 +24,8 @@ case class SimpleTumblrAPI @Inject()(
   oAuthService: UserOAuthService,
   tumblrProvider: TumblrProvider,
 
-  client: WSClient,
   userOAuth: UserOAuthService,
+  client: WSClient,
   implicit val ec: ExecutionContext
 ) extends TumblrAPI with WSClientAware {
 

@@ -45,8 +45,9 @@ trait ProjectWebStackAnalysis {
 
 case class WappalyzerWebStackAnalyzer(
   lookupUrl: String,
-  client: WSClient
-)(implicit ec: ExecutionContext) extends ProjectWebStackAnalysis with WSClientAware {
+  client: WSClient,
+  implicit val ec: ExecutionContext
+) extends ProjectWebStackAnalysis with WSClientAware {
 
   override def analyze(url: Resource): Future[Option[WebStack]] = {
     client.url(lookupUrl)

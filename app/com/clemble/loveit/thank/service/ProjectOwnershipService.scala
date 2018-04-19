@@ -9,7 +9,7 @@ import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider.SpecifiedProfileError
 import com.mohiva.play.silhouette.impl.providers.{OAuth1Info, OAuth2Info}
 import javax.inject.{Inject, Singleton}
-import play.api.http.Status
+import WSClientAware._
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.WSClient
 
@@ -81,9 +81,9 @@ case class GoogleProjectOwnershipService @Inject()(
   oAuthService: UserOAuthService,
   tumblrProvider: TumblrProvider,
   enrichService: ProjectEnrichService,
-  http: WSClient,
+  client: WSClient,
   implicit val ec: ExecutionContext
-) extends ProjectOwnershipService {
+) extends ProjectOwnershipService with WSClientAware {
 
   val ANDROID_APP = "ANDROID_APP"
   val INET_DOMAIN = "INET_DOMAIN"
@@ -113,15 +113,6 @@ case class GoogleProjectOwnershipService @Inject()(
     resources
   }
 
-  private def isAlive(url: Resource): Future[Boolean] = {
-    http.url(url)
-      .withFollowRedirects(false)
-      .get()
-      .filter(res => res.status == Status.OK)
-      .map(_ => true)
-      .recover({ case _ => false })
-  }
-
   override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
     (for {
       googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
@@ -130,14 +121,14 @@ case class GoogleProjectOwnershipService @Inject()(
       googleAuthOpt match {
         case Some(info: OAuth2Info) =>
           val url = s"https://www.googleapis.com/siteVerification/v1/webResource?access_token=${URLEncoder.encode(info.accessToken, "UTF-8")}"
-          http
+          client
             .url(url)
             .withHttpHeaders("Authorization" -> s"Bearer ${info.accessToken}")
             .get()
             .map(res => readGoogleResources(user, res.json))
             .flatMap(urls => {
               val enrichedUrls = urls.map(url => {
-                isAlive(url).flatMap({
+                client.isAlive(url).flatMap({
                   case true => enrichService.enrich(user, url).map(Some(_))
                   case false => Future.successful(None)
                 })

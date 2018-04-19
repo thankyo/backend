@@ -1,9 +1,9 @@
 package com.clemble.loveit.payment.service
 
 import javax.inject.{Inject, Singleton}
-
 import com.clemble.loveit.common.error.PaymentException
 import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.service.WSClientAware
 import com.clemble.loveit.payment.model.PayoutAccount
 import com.clemble.loveit.payment.service.repository.PayoutAccountRepository
 import com.stripe.Stripe
@@ -66,14 +66,17 @@ sealed trait PayoutAccountConverter {
   * Stripe processing service
   */
 @Singleton
-class StripePayoutAccountConverter @Inject() (wsClient: WSClient, implicit val ec: ExecutionContext) extends PayoutAccountConverter {
+case class StripePayoutAccountConverter @Inject() (
+  client: WSClient,
+  implicit val ec: ExecutionContext
+) extends PayoutAccountConverter with WSClientAware {
 
   /**
     * Converts payout token to [[PayoutAccount]]
     */
   override def processPayoutToken(token: String): Future[PayoutAccount] = {
     // Step 1. Make a request to PayoutToken
-    val fRes = wsClient.url("https://connect.stripe.com/oauth/token").
+    val fRes = client.url("https://connect.stripe.com/oauth/token").
       addQueryStringParameters(
         "client_secret" -> Stripe.apiKey,
         "grant_type" -> "authorization_code",

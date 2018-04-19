@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service
 
 import com.clemble.loveit.common.model.{Post, UserID}
-import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, UserService}
+import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, UserService, WSClientAware}
 import com.mohiva.play.silhouette.impl.providers.OAuth1Info
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
@@ -27,7 +27,7 @@ case class SimpleTumblrAPI @Inject()(
   client: WSClient,
   userOAuth: UserOAuthService,
   implicit val ec: ExecutionContext
-) extends TumblrAPI {
+) extends TumblrAPI with WSClientAware {
 
   val LOG = LoggerFactory.getLogger(classOf[TumblrAPI])
 

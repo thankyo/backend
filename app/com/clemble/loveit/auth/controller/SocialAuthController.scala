@@ -13,8 +13,6 @@ import com.mohiva.play.silhouette.api.util.ExtractableRequest
 import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.providers.oauth1.secrets.{CookieSecret, CookieSecretProvider}
 import javax.inject.{Inject, Singleton}
-import org.joda.time.DateTime
-import play.api.libs.ws.WSClient
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -28,7 +26,6 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
   */
 @Singleton
 class SocialAuthController @Inject()(
-  wsClient: WSClient,
   authService: AuthService,
   tokenSecretProvider: CookieSecretProvider,
   authInfoRepository: AuthInfoRepository,

@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 import com.clemble.loveit.common.model
 import com.clemble.loveit.common.model.{OpenGraphImage, OpenGraphObject, Project, Tag, Tumblr}
+import com.clemble.loveit.common.service.WSClientAware
 import javax.inject.{Inject, Singleton}
 import org.jsoup.Jsoup
 import play.api.http.Status
@@ -19,7 +20,10 @@ trait PostEnrichService {
 }
 
 @Singleton
-class FacebookPostEnrichService @Inject()(client: WSClient, implicit val ec: ExecutionContext) extends PostEnrichService {
+case class FacebookPostEnrichService @Inject()(
+  client: WSClient,
+  implicit val ec: ExecutionContext
+) extends PostEnrichService with WSClientAware {
 
   private def openGraphFromFB(url: String, fb: JsValue): Option[OpenGraphObject] = {
     val imageUrl = (fb \ "og_object" \ "image" \ "src").asOpt[String]
@@ -58,7 +62,10 @@ class FacebookPostEnrichService @Inject()(client: WSClient, implicit val ec: Exe
 }
 
 @Singleton
-class HtmlPostEnrichService @Inject()(client: WSClient, implicit val ec: ExecutionContext) extends PostEnrichService {
+case class HtmlPostEnrichService @Inject()(
+  client: WSClient,
+  implicit val ec: ExecutionContext
+) extends PostEnrichService with WSClientAware {
 
   private def openGraphFromHTML(url: String, htmlStr: String): Option[OpenGraphObject] = {
     Option(Jsoup.parse(htmlStr)).map(doc => {
@@ -122,7 +129,7 @@ class HtmlPostEnrichService @Inject()(client: WSClient, implicit val ec: Executi
         val htmlGraph = htmlOpt.flatMap(openGraphFromHTML(post.url, _))
         post.merge(htmlGraph)
       }).
-      recover({ case _ => post})
+      recover({ case _ => post })
   }
 
 }
@@ -157,7 +164,7 @@ case class TumblrPostEnrichService @Inject()(tumblrAPI: TumblrAPI, implicit val 
         case Some(jsObj) => post.merge(openGraphFromTumblr(post.url, jsObj))
         case None => post
       }).
-      recover({ case _ => post})
+      recover({ case _ => post })
   }
 
 }

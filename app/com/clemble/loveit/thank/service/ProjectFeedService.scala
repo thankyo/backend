@@ -3,6 +3,7 @@ package com.clemble.loveit.thank.service
 import java.time.LocalDateTime
 
 import com.clemble.loveit.common.model.{OpenGraphObject, Post, Project}
+import com.clemble.loveit.common.service.WSClientAware
 import javax.inject.{Inject, Singleton}
 import play.api.http.Status
 import play.api.libs.ws.WSClient
@@ -29,12 +30,15 @@ object RSSFeedReader {
 }
 
 @Singleton
-case class RSSFeedReader @Inject()(wsClient: WSClient, implicit val ec: ExecutionContext) {
+case class RSSFeedReader @Inject()(
+  client: WSClient,
+  implicit val ec: ExecutionContext
+) extends WSClientAware {
 
   import RSSFeedReader._
 
   def read(feedUrl: String): Future[List[OpenGraphObject]] = {
-    wsClient.url(feedUrl).get()
+    client.url(feedUrl).get()
       .map(feed => {
         if (feed.status == Status.OK) {
           readFeed(feed.body).sortBy(_.pubDate)
@@ -42,8 +46,8 @@ case class RSSFeedReader @Inject()(wsClient: WSClient, implicit val ec: Executio
           List.empty
         }
       }).recover({
-        case _ => List.empty[OpenGraphObject]
-      })
+      case _ => List.empty[OpenGraphObject]
+    })
   }
 
 }

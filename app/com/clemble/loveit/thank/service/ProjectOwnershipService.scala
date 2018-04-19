@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import java.net.URLEncoder
 
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, UserService}
+import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, UserService, WSClientAware}
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider.SpecifiedProfileError
@@ -28,7 +28,7 @@ case class TumblrProjectOwnershipService @Inject()(
   tumblrProvider: TumblrProvider,
   client: WSClient,
   implicit val ec: ExecutionContext
-) extends ProjectOwnershipService {
+) extends ProjectOwnershipService with WSClientAware {
 
   private def readTumblrResources(user: User, json: JsValue): Seq[ProjectConstructor] = {
     val blogs = (json \ "response" \ "user" \ "blogs").asOpt[List[JsObject]].getOrElse(List.empty[JsObject])

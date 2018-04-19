@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern
 import com.clemble.loveit.common.model.{DibsVerification, ProjectConstructor, Resource, Tag, UserID, WebStack}
-import com.clemble.loveit.common.service.UserService
+import com.clemble.loveit.common.service.{UserService, WSClientAware}
 import javax.inject.Inject
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
@@ -43,10 +43,13 @@ trait ProjectWebStackAnalysis {
 
 }
 
-case class WappalyzerWebStackAnalyzer(lookupUrl: String, http: WSClient)(implicit ec: ExecutionContext) extends ProjectWebStackAnalysis {
+case class WappalyzerWebStackAnalyzer(
+  lookupUrl: String,
+  client: WSClient
+)(implicit ec: ExecutionContext) extends ProjectWebStackAnalysis with WSClientAware {
 
   override def analyze(url: Resource): Future[Option[WebStack]] = {
-    http.url(lookupUrl)
+    client.url(lookupUrl)
       .addQueryStringParameters("url" -> url)
       .execute()
       .filter(_.status == 200)

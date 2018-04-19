@@ -45,7 +45,6 @@ class UserModule(env: PlayEnvironment, conf: Configuration) extends ScalaModule 
     JSONCollectionFactory.create("invitation", mongoApi, ec, env)
   }
 
-
   @Provides
   @Singleton
   def subscriptionManager(ws: WSClient, ec: ExecutionContext, eventBusManager: EventBusManager): SubscriptionManager = {

@@ -3,9 +3,3 @@ mongo:
   restart: always
   ports:
     - "27017:27017"
-
-wappalyzer-api:
-  image: loveit/wappalyzer-api
-  restart: always
-  ports:
-    - "3001:3000"

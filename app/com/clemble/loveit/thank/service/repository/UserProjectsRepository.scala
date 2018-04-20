@@ -5,14 +5,14 @@ import com.clemble.loveit.thank.model.UserProjects
 
 import scala.concurrent.Future
 
-trait UserProjectsRepository {
+trait UserProjectsRepository extends ProjectRepository {
 
   def findById(user: UserID): Future[Option[UserProjects]]
 
   def save(projects: UserProjects): Future[UserProjects]
 
-  def append(user: UserID, owned: OwnedProject): Future[Boolean]
+  def saveOwnedProject(user: UserID, owned: OwnedProject): Future[Boolean]
 
-  def saveProject(project: Project): Future[Boolean]
+  def saveProject(project: Project): Future[Project]
 
 }

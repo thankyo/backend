@@ -35,4 +35,5 @@ class SimpleUserPaymentService @Inject()(eventBusManager: EventBusManager, payme
     val payment = UserPayment from user
     paymentRepository.save(payment)
   }
+
 }

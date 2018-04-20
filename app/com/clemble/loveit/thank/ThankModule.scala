@@ -5,6 +5,7 @@ import akka.actor.{ActorSystem, Scheduler}
 import com.clemble.loveit.common.model.WordPress
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.service.UserService
+import com.clemble.loveit.payment.service.{SimpleUserPaymentService, UserPaymentService}
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
 import com.clemble.loveit.thank.service.repository.mongo._
@@ -31,10 +32,10 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[ProjectOwnershipService]).to(classOf[SimpleProjectOwnershipService])
 
     bind(classOf[TumblrIntegrationService]).to(classOf[SimpleTumblrIntegrationService]).asEagerSingleton()
-
-    bind(classOf[ProjectRepository]).to(classOf[MongoProjectRepository]).asEagerSingleton()
     bind(classOf[UserProjectsRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
+
+    bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()
 
     bind(classOf[ProjectEnrichService]).to(classOf[SimpleProjectEnrichService]).asEagerSingleton()
 
@@ -71,13 +72,6 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Named("userResource")
   def userResourceCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("userResource", mongoApi, ec, env)
-  }
-
-  @Provides
-  @Singleton
-  @Named("projects")
-  def projectsCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("projects", mongoApi, ec, env)
   }
 
   @Provides

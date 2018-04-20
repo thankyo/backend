@@ -4,7 +4,6 @@ import javax.inject.{Inject, Named}
 import akka.stream.Materializer
 import com.clemble.loveit.common.model.{Project, ProjectID, Resource, Tag, UserID, _}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.common.util.IDGenerator
 import com.clemble.loveit.common.model.Project._
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import play.api.libs.json.Json
@@ -14,6 +13,7 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@deprecated
 case class MongoProjectRepository @Inject()(
                                                  @Named("projects") collection: JSONCollection,
                                                  implicit val ec: ExecutionContext,
@@ -53,7 +53,7 @@ case class MongoProjectRepository @Inject()(
     collection.find(query).one[Project]
   }
 
-  override def deleteProject(id: ProjectID): Future[Boolean] = {
+  override def deleteProject(user: UserID, id: ProjectID): Future[Boolean] = {
     val selector = Json.obj("_id" -> id)
     MongoSafeUtils.safeSingleUpdate(collection.remove(selector))
   }

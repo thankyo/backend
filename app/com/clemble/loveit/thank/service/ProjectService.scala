@@ -46,7 +46,6 @@ class SimpleProjectService @Inject()(
     }
   }
 
-
   override def create(user: UserID, project: OwnedProject): Future[Project] = {
     for {
       existingProjectOpt <- repo.findProjectByUrl(project.url)
@@ -77,7 +76,7 @@ class SimpleProjectService @Inject()(
       projectOpt <- repo.findProjectById(id)
       _ = if (!projectOpt.isDefined) throw ResourceException.noResourceExists()
       _ = if (!projectOpt.forall(_.user == user)) throw ResourceException.differentOwner()
-      removed <- repo.deleteProject(id)
+      removed <- repo.deleteProject(user, id)
       removedPosts <- postService.delete(projectOpt.get)
     } yield {
       removed && removedPosts

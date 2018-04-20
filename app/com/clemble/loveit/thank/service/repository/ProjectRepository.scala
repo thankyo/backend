@@ -18,6 +18,6 @@ trait ProjectRepository {
 
   def updateProject(project: Project): Future[Boolean]
 
-  def deleteProject(id: ProjectID): Future[Boolean]
+  def deleteProject(user: UserID, id: ProjectID): Future[Boolean]
 
 }

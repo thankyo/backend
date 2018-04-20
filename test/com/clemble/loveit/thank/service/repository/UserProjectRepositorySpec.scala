@@ -22,7 +22,7 @@ class UserProjectRepositorySpec extends RepositorySpec {
     await(repo.save(projects))
 
     val ownedProject = someRandom[OwnedProject]
-    await(repo.append(user, ownedProject)) shouldEqual true
+    await(repo.saveOwnedProject(user, ownedProject)) shouldEqual true
 
     await(repo.findById(user)).get.owned should containAllOf(Seq(ownedProject))
   }
@@ -34,7 +34,7 @@ class UserProjectRepositorySpec extends RepositorySpec {
     await(repo.save(projects))
 
     val installedProject = someRandom[Project].copy(user = user)
-    await(repo.saveProject(installedProject)) shouldEqual true
+    await(repo.saveProject(installedProject)) shouldEqual installedProject
 
     await(repo.findById(user)).get.installed should containAllOf(Seq(installedProject))
   }

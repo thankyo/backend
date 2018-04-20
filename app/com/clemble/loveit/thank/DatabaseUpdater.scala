@@ -100,16 +100,11 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
       agg match {
         case false => Future.successful(false)
         case true =>
-          val id = (json \ "_id").as[String]
           val user = (json \ "user").as[String]
-          if (id == user) {
-            Future.successful(true)
-          } else {
-            userProjectsCollection.remove(Json.obj("_id" -> id)).flatMap(_.ok match {
-              case true => userProjectsCollection.insert(json + ("_id" -> JsString("user"))).map(_.ok)
-              case false => Future.successful(false)
-            })
-          }
+          userProjectsCollection.remove(Json.obj("user" -> user)).flatMap(_.ok match {
+            case true => userProjectsCollection.insert(json + ("_id" -> JsString("user"))).map(_.ok)
+            case false => Future.successful(false)
+          })
       }
     })
   }

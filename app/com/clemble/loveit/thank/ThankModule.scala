@@ -33,6 +33,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[TumblrIntegrationService]).to(classOf[SimpleTumblrIntegrationService]).asEagerSingleton()
     bind(classOf[UserProjectsRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
+    bind(classOf[ProjectRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
 
     bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()

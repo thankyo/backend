@@ -7,7 +7,7 @@ import com.clemble.loveit.common.model.{OwnedProject, Project, ProjectID, Resour
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.UserProjects
 import com.clemble.loveit.thank.service.repository.UserProjectsRepository
-import javax.inject.{Inject, Named}
+import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.json.{JsObject, JsString, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.play.json._
@@ -15,6 +15,7 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class MongoUserProjectsRepository @Inject() (
   @Named("userProject") collection: JSONCollection,
   implicit val m: Materializer,
@@ -31,7 +32,7 @@ class MongoUserProjectsRepository @Inject() (
   }
 
   override def findProjectByUrl(url: Resource): Future[Option[Project]] = {
-    val selector = Json.obj("url" -> Json.obj("$in" -> url.parents()))
+    val selector = Json.obj("installed.url" -> Json.obj("$in" -> url.parents()))
     collection
       .find(selector)
       .one[UserProjects]
@@ -83,7 +84,7 @@ class MongoUserProjectsRepository @Inject() (
   }
 
   override def saveProject(project: Project): Future[Project] = {
-    val selector = Json.obj("_id" -> project.user)
+    val selector = Json.obj("_id" -> project.user, "installed.url" -> Json.obj("$ne" -> project.url))
     val update = Json.obj("$addToSet" -> Json.obj("installed" -> project))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update)).map({
       case true => project

@@ -4,7 +4,6 @@ import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
 import com.clemble.loveit.common.model.{Project, Resource, UserID, Verification}
 import com.clemble.loveit.common.util.IDGenerator
-import com.clemble.loveit.test
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.runner.JUnitRunner
@@ -12,29 +11,29 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  val trackRepo = dependency[ProjectSupportTrackRepository]
-
-  def assignOwnership(user: UserID, url: Resource): Project = await(prjRepo.saveProject(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
+  def assignOwnership(user: UserID, url: Resource): Project = {
+    await(prjRepo.saveProject(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
+  }
 
   def listOwned(user: UserID): List[Resource] = await(prjRepo.findProjectsByUser(user)).map(_.url)
 
   def findOwner(url: Resource): Option[UserID] = await(prjRepo.findProjectByUrl(url)).map(_.user)
 
 
-  "Resource repo creates a project" in {
-    val user = createUser()
+  "Update" should {
 
-    await(prjRepo.findProjectsByUser(user)) shouldNotEqual None
-  }
+    "update title" in {
+      val user = createUser()
+      val res = randomResource
 
-  "Update repo" in {
-    val giver = createUser()
-    val owner = createUser()
+      val project = assignOwnership(user, res)
 
-    val project = someRandom[Project]
+      val projectWithTitle = project.copy(title = someRandom[String])
 
-    await(trackRepo.markSupportedBy(giver, project)) shouldEqual true
-    await(trackRepo.getSupported(giver)) shouldEqual List(project._id)
+      await(prjRepo.updateProject(projectWithTitle)) shouldEqual true
+      await(prjRepo.findProjectById(project._id)) shouldEqual Some(projectWithTitle)
+    }
+
   }
 
   "LIST" should {
@@ -69,7 +68,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val res = randomResource
 
       assignOwnership(user, res)
-      assignOwnership(user, res) should throwA[RepositoryException]
+      assignOwnership(user, res) should throwA[IllegalArgumentException]
 
       listOwned(user) shouldEqual List(res)
     }

@@ -3,7 +3,10 @@ package com.clemble.loveit.thank.service.repository
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{OwnedProject, Project}
 import com.clemble.loveit.thank.model.UserProjects
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class UserProjectRepositorySpec extends RepositorySpec {
 
   lazy val repo = dependency[UserProjectsRepository]

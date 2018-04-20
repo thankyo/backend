@@ -14,8 +14,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ProjectController @Inject()(
+  usrPrjService: UserProjectsService,
   service: ProjectService,
-  enrichService: ProjectEnrichService,
   feedService: ProjectFeedService,
   lookupService: ProjectLookupService,
   trackService: ProjectSupportTrackService,
@@ -25,7 +25,7 @@ class ProjectController @Inject()(
 ) extends LoveItController(components) {
 
   def getOwnedProjects() = silhouette.SecuredAction.async(implicit req => {
-    service.getOwned(req.identity.id).map(userProjects => {
+    usrPrjService.get(req.identity.id).map(userProjects => {
       Ok(userProjects)
     })
   })
@@ -66,7 +66,7 @@ class ProjectController @Inject()(
   })
 
   def enrich(url: Resource) = silhouette.SecuredAction.async(implicit req => {
-    enrichService.enrich(req.identity.id, url).map(Ok(_))
+    usrPrjService.dibsOnUrl(req.identity.id, url).map(Ok(_))
   })
 
   def create() = silhouette.SecuredAction.async(parse.json[OwnedProject])(implicit req => {

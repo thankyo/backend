@@ -3,16 +3,13 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.thank.model.UserProjects
-import com.clemble.loveit.thank.service.repository.{ProjectRepository, UserProjectsRepository}
+import com.clemble.loveit.thank.service.repository.{UserProjectsRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectService {
 
   def findProjectsByUser(user: UserID): Future[List[Project]]
-
-  def getOwned(user: UserID): Future[UserProjects]
 
   def create(user: UserID, project: OwnedProject): Future[Project]
 
@@ -26,17 +23,12 @@ trait ProjectService {
 class SimpleProjectService @Inject()(
   repo: UserProjectsRepository,
   postService: PostService,
-  ownershipService: ProjectOwnershipService,
   verificationService: ProjectOwnershipVerificationService,
   implicit val ec: ExecutionContext
 ) extends ProjectService {
 
   override def findProjectsByUser(user: UserID): Future[List[Project]] = {
     repo.findProjectsByUser(user)
-  }
-
-  override def getOwned(user: UserID): Future[UserProjects] = {
-    repo.findById(user).map(_.getOrElse(UserProjects(user)))
   }
 
   override def create(user: UserID, project: OwnedProject): Future[Project] = {

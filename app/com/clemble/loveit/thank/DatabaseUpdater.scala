@@ -7,10 +7,11 @@ import com.clemble.loveit.common.model.{Project, User}
 import com.clemble.loveit.common.mongo.{JSONCollectionFactory, MongoSafeUtils}
 import com.clemble.loveit.thank.model.UserProjects
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import reactivemongo.play.json._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
 trait DatabaseUpdater {
 
@@ -25,10 +26,11 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
 
   val UPDATES: List[() => Future[Boolean]] = List(
     createUserProjectForExistingUsers,
-    moveFromProjectsToUserProject
+    moveFromProjectsToUserProject,
+    updateUserProject
   )
 
-  updateCollections()
+  Await.result(updateCollections(), 5 minutes)
 
   def getVersion(): Future[Int] = {
     versionCollection.find(Json.obj(), Json.obj("version" -> 1))
@@ -79,9 +81,9 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
   }
 
   def moveFromProjectsToUserProject(): Future[Boolean] = {
-    val projects = factory.create("projects")
+    val projectsCollection = factory.create("projects")
     val userProjectsCollection = factory.create("userProject")
-    MongoSafeUtils.findAll[Project](projects, Json.obj()).runFoldAsync(true)((agg, project) => {
+    MongoSafeUtils.findAll[Project](projectsCollection, Json.obj()).runFoldAsync(true)((agg, project) => {
       agg match {
         case false => Future.successful(false)
         case true =>
@@ -90,6 +92,26 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
           userProjectsCollection.update(selector, update).map(_.ok)
       }
     }).recover({ case _ => false })
+  }
+
+  def updateUserProject(): Future[Boolean] = {
+    val userProjectsCollection = factory.create("userProject")
+    MongoSafeUtils.findAll[JsObject](userProjectsCollection, Json.obj()).runFoldAsync(true)((agg, json) => {
+      agg match {
+        case false => Future.successful(false)
+        case true =>
+          val id = (json \ "_id").as[String]
+          val user = (json \ "user").as[String]
+          if (id == user) {
+            Future.successful(true)
+          } else {
+            userProjectsCollection.remove(Json.obj("_id" -> id)).flatMap(_.ok match {
+              case true => userProjectsCollection.insert(json + ("_id" -> JsString("user"))).map(_.ok)
+              case false => Future.successful(false)
+            })
+          }
+      }
+    })
   }
 
 }

@@ -3,6 +3,7 @@ package com.clemble.loveit.common.mongo
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import com.clemble.loveit.common.error.{RepositoryException, ThankException}
+import com.mohiva.play.silhouette.api
 import play.api.Logger
 import play.api.libs.json.{JsObject, Json, Reads}
 import reactivemongo.akkastream.{State, cursorProducer}
@@ -16,7 +17,7 @@ import reactivemongo.play.json.collection.JSONCollection
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
-object MongoSafeUtils {
+object MongoSafeUtils extends api.Logger {
 
   private def ignoreErrorHandler[T](collectionName: String, query: JsObject) = {
     Cursor.ContOnError[T]((_, thr) =>
@@ -91,6 +92,9 @@ object MongoSafeUtils {
 
   def ensureIndexes(collection: JSONCollection, indexes: Index*)(implicit ec: ExecutionContext): Unit = {
     val fEnsuredIndexes = indexes.map(collection.indexesManager.ensure(_))
+    fEnsuredIndexes.zip(indexes).map({ case (fEnsured, index) => {
+      fEnsured.foreach(ensured => logger.info(s"Ensured index ${index.name} ${ensured}"))
+    }})
     Await.result(Future.sequence(fEnsuredIndexes), 1 minute)
   }
 

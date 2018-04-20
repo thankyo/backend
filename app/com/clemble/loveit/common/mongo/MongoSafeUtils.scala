@@ -13,7 +13,8 @@ import reactivemongo.core.errors.DatabaseException
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
 object MongoSafeUtils {
 
@@ -89,25 +90,8 @@ object MongoSafeUtils {
   }
 
   def ensureIndexes(collection: JSONCollection, indexes: Index*)(implicit ec: ExecutionContext): Unit = {
-    for {
-      index <- indexes
-    } {
-      collection.indexesManager.ensure(index).
-        recover({ case t =>
-          t.printStackTrace(System.err)
-          System.exit(2)
-        })
-    }
-  }
-
-  def ensureUpdate(collection: JSONCollection, selector: JsObject, update: (JsObject) => Future[WriteResult])(implicit ec: ExecutionContext, m: Materializer): Unit = {
-    val source = collection.find(selector).cursor[JsObject](ReadPreference.nearest).documentSource()
-    val updateEach = source.runFoldAsync(true)((agg, jsObj) => update(jsObj).map(res => agg && res.ok && res.n == 1))
-    updateEach.foreach(success => {
-      if (!success) {
-        System.exit(1)
-      }
-    })
+    val fEnsuredIndexes = indexes.map(collection.indexesManager.ensure(_))
+    Await.result(Future.sequence(fEnsuredIndexes), 1 minute)
   }
 
 }

@@ -98,24 +98,17 @@ class MongoUserProjectsRepository @Inject() (
 object MongoUserProjectsRepository {
 
   def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
-    ensureIndexes(collection)
-  }
-
-  private def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
+        name = Some("user_project_installed_unique_url"),
         key = Seq("installed.url" -> IndexType.Ascending),
-        name = Some("usrPrj_installed_unique_url"),
         unique = true,
         sparse = true
-      )
-    )
-    MongoSafeUtils.ensureIndexes(
-      collection,
+      ),
       Index(
+        name = Some("user_project_owned_unique_url"),
         key = Seq("owned.url" -> IndexType.Ascending),
-        name = Some("usrPrj_owned_unique_url"),
         unique = true,
         sparse = true
       )

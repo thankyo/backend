@@ -34,6 +34,15 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       await(prjRepo.findProjectById(project._id)) shouldEqual Some(projectWithTitle)
     }
 
+    "Delete" in {
+      val user = createUser()
+      val res = randomResource
+
+      val project = assignOwnership(user, res)
+
+      await(prjRepo.deleteProject(user, project._id)) shouldEqual true
+    }
+
   }
 
   "LIST" should {

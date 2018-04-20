@@ -60,8 +60,8 @@ class MongoUserProjectsRepository @Inject() (
 
   override def deleteProject(user: UserID, id: ProjectID): Future[Boolean] = {
     val selector = Json.obj("_id" -> user)
-    val udpate = Json.obj("$pull" -> Json.obj("installed._id" -> id))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, udpate))
+    val deleteQuery = Json.obj("$pull" -> Json.obj("installed" -> Json.obj("_id" -> id)))
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, deleteQuery))
   }
 
   override def findById(user: UserID): Future[Option[UserProjects]] = {

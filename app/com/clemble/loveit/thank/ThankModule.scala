@@ -3,9 +3,8 @@ package com.clemble.loveit.thank
 import javax.inject.{Inject, Named, Singleton}
 import akka.actor.{ActorSystem, Scheduler}
 import com.clemble.loveit.common.model.WordPress
-import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.common.mongo.{JSONCollectionFactory}
 import com.clemble.loveit.common.service.UserService
-import com.clemble.loveit.payment.service.{SimpleUserPaymentService, UserPaymentService}
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
 import com.clemble.loveit.thank.service.repository.mongo._
@@ -15,7 +14,6 @@ import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Environment, Mode}
-import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext
@@ -64,36 +62,36 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Provides
   @Singleton
   @Named("post")
-  def postMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("post", mongoApi, ec, env)
+  def postMongoCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("post")
   }
 
   @Provides
   @Singleton
   @Named("userResource")
-  def userResourceCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("userResource", mongoApi, ec, env)
+  def userResourceCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("userResource")
   }
 
   @Provides
   @Singleton
   @Named("userSupported")
-  def userSupportedCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("userSupported", mongoApi, ec, env)
+  def userSupportedCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("userSupported")
   }
 
   @Provides
   @Singleton
   @Named("userProject")
-  def userProjectCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("userProject", mongoApi, ec, env)
+  def userProjectCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("userProject")
   }
 
   @Provides
   @Singleton
   @Named("stat")
-  def statMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("stat", mongoApi, ec, env)
+  def statMongoCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("stat")
   }
 
   @Provides

@@ -3,7 +3,7 @@ package com.clemble.loveit.auth
 import javax.inject.Singleton
 import com.clemble.loveit.auth.service._
 import com.clemble.loveit.auth.service.repository.mongo.MongoAuthInfoRepository
-import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.common.mongo.{JSONCollectionFactory}
 import com.clemble.loveit.common.service.{TumblrProvider, UserService}
 import com.clemble.loveit.common.util.AuthEnv
 import com.google.inject.name.Named
@@ -68,8 +68,8 @@ class SilhouetteModule(env: api.Environment, conf: Configuration) extends Abstra
   @Provides
   @Singleton
   @Named("authInfo")
-  def authInfoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext) = {
-    JSONCollectionFactory.create("authInfo", mongoApi, ec, env)
+  def authInfoCollection(collectionFactory: JSONCollectionFactory) = {
+    collectionFactory.create("authInfo")
   }
 
   @Provides

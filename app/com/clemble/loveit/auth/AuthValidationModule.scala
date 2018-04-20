@@ -5,7 +5,7 @@ import akka.actor.ActorSystem
 import com.clemble.loveit.auth.service.repository.ResetPasswordTokenRepository
 import com.clemble.loveit.auth.service.repository.mongo.MongoResetPasswordTokenRepository
 import com.clemble.loveit.auth.service._
-import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.common.mongo.{JSONCollectionFactory}
 import com.clemble.loveit.common.service.UserOAuthService
 import com.clemble.loveit.common.util.{AuthEnv, EventBusManager}
 import com.google.inject.name.Named
@@ -38,8 +38,8 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
   @Provides
   @Singleton
   @Named("resetToken")
-  def authTokenCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext) = {
-    JSONCollectionFactory.create("resetToken", mongoApi, ec, env)
+  def authTokenCollection(collectionFactory: JSONCollectionFactory) = {
+    collectionFactory.create("resetToken")
   }
 
   @Provides

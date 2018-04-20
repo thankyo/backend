@@ -8,8 +8,7 @@ import com.clemble.loveit.payment.service.repository.mongo._
 import com.clemble.loveit.payment.service.{StripePayoutAccountConverter, _}
 import com.clemble.loveit.common.util.LoveItCurrency
 import javax.inject.{Named, Singleton}
-
-import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.common.mongo.{JSONCollectionFactory}
 import com.google.inject.Provides
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
@@ -118,37 +117,37 @@ case class PaymentModule(env: Environment, conf: Configuration) extends ScalaMod
   @Provides
   @Singleton
   @Named("eomCharge")
-  def eomChargeMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("eomCharge", mongoApi, ec, env)
+  def eomChargeMongoCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("eomCharge")
   }
 
   @Provides
   @Singleton
   @Named("eomPayout")
-  def eomPayoutMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("eomPayout", mongoApi, ec, env)
+  def eomPayoutMongoCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("eomPayout")
   }
 
   @Provides
   @Singleton
   @Named("eomStatus")
-  def eomStatusMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("eomStatus", mongoApi, ec, env)
+  def eomStatusMongoCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("eomStatus")
   }
 
   @Provides
   @Singleton
   @Named("userPayment")
-  def userPaymentCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("userPayment", mongoApi, ec, env)
+  def userPaymentCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("userPayment")
   }
 
 
   @Provides
   @Singleton
   @Named("thankTransactions")
-  def thankTransactionMongoCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
-    JSONCollectionFactory.create("thankTransaction", mongoApi, ec, env)
+  def thankTransactionMongoCollection(collectionFactory: JSONCollectionFactory): JSONCollection = {
+    collectionFactory.create("thankTransaction")
   }
 
   @Provides

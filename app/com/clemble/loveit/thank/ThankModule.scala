@@ -33,6 +33,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[TumblrIntegrationService]).to(classOf[SimpleTumblrIntegrationService]).asEagerSingleton()
 
     bind(classOf[ProjectRepository]).to(classOf[MongoProjectRepository]).asEagerSingleton()
+    bind(classOf[UserProjectsRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
 
     bind(classOf[ProjectEnrichService]).to(classOf[SimpleProjectEnrichService]).asEagerSingleton()
@@ -84,6 +85,13 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
   @Named("userSupported")
   def userSupportedCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
     JSONCollectionFactory.create("userSupported", mongoApi, ec, env)
+  }
+
+  @Provides
+  @Singleton
+  @Named("userProject")
+  def userProjectCollection(mongoApi: ReactiveMongoApi, ec: ExecutionContext): JSONCollection = {
+    JSONCollectionFactory.create("userProject", mongoApi, ec, env)
   }
 
   @Provides

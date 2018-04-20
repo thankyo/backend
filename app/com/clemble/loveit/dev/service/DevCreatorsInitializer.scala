@@ -3,9 +3,9 @@ package com.clemble.loveit.dev.service
 import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
-import com.clemble.loveit.common.model.{Post, Project, ProjectConstructor, UserID}
+import com.clemble.loveit.common.model.{Post, Project, OwnedProject, UserID}
 import com.clemble.loveit.common.util.EventBusManager
-import com.clemble.loveit.common.model.{Project, ProjectConstructor}
+import com.clemble.loveit.common.model.{Project, OwnedProject}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectLookupService, ProjectService}
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case class DevCreatorConfig(
   creator: RegistrationRequest,
-  projects: Set[ProjectConstructor]
+  projects: Set[OwnedProject]
 )
 
 @Singleton
@@ -56,7 +56,7 @@ case class DevCreatorsInitializer @Inject()(
     Future.sequence(fCreators)
   }
 
-  private def ensureCreatorsOwnership(creatorToProjects: Seq[(UserID, Set[ProjectConstructor])]): Future[Seq[Project]] = {
+  private def ensureCreatorsOwnership(creatorToProjects: Seq[(UserID, Set[OwnedProject])]): Future[Seq[Project]] = {
     val resources = for {
       (creator, projects) <- creatorToProjects
       project <- projects

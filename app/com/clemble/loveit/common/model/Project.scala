@@ -86,7 +86,7 @@ object Project {
   }
 }
 
-case class ProjectConstructor(
+case class OwnedProject(
   url: Resource,
   title: String,
   shortDescription: String,
@@ -98,10 +98,10 @@ case class ProjectConstructor(
   rss: Option[String] = None
 ) extends ProjectLike
 
-object ProjectConstructor {
+object OwnedProject {
 
-  implicit val jsonFormat = Json.format[ProjectConstructor]
-  implicit val projectWriteable = WriteableUtils.jsonToWriteable[ProjectConstructor]
+  implicit val jsonFormat = Json.format[OwnedProject]
+  implicit val projectWriteable = WriteableUtils.jsonToWriteable[OwnedProject]
 
 }
 

@@ -14,7 +14,7 @@ trait ProjectService {
 
   def getOwned(user: UserID): Future[UserProjects]
 
-  def create(user: UserID, project: ProjectConstructor): Future[Project]
+  def create(user: UserID, project: OwnedProject): Future[Project]
 
   def delete(user: UserID, id: ProjectID): Future[Boolean]
 
@@ -32,27 +32,27 @@ class SimpleProjectService @Inject()(
 ) extends ProjectService {
 
   override def findProjectsByUser(user: UserID): Future[List[Project]] = {
-    repo.findByUser(user)
+    repo.findProjectsByUser(user)
   }
 
   override def getOwned(user: UserID): Future[UserProjects] = {
     val fOwned = ownershipService.fetch(user)
-    val fActive = repo.findByUser(user)
+    val fActive = repo.findProjectsByUser(user)
     for {
       installed <- fActive
       pending <- fOwned
     } yield {
-      UserProjects(pending, installed)
+      UserProjects(user, pending, installed)
     }
   }
 
 
-  override def create(user: UserID, project: ProjectConstructor): Future[Project] = {
+  override def create(user: UserID, project: OwnedProject): Future[Project] = {
     for {
-      existingProjectOpt <- repo.findByUrl(project.url)
+      existingProjectOpt <- repo.findProjectByUrl(project.url)
       _ = if (existingProjectOpt.isDefined) throw ResourceException.projectAlreadyCreated()
       verification <- verificationService.verify(user, project.url)
-      save <- repo.save(Project.from(user, project.copy(verification = verification)))
+      save <- repo.saveProject(Project.from(user, project.copy(verification = verification)))
     } yield {
       save
     }
@@ -60,12 +60,12 @@ class SimpleProjectService @Inject()(
 
   override def update(project: Project): Future[Project] = {
     for {
-      existingProjectOpt <- repo.findByUrl(project.url)
+      existingProjectOpt <- repo.findProjectByUrl(project.url)
       _ = if (!existingProjectOpt.isDefined) throw ResourceException.noResourceExists()
       existingProject = existingProjectOpt.get
       _ = if (existingProject.user != project.user) throw ResourceException.differentOwner()
       _ = if (existingProject._id != project._id) throw ResourceException.differentId()
-      updated <- repo.update(project)
+      updated <- repo.updateProject(project)
       _ = if (!updated) throw RepositoryException.failedToUpdate()
     } yield {
       project
@@ -74,10 +74,10 @@ class SimpleProjectService @Inject()(
 
   override def delete(user: UserID, id: ProjectID): Future[Boolean] = {
     for {
-      projectOpt <- repo.findById(id)
+      projectOpt <- repo.findProjectById(id)
       _ = if (!projectOpt.isDefined) throw ResourceException.noResourceExists()
       _ = if (!projectOpt.forall(_.user == user)) throw ResourceException.differentOwner()
-      removed <- repo.delete(id)
+      removed <- repo.deleteProject(id)
       removedPosts <- postService.delete(projectOpt.get)
     } yield {
       removed && removedPosts

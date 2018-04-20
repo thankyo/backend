@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service
 
 import akka.actor.ActorSystem
 import akka.pattern
-import com.clemble.loveit.common.model.{DibsVerification, ProjectConstructor, Resource, Tag, UserID, WebStack}
+import com.clemble.loveit.common.model.{DibsVerification, OwnedProject, Resource, Tag, UserID, WebStack}
 import com.clemble.loveit.common.service.{UserService, WSClientAware}
 import javax.inject.Inject
 import org.jsoup.Jsoup
@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectEnrichService {
 
-  def enrich(user: UserID, url: Resource): Future[ProjectConstructor]
+  def enrich(user: UserID, url: Resource): Future[OwnedProject]
 
 }
 
@@ -116,7 +116,7 @@ case class SimpleProjectEnrichService @Inject()(
     possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1 == true).map(_._2))
   }
 
-  private def doEnrich(user: UserID, url: Resource): Future[ProjectConstructor] = {
+  private def doEnrich(user: UserID, url: Resource): Future[OwnedProject] = {
     val fNone = pattern.after[Option[Nothing]](DELAY, actorSystem.scheduler)(Future.successful(None))
     val fWebStack = Future.firstCompletedOf(Seq(webStackAnalyzer.analyze(url), fNone))
     val fDescription = Future.firstCompletedOf(Seq(enrichDescription(url), fNone.map(_ => descriptionFromUrl(url))))
@@ -128,7 +128,7 @@ case class SimpleProjectEnrichService @Inject()(
       avatar <- fAvatar
       rss <- fRss
     } yield {
-      ProjectConstructor(
+      OwnedProject(
         url = url,
         avatar = avatar,
         webStack = webStack,
@@ -142,7 +142,7 @@ case class SimpleProjectEnrichService @Inject()(
     }
   }
 
-  override def enrich(user: UserID, url: Resource): Future[ProjectConstructor] = {
+  override def enrich(user: UserID, url: Resource): Future[OwnedProject] = {
     if (url.startsWith("http")) {
       doEnrich(user, url)
     } else {

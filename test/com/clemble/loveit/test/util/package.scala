@@ -87,10 +87,9 @@ package object util {
       case 2 => DibsVerification
     }
   }
-  implicit val supportedProjectGenerator: Generator[Project] = () => {
-    Project(
+  implicit val ownedProjectGenerator: Generator[OwnedProject] = () => {
+    OwnedProject(
       randomResource,
-      someRandom[UserID],
       someRandom[String],
       someRandom[String],
       someRandom[Verification],
@@ -100,6 +99,19 @@ package object util {
       someRandom[Set[Tag]]
     )
   }
+
+  implicit val supportedProjectGenerator: Generator[Project] = () => {
+    Project.from(someRandom[UserID], someRandom[OwnedProject])
+  }
+
+  implicit val userProjectsGenerator: Generator[UserProjects] = () => {
+    UserProjects(
+      someRandom[UserID],
+      someRandom[Seq[OwnedProject]],
+      someRandom[Seq[Project]]
+    )
+  }
+
   implicit val pendingTransactionGenerator: Generator[PendingTransaction] = () => {
     PendingTransaction(someRandom[Project], randomResource, someRandom[LocalDateTime])
   }
@@ -202,6 +214,14 @@ package object util {
       Set(gen.generate()) ++ someRandom[Set[T]]
     } else {
       Set(gen.generate())
+    }
+  }
+
+  implicit def seqGenerator[T](implicit gen: Generator[T]): Generator[Seq[T]] = () => {
+    if (someRandom[Boolean]) {
+      List(gen.generate()) ++ someRandom[List[T]]
+    } else {
+      List(gen.generate())
     }
   }
 

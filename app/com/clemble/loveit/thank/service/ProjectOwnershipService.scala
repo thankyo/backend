@@ -17,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectOwnershipService {
 
-  def fetch(user: UserID): Future[Seq[ProjectConstructor]]
+  def fetch(user: UserID): Future[Seq[OwnedProject]]
 
 }
 
@@ -30,7 +30,7 @@ case class TumblrProjectOwnershipService @Inject()(
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService with WSClientAware {
 
-  private def readTumblrResources(user: User, json: JsValue): Seq[ProjectConstructor] = {
+  private def readTumblrResources(user: User, json: JsValue): Seq[OwnedProject] = {
     val blogs = (json \ "response" \ "user" \ "blogs").asOpt[List[JsObject]].getOrElse(List.empty[JsObject])
 
     blogs
@@ -42,7 +42,7 @@ case class TumblrProjectOwnershipService @Inject()(
         val shortDescription = (blog \ "description").asOpt[String].getOrElse("")
         val rss = url + "/rss"
 
-        ProjectConstructor(
+        OwnedProject(
           url = url,
           title = title,
           shortDescription = shortDescription,
@@ -54,7 +54,7 @@ case class TumblrProjectOwnershipService @Inject()(
       })
   }
 
-  override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
+  override def fetch(user: UserID): Future[Seq[OwnedProject]] = {
     (for {
       userOpt <- userService.findById(user)
       tumblrLoginOpt = userOpt.flatMap(_.profiles.asTumblrLogin())
@@ -69,7 +69,7 @@ case class TumblrProjectOwnershipService @Inject()(
             .get()
             .map(res => readTumblrResources(userOpt.get, res.json))
         case _ =>
-          Future.successful(Seq.empty[ProjectConstructor])
+          Future.successful(Seq.empty[OwnedProject])
       }
     }).flatten
   }
@@ -113,7 +113,7 @@ case class GoogleProjectOwnershipService @Inject()(
     resources
   }
 
-  override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
+  override def fetch(user: UserID): Future[Seq[OwnedProject]] = {
     (for {
       googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
       googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
@@ -137,7 +137,7 @@ case class GoogleProjectOwnershipService @Inject()(
             })
             .map(_.map(_.copy(verification = GoogleVerification)))
         case _ =>
-          Future.successful(Seq.empty[ProjectConstructor])
+          Future.successful(Seq.empty[OwnedProject])
       }
     }).flatten
   }
@@ -151,7 +151,7 @@ case class SimpleProjectOwnershipService @Inject()(
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
 
-  override def fetch(user: UserID): Future[Seq[ProjectConstructor]] = {
+  override def fetch(user: UserID): Future[Seq[OwnedProject]] = {
     val fResources = Seq(googleOwnershipService, tumblrOwnershipService).map(_.fetch(user))
     Future.sequence(fResources).map(_.flatten)
   }

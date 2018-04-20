@@ -20,15 +20,15 @@ trait ProjectLookupService {
 case class SimpleProjectLookupService @Inject() (repo: ProjectRepository) extends ProjectLookupService {
 
   override def findById(project: ProjectID): Future[Option[Project]] = {
-    repo.findById(project)
+    repo.findProjectById(project)
   }
 
   override def findByUrl(url: Resource): Future[Option[Project]] = {
-    repo.findByUrl(url)
+    repo.findProjectByUrl(url)
   }
 
   override def findByUser(user: UserID): Future[List[Project]] = {
-    repo.findByUser(user)
+    repo.findProjectsByUser(user)
   }
 
 }

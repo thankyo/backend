@@ -6,18 +6,18 @@ import scala.concurrent.Future
 
 trait ProjectRepository {
 
-  def findById(project: ProjectID): Future[Option[Project]]
+  def findProjectById(project: ProjectID): Future[Option[Project]]
 
-  def findAll(ids: List[ProjectID]): Future[List[Project]]
+  def findProjectByUrl(url: Resource): Future[Option[Project]]
 
-  def findByUrl(url: Resource): Future[Option[Project]]
+  def findProjectsByUser(user: UserID): Future[List[Project]]
 
-  def findByUser(user: UserID): Future[List[Project]]
+  def findAllProjects(ids: List[ProjectID]): Future[List[Project]]
 
-  def save(project: Project): Future[Project]
+  def saveProject(project: Project): Future[Project]
 
-  def update(project: Project): Future[Boolean]
+  def updateProject(project: Project): Future[Boolean]
 
-  def delete(id: ProjectID): Future[Boolean]
+  def deleteProject(id: ProjectID): Future[Boolean]
 
 }

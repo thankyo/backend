@@ -26,8 +26,7 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
 
   val UPDATES: List[() => Future[Boolean]] = List(
     createUserProjectForExistingUsers,
-    moveFromProjectsToUserProject,
-    updateUserProject
+    moveFromProjectsToUserProject
   )
 
   Await.result(updateCollections(), 5 minutes)
@@ -74,7 +73,9 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
         case false => Future.successful(false)
         case true => userProjectsCollection.find(Json.obj("_id" -> user.id)).one[UserProjects].flatMap({
           case Some(_) => Future.successful(true)
-          case None => userProjectsCollection.insert[UserProjects](UserProjects from user).map(_.ok)
+          case None =>
+            val userProjectJson = Json.toJsObject(UserProjects from user) + ("_id" -> JsString(user.id))
+            userProjectsCollection.insert(userProjectJson).map(_.ok)
         })
       }
     }).recover({ case _ => false })
@@ -92,21 +93,6 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
           userProjectsCollection.update(selector, update).map(_.ok)
       }
     }).recover({ case _ => false })
-  }
-
-  def updateUserProject(): Future[Boolean] = {
-    val userProjectsCollection = factory.create("userProject")
-    MongoSafeUtils.findAll[JsObject](userProjectsCollection, Json.obj()).runFoldAsync(true)((agg, json) => {
-      agg match {
-        case false => Future.successful(false)
-        case true =>
-          val user = (json \ "user").as[String]
-          userProjectsCollection.remove(Json.obj("user" -> user)).flatMap(_.ok match {
-            case true => userProjectsCollection.insert(json + ("_id" -> JsString("user"))).map(_.ok)
-            case false => Future.successful(false)
-          })
-      }
-    })
   }
 
 }

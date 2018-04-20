@@ -77,10 +77,10 @@ class MongoUserProjectsRepository @Inject() (
     })
   }
 
-  override def saveOwnedProject(user: UserID, owned: OwnedProject): Future[Boolean] = {
+  override def saveOwnedProject(user: UserID, owned: Seq[OwnedProject]): Future[UserProjects] = {
     val selector = Json.obj("_id" -> user)
-    val update = Json.obj("$addToSet" -> Json.obj("owned" -> owned))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+    val update = Json.obj("$addToSet" -> Json.obj("owned" -> Json.obj("$each" -> owned)))
+    collection.findAndUpdate(selector, update, true).map(_.result[UserProjects].get)
   }
 
   override def saveProject(project: Project): Future[Project] = {
@@ -102,12 +102,20 @@ object MongoUserProjectsRepository {
   }
 
   private def ensureIndexes(collection: JSONCollection)(implicit ec: ExecutionContext): Unit = {
-    collection.indexesManager.drop("user_owns_unique")
     MongoSafeUtils.ensureIndexes(
       collection,
       Index(
         key = Seq("installed.url" -> IndexType.Ascending),
-        name = Some("user_owns_unique_url"),
+        name = Some("usrPrj_installed_unique_url"),
+        unique = true,
+        sparse = true
+      )
+    )
+    MongoSafeUtils.ensureIndexes(
+      collection,
+      Index(
+        key = Seq("owned.url" -> IndexType.Ascending),
+        name = Some("usrPrj_owned_unique_url"),
         unique = true,
         sparse = true
       )

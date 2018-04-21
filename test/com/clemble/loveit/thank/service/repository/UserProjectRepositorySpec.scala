@@ -27,6 +27,19 @@ class UserProjectRepositorySpec extends RepositorySpec {
     await(repo.findById(user)).get.owned should containAllOf(Seq(ownedProject))
   }
 
+  "Update Owned Project with additional details" in {
+    val user = createUser()
+
+    val ownedProject = someRandom[OwnedProject]
+    await(repo.saveOwnedProject(user, Seq(ownedProject)))
+
+    val modifiedProject = ownedProject.copy(title = "Another title")
+    await(repo.saveOwnedProject(user, Seq(modifiedProject)))
+
+    await(repo.findById(user)).get.owned shouldEqual Seq(modifiedProject)
+  }
+
+
   "Update Installed Project" in {
     val user = createUser()
 

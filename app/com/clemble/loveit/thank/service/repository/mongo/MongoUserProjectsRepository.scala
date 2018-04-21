@@ -83,10 +83,13 @@ class MongoUserProjectsRepository @Inject() (
 
   override def saveOwnedProject(user: UserID, owned: Seq[OwnedProject]): Future[UserProjects] = {
     val selector = Json.obj("_id" -> user)
-    val update = Json.obj("$addToSet" -> Json.obj("owned" -> Json.obj("$each" -> owned)))
-    collection.findAndUpdate(selector, update, true)
-      .map(_.result[UserProjects].get)
-      .recoverWith(errorHandler)
+    collection
+      .update(selector, Json.obj("$pull" -> Json.obj("owned" -> Json.obj("url" -> Json.obj("$in" -> owned.map(_.url))))))
+      .flatMap(_ => {
+        val update = Json.obj("$addToSet" -> Json.obj("owned" -> Json.obj("$each" -> owned)))
+        collection.findAndUpdate(selector, update, true)
+          .map(_.result[UserProjects].get)
+      }).recoverWith(errorHandler)
   }
 
   override def saveProject(project: Project): Future[Project] = {

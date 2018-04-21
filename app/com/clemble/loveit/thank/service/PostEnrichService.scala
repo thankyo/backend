@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import java.time.LocalDateTime
 
 import com.clemble.loveit.common.model
-import com.clemble.loveit.common.model.{OpenGraphImage, OpenGraphObject, Project, Tag, Tumblr}
+import com.clemble.loveit.common.model.{OpenGraphImage, OpenGraphObject, Project, Resource, Tag, Tumblr}
 import com.clemble.loveit.common.service.WSClientAware
 import javax.inject.{Inject, Singleton}
 import org.jsoup.Jsoup
@@ -19,11 +19,17 @@ trait PostEnrichService {
 
 }
 
+sealed trait PostSourceService {
+
+  def fetch(prj: Project, url: Resource): Future[Option[OpenGraphObject]]
+
+}
+
 @Singleton
-case class FacebookPostEnrichService @Inject()(
+case class FacebookPostSourceService @Inject()(
   client: WSClient,
   implicit val ec: ExecutionContext
-) extends PostEnrichService with WSClientAware {
+) extends PostSourceService with WSClientAware {
 
   private def openGraphFromFB(url: String, fb: JsValue): Option[OpenGraphObject] = {
     val imageUrl = (fb \ "og_object" \ "image" \ "src").asOpt[String]
@@ -46,26 +52,26 @@ case class FacebookPostEnrichService @Inject()(
     }
   }
 
-  override def enrich(prj: Project, post: OpenGraphObject): Future[OpenGraphObject] = {
-    client.url(s"https://graph.facebook.com/?id=${post.url}")
+  override def fetch(prj: Project, url: String): Future[Option[OpenGraphObject]] = {
+    client.url(s"https://graph.facebook.com/?id=${url}")
       .get()
       .map(res => {
         if (res.status == Status.OK) {
-          post.merge(openGraphFromFB(post.url, res.json))
+          openGraphFromFB(url, res.json)
         } else {
-          post
+          None
         }
       }).
-      recover({ case _ => post })
+      recover({ case _ => None })
   }
 
 }
 
 @Singleton
-case class HtmlPostEnrichService @Inject()(
+case class HtmlPostSourceService @Inject()(
   client: WSClient,
   implicit val ec: ExecutionContext
-) extends PostEnrichService with WSClientAware {
+) extends PostSourceService with WSClientAware {
 
   private def openGraphFromHTML(url: String, htmlStr: String): Option[OpenGraphObject] = {
     Option(Jsoup.parse(htmlStr)).map(doc => {
@@ -83,7 +89,7 @@ case class HtmlPostEnrichService @Inject()(
       val title = {
         val titleProp = doc.getElementsByAttributeValue("property", "og:title").first()
         val title = Option(doc.getElementsByTag("title").first()).map(_.text())
-        Option(titleProp).map(_.attr("property")).orElse(title)
+        Option(titleProp).map(_.attr("content")).orElse(title)
       }
 
       model.OpenGraphObject(
@@ -123,19 +129,21 @@ case class HtmlPostEnrichService @Inject()(
       })
   }
 
-  override def enrich(prj: Project, post: OpenGraphObject): Future[OpenGraphObject] = {
-    getPostHtml(post.url).
+  override def fetch(prj: Project, url: String): Future[Option[OpenGraphObject]] = {
+    getPostHtml(url).
       map(htmlOpt => {
-        val htmlGraph = htmlOpt.flatMap(openGraphFromHTML(post.url, _))
-        post.merge(htmlGraph)
+        htmlOpt.flatMap(openGraphFromHTML(url, _))
       }).
-      recover({ case _ => post })
+      recover({ case _ => None })
   }
 
 }
 
 @Singleton
-case class TumblrPostEnrichService @Inject()(tumblrAPI: TumblrAPI, implicit val ec: ExecutionContext) extends PostEnrichService {
+case class TumblrPostSourceService @Inject()(
+  tumblrAPI: TumblrAPI,
+  implicit val ec: ExecutionContext
+) extends PostSourceService {
 
   private def openGraphFromTumblr(url: String, json: JsObject): Option[OpenGraphObject] = {
     val pubDate = (json \ "date").asOpt[LocalDateTime]
@@ -151,20 +159,17 @@ case class TumblrPostEnrichService @Inject()(tumblrAPI: TumblrAPI, implicit val 
     )
   }
 
-  override def enrich(prj: Project, post: OpenGraphObject): Future[OpenGraphObject] = {
+  override def fetch(prj: Project, url: String): Future[Option[OpenGraphObject]] = {
     if (!prj.webStack.contains(Tumblr)) {
-      return Future.successful(post)
+      return Future.successful(None)
     }
-    val parts = post.url.split("/")
+    val parts = url.split("/")
     val blog = parts(2)
     val postId = parts(4)
     tumblrAPI
       .findPost(prj.user, blog, postId)
-      .map({
-        case Some(jsObj) => post.merge(openGraphFromTumblr(post.url, jsObj))
-        case None => post
-      }).
-      recover({ case _ => post })
+      .map(_.flatMap(jsObj => openGraphFromTumblr(url, jsObj))).
+      recover({ case _ => None })
   }
 
 }
@@ -172,23 +177,24 @@ case class TumblrPostEnrichService @Inject()(tumblrAPI: TumblrAPI, implicit val 
 
 @Singleton
 case class SimplePostEnrichService @Inject()(
-  fbEnrichService: FacebookPostEnrichService,
-  htmlEnrichService: HtmlPostEnrichService,
-  tumblrEnrichService: TumblrPostEnrichService,
+  fbEnrichService: FacebookPostSourceService,
+  htmlEnrichService: HtmlPostSourceService,
+  tumblrEnrichService: TumblrPostSourceService,
   implicit val ec: ExecutionContext
 ) extends PostEnrichService {
 
   override def enrich(prj: Project, post: OpenGraphObject): Future[OpenGraphObject] = {
-    val fbGraph = fbEnrichService.enrich(prj, post)
-    val htmlGraph = htmlEnrichService.enrich(prj, post)
-    val tumblrGraph = tumblrEnrichService.enrich(prj, post)
+    val fbGraph = fbEnrichService.fetch(prj, post.url)
+    val htmlGraph = htmlEnrichService.fetch(prj, post.url)
+    val tumblrGraph = tumblrEnrichService.fetch(prj, post.url)
 
     for {
       fb <- fbGraph
       html <- htmlGraph
       tumblr <- tumblrGraph
     } yield {
-      tumblr.merge(fb).merge(html)
+      val base = tumblr.orElse(fb).orElse(html).getOrElse(post)
+      base.merge(fb).merge(html)
     }
   }
 

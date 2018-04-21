@@ -143,21 +143,27 @@ case class SimpleProjectEnrichService @Inject()(
     }
   }
 
-  override def enrich(user: UserID, url: Resource): Future[OwnedProject] = {
+  private def toVariations(url: Resource): List[Resource] = {
     if (url.startsWith("http")) {
-      doEnrich(user, url)
+      List(url)
     } else {
-      val urlWithHttp = s"http://${url}"
-      val urlWithHttps = s"https://${url}"
-      client.isAlive(urlWithHttps).flatMap({
-        case true => doEnrich(user, urlWithHttps)
-        case false =>
-          client.isAlive(urlWithHttp).flatMap({
-            case false => Future.failed(FieldValidationError("url", s"Can't connect over HTTP(S)"))
-            case true => doEnrich(user, urlWithHttp)
-          })
-      })
+      List(s"https://${url}", s"https://www.${url}", s"http://${url}", s"http://www.${url}")
     }
+  }
+
+  private def enrichFirstValid(user: UserID, variations: List[Resource]): Future[OwnedProject] = {
+    variations match {
+      case Nil => Future.failed(FieldValidationError("url", s"Can't connect over"))
+      case url :: xs =>
+        client.isAlive(url).flatMap({
+          case true => doEnrich(user, url)
+          case false => enrichFirstValid(user, xs)
+        })
+    }
+  }
+
+  override def enrich(user: UserID, url: Resource): Future[OwnedProject] = {
+    enrichFirstValid(user, toVariations(url))
   }
 
 }

@@ -57,7 +57,7 @@ class MongoUserProjectsRepository @Inject() (
   }
 
   override def updateProject(project: Project): Future[Boolean] = {
-    val selector = Json.obj("_id" -> project.user, "installed._id" -> project._id)
+    val selector = Json.obj("_id" -> project.user, "installed._id" -> project._id, "installed.url" -> project.url)
     val update = Json.obj("$set" -> Json.obj("installed.$" -> project))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update)).recoverWith(errorHandler)
   }

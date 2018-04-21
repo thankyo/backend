@@ -34,6 +34,18 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       await(prjRepo.findProjectById(project._id)) shouldEqual Some(projectWithTitle)
     }
 
+    "update url ignored" in {
+      val user = createUser()
+      val res = randomResource
+
+      val project = assignOwnership(user, res)
+
+      val projectWithDiffUrl = project.copy(url = randomResource)
+
+      await(prjRepo.updateProject(projectWithDiffUrl)) shouldEqual false
+      await(prjRepo.findProjectById(project._id)) shouldEqual Some(project)
+    }
+
     "Delete" in {
       val user = createUser()
       val res = randomResource

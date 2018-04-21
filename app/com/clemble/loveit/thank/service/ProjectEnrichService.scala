@@ -9,6 +9,7 @@ import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
 import play.api.libs.ws.WSClient
 import WSClientAware._
+import com.clemble.loveit.common.error.FieldValidationError
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -146,10 +147,15 @@ case class SimpleProjectEnrichService @Inject()(
     if (url.startsWith("http")) {
       doEnrich(user, url)
     } else {
+      val urlWithHttp = s"http://${url}"
       val urlWithHttps = s"https://${url}"
       client.isAlive(urlWithHttps).flatMap({
         case true => doEnrich(user, urlWithHttps)
-        case false => doEnrich(user, s"http://${url}")
+        case false =>
+          client.isAlive(urlWithHttp).flatMap({
+            case false => Future.failed(FieldValidationError("url", s"Can't connect over HTTP(S)"))
+            case true => doEnrich(user, urlWithHttp)
+          })
       })
     }
   }

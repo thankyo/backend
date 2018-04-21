@@ -21,8 +21,7 @@ object WSClientAware {
       client.url(url)
         .withFollowRedirects(false)
         .get()
-        .filter(res => res.status == Status.OK)
-        .map(_ => true)
+        .map(res => res.status == Status.OK)
         .recover({ case _ => false })
     }
 

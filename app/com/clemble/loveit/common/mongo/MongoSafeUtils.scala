@@ -2,7 +2,7 @@ package com.clemble.loveit.common.mongo
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
-import com.clemble.loveit.common.error.{RepositoryException, ThankException}
+import com.clemble.loveit.common.error.{FieldValidationError, RepositoryException, ThankException}
 import com.mohiva.play.silhouette.api
 import play.api.Logger
 import play.api.libs.json.{JsObject, Json, Reads}

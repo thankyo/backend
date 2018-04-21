@@ -1,17 +1,21 @@
 package com.clemble.loveit.thank.service.repository.mongo
 
 import akka.stream.Materializer
+import com.clemble.loveit.common.error.{FieldValidationError, RepositoryException}
 import com.clemble.loveit.common.model.Project._
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.model.{OwnedProject, Project, ProjectID, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
+import com.clemble.loveit.common.mongo.MongoSafeUtils.toException
 import com.clemble.loveit.thank.model.UserProjects
 import com.clemble.loveit.thank.service.repository.UserProjectsRepository
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.json.{JsObject, JsString, Json}
 import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.core.errors.DatabaseException
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.play.json.commands.DefaultJSONCommandError
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -55,7 +59,7 @@ class MongoUserProjectsRepository @Inject() (
   override def updateProject(project: Project): Future[Boolean] = {
     val selector = Json.obj("_id" -> project.user, "installed._id" -> project._id)
     val update = Json.obj("$set" -> Json.obj("installed.$" -> project))
-    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update))
+    MongoSafeUtils.safeSingleUpdate(collection.update(selector, update)).recoverWith(errorHandler)
   }
 
   override def deleteProject(user: UserID, id: ProjectID): Future[Boolean] = {
@@ -74,13 +78,15 @@ class MongoUserProjectsRepository @Inject() (
     MongoSafeUtils.safeSingleUpdate(collection.insert(presentation)).map({
       case true => projects
       case false => throw new IllegalArgumentException(s"Could not update ${projects.user}")
-    })
+    }).recoverWith(errorHandler)
   }
 
   override def saveOwnedProject(user: UserID, owned: Seq[OwnedProject]): Future[UserProjects] = {
     val selector = Json.obj("_id" -> user)
     val update = Json.obj("$addToSet" -> Json.obj("owned" -> Json.obj("$each" -> owned)))
-    collection.findAndUpdate(selector, update, true).map(_.result[UserProjects].get)
+    collection.findAndUpdate(selector, update, true)
+      .map(_.result[UserProjects].get)
+      .recoverWith(errorHandler)
   }
 
   override def saveProject(project: Project): Future[Project] = {
@@ -89,7 +95,16 @@ class MongoUserProjectsRepository @Inject() (
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update)).map({
       case true => project
       case false => throw new IllegalArgumentException(s"Could not save project")
-    })
+    }).recoverWith(errorHandler[Project])
+  }
+
+  private def errorHandler[T]: PartialFunction[Throwable, Future[T]]  = {
+    case dbExc: DatabaseException if (dbExc.code == Some(11000) && dbExc.message.contains("user_project_owned_unique_url")) =>
+      Future.failed(FieldValidationError("url", "Already owned"))
+    case err: DefaultJSONCommandError if (err.code == Some(11000) && err.errmsg.exists(_.contains("user_project_owned_unique_url"))) =>
+      Future.failed(FieldValidationError("url", "Already owned"))
+    case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, msg) if msg.contains("user_project_owned_unique_url") =>
+      Future.failed(FieldValidationError("url", "Already owned"))
   }
 
 }

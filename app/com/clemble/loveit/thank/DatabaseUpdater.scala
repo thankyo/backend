@@ -59,7 +59,7 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
       relevantUpdates = UPDATES.drop(version)
       updated <- sequentiallyProcess(relevantUpdates)
       nextVersion = version + updated
-      updatedVersion <- updateVersion(nextVersion)
+      updatedVersion <- if (nextVersion == version) Future.successful(true) else updateVersion(nextVersion)
     } yield {
       nextVersion == relevantUpdates.length && updatedVersion
     }

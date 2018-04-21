@@ -44,11 +44,11 @@ class SimpleProjectService @Inject()(
 
   override def update(project: Project): Future[Project] = {
     for {
-      existingProjectOpt <- repo.findProjectByUrl(project.url)
+      existingProjectOpt <- repo.findProjectById(project._id)
       _ = if (!existingProjectOpt.isDefined) throw ResourceException.noResourceExists()
       existingProject = existingProjectOpt.get
       _ = if (existingProject.user != project.user) throw ResourceException.differentOwner()
-      _ = if (existingProject._id != project._id) throw ResourceException.differentId()
+      _ = if (existingProject.url != project.url) throw ResourceException.urlModified()
       updated <- repo.updateProject(project)
       _ = if (!updated) throw RepositoryException.failedToUpdate()
     } yield {

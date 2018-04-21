@@ -42,6 +42,7 @@ object ResourceException {
   val NO_RESOURCE_EXISTS_CODE = "NO_RESOURCE_EXISTS_CODE"
 
   def noResourceExists() = ResourceException(NO_RESOURCE_EXISTS_CODE, "URL was not registered")
+  def urlModified() = ResourceException("URL_MODIFIED", "URL was modified")
   def failedToUpdate() = ResourceException("FAILED_TO_UPDATE", "Failed to update the record")
   def projectAlreadyCreated() = ResourceException("PROJECT_ALREADY_CREATED", "Project with specified URL already exists")
   def ownerMissing(url: Resource) = ResourceException(OWNER_MISSING_CODE, s"No owner for the resource registered for ${url}")

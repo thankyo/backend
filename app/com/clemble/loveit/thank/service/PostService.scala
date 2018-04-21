@@ -25,6 +25,8 @@ trait PostService {
 
   def create(og: OpenGraphObject): Future[Post]
 
+  def refresh(user: UserID, post: PostID): Future[Post]
+
   def updateProject(owner: Project): Future[Boolean]
 
   def delete(id: PostID): Future[Boolean]
@@ -101,6 +103,17 @@ case class SimplePostService @Inject()(
 
   override def findLastByProject(project: ProjectID): Future[Option[Post]] = {
     repo.findLastByProject(project)
+  }
+
+  override def refresh(user: UserID, post: PostID): Future[Post] = {
+    repo.findById(post).flatMap({
+      case Some(Post(_, project, ogObj, _, _, _)) if project.user == user =>
+        enrichService.enrich(project, ogObj).flatMap(create)
+      case Some(_) =>
+        Future.failed(ResourceException.ownershipNotVerified())
+      case None =>
+        Future.failed(ResourceException.noResourceExists())
+    })
   }
 
   override def create(og: OpenGraphObject): Future[Post] = {

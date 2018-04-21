@@ -4,6 +4,8 @@ GET         /stat/:owner/:year/:month          @com.clemble.loveit.thank.control
 GET         /post/:post                        @com.clemble.loveit.thank.controller.PostController.get(post)
 DELETE      /post/:post                        @com.clemble.loveit.thank.controller.PostController.delete(post)
 
+POST        /refresh/post/:post                @com.clemble.loveit.thank.controller.PostController.refresh(post)
+
 GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
 POST        /project                           @com.clemble.loveit.thank.controller.ProjectController.create()
 PUT         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.updateProject(project)

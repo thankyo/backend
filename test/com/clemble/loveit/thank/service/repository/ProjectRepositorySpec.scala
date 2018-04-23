@@ -1,8 +1,8 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
-import com.clemble.loveit.common.model.{Project, Resource, UserID, Verification}
+import com.clemble.loveit.common.error.{RepositoryException}
+import com.clemble.loveit.common.model.{Project, Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
@@ -11,14 +11,18 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
-  def assignOwnership(user: UserID, url: Resource): Project = {
-    await(prjRepo.saveProject(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
-  }
-
   def listOwned(user: UserID): List[Resource] = await(prjRepo.findProjectsByUser(user)).map(_.url)
 
   def findOwner(url: Resource): Option[UserID] = await(prjRepo.findProjectByUrl(url)).map(_.user)
 
+  "Create" should {
+    "create only owned" in {
+      val user = createUser()
+      val prj = someRandom[Project].copy(user = user)
+
+      await(prjRepo.saveProject(prj)) should throwA[Throwable]
+    }
+  }
 
   "Update" should {
 
@@ -26,7 +30,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val user = createUser()
       val res = randomResource
 
-      val project = assignOwnership(user, res)
+      val project = createProject(user, res)
 
       val projectWithTitle = project.copy(title = someRandom[String])
 
@@ -38,7 +42,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val user = createUser()
       val res = randomResource
 
-      val project = assignOwnership(user, res)
+      val project = createProject(user, res)
 
       val projectWithDiffUrl = project.copy(url = randomResource)
 
@@ -50,7 +54,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val user = createUser()
       val res = randomResource
 
-      val project = assignOwnership(user, res)
+      val project = createProject(user, res)
 
       await(prjRepo.deleteProject(user, project._id)) shouldEqual true
     }
@@ -79,7 +83,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val user = createUser()
       val res = randomResource
 
-      assignOwnership(user, res)
+      createProject(user, res)
 
       listOwned(user) shouldEqual List(res)
     }
@@ -88,8 +92,8 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val user = createUser()
       val res = randomResource
 
-      assignOwnership(user, res)
-      assignOwnership(user, res) should throwA[IllegalArgumentException]
+      createProject(user, res)
+      createProject(user, res) should throwA[IllegalArgumentException]
 
       listOwned(user) shouldEqual List(res)
     }
@@ -103,8 +107,8 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
       val res = randomResource
 
-      assignOwnership(A, res)
-      assignOwnership(B, res) should throwA[RepositoryException]
+      createProject(A, res)
+      createProject(B, res) should throwA[RepositoryException]
 
       listOwned(A) shouldEqual List(res)
       listOwned(B) shouldEqual List.empty[Resource]
@@ -118,7 +122,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val owner = createUser()
       val res = randomResource
 
-      assignOwnership(owner, res)
+      createProject(owner, res)
 
       findOwner(res) shouldEqual Some(owner)
     }
@@ -127,7 +131,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val owner = createUser()
 
       val parentRes = randomResource
-      assignOwnership(owner, parentRes)
+      createProject(owner, parentRes)
 
       val childRes = s"${parentRes}/${someRandom[Long]}"
       findOwner(childRes) shouldEqual Some(owner)

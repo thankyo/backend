@@ -16,14 +16,14 @@ class AdminEOMControllerSpec extends GenericEOMPaymentServiceSpec with PaymentCo
   override def getStatus(yom: YearMonth): Option[EOMStatus] = {
     val res = perform(admin, FakeRequest(GET, s"/api/v1/payment/admin/eom/${yom.getYear}/${yom.getMonthValue}"))
     res.header.status match {
-      case 200 => res.body.dataStream.readJson[EOMStatus]
+      case 200 => res.body.dataStream.readJsonOpt[EOMStatus]
       case 404 => None
     }
   }
 
   override def run(yom: YearMonth): EOMStatus = {
     val res = perform(admin, FakeRequest(POST, s"/api/v1/payment/admin/eom/${yom.getYear}/${yom.getMonthValue}"))
-    res.body.dataStream.readJson[EOMStatus].get
+    res.body.dataStream.readJson[EOMStatus]
   }
 
 }

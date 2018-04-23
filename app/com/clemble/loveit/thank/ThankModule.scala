@@ -36,8 +36,6 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()
 
-    bind(classOf[ProjectEnrichService]).to(classOf[SimpleProjectEnrichService]).asEagerSingleton()
-
     bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()
     bind(classOf[ProjectSupportTrackService]).to(classOf[SimpleProjectSupportTrackService]).asEagerSingleton()
 
@@ -45,6 +43,12 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[UserStatService]).to(classOf[SimpleUserStatService]).asEagerSingleton()
     bind(classOf[UserStatRepo]).to(classOf[MongoUserStatRepo])
+
+    if (env.mode == Mode.Test) {
+      bind(classOf[ProjectEnrichService]).toInstance(TestProjectEnrichService)
+    } else {
+      bind(classOf[ProjectEnrichService]).to(classOf[SimpleProjectEnrichService]).asEagerSingleton()
+    }
 
     if (env.mode == Mode.Test) {
       bind(classOf[PostEnrichService]).toInstance(TestPostEnrichService)

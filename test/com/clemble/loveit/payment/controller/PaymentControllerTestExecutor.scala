@@ -19,19 +19,19 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
 
   override def charges(user: UserID): Seq[EOMCharge] = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge"))
-    res.body.dataStream.readJson[Seq[EOMCharge]].get
+    res.body.dataStream.readJson[Seq[EOMCharge]]
   }
 
   override def payouts(user: UserID): Seq[EOMPayout] = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/payout"))
     val payouts = res.body.dataStream.readJson[Seq[EOMPayout]]
-    payouts.get
+    payouts
   }
 
   override def getChargeAccount(user: UserID): Option[ChargeAccount] = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge/account"))
     res.header.status match {
-      case 200 => res.body.dataStream.readJson[ChargeAccount]
+      case 200 => res.body.dataStream.readJsonOpt[ChargeAccount]
       case _ => None
     }
   }
@@ -40,13 +40,13 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
     val req = FakeRequest(POST, s"/api/v1/payment/my/charge/account").
       withJsonBody(JsString(token))
     val res = perform(user, req)
-    res.body.dataStream.readJson[ChargeAccount].get
+    res.body.dataStream.readJson[ChargeAccount]
   }
 
   override def getMonthlyLimit(user: UserID): Option[Money] = {
     val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge/limit"))
     res.header.status match {
-      case 200 => res.body.dataStream.readJson[Money]
+      case 200 => res.body.dataStream.readJsonOpt[Money]
       case 404 => None
     }
   }
@@ -54,7 +54,7 @@ trait PaymentControllerTestExecutor extends ControllerSpec with PaymentTestExecu
   override def setMonthlyLimit(user: UserID, limit: Money): Boolean = {
     val res = perform(user, FakeRequest(POST, s"/api/v1/payment/my/charge/limit").withJsonBody(Json.toJson(limit)))
 
-    res.body.dataStream.readJson[Money].isDefined
+    res.body.dataStream.readJsonOpt[Money].isDefined
   }
 
   override def thank(giver: UserID, project: Project, url: Resource): PendingTransaction = {

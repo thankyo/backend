@@ -99,11 +99,14 @@ class MongoUserProjectsRepository @Inject() (
   }
 
   override def saveProject(project: Project): Future[Project] = {
-    val selector = Json.obj("_id" -> project.user, "installed.url" -> Json.obj("$ne" -> project.url))
+    val selector = Json.obj("_id" -> project.user,
+      "owned.url" -> project.url,
+      "installed.url" -> Json.obj("$ne" -> project.url)
+    )
     val update = Json.obj("$addToSet" -> Json.obj("installed" -> project))
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, update)).map({
       case true => project
-      case false => throw new IllegalArgumentException(s"Could not save project")
+      case false => throw new IllegalArgumentException(s"Could not create project")
     }).recoverWith(errorHandler[Project])
   }
 

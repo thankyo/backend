@@ -25,11 +25,10 @@ class GraphControllerSpec extends PaymentControllerTestExecutor {
       val thanks = for {
         url <- urlVariations
       } yield {
-        val req = sign(giver, FakeRequest(POST, s"/api/v1/thank/graph/my/support").withJsonBody(Json.obj("url" -> url)))
-        route(application, req).get.map(_.header.status).recover({ case _ => 500 })
+        val res = perform(giver, FakeRequest(POST, s"/api/v1/thank/graph/my/support").withJsonBody(Json.obj("url" -> url)))
+        res.header.status
       }
-      val updateReq = await(Future.sequence(thanks))
-      val allSuccess = updateReq.forall(_ == OK)
+      val allSuccess = thanks.forall(_ == OK)
       allSuccess should beTrue
     }
 

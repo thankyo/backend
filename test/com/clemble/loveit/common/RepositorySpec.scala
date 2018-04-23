@@ -1,7 +1,7 @@
 package com.clemble.loveit.common
 
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{Project, Resource, User, UserID, Verification}
+import com.clemble.loveit.common.model.{OwnedProject, Project, Resource, User, UserID, Verification}
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.UserPaymentRepository
 import com.clemble.loveit.thank.model.UserProjects
@@ -30,7 +30,9 @@ trait RepositorySpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    await(prjRepo.saveProject(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
+    val ownedProject = OwnedProject(url, someRandom[String], someRandom[String], someRandom[Verification])
+    await(usrPrjRepo.saveOwnedProject(user, Seq(ownedProject)))
+    await(prjRepo.saveProject(Project.from(user, ownedProject)))
   }
 
   override def getUser(user: UserID): Option[User] = {

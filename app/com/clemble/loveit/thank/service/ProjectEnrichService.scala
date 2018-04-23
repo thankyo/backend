@@ -167,3 +167,11 @@ case class SimpleProjectEnrichService @Inject()(
   }
 
 }
+
+case object TestProjectEnrichService extends ProjectEnrichService {
+
+  override def enrich(user: UserID, url: Resource): Future[OwnedProject] = {
+    Future.successful(OwnedProject(url, "Test title", "Test description", DibsVerification))
+  }
+
+}

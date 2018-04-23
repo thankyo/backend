@@ -10,10 +10,6 @@ class ProjectSupportTrackRepositorySpec extends RepositorySpec {
 
   val trackRepo = dependency[ProjectSupportTrackRepository]
 
-  def assignOwnership(user: UserID, url: Resource): Project = {
-    await(prjRepo.saveProject(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
-  }
-
   "Update repo" in {
     val giver = createUser()
 

@@ -14,7 +14,7 @@ import com.clemble.loveit.common.model.User.socialProfileJsonFormat
 import com.clemble.loveit.common.model._
 import com.nimbusds.jose.JWSObject
 import play.api.http.Writeable
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsObject, JsString, Json, Reads}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 
@@ -29,7 +29,8 @@ trait ControllerSpec extends FunctionalThankSpecification {
 
   implicit class ByteSourceReader(source: Source[ByteString, _]) {
     def read(): String = await(source.runWith(Sink.fold("")((agg, s) => agg.concat(s.utf8String))))
-    def readJson[T]()(implicit reader: Reads[T]): Option[T] = Json.parse(read()).asOpt[T]
+    def readJsonOpt[T]()(implicit reader: Reads[T]): Option[T] = Json.parse(read()).asOpt[T]
+    def readJson[T]()(implicit reader: Reads[T]): T = Json.parse(read()).as[T]
   }
 
   override def createUser(profile: RegistrationRequest = someRandom[RegistrationRequest]): UserID = {
@@ -50,55 +51,41 @@ trait ControllerSpec extends FunctionalThankSpecification {
 
     res.header.status match {
       case NOT_FOUND => None
-      case OK => res.body.dataStream.readJson[User]
+      case OK => res.body.dataStream.readJsonOpt[User]
     }
   }
 
-  def sign[A](user: UserID, req: FakeRequest[A]): FakeRequest[A] = {
-    val userAuth = ControllerSpec.getUser(user)
-    req.withHeaders(userAuth:_*)
-  }
-
   def perform[A](user: UserID, req: FakeRequest[A])(implicit writeable: Writeable[A]) = {
-    val singed = sign(user, req)
-    val fRes = route(application, singed).get
+    val userAuth = ControllerSpec.getUser(user)
+    val signed = req.withHeaders(userAuth:_*)
+    val fRes = route(application, signed).get
     await(fRes)
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    val project = await(prjRepo.saveProject(Project(url, user, someRandom[String], someRandom[String], someRandom[Verification])))
+    val json: JsObject = JsObject(Seq("url" -> JsString(url)))
+    val dibsOnPrj = FakeRequest(POST, "/api/v1/thank/user/my/owned").withJsonBody(json)
+    val res = perform(user, dibsOnPrj)
 
-    val ogObj = someRandom[OpenGraphObject].copy(url = url)
-    val createOgObjReq = FakeRequest(POST, "/api/v1/thank/graph").withJsonBody(Json.toJson(ogObj))
-    val resp = await(route(application, createOgObjReq).get)
-    if (resp.header.status != OK) {
-      throw new IllegalArgumentException("Could not create OG obj for resource")
-    }
+    res.header.status shouldEqual OK
+    val ownedPrj = res.body.dataStream.readJson[OwnedProject]
 
-    project
+    val createPrjReq = FakeRequest(POST, "/api/v1/thank/project").withJsonBody(Json.toJson(ownedPrj))
+    val resp = perform(user, createPrjReq)
+    resp.header.status shouldEqual OK
+
+    resp.body.dataStream.readJson[Project]
   }
 
   def getMyUser(user: UserID): User = {
-    val resp = perform(user, FakeRequest(GET, s"/api/v1/user/my/profile"))
-    val userOpt = resp.header.status match {
-      case NOT_FOUND => None
-      case OK => Json.parse(await(resp.body.consumeData).utf8String).asOpt[User]
-    }
-    userOpt.get
+    val res = perform(user, FakeRequest(GET, s"/api/v1/user/my/profile"))
+    res.header.status shouldEqual OK
+    res.body.dataStream.readJson[User]
   }
 
   def pendingCharges(user: String): Seq[PendingTransaction] = {
-    val req = sign(user, FakeRequest(GET, s"/api/v1/payment/my/charge/pending"))
-    val fRes = route(application, req).get
-
-    val res = await(fRes)
-    val payments = res.body.consumeData(materializer).
-      map(byteStream => byteStream.utf8String).
-      map(str => {
-        Json.parse(str).as[List[PendingTransaction]]
-      })
-
-    await(payments)
+    val res = perform(user, FakeRequest(GET, s"/api/v1/payment/my/charge/pending"))
+    res.body.dataStream.readJson[List[PendingTransaction]]
   }
 
 }

@@ -8,6 +8,7 @@ sealed trait Verification
 case object GoogleVerification extends Verification
 case object TumblrVerification extends Verification
 case object DibsVerification extends Verification
+case object EmailVerification extends Verification
 
 object Verification {
 
@@ -16,11 +17,13 @@ object Verification {
     val GOOGLE = JsString("google")
     val TUMBLR = JsString("tumblr")
     val DIBS = JsString("dibs")
+    val EMAIL = JsString("email")
 
     override def reads(json: JsValue): JsResult[Verification] = json match {
       case GOOGLE => JsSuccess(GoogleVerification)
       case TUMBLR => JsSuccess(TumblrVerification)
       case DIBS => JsSuccess(DibsVerification)
+      case EMAIL => JsSuccess(EmailVerification)
       case _ => JsError("Unknown verification type")
     }
 
@@ -29,6 +32,7 @@ object Verification {
         case GoogleVerification => GOOGLE
         case TumblrVerification => TUMBLR
         case DibsVerification => DIBS
+        case EmailVerification => EMAIL
       }
     }
   }

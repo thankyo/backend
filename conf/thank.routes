@@ -11,14 +11,13 @@ POST        /project                           @com.clemble.loveit.thank.control
 PUT         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.updateProject(project)
 DELETE      /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.delete(project)
 
-GET         /enrich                            @com.clemble.loveit.thank.controller.ProjectController.enrich(url)
-
 GET         /project/:project/feed             @com.clemble.loveit.thank.controller.ProjectController.getProjectFeed(project)
 
 GET         /user/:user/supported              @com.clemble.loveit.thank.controller.ProjectController.getSupportedByUser(user)
 GET         /user/:user/project                @com.clemble.loveit.thank.controller.ProjectController.getProjectsByUser(user)
 
 GET         /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.getOwnedProjects()
+POST        /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.dibsOnUrl()
 
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()

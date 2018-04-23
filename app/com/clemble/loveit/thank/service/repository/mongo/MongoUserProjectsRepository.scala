@@ -92,6 +92,12 @@ class MongoUserProjectsRepository @Inject() (
       }).recoverWith(errorHandler)
   }
 
+  override def deleteOwnedProject(user: UserID, url: String): Future[UserProjects] = {
+    val selector = Json.obj("_id" -> user)
+    val update = Json.obj("$pull" -> Json.obj("owned" -> Json.obj("url" -> url)))
+    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
+  }
+
   override def saveProject(project: Project): Future[Project] = {
     val selector = Json.obj("_id" -> project.user, "installed.url" -> Json.obj("$ne" -> project.url))
     val update = Json.obj("$addToSet" -> Json.obj("installed" -> project))

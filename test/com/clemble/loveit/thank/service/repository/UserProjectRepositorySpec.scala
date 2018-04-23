@@ -39,6 +39,17 @@ class UserProjectRepositorySpec extends RepositorySpec {
     await(repo.findById(user)).get.owned shouldEqual Seq(modifiedProject)
   }
 
+  "Delete Owned Project" in {
+    val user = createUser()
+
+    val ownedProject = someRandom[OwnedProject]
+    await(repo.saveOwnedProject(user, Seq(ownedProject)))
+    await(repo.deleteOwnedProject(user, ownedProject.url))
+
+    await(repo.findById(user)).get.owned should not(containAllOf(Seq(ownedProject)))
+    await(repo.findById(user)).get.owned shouldEqual List.empty
+  }
+
 
   "Update Installed Project" in {
     val user = createUser()

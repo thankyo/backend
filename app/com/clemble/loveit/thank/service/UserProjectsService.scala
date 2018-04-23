@@ -18,6 +18,8 @@ trait UserProjectsService {
 
   def create(user: User): Future[UserProjects]
 
+  def deleteOwned(user: UserID, url: Resource): Future[UserProjects]
+
   def updateOwned(user: UserID): Future[UserProjects]
 
 }
@@ -70,6 +72,16 @@ class SimpleUserProjectsService @Inject()(
       .flatMap(owned => {
         repo.saveOwnedProject(user, owned)
       })
+  }
+
+  override def deleteOwned(user: UserID, url: Resource): Future[UserProjects] = {
+    for {
+      installedPrjOpt <- repo.findProjectByUrl(url)
+      _ = if(installedPrjOpt.isDefined) throw new IllegalArgumentException("Remove installed project first")
+      userProject <- repo.deleteOwnedProject(user, url)
+    } yield {
+      userProject
+    }
   }
 
 }

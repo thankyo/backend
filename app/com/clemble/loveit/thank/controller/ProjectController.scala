@@ -30,6 +30,10 @@ class ProjectController @Inject()(
     })
   })
 
+  def deleteOwnedProject(url: Resource) = silhouette.SecuredAction.async(implicit req => {
+    usrPrjService.deleteOwned(req.identity.id, url).map(Ok(_))
+  })
+
   def getProjectsByUser(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     lookupService
       .findByUser(idOrMe(user))

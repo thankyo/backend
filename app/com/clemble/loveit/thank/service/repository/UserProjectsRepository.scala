@@ -15,4 +15,6 @@ trait UserProjectsRepository extends ProjectRepository {
 
   def saveProject(project: Project): Future[Project]
 
+  def deleteOwnedProject(user: UserID, url: String): Future[UserProjects]
+
 }

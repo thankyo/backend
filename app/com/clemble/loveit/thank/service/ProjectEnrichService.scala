@@ -153,7 +153,7 @@ case class SimpleProjectEnrichService @Inject()(
 
   private def enrichFirstValid(user: UserID, variations: List[Resource]): Future[OwnedProject] = {
     variations match {
-      case Nil => Future.failed(FieldValidationError("url", s"Can't connect over"))
+      case Nil => Future.failed(FieldValidationError("url", s"Can't connect"))
       case url :: xs =>
         client.isAlive(url).flatMap({
           case true => doEnrich(user, url)

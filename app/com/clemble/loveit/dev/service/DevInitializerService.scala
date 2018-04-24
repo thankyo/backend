@@ -135,17 +135,21 @@ case class SimpleDevInitializerService @Inject()(
   enable(DevInitializerService.CREATORS, DevInitializerService.SUPPORTERS)
 
 
+  val tasks = List(
+
+  )
+
   override def enable(configs: Seq[DevCreatorConfig], supporters: Seq[RegistrationRequest]): Future[Boolean] = {
     (
       for {
         supporters <- supportersInitializer.initialize(supporters)
-        _ = logger.info("Supporters initialization done")
-        posts <- creatorInitializer.initialize(configs)
+        _ = logger.info(s"Supporters initialization done ${supporters.length}")
+        posts <- if(supporters.isEmpty) Future.successful(List.empty) else creatorInitializer.initialize(configs)
         _ = logger.info("Creators initialization done")
-        thanks <- ensureLoveWasSpread(supporters, posts)
-        _ = logger.info(s"Love was spread")
-        status <- ensureEOMProcessed()
-        _ = logger.info(s"EOM processing was run with ${status}")
+        thanks <- if (posts.isEmpty) Future.successful(0) else ensureLoveWasSpread(supporters, posts)
+        _ = logger.info(s"Love was spread ${thanks}")
+        statusOpt <- if (supporters.isEmpty) Future.successful(None) else ensureEOMProcessed()
+        _ = logger.info(s"EOM processing was run with ${statusOpt}")
       } yield {
         logger.info("Dev user initialization finished")
         true
@@ -168,11 +172,11 @@ case class SimpleDevInitializerService @Inject()(
     Future.sequence(thanked).map(_.count(_ == true))
   }
 
-  private def ensureEOMProcessed(): Future[EOMStatus] = {
+  private def ensureEOMProcessed(): Future[Option[EOMStatus]] = {
     val yom = YearMonth.now().minusMonths(1)
-    eomService.getStatus(yom).flatMap(_ match {
-      case Some(status) => Future.successful(status)
-      case None => eomService.run(yom)
+    eomService.getStatus(yom).flatMap({
+      case Some(status) => Future.successful(Some(status))
+      case None => eomService.run(yom).map(Some(_))
     })
   }
 

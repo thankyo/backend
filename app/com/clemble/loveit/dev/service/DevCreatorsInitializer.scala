@@ -33,11 +33,11 @@ case class DevCreatorsInitializer @Inject()(
   def initialize(configs: Seq[DevCreatorConfig]): Future[Seq[Post]] = {
     for {
       creators <- ensureUserExist(configs.map(_.creator))
-      _ <- logger.info("Creators initialized")
+      _ = logger.info("Creators initialized")
       projects <- ensureCreatorsOwnership(creators.zip(configs.map(_.projects)))
-      _ <- logger.info("Project ownership verified")
+      _ = logger.info("Project ownership verified")
       posts <- updateProjectsFeed(projects)
-      _ <- logger.info("Posts fetched from the system")
+      _ = logger.info("Posts fetched from the feed")
     } yield {
       posts
     }

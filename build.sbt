@@ -11,7 +11,7 @@ version := "1.0-SNAPSHOT"
 scalaVersion := "2.12.5"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val silhouetteVersion = "5.0.3"
+val silhouetteVersion = "5.0.4"
 val reactMongoVersion = "0.13.0"
 val scalaGuiceVersion = "4.2.0"
 val elastic4sVersion = "6.1.3"
@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVersion,
 
-  "io.sentry" % "sentry-logback" % "1.7.2",
+  "io.sentry" % "sentry-logback" % "1.7.3",
 
   "org.apache.commons" % "commons-text" % "1.2" % Test,
   specs2 % Test,
@@ -63,7 +63,7 @@ libraryDependencies ++= Seq(
   // auth dependencies
   // ws,
 
-  "com.github.scribejava" % "scribejava-apis" % "5.3.0",
+  "com.github.scribejava" % "scribejava-apis" % "5.4.0",
 
   "org.matthicks" %% "mailgun4s" % "1.0.9",
 
@@ -83,7 +83,7 @@ libraryDependencies ++= Seq(
   // thank
   ws,
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVersion,
-  "org.jsoup" % "jsoup" % "1.11.2",
+  "org.jsoup" % "jsoup" % "1.11.3",
 )
 
 TwirlKeys.templateImports := Seq()

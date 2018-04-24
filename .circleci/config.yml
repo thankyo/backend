@@ -41,10 +41,15 @@ jobs:
 
       - run:
           command:
-            sbt test exit
+            sbt clean coverage test
 
       - store_test_results:
           path: target/test-reports
+
+      - run:
+          name: Update Coveralls
+          command:
+            sbt coverageReport coveralls
 
       - run:
           name: Add docker

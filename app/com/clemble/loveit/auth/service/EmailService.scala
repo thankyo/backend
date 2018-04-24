@@ -3,10 +3,11 @@ package com.clemble.loveit.auth.service
 import com.clemble.loveit.auth.model.ResetPasswordToken
 import com.clemble.loveit.auth.views.html.emails.resetPassword
 import org.matthicks.mailgun.{EmailAddress, Mailgun, Message}
-import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesProvider}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import com.clemble.loveit.auth.views.txt.emails
 import com.clemble.loveit.common.model.User
-import play.api.mvc.{Request, RequestHeader}
+import com.mohiva.play.silhouette.api.Logger
+import play.api.mvc.{RequestHeader}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,11 +34,11 @@ case class MailgunEmailService(mailgun: Mailgun)(implicit val messagesApi: Messa
 
 }
 
-class StubEmailService extends EmailService {
+class StubEmailService extends EmailService with Logger {
 
   override def sendResetPasswordEmail(user: User, authToken: ResetPasswordToken)(implicit req: RequestHeader): Future[Boolean] = {
     val url = s"http://localhost:8080/auth/reset/${authToken.token}"
-    println(s"Restore url is ${url}")
+    logger.info(s"Restore url is ${url}")
     Future.successful(true)
   }
 

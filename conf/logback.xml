@@ -40,8 +40,9 @@
     </appender>
 
     <logger name="com.clemble.loveit.dev" level="INFO"/>
+    <logger name="com.clemble.loveit.auth" level="INFO"/>
 
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="ASYNCFILE"/>
         <appender-ref ref="ASYNCSTDOUT"/>
         <appender-ref ref="SENTRY"/>

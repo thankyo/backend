@@ -7,7 +7,7 @@ import org.specs2.runner.JUnitRunner
 
 trait TagTestServiceScenario extends ServiceSpec with TagTestService with PostTestService {
 
-  "assign tags to user" in {
+  "assign tags to project" in {
     val user = createUser()
 
     val url = randomResource
@@ -23,7 +23,6 @@ trait TagTestServiceScenario extends ServiceSpec with TagTestService with PostTe
   "assign tags to post" in {
     val post = createPost()
 
-    val tags = getTags(post)
     val newTags = someRandom[Set[Tag]]
 
     assignTags(post, newTags) shouldEqual true

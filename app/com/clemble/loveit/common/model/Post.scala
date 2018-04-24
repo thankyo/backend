@@ -7,7 +7,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class Post(
                  url: Resource,
-                 project: Project,
+                 project: ProjectPointer,
 
                  ogObj: OpenGraphObject,
 
@@ -15,7 +15,7 @@ case class Post(
 
                  created: LocalDateTime = LocalDateTime.now(),
                  _id: PostID = IDGenerator.generate()
-               ) extends CreatedAware with ResourceAware {
+               ) extends CreatedAware with ResourceAware with ProjectAware {
 
   def isSupportedBy(user: UserID): Boolean = thank.isSupportedBy(user)
 
@@ -26,7 +26,7 @@ case class Post(
   }
 
   def withOg(og: OpenGraphObject): Post = {
-    this.copy(ogObj = og.copy(tags = og.tags ++ project.tags))
+    this.copy(ogObj = og)
   }
 
   def withUrl(url: String): Post = {
@@ -47,6 +47,7 @@ object Post {
   }
 
   def from(og: OpenGraphObject, project: Project): Post = {
-    Post.from(og.url, project).withOg(og)
+    Post(og.url, project, og.withTags(project.tags))
   }
+
 }

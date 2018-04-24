@@ -47,6 +47,10 @@ case class OpenGraphObject(
     }
   }
 
+  def withTags(additionalTags: Set[Tag]): OpenGraphObject = {
+    this.copy(tags = tags ++ additionalTags)
+  }
+
 }
 
 /**

@@ -94,7 +94,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       await(postRepo.save(post)) should beTrue
 
       await(postRepo.updateProject(newProject)) shouldEqual true
-      await(postRepo.findByResource(post.url)).map(_.project) shouldEqual Some(newProject)
+      await(postRepo.findByResource(post.url)).map(_.project) shouldEqual Some(newProject.toPointer())
     }
 
     "update if exists" in {
@@ -109,7 +109,7 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
       val B = someRandom[Project].copy(url = url)
 
       await(postRepo.updateProject(B)) shouldEqual true
-      await(postRepo.findByResource(post.url)).map(_.project) shouldEqual Some(B)
+      await(postRepo.findByResource(post.url)).map(_.project) shouldEqual Some(B.toPointer())
     }
 
     "update children" in {
@@ -124,8 +124,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       await(postRepo.updateProject(B))
 
-      await(postRepo.findByResource(parent)).get.project shouldEqual B
-      await(postRepo.findByResource(child)).get.project shouldEqual B
+      await(postRepo.findByResource(parent)).get.project shouldEqual B.toPointer()
+      await(postRepo.findByResource(child)).get.project shouldEqual B.toPointer()
     }
 
     "update children correctly" in {
@@ -150,8 +150,8 @@ class PostRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpec {
 
       await(postRepo.updateProject(B))
 
-      await(postRepo.findByResource(parent)).get.project shouldEqual original
-      await(postRepo.findByResource(child)).get.project shouldEqual B
+      await(postRepo.findByResource(parent)).get.project shouldEqual original.toPointer()
+      await(postRepo.findByResource(child)).get.project shouldEqual B.toPointer()
     }
 
   }

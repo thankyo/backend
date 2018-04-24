@@ -2,7 +2,7 @@ package com.clemble.loveit.payment.service
 
 import javax.inject.{Inject, Singleton}
 import akka.actor.{Actor, ActorSystem, Props}
-import com.clemble.loveit.common.model.{Project, Resource, ThankEvent, UserID}
+import com.clemble.loveit.common.model.{ProjectPointer, Resource, ThankEvent, UserID}
 import com.clemble.loveit.common.service.ThankEventBus
 import com.clemble.loveit.payment.model.PendingTransaction
 import com.clemble.loveit.payment.service.repository.PendingTransactionRepository
@@ -16,7 +16,7 @@ trait PendingTransactionService {
 
   def listPayouts(user: UserID): Future[List[PendingTransaction]]
 
-  def create(giver: UserID, owner: Project, url: Resource): Future[PendingTransaction]
+  def create(giver: UserID, owner: ProjectPointer, url: Resource): Future[PendingTransaction]
 
   def findUsersWithPayouts(): Future[List[UserID]]
 
@@ -63,7 +63,7 @@ case class SimplePendingTransactionService @Inject()(
     repo.findUsersWithoutCharges()
   }
 
-  override def create(giver: UserID, project: Project, url: Resource): Future[PendingTransaction] = {
+  override def create(giver: UserID, project: ProjectPointer, url: Resource): Future[PendingTransaction] = {
     val transaction = PendingTransaction(project, url)
     for {
       savedInRepo <- repo.save(giver, transaction)

@@ -51,6 +51,25 @@ trait ProjectLike {
   val rss: Option[String]
 }
 
+case class ProjectPointer(
+  url: Resource,
+  user: UserID,
+  webStack: Option[WebStack],
+  _id: ProjectID
+) extends UserAware
+
+object ProjectPointer {
+
+  implicit val jsonFormat = Json.format[ProjectPointer]
+
+  implicit def toPointer(project: Project) = project.toPointer()
+
+}
+
+trait ProjectAware {
+  val project: ProjectPointer
+}
+
 case class Project(
   url: Resource,
   user: UserID,
@@ -63,7 +82,11 @@ case class Project(
   tags: Set[Tag] = Set.empty,
   rss: Option[String] = None,
   _id: ProjectID = IDGenerator.generate()
-) extends UserAware with ResourceAware with ProjectLike
+) extends UserAware with ResourceAware with ProjectLike {
+
+  def toPointer(): ProjectPointer = ProjectPointer(url, user, webStack, _id)
+
+}
 
 object Project {
 

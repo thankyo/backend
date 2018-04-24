@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.error.{RepositoryException}
+import com.clemble.loveit.common.error.{FieldValidationError, RepositoryException}
 import com.clemble.loveit.common.model.{Project, Resource, UserID}
 import com.clemble.loveit.common.util.IDGenerator
 import org.junit.runner.RunWith
@@ -108,7 +108,7 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
       val res = randomResource
 
       createProject(A, res)
-      createProject(B, res) should throwA[RepositoryException]
+      createProject(B, res) should throwA[FieldValidationError]
 
       listOwned(A) shouldEqual List(res)
       listOwned(B) shouldEqual List.empty[Resource]

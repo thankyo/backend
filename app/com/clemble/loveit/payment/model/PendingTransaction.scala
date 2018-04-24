@@ -2,17 +2,16 @@ package com.clemble.loveit.payment.model
 
 import java.time.LocalDateTime
 
-import com.clemble.loveit.common.model.{CreatedAware, Project, Resource, ResourceAware, ThankEvent}
+import com.clemble.loveit.common.model.{CreatedAware, Project, ProjectAware, ProjectPointer, Resource, ResourceAware, ThankEvent, UserAware}
 import com.clemble.loveit.common.util.WriteableUtils
-import com.clemble.loveit.common.model.UserAware
 import play.api.http.Writeable
 import play.api.libs.json.Json
 
 case class PendingTransaction(
-  project: Project,
+  project: ProjectPointer,
   url: Resource,
   created: LocalDateTime = LocalDateTime.now()
-) extends CreatedAware with UserAware with ResourceAware {
+) extends CreatedAware with UserAware with ResourceAware with ProjectAware {
 
   val user = project.user
 

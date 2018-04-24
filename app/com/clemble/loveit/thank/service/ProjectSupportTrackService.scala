@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service
 
 import javax.inject.{Inject, Singleton}
 import akka.actor.{Actor, ActorSystem, Props}
-import com.clemble.loveit.common.model.{Project, ThankEvent, UserID}
+import com.clemble.loveit.common.model.{Project, ProjectPointer, ThankEvent, UserID}
 import com.clemble.loveit.common.service.ThankEventBus
 import com.clemble.loveit.thank.service.repository.{ProjectRepository, ProjectSupportTrackRepository}
 
@@ -12,7 +12,7 @@ trait ProjectSupportTrackService {
 
   def getSupported(user: UserID): Future[List[Project]]
 
-  def markSupported(supporter: UserID, project: Project): Future[Boolean]
+  def markSupported(supporter: UserID, project: ProjectPointer): Future[Boolean]
 
 }
 
@@ -42,8 +42,13 @@ class SimpleProjectSupportTrackService @Inject()(
     supTrackRepo.getSupported(user).flatMap(repo.findAllProjects)
   }
 
-  override def markSupported(supporter: UserID, project: Project): Future[Boolean] = {
-    supTrackRepo.markSupportedBy(supporter, project)
+  override def markSupported(supporter: UserID, projectPointer: ProjectPointer): Future[Boolean] = {
+    for {
+      projectOpt <- repo.findProjectById(projectPointer._id)
+      supported <- supTrackRepo.markSupportedBy(supporter, projectOpt.get)
+    } yield {
+      supported
+    }
   }
 
 }

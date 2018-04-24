@@ -88,7 +88,7 @@ class PostServiceSpec(implicit val ee: ExecutionEnv) extends ServiceSpec {
 
       val B = createUser()
 
-      createProject(B, url) should throwA[ResourceException]
+      createProject(B, url) should throwA[Exception]
     }
 
   }

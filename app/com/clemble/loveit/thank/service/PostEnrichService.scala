@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import java.time.LocalDateTime
 
 import com.clemble.loveit.common.model
-import com.clemble.loveit.common.model.{OpenGraphImage, OpenGraphObject, Project, Resource, Tag, Tumblr}
+import com.clemble.loveit.common.model.{OpenGraphImage, OpenGraphObject, Project, ProjectPointer, Resource, Tag, Tumblr}
 import com.clemble.loveit.common.service.WSClientAware
 import javax.inject.{Inject, Singleton}
 import org.jsoup.Jsoup
@@ -15,13 +15,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PostEnrichService {
 
-  def enrich(prj: Project, post: OpenGraphObject): Future[OpenGraphObject]
+  def enrich(prj: ProjectPointer, post: OpenGraphObject): Future[OpenGraphObject]
 
 }
 
 sealed trait PostSourceService {
 
-  def fetch(prj: Project, url: Resource): Future[Option[OpenGraphObject]]
+  def fetch(prj: ProjectPointer, url: Resource): Future[Option[OpenGraphObject]]
 
 }
 
@@ -52,7 +52,7 @@ case class FacebookPostSourceService @Inject()(
     }
   }
 
-  override def fetch(prj: Project, url: String): Future[Option[OpenGraphObject]] = {
+  override def fetch(prj: ProjectPointer, url: String): Future[Option[OpenGraphObject]] = {
     client.url(s"https://graph.facebook.com/?id=${url}")
       .get()
       .map(res => {
@@ -129,7 +129,7 @@ case class HtmlPostSourceService @Inject()(
       })
   }
 
-  override def fetch(prj: Project, url: String): Future[Option[OpenGraphObject]] = {
+  override def fetch(prj: ProjectPointer, url: String): Future[Option[OpenGraphObject]] = {
     getPostHtml(url).
       map(htmlOpt => {
         htmlOpt.flatMap(openGraphFromHTML(url, _))
@@ -159,7 +159,7 @@ case class TumblrPostSourceService @Inject()(
     )
   }
 
-  override def fetch(prj: Project, url: String): Future[Option[OpenGraphObject]] = {
+  override def fetch(prj: ProjectPointer, url: String): Future[Option[OpenGraphObject]] = {
     if (!prj.webStack.contains(Tumblr)) {
       return Future.successful(None)
     }
@@ -183,7 +183,7 @@ case class SimplePostEnrichService @Inject()(
   implicit val ec: ExecutionContext
 ) extends PostEnrichService {
 
-  override def enrich(prj: Project, post: OpenGraphObject): Future[OpenGraphObject] = {
+  override def enrich(prj: ProjectPointer, post: OpenGraphObject): Future[OpenGraphObject] = {
     val fbGraph = fbEnrichService.fetch(prj, post.url)
     val htmlGraph = htmlEnrichService.fetch(prj, post.url)
     val tumblrGraph = tumblrEnrichService.fetch(prj, post.url)
@@ -201,7 +201,7 @@ case class SimplePostEnrichService @Inject()(
 }
 
 case object TestPostEnrichService extends PostEnrichService {
-  override def enrich(prj: Project, post: OpenGraphObject): Future[OpenGraphObject] = {
+  override def enrich(prj: ProjectPointer, post: OpenGraphObject): Future[OpenGraphObject] = {
     Future.successful(post)
   }
 }

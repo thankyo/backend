@@ -51,8 +51,8 @@ trait InternalContributionStatisticsScenario extends ContributionStatisticsScena
 @RunWith(classOf[JUnitRunner])
 class ContributionStatisticsRepositorySpec(implicit ee: ExecutionEnv) extends InternalContributionStatisticsScenario with RepositorySpec {
 
-  val repo = dependency[PendingTransactionRepository]
-  val statRepo = dependency[ContributionStatisticsRepository]
+  val repo: PendingTransactionRepository = dependency[PendingTransactionRepository]
+  val statRepo: ContributionStatisticsRepository = dependency[ContributionStatisticsRepository]
 
   override def getContributions(user: UserID): ContributionStatistics = {
     await(statRepo.find(user))
@@ -67,8 +67,8 @@ class ContributionStatisticsRepositorySpec(implicit ee: ExecutionEnv) extends In
 @RunWith(classOf[JUnitRunner])
 class ContributionStatisticsServiceSpec(implicit ee: ExecutionEnv) extends InternalContributionStatisticsScenario with ServiceSpec {
 
-  val trService = dependency[PendingTransactionService]
-  val statService = dependency[ContributionStatisticsService]
+  val trService: PendingTransactionService = dependency[PendingTransactionService]
+  val statService: ContributionStatisticsService = dependency[ContributionStatisticsService]
 
   override def getContributions(user: UserID): ContributionStatistics = await(statService.find(user))
 

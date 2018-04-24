@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 case class ThankEvent(
                        user: UserID,
-                       project: Project,
+                       project: ProjectPointer,
                        url: Resource,
                        created: LocalDateTime = LocalDateTime.now()
-                     ) extends ResourceAware with CreatedAware with UserAware
+                     ) extends ResourceAware with CreatedAware with UserAware with ProjectAware

@@ -3,11 +3,11 @@ package com.clemble.loveit.dev.service
 import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.auth.service.{AuthService, UserLoggedIn, UserRegister}
-import com.clemble.loveit.common.model.{Post, Project, OwnedProject, UserID}
+import com.clemble.loveit.common.model.{Post, UserID}
 import com.clemble.loveit.common.util.EventBusManager
-import com.clemble.loveit.common.model.{Project, OwnedProject}
+import com.clemble.loveit.common.model.{OwnedProject, Project}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
-import com.clemble.loveit.thank.service.{PostService, ProjectFeedService, ProjectLookupService, ProjectService}
+import com.clemble.loveit.thank.service._
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,6 +24,7 @@ case class DevCreatorsInitializer @Inject()(
   postService: PostService,
   prjLookupService: ProjectLookupService,
   prjService: ProjectService,
+  usrPrjService: UserProjectsService,
   prjRepo: ProjectRepository,
   eventBusManager: EventBusManager,
   implicit val ec: ExecutionContext
@@ -65,7 +66,13 @@ case class DevCreatorsInitializer @Inject()(
         .findByUrl(project.url)
         .flatMap {
           case Some(prj) => Future.successful(prj)
-          case None => prjService.create(creator, project)
+          case None =>
+            for {
+              _ <- usrPrjService.dibsOnUrl(creator, project.url)
+              project <- prjService.create(creator, project)
+            } yield {
+              project
+            }
         }
     }
     Future.sequence(resources)

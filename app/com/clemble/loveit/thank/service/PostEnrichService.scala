@@ -194,7 +194,7 @@ case class SimplePostEnrichService @Inject()(
       tumblr <- tumblrGraph
     } yield {
       val base = tumblr.orElse(fb).orElse(html).getOrElse(post)
-      base.merge(fb).merge(html)
+      base.merge(fb).merge(html).merge(post)
     }
   }
 

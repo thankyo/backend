@@ -9,8 +9,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectService {
 
-  def findProjectsByUser(user: UserID): Future[List[Project]]
-
   def create(user: UserID, project: OwnedProject): Future[Project]
 
   def delete(user: UserID, id: ProjectID): Future[Boolean]
@@ -26,10 +24,6 @@ class SimpleProjectService @Inject()(
   verificationService: ProjectOwnershipVerificationService,
   implicit val ec: ExecutionContext
 ) extends ProjectService {
-
-  override def findProjectsByUser(user: UserID): Future[List[Project]] = {
-    repo.findProjectsByUser(user)
-  }
 
   override def create(user: UserID, project: OwnedProject): Future[Project] = {
     for {

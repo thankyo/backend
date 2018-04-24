@@ -44,6 +44,7 @@ case object FeedParser {
 
 case object RSSParser extends FeedParser {
   val _title = "title"
+  val _origLink = "origLink"
   val _link = "link"
   val _description = "description"
   val _item = "item"
@@ -55,7 +56,9 @@ case object RSSParser extends FeedParser {
   override def parse(x: Elem): Iterable[Option[OpenGraphObject]] = {
     val items = x \\ _item
     items.map({ implicit item =>
-      val opOpt = from(_link).map(url => {
+      val pubDateStrOpt = from(_pubDate)
+      val pubDate = pubDateStrOpt.flatMap(parseDate)
+      val opOpt = from(_origLink).orElse(from(_link)).map(url => {
         OpenGraphObject(
           url = url,
           title = from(_title),
@@ -65,7 +68,7 @@ case object RSSParser extends FeedParser {
             val width = Option(img.\@("width")).filterNot(_.isEmpty).map(_.toInt)
             Option(img.\@("url")).map(url => OpenGraphImage(url, height = height, width = width))
           }),
-          pubDate = from(_pubDate).flatMap(parseDate)
+          pubDate = pubDate
         )
       })
       opOpt

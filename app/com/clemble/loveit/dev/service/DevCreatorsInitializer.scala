@@ -8,7 +8,7 @@ import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.common.model.{OwnedProject, Project}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import com.clemble.loveit.thank.service._
-import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
+import com.mohiva.play.silhouette.api.{Logger, LoginEvent, SignUpEvent}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,13 +28,16 @@ case class DevCreatorsInitializer @Inject()(
   prjRepo: ProjectRepository,
   eventBusManager: EventBusManager,
   implicit val ec: ExecutionContext
-) {
+) extends Logger {
 
   def initialize(configs: Seq[DevCreatorConfig]): Future[Seq[Post]] = {
     for {
       creators <- ensureUserExist(configs.map(_.creator))
+      _ <- logger.info("Creators initialized")
       projects <- ensureCreatorsOwnership(creators.zip(configs.map(_.projects)))
+      _ <- logger.info("Project ownership verified")
       posts <- updateProjectsFeed(projects)
+      _ <- logger.info("Posts fetched from the system")
     } yield {
       posts
     }

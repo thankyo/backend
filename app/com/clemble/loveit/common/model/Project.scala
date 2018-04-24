@@ -54,6 +54,8 @@ trait ProjectLike {
 case class ProjectPointer(
   url: Resource,
   user: UserID,
+  title: String,
+  avatar: Option[String],
   webStack: Option[WebStack],
   _id: ProjectID
 ) extends UserAware
@@ -84,7 +86,7 @@ case class Project(
   _id: ProjectID = IDGenerator.generate()
 ) extends UserAware with ResourceAware with ProjectLike {
 
-  def toPointer(): ProjectPointer = ProjectPointer(url, user, webStack, _id)
+  def toPointer(): ProjectPointer = ProjectPointer(url, user, title, avatar, webStack, _id)
 
 }
 

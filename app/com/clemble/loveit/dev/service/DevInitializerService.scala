@@ -4,11 +4,12 @@ import java.time.YearMonth
 
 import javax.inject.Inject
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{DibsVerification, Post, Project, OwnedProject, UserID}
+import com.clemble.loveit.common.model.{DibsVerification, OwnedProject, Post, Project, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.EOMPaymentService
 import com.clemble.loveit.thank.service.PostService
+import com.mohiva.play.silhouette.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
@@ -129,7 +130,7 @@ case class SimpleDevInitializerService @Inject()(
                                                eomService: EOMPaymentService,
                                                eventBusManager: EventBusManager,
                                                implicit val ec: ExecutionContext
-                                             ) extends DevInitializerService {
+                                             ) extends DevInitializerService with Logger {
 
   enable(DevInitializerService.CREATORS, DevInitializerService.SUPPORTERS)
 
@@ -138,11 +139,15 @@ case class SimpleDevInitializerService @Inject()(
     (
       for {
         supporters <- supportersInitializer.initialize(supporters)
+        _ = logger.info("Supporters initialization done")
         posts <- creatorInitializer.initialize(configs)
-        _ <- ensureLoveWasSpread(supporters, posts)
-        _ <- ensureEOMProcessed()
+        _ = logger.info("Creators initialization done")
+        thanks <- ensureLoveWasSpread(supporters, posts)
+        _ = logger.info(s"Love was spread")
+        status <- ensureEOMProcessed()
+        _ = logger.info(s"EOM processing was run with ${status}")
       } yield {
-        println("Dev user initialization finished")
+        logger.info("Dev user initialization finished")
         true
       }).recover({
       case t => {

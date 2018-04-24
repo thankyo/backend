@@ -39,11 +39,12 @@
         </filter>
     </appender>
 
+    <logger name="com.clemble.loveit.dev" level="INFO"/>
+
     <root level="WARN">
         <appender-ref ref="ASYNCFILE"/>
         <appender-ref ref="ASYNCSTDOUT"/>
         <appender-ref ref="SENTRY"/>
-        <!--<appender-ref ref="SENTRY" />-->
     </root>
 
 </configuration>

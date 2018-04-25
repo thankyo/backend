@@ -2,56 +2,46 @@ package com.clemble.loveit.auth.service
 
 import java.util.UUID
 
-import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.auth.model.ResetPasswordToken
-import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.common.model.UserID
-import com.clemble.loveit.common.service.TokenRepository
+import com.clemble.loveit.auth.model.requests.ResetPasswordRequest
+import com.clemble.loveit.common.error.{FieldValidationError}
+import com.clemble.loveit.common.service.{TokenRepository, UserService}
+import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-/**
-  * Handles actions to auth tokens.
-  *
-  * @param repo The auth token Repository implementation.
-  * @param ex   The execution context.
-  */
 @Singleton
 case class SimpleResetPasswordTokenService @Inject()(
-                                             repo: TokenRepository[ResetPasswordToken]
-                                           )(
-                                             implicit
-                                             ex: ExecutionContext
-                                           ) extends ResetPasswordTokenService {
+  userService: UserService,
+  emailService: EmailService,
+  repo: TokenRepository[ResetPasswordToken]
+)(
+  implicit
+  ec: ExecutionContext
+) extends ResetPasswordTokenService {
 
-  /**
-    * Creates a new auth token and saves it in the backing store.
-    *
-    * @param user The user ID for which the token should be created.
-    * @return The saved auth token.
-    */
-  def create(user: UserID): Future[ResetPasswordToken] = {
-    val token = ResetPasswordToken(UUID.randomUUID(), user)
-    repo.
-      save(token).
-      recoverWith({
-        case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
-          for {
-            _ <- repo.removeByUser(user)
-            savedToken <- repo.save(token)
-          } yield {
-            savedToken
-          }
-      })
+  override def create(request: ResetPasswordRequest): Future[ResetPasswordToken] = {
+    for {
+      user <- userService.findByEmail(request.email).
+          map({
+            case Some(user) if user.profiles.credentials.isEmpty =>
+              import user.profiles._
+              val regStr = List(facebook.map(_ => "FB"), google.map(_ => "Google"), tumblr.map(_ => "Tumblr")).flatten.mkString(", ")
+              throw FieldValidationError("email", s"You are registered through ${regStr}")
+            case Some(user) => user
+            case None =>
+              throw new IdentityNotFoundException(s"No user with specified email exist")
+          })
+      authToken <- repo.save(ResetPasswordToken(user.id))
+      emailSent <- emailService.sendResetPasswordEmail(user.email, authToken)
+      _ = if (emailSent) throw new IllegalArgumentException("Could not send verification email")
+    } yield {
+      authToken
+    }
   }
 
-  /**
-    * Validates a token ID.
-    *
-    * @param token The token ID to validate.
-    * @return The token if it's valid, None otherwise.
-    */
   def validate(token: UUID): Future[Option[ResetPasswordToken]] = {
     val findRes = repo.findByToken(token)
     repo.removeByToken(token)

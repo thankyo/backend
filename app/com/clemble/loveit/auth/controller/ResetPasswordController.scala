@@ -53,28 +53,11 @@ class ResetPasswordController @Inject()(
     *
     * @return The result to display.
     */
-  def sendResetEmail = silhouette.UnsecuredAction.async(parse.json[ResetPasswordRequest])({
-    implicit request => {
-      val loginInfo = request.body.toLoginInfo
-
+  def sendResetEmail = silhouette.UnsecuredAction.async(parse.json[ResetPasswordRequest])({ implicit request => {
       for {
-        user <- userService.retrieve(loginInfo).flatMap({
-          case Some(user) => Future.successful(user)
-          case None => userService.
-            findByEmail(request.body.email).
-            map({
-              case Some(user) =>
-                import user.profiles._
-                val regStr = List(facebook.map(_ => "FB"), google.map(_ => "Google"), credentials.map(_ => "Credentials")).flatten.mkString(", ")
-                throw FieldValidationError("email", s"You are registered through ${regStr}")
-              case None =>
-                throw new IdentityNotFoundException(s"No user with ${loginInfo.providerKey}")
-            })
-        })
-        authToken <- authTokenService.create(user.id)
-        emailSent <- emailService.sendResetPasswordEmail(user, authToken)
+        _ <- authTokenService.create(request.body)
       } yield {
-        Ok(JsBoolean(emailSent))
+        Ok(JsBoolean(true))
       }
     }
   })

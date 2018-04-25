@@ -43,15 +43,7 @@ case class SimpleEmailVerificationTokenService @Inject()(repo: TokenRepository[E
       throw new FieldValidationError("email", s"Domain does not match ${url}")
     }
     val token = EmailVerificationToken(user, email, url)
-    repo.save(token).recoverWith({
-      case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
-        for {
-          _ <- repo.removeByUser(user)
-          savedToken <- repo.save(token)
-        } yield {
-          savedToken
-        }
-    })
+    repo.save(token)
   }
 
   override def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]] = {

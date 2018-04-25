@@ -3,6 +3,7 @@ package com.clemble.loveit.common.service.repository
 import java.util.UUID
 
 import com.clemble.loveit.auth.model.ResetPasswordToken
+import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.{TokenAware, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.common.service.TokenRepository
@@ -32,7 +33,15 @@ case class MongoTokenRepository[T <: TokenAware] @Inject()(
   }
 
   def save(token: T): Future[T] = {
-    MongoSafeUtils.safe(token, collection.insert[T](token))
+    MongoSafeUtils.safe(token, collection.insert[T](token)).recoverWith({
+      case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
+        for {
+          _ <- removeByUser(token.user)
+          savedToken <- save(token)
+        } yield {
+          savedToken
+        }
+    })
   }
 
   def removeByToken(token: UUID): Future[Boolean] = {

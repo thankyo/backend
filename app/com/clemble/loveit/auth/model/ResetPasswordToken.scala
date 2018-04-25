@@ -13,8 +13,8 @@ import play.api.libs.json.{Json, OFormat}
  * @param user The unique ID of the user the token is associated with.
  */
 case class ResetPasswordToken(
-                      token: UUID,
                       user: UserID,
+                      token: UUID = UUID.randomUUID(),
                       created: LocalDateTime = LocalDateTime.now()
 ) extends TokenAware
 

@@ -27,9 +27,14 @@ case class MongoTokenRepository[T <: TokenAware] @Inject()(
 
   MongoTokenRepository.ensureMeta(collection)
 
-  def findByToken(token: UUID): Future[Option[T]] = {
+  def findAndRemoveByToken(token: UUID): Future[Option[T]] = {
     val selector = Json.obj("token" -> token)
-    collection.find(selector).one[T]
+    for {
+      tokenOpt <- collection.find(selector).one[T]
+      _ <- collection.remove(selector)
+    } yield {
+      tokenOpt
+    }
   }
 
   def save(token: T): Future[T] = {

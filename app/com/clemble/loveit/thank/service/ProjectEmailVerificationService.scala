@@ -47,9 +47,7 @@ case class SimpleEmailVerificationTokenService @Inject()(repo: TokenRepository[E
   }
 
   override def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]] = {
-    val findRes = repo.findByToken(token)
-    repo.removeByToken(token)
-    findRes.map({
+    repo.findAndRemoveByToken(token).map({
       case Some(verification) if verification.user != user =>
         throw new IllegalArgumentException("Token was created by different user")
       case verificationOpt => verificationOpt

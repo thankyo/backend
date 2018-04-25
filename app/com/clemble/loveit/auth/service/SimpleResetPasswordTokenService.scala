@@ -3,9 +3,11 @@ package com.clemble.loveit.auth.service
 import java.util.UUID
 
 import com.clemble.loveit.auth.model.ResetPasswordToken
-import com.clemble.loveit.auth.model.requests.ResetPasswordRequest
-import com.clemble.loveit.common.error.{FieldValidationError}
+import com.clemble.loveit.auth.model.requests.{ResetPasswordRequest, RestorePasswordRequest}
+import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.service.{TokenRepository, UserService}
+import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
+import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import javax.inject.{Inject, Singleton}
 
@@ -16,11 +18,13 @@ import scala.language.postfixOps
 case class SimpleResetPasswordTokenService @Inject()(
   userService: UserService,
   emailService: EmailService,
+  passwordHasherRegistry: PasswordHasherRegistry,
+  authInfoRepo: AuthInfoRepository,
   repo: TokenRepository[ResetPasswordToken]
 )(
   implicit
   ec: ExecutionContext
-) extends ResetPasswordTokenService {
+) extends ResetPasswordService {
 
   override def create(request: ResetPasswordRequest): Future[ResetPasswordToken] = {
     for {
@@ -42,10 +46,20 @@ case class SimpleResetPasswordTokenService @Inject()(
     }
   }
 
-  def validate(token: UUID): Future[Option[ResetPasswordToken]] = {
-    val findRes = repo.findByToken(token)
-    repo.removeByToken(token)
-    findRes
+  override def restore(token: UUID, restore: RestorePasswordRequest): Future[UserLoggedIn] = {
+    val passwordInfo = passwordHasherRegistry.current.hash(restore.password)
+    for {
+      authTokenOpt <- repo.findAndRemoveByToken(token)
+      authToken = authTokenOpt.getOrElse({
+        throw FieldValidationError("password", "Token expired or already used")
+      })
+      userOpt <- userService.findById(authToken.user)
+      user = userOpt.getOrElse({ throw new IllegalArgumentException("User not found, this should never happen")})
+      loginInfoOpt = user.profiles.asCredentialsLogin()
+      _ <- authInfoRepo.update[PasswordInfo](loginInfoOpt.get, passwordInfo)
+    } yield {
+      UserLoggedIn(userOpt.get, loginInfoOpt.get)
+    }
   }
 
 }

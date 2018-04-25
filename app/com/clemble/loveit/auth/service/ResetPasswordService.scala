@@ -3,7 +3,7 @@ package com.clemble.loveit.auth.service
 import java.util.UUID
 
 import com.clemble.loveit.auth.model.ResetPasswordToken
-import com.clemble.loveit.auth.model.requests.ResetPasswordRequest
+import com.clemble.loveit.auth.model.requests.{ResetPasswordRequest, RestorePasswordRequest}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -11,10 +11,10 @@ import scala.language.postfixOps
 /**
  * Handles actions to auth tokens.
  */
-trait ResetPasswordTokenService {
+trait ResetPasswordService {
 
   def create(request: ResetPasswordRequest): Future[ResetPasswordToken]
 
-  def validate(token: UUID): Future[Option[ResetPasswordToken]]
+  def restore(token: UUID, restore: RestorePasswordRequest): Future[UserLoggedIn]
 
 }

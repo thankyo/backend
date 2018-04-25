@@ -1,7 +1,7 @@
 POST        /register                        com.clemble.loveit.auth.controller.RegisterController.submit
 POST        /logIn                           com.clemble.loveit.auth.controller.LogInController.submit
 
-POST        /password/forgot                 com.clemble.loveit.auth.controller.ResetPasswordController.sendResetEmail
+POST        /password/forgot                 com.clemble.loveit.auth.controller.ResetPasswordController.resetPassword
 POST        /password/reset/:token           com.clemble.loveit.auth.controller.ResetPasswordController.restorePassword(token: java.util.UUID)
 POST        /password/change                 com.clemble.loveit.auth.controller.ChangePasswordController.submit
 

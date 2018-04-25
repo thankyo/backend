@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 trait TokenRepository[T <: TokenAware] {
 
-  def findByToken(token: UUID): Future[Option[T]]
+  def findAndRemoveByToken(token: UUID): Future[Option[T]]
 
   def save(token: T): Future[T]
 

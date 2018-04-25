@@ -29,7 +29,7 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
   override def configure(): Unit = {
     bind[AuthService].to[SimpleAuthService]
     bind[UserOAuthService].to[SimpleAuthService]
-    bind[ResetPasswordTokenService].to[SimpleResetPasswordTokenService]
+    bind[ResetPasswordService].to[SimpleResetPasswordTokenService]
   }
 
   @Provides

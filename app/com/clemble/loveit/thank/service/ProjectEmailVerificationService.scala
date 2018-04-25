@@ -1,40 +1,63 @@
 package com.clemble.loveit.thank.service
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 import java.util.UUID
 
-import com.clemble.loveit.common.model.{CreatedAware, Email, Project, Resource, ResourceAware, TokenAware, UserAware, UserID}
-import play.api.libs.json.Json
+import com.clemble.loveit.common.error.{FieldValidationError, RepositoryException}
+import com.clemble.loveit.common.model._
+import com.clemble.loveit.common.service.TokenRepository
+import javax.inject.{Inject, Singleton}
+import play.api.libs.json.{Json, OFormat}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class EmailVerificationToken(
   user: UserID,
   email: Email,
-  token: UUID,
-  created: LocalDateTime
-) extends TokenAware
+  url: Resource,
+  token: UUID = UUID.randomUUID(),
+  created: LocalDateTime = LocalDateTime.now()
+) extends TokenAware with ResourceAware
 
 object EmailVerificationToken {
 
-  implicit val json = Json.format[EmailVerificationToken]
+  implicit val json: OFormat[EmailVerificationToken] = Json.format[EmailVerificationToken]
 
 }
 
-case class EmailVerificationRequest(
-  email: String,
-  url: Resource
-) extends ResourceAware
+trait EmailVerificationTokenService {
 
-case class EmailVerification(
-  user: UserID,
-  url: Resource,
-  email: String,
-  token: String
-) extends ResourceAware with UserAware
+  def create(user: UserID, email: String, url: Resource): Future[EmailVerificationToken]
 
-trait ProjectEmailVerificationService {
+  def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]]
 
-  def verify(verificationRequest: EmailVerificationRequest): Future[EmailVerification]
+}
+
+@Singleton
+case class SimpleEmailVerificationTokenService @Inject()(repo: TokenRepository[EmailVerificationToken])(implicit ec: ExecutionContext) extends EmailVerificationTokenService {
+
+  override def create(user: UserID, email: Email, url: Resource): Future[EmailVerificationToken] = {
+    val emailDomain = email.toEmailDomain()
+    val resDomain = url.toParentDomain()
+    if (emailDomain != resDomain) {
+      throw new FieldValidationError("email", s"Domain does not match ${url}")
+    }
+    val token = EmailVerificationToken(user, email, url)
+    repo.save(token).recoverWith({
+      case RepositoryException(RepositoryException.DUPLICATE_KEY_CODE, _) =>
+        for {
+          _ <- repo.removeByUser(user)
+          savedToken <- repo.save(token)
+        } yield {
+          savedToken
+        }
+    })
+  }
+
+  override def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]] = {
+    val findRes = repo.findByToken(token).map(_.filter(_.user == user))
+    repo.removeByToken(token)
+    findRes
+  }
 
 }

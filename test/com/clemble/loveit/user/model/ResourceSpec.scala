@@ -27,4 +27,11 @@ class ResourceSpec extends Specification {
     "https://example.com/".normalize() shouldEqual "https://example.com"
   }
 
+  "domain" in {
+    "https://www.some.com".toParentDomain() shouldEqual "some.com"
+    "https://some.com".toParentDomain() shouldEqual "some.com"
+    "http://www.some.com".toParentDomain() shouldEqual "some.com"
+    "http://some.com".toParentDomain() shouldEqual "some.com"
+  }
+
 }

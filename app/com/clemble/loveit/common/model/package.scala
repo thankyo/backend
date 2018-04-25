@@ -35,6 +35,14 @@ package object model {
     }
   }
 
+  implicit class EmailExtensions(email: Email) {
+
+    def toEmailDomain(): Resource = {
+      email.substring(email.indexOf("@"))
+    }
+
+  }
+
   implicit class ResourceExtensions(url: Resource) {
 
     def parent(): Option[Resource] = {
@@ -57,6 +65,10 @@ package object model {
 
       val normParts = url.split("\\/").toList
       toParents(normParts.reverse, List.empty[String]).reverse
+    }
+
+    def toParentDomain(): Resource = {
+      url.substring(6).replace("www.", "").replaceAllLiterally("/", "")
     }
 
     def normalize(): Resource = url match {

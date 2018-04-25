@@ -3,8 +3,9 @@ package com.clemble.loveit.thank
 import javax.inject.{Inject, Named, Singleton}
 import akka.actor.{ActorSystem, Scheduler}
 import com.clemble.loveit.common.model.WordPress
-import com.clemble.loveit.common.mongo.{JSONCollectionFactory}
-import com.clemble.loveit.common.service.UserService
+import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.common.service.repository.MongoTokenRepository
+import com.clemble.loveit.common.service.{TokenRepository, UserService}
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
 import com.clemble.loveit.thank.service.repository.mongo._
@@ -36,6 +37,8 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()
 
+    bind(classOf[EmailVerificationTokenService]).to(classOf[SimpleEmailVerificationTokenService])
+
     bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()
     bind(classOf[ProjectSupportTrackService]).to(classOf[SimpleProjectSupportTrackService]).asEagerSingleton()
 
@@ -61,6 +64,12 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     } else {
       bind(classOf[ProjectOwnershipVerificationService]).to(classOf[SimpleProjectOwnershipVerificationService])
     }
+  }
+
+  @Provides
+  @Singleton
+  def projectVerificationByEmailRepo(factory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[EmailVerificationToken] = {
+    MongoTokenRepository[EmailVerificationToken](factory.create("prj_email_verification_token"))
   }
 
   @Provides

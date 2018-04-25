@@ -24,9 +24,9 @@ trait ResetPasswordTokenService {
   /**
    * Validates a token ID.
    *
-   * @param id The token ID to validate.
+   * @param token The token ID to validate.
    * @return The token if it's valid, None otherwise.
    */
-  def validate(id: UUID): Future[Option[ResetPasswordToken]]
+  def validate(token: UUID): Future[Option[ResetPasswordToken]]
 
 }

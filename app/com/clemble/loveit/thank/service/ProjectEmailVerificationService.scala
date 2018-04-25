@@ -17,7 +17,7 @@ case class EmailVerificationToken(
   url: Resource,
   token: UUID = UUID.randomUUID(),
   created: LocalDateTime = LocalDateTime.now()
-) extends TokenAware with ResourceAware
+) extends Token with ResourceAware
 
 object EmailVerificationToken {
 

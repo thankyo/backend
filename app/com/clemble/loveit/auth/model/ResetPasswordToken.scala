@@ -3,7 +3,7 @@ package com.clemble.loveit.auth.model
 import java.time.LocalDateTime
 import java.util.UUID
 
-import com.clemble.loveit.common.model.{CreatedAware, TokenAware, UserAware, UserID}
+import com.clemble.loveit.common.model.{CreatedAware, Token, UserAware, UserID}
 import play.api.libs.json.{Json, OFormat}
 
 /**
@@ -16,7 +16,7 @@ case class ResetPasswordToken(
                       user: UserID,
                       token: UUID = UUID.randomUUID(),
                       created: LocalDateTime = LocalDateTime.now()
-) extends TokenAware
+) extends Token
 
 object ResetPasswordToken {
 

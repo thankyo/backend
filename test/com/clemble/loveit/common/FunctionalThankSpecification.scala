@@ -2,14 +2,11 @@ package com.clemble.loveit.common
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
-import com.clemble.loveit.common.service.TokenRepository
-import javax.inject.Named
 import play.api.Mode
 import play.api.inject.BindingKey
 import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.collection.immutable
-import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 
 trait FunctionalThankSpecification extends ThankSpecification with ThankExecutor {

@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 @Singleton
-case class SimpleResetPasswordTokenService @Inject()(
+case class SimpleResetPasswordService @Inject()(
   userService: UserService,
   emailService: EmailService,
   passwordHasherRegistry: PasswordHasherRegistry,

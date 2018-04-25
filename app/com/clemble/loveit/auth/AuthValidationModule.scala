@@ -29,13 +29,13 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
   override def configure(): Unit = {
     bind[AuthService].to[SimpleAuthService]
     bind[UserOAuthService].to[SimpleAuthService]
-    bind[ResetPasswordService].to[SimpleResetPasswordTokenService]
+    bind[ResetPasswordService].to[SimpleResetPasswordService]
   }
 
   @Provides
   @Singleton
   @Named("resetPasswordTokenRepo")
-  def resetPasswordTokenRepository(collectionFactory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[ResetPasswordToken] = {
+  def resetPasswordTokenRepo(collectionFactory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[ResetPasswordToken] = {
     MongoTokenRepository[ResetPasswordToken](collectionFactory.create("resetToken"))
   }
 

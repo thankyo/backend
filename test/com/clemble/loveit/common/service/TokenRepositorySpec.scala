@@ -1,19 +1,15 @@
 package com.clemble.loveit.common.service
 
 import com.clemble.loveit.auth.model.ResetPasswordToken
+import com.clemble.loveit.auth.service.SimpleResetPasswordService
 import com.clemble.loveit.common.RepositorySpec
-import com.google.inject.name.{Named, Names}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import play.api.inject.{BindingKey, QualifierInstance}
 
 @RunWith(classOf[JUnitRunner])
 class TokenRepositorySpec extends RepositorySpec {
 
-  val repo: TokenRepository[ResetPasswordToken] = dependency(
-    BindingKey(classOf[TokenRepository[ResetPasswordToken]])
-      .qualifiedWith("resetPasswordTokenRepo")
-  )
+  val repo = dependency[SimpleResetPasswordService].repo
 
   "REMOVES ON FIRST READ" in {
     val user = createUser()

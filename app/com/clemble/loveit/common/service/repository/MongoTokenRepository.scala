@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.clemble.loveit.auth.model.ResetPasswordToken
 import com.clemble.loveit.common.error.RepositoryException
-import com.clemble.loveit.common.model.{TokenAware, UserID}
+import com.clemble.loveit.common.model.{Token, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.common.service.TokenRepository
 import javax.inject.{Inject, Named, Singleton}
@@ -19,9 +19,8 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * Give access to the [[ResetPasswordToken]] object.
   */
-@Singleton
-case class MongoTokenRepository[T <: TokenAware] @Inject()(
-  @Named("resetToken") collection: JSONCollection)
+case class MongoTokenRepository[T <: Token] @Inject()(
+  collection: JSONCollection)
   (implicit val ec: ExecutionContext, implicit val format: OFormat[T])
   extends TokenRepository[T] {
 
@@ -77,6 +76,12 @@ object MongoTokenRepository {
         key = Seq("created" -> IndexType.Ascending),
         name = Some("created_expire"),
         options = BSONDocument(BSONElement("expireAfterSeconds", BSONInteger(3600)))
+      ),
+      Index(
+        key = Seq("user" -> IndexType.Ascending),
+        name = Some("user_unique"),
+        unique = true,
+        sparse = false
       )
     )
   }

@@ -1,12 +1,11 @@
 package com.clemble.loveit.auth
 
-import javax.inject.Singleton
+import javax.inject.{Named, Singleton}
 import com.clemble.loveit.auth.service._
 import com.clemble.loveit.auth.service.repository.mongo.MongoAuthInfoRepository
-import com.clemble.loveit.common.mongo.{JSONCollectionFactory}
+import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.service.{TumblrProvider, UserService}
 import com.clemble.loveit.common.util.AuthEnv
-import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.actions.{DefaultSecuredErrorHandler, DefaultUnsecuredErrorHandler, SecuredErrorHandler, UnsecuredErrorHandler}
 import com.mohiva.play.silhouette.api.crypto._

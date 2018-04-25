@@ -2,11 +2,11 @@ package com.clemble.loveit.common.service
 
 import java.util.UUID
 
-import com.clemble.loveit.common.model.{TokenAware, UserID}
+import com.clemble.loveit.common.model.{Token, UserID}
 
 import scala.concurrent.Future
 
-trait TokenRepository[T <: TokenAware] {
+trait TokenRepository[T <: Token] {
 
   def findAndRemoveByToken(token: UUID): Future[Option[T]]
 

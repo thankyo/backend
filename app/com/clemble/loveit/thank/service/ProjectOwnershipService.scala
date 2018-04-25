@@ -144,6 +144,7 @@ case class GoogleProjectOwnershipService @Inject()(
 
 }
 
+
 @Singleton
 case class SimpleProjectOwnershipService @Inject()(
   googleOwnershipService: GoogleProjectOwnershipService,

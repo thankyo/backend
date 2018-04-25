@@ -1,12 +1,12 @@
 package com.clemble.loveit.auth.service
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.auth.model.ResetPasswordToken
-import com.clemble.loveit.auth.service.repository.ResetPasswordTokenRepository
 import com.clemble.loveit.common.error.RepositoryException
 import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.service.TokenRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -19,7 +19,7 @@ import scala.language.postfixOps
   */
 @Singleton
 case class SimpleResetPasswordTokenService @Inject()(
-                                             repo: ResetPasswordTokenRepository
+                                             repo: TokenRepository[ResetPasswordToken]
                                            )(
                                              implicit
                                              ex: ExecutionContext
@@ -53,8 +53,8 @@ case class SimpleResetPasswordTokenService @Inject()(
     * @return The token if it's valid, None otherwise.
     */
   def validate(token: UUID): Future[Option[ResetPasswordToken]] = {
-    val findRes = repo.find(token)
-    repo.remove(token)
+    val findRes = repo.findByToken(token)
+    repo.removeByToken(token)
     findRes
   }
 

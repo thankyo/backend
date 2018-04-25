@@ -5,7 +5,7 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import play.api.libs.json.Json
 
-case class ForgotPasswordRequest(email: Email) {
+case class ResetPasswordRequest(email: Email) {
 
   def toLoginInfo = {
     LoginInfo(CredentialsProvider.ID, email)
@@ -13,8 +13,8 @@ case class ForgotPasswordRequest(email: Email) {
 
 }
 
-object ForgotPasswordRequest {
+object ResetPasswordRequest {
 
-  implicit val json = Json.format[ForgotPasswordRequest]
+  implicit val json = Json.format[ResetPasswordRequest]
 
 }

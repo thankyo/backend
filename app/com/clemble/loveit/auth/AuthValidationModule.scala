@@ -2,21 +2,19 @@ package com.clemble.loveit.auth
 
 import javax.inject.Singleton
 import akka.actor.ActorSystem
-import com.clemble.loveit.auth.service.repository.ResetPasswordTokenRepository
-import com.clemble.loveit.auth.service.repository.mongo.MongoResetPasswordTokenRepository
+import com.clemble.loveit.auth.model.ResetPasswordToken
 import com.clemble.loveit.auth.service._
-import com.clemble.loveit.common.mongo.{JSONCollectionFactory}
-import com.clemble.loveit.common.service.UserOAuthService
+import com.clemble.loveit.common.mongo.JSONCollectionFactory
+import com.clemble.loveit.common.service.repository.MongoTokenRepository
+import com.clemble.loveit.common.service.{TokenRepository, UserOAuthService}
 import com.clemble.loveit.common.util.{AuthEnv, EventBusManager}
-import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.Environment
 import net.codingwell.scalaguice.ScalaModule
 import org.matthicks.mailgun.Mailgun
 import play.api
-import play.api.i18n.{MessagesApi, MessagesProvider}
+import play.api.i18n.{MessagesApi}
 import play.api.{Configuration, Mode}
-import play.modules.reactivemongo.ReactiveMongoApi
 
 import scala.concurrent.ExecutionContext
 
@@ -31,15 +29,13 @@ class AuthValidationModule(env: api.Environment, conf: Configuration) extends Ab
   override def configure(): Unit = {
     bind[AuthService].to[SimpleAuthService]
     bind[UserOAuthService].to[SimpleAuthService]
-    bind[ResetPasswordTokenRepository].to[MongoResetPasswordTokenRepository]
     bind[ResetPasswordTokenService].to[SimpleResetPasswordTokenService]
   }
 
   @Provides
   @Singleton
-  @Named("resetToken")
-  def authTokenCollection(collectionFactory: JSONCollectionFactory) = {
-    collectionFactory.create("resetToken")
+  def resetPasswordTokenRepository(collectionFactory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[ResetPasswordToken] = {
+    MongoTokenRepository[ResetPasswordToken](collectionFactory.create("resetToken"))
   }
 
   @Provides

@@ -4,10 +4,10 @@ import com.clemble.loveit.common.error.FieldValidationError
 import play.api.libs.json.Json
 
 case class RestorePasswordRequest(
-                                 password: String
-                               ) {
+  password: String
+) {
 
-  def validate() = {
+  def validate(): Unit = {
     if (password.length > 65) throw FieldValidationError("password", "Max size is 64 characters")
   }
 

@@ -13,7 +13,7 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@deprecated
+@deprecated("UserProject is preferable", "Apr 2018")
 case class MongoProjectRepository @Inject()(
                                                  @Named("projects") collection: JSONCollection,
                                                  implicit val ec: ExecutionContext,

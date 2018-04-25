@@ -20,6 +20,7 @@ object WebStack {
     override def writes(o: WebStack): JsValue = o match {
       case WordPress => WORD_PRESS
       case Tumblr => TUMBLR
+      case LandingLion => LANDING_LION
     }
 
     override def reads(json: JsValue): JsResult[WebStack] = json match {

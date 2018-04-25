@@ -38,7 +38,7 @@ package object model {
   implicit class EmailExtensions(email: Email) {
 
     def toEmailDomain(): Resource = {
-      email.substring(email.indexOf("@"))
+      email.substring(email.indexOf("@") + 1)
     }
 
   }

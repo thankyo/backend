@@ -34,7 +34,7 @@ class EmailVerificationTokenServiceSpec extends ServiceSpec {
 
   "Validation" should {
 
-    "Forbid creation if user is different" in {
+    "Forbid validation if user is different" in {
       val user = createUser()
 
       val res = randomResource

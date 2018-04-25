@@ -91,11 +91,17 @@ object MongoSafeUtils extends api.Logger {
   }
 
   def ensureIndexes(collection: JSONCollection, indexes: Index*)(implicit ec: ExecutionContext): Unit = {
-    val fEnsuredIndexes = indexes.map(collection.indexesManager.ensure(_))
-    fEnsuredIndexes.zip(indexes).map({ case (fEnsured, index) => {
-      fEnsured.foreach(ensured => logger.info(s"Ensured index ${index.name} ${ensured}"))
-    }})
-    Await.result(Future.sequence(fEnsuredIndexes), 1 minute)
+    val ensureTask = for {
+      existing <- collection.indexesManager.list()
+      missing = indexes.filterNot(existing.contains)
+      created <- Future.sequence(missing.map(collection.indexesManager.create(_).map(_.ok)))
+      existingAfter <- collection.indexesManager.list()
+    } yield {
+      logger.info(s"${collection.name} existing indexes ${existing.map(_.name)}")
+      logger.info(s"${collection.name} missing ${missing.map(_.name).zip(created)}")
+      logger.info(s"${collection.name} after ${existingAfter.map(_.name)}")
+    }
+    Await.result(ensureTask, 1 minute)
   }
 
 }

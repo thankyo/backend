@@ -131,13 +131,15 @@ object MongoUserProjectsRepository {
         name = Some("user_project_installed_unique_url"),
         key = Seq("installed.url" -> IndexType.Ascending),
         unique = true,
-        sparse = true
+        sparse = true,
+        background = false
       ),
       Index(
         name = Some("user_project_owned_unique_url"),
         key = Seq("owned.url" -> IndexType.Ascending),
         unique = true,
-        sparse = true
+        sparse = true,
+        background = false
       )
     )
   }

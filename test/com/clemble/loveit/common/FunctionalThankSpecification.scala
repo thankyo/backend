@@ -2,7 +2,10 @@ package com.clemble.loveit.common
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
+import com.clemble.loveit.common.service.TokenRepository
+import javax.inject.Named
 import play.api.Mode
+import play.api.inject.BindingKey
 import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.collection.immutable
@@ -15,6 +18,10 @@ trait FunctionalThankSpecification extends ThankSpecification with ThankExecutor
 
   def dependency[T: ClassTag]: T = {
     application.injector.instanceOf[T]
+  }
+
+  def dependency[T](bindingKey: BindingKey[T]): T = {
+    application.injector.instanceOf[T](bindingKey)
   }
 
   implicit lazy val materializer: Materializer = dependency[Materializer]

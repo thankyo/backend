@@ -9,7 +9,7 @@ import com.clemble.loveit.common.service.{TokenRepository, UserService}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -20,7 +20,7 @@ case class SimpleResetPasswordTokenService @Inject()(
   emailService: EmailService,
   passwordHasherRegistry: PasswordHasherRegistry,
   authInfoRepo: AuthInfoRepository,
-  repo: TokenRepository[ResetPasswordToken]
+  @Named("resetPasswordTokenRepo") repo: TokenRepository[ResetPasswordToken]
 )(
   implicit
   ec: ExecutionContext

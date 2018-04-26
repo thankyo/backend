@@ -81,26 +81,44 @@ class MongoUserProjectsRepository @Inject() (
     }).recoverWith(errorHandler)
   }
 
-  override def saveOwnedProject(user: UserID, owned: Seq[OwnedProject]): Future[UserProjects] = {
+  private def saveOwnedProject(user: UserID, field: String, owned: Seq[OwnedProject]): Future[UserProjects] = {
     val selector = Json.obj("_id" -> user)
     collection
-      .update(selector, Json.obj("$pull" -> Json.obj("owned" -> Json.obj("url" -> Json.obj("$in" -> owned.map(_.url))))))
+      .update(selector, Json.obj("$pull" -> Json.obj(field -> Json.obj("url" -> Json.obj("$in" -> owned.map(_.url))))))
       .flatMap(_ => {
-        val update = Json.obj("$addToSet" -> Json.obj("owned" -> Json.obj("$each" -> owned)))
+        val update = Json.obj("$addToSet" -> Json.obj(field -> Json.obj("$each" -> owned)))
         collection.findAndUpdate(selector, update, true)
           .map(_.result[UserProjects].get)
       }).recoverWith(errorHandler)
   }
 
-  override def deleteOwnedProject(user: UserID, url: String): Future[UserProjects] = {
+
+  override def saveGoogleProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects] = {
+    saveOwnedProject(user, "google", projects)
+  }
+
+  override def saveTumblrProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects] = {
+    saveOwnedProject(user, "tumblr", projects)
+  }
+
+  override def saveDibsProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects] = {
+    saveOwnedProject(user, "dibs", projects)
+  }
+
+  override def deleteDibsProject(user: UserID, url: String): Future[UserProjects] = {
     val selector = Json.obj("_id" -> user)
-    val update = Json.obj("$pull" -> Json.obj("owned" -> Json.obj("url" -> url)))
+    val update = Json.obj("$pull" -> Json.obj("dibs" -> Json.obj("url" -> url)))
     collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
   }
 
   override def saveProject(project: Project): Future[Project] = {
     val selector = Json.obj("_id" -> project.user,
-      "owned.url" -> project.url,
+      "$or" -> Seq(
+        Json.obj("dibs.url" -> project.url),
+        Json.obj("google.url" -> project.url),
+        Json.obj("tumblr.url" -> project.url),
+        Json.obj("email.url" -> project.url)
+      ),
       "installed.url" -> Json.obj("$ne" -> project.url)
     )
     val update = Json.obj("$addToSet" -> Json.obj("installed" -> project))

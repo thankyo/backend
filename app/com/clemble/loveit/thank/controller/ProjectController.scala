@@ -19,6 +19,7 @@ class ProjectController @Inject()(
   feedService: ProjectFeedService,
   lookupService: ProjectLookupService,
   trackService: ProjectSupportTrackService,
+  dibsOwnSvc: DibsProjectOwnershipService,
   silhouette: Silhouette[AuthEnv],
   components: ControllerComponents,
   implicit val ec: ExecutionContext
@@ -70,7 +71,7 @@ class ProjectController @Inject()(
   })
 
   def dibsOnUrl() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[String]))(implicit req => {
-    usrPrjService.dibsOnUrl(req.identity.id, req.body).map(Ok(_))
+    dibsOwnSvc.dibsOnUrl(req.identity.id, req.body).map(Ok(_))
   })
 
   def create() = silhouette.SecuredAction.async(parse.json[OwnedProject])(implicit req => {

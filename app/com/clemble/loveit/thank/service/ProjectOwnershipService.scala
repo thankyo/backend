@@ -2,12 +2,14 @@ package com.clemble.loveit.thank.service
 
 import java.net.URLEncoder
 
+import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.service._
+import com.clemble.loveit.thank.service.repository.UserProjectsRepository
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
+import com.mohiva.play.silhouette.impl.providers.OAuth2Info
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider.SpecifiedProfileError
-import com.mohiva.play.silhouette.impl.providers.{OAuth1Info, OAuth2Info}
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.WSClient
@@ -16,20 +18,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectOwnershipService {
 
-  def fetch(user: UserID): Future[Seq[OwnedProject]]
+  def refresh(user: UserID): Future[Seq[OwnedProject]]
 
 }
 
 @Singleton
 case class TumblrProjectOwnershipService @Inject()(
-  userService: UserService,
+  api: TumblrAPI,
   oAuthService: UserOAuthService,
-  tumblrProvider: TumblrProvider,
+  repo: UserProjectsRepository,
   client: WSClient,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService with WSClientAware {
 
-  private def readTumblrResources(user: User, json: JsValue): Seq[OwnedProject] = {
+  private def readTumblrResources(json: JsValue): Seq[OwnedProject] = {
     val blogs = (json \ "response" \ "user" \ "blogs").asOpt[List[JsObject]].getOrElse(List.empty[JsObject])
 
     blogs
@@ -46,41 +48,34 @@ case class TumblrProjectOwnershipService @Inject()(
           title = title,
           shortDescription = shortDescription,
           webStack = Some(Tumblr),
-          rss = Some(rss),
-          verification = TumblrVerification,
-          avatar = user.avatar
+          rss = Some(rss)
         )
       })
   }
 
-  override def fetch(user: UserID): Future[Seq[OwnedProject]] = {
-    (for {
-      userOpt <- userService.findById(user)
-      tumblrLoginOpt = userOpt.flatMap(_.profiles.asTumblrLogin())
-      tumblrAuthOpt <- tumblrLoginOpt.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
+  private def fetchProjects(user: UserID): Future[Seq[OwnedProject]] = {
+    api.findUser(user).map({
+      case Some(json) => readTumblrResources(json)
+      case None => Seq.empty[OwnedProject]
+    })
+  }
+
+  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
+    for {
+      projects <- fetchProjects(user)
+      _ <- repo.saveTumblrProjects(user, projects)
     } yield {
-      tumblrAuthOpt match {
-        case Some(info: OAuth1Info) =>
-          val url = s"https://api.tumblr.com/v2/user/info"
-          client
-            .url(url)
-            .sign(tumblrProvider.service.sign(info))
-            .get()
-            .map(res => readTumblrResources(userOpt.get, res.json))
-        case _ =>
-          Future.successful(Seq.empty[OwnedProject])
-      }
-    }).flatten
+      projects
+    }
   }
 
 }
 
 case class GoogleProjectOwnershipService @Inject()(
-  userService: UserService,
   oAuthService: UserOAuthService,
-  tumblrProvider: TumblrProvider,
   enrichService: ProjectEnrichService,
   urlValidator: URLValidator,
+  repo: UserProjectsRepository,
   client: WSClient,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService with WSClientAware {
@@ -89,7 +84,7 @@ case class GoogleProjectOwnershipService @Inject()(
   val INET_DOMAIN = "INET_DOMAIN"
   val SITE = "SITE"
 
-  private def readGoogleResources(user: UserID, json: JsValue): Seq[Resource] = {
+  private def readGoogleResources(json: JsValue): Seq[Resource] = {
     (json \ "error").asOpt[JsObject].foreach(error => {
       val errorCode = (error \ "code").as[Int]
       val errorMsg = (error \ "message").as[String]
@@ -111,10 +106,10 @@ case class GoogleProjectOwnershipService @Inject()(
     resources
   }
 
-  override def fetch(user: UserID): Future[Seq[OwnedProject]] = {
+
+  private def fetchOwned(user: UserID): Future[Seq[Resource]] = {
     (for {
-      googleLogin <- userService.findById(user).map(_.flatMap(_.profiles.asGoogleLogin()))
-      googleAuthOpt <- googleLogin.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
+      googleAuthOpt <- oAuthService.findAuthInfo(user, GoogleProvider.ID)
     } yield {
       googleAuthOpt match {
         case Some(info: OAuth2Info) =>
@@ -123,23 +118,53 @@ case class GoogleProjectOwnershipService @Inject()(
             .url(url)
             .withHttpHeaders("Authorization" -> s"Bearer ${info.accessToken}")
             .get()
-            .map(res => readGoogleResources(user, res.json))
-            .flatMap(urls => {
-              val enrichedUrls = urls.map(url => urlValidator.findAlive(url).flatMap({
-                case Some(url) => enrichService.enrich(user, url).map(Some(_))
-                case _ => Future.successful(None)
-              }))
-              Future.sequence(enrichedUrls).map(_.flatten)
-            })
-            .map(_.map(_.copy(verification = GoogleVerification)))
+            .map(res => if (res.status == 200) readGoogleResources(res.json) else Seq.empty)
+            .flatMap(urls => Future.sequence(urls.map(url => urlValidator.findAlive(url))).map(_.flatten))
         case _ =>
-          Future.successful(Seq.empty[OwnedProject])
+          Future.successful(Seq.empty[Resource])
       }
     }).flatten
   }
 
+
+  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
+    for {
+      urls <- fetchOwned(user)
+      projects <- Future.sequence(urls.map(enrichService.enrich(user, _)))
+      _ <- repo.saveGoogleProjects(user, projects)
+    } yield {
+      projects
+    }
+  }
+
 }
 
+@Singleton
+case class DibsProjectOwnershipService @Inject()(
+  urlValidator: URLValidator,
+  enrichService: ProjectEnrichService,
+  emailVerSvc: ProjectOwnershipByEmailService,
+  repo: UserProjectsRepository,
+  implicit val ec: ExecutionContext
+) extends ProjectOwnershipService {
+
+  def dibsOnUrl(user: UserID, url: Resource): Future[OwnedProject] = {
+    for {
+      urlOpt <- urlValidator.findAlive(url)
+      _ = if (urlOpt.isEmpty) throw FieldValidationError("url", "Can't connect")
+      ownedProject <- enrichService.enrich(user, urlOpt.get)
+      _ <- repo.saveDibsProjects(user, Seq(ownedProject))
+    } yield {
+      emailVerSvc.verifyWithWHOIS(user, urlOpt.get)
+      ownedProject
+    }
+  }
+
+  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
+    repo.findById(user).map(_.map(_.dibs).getOrElse(Seq.empty[OwnedProject]))
+  }
+
+}
 
 @Singleton
 case class SimpleProjectOwnershipService @Inject()(
@@ -148,8 +173,8 @@ case class SimpleProjectOwnershipService @Inject()(
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
 
-  override def fetch(user: UserID): Future[Seq[OwnedProject]] = {
-    val fResources = Seq(googleOwnershipService, tumblrOwnershipService).map(_.fetch(user))
+  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
+    val fResources = Seq(googleOwnershipService, tumblrOwnershipService).map(_.refresh(user))
     Future.sequence(fResources).map(_.flatten)
   }
 

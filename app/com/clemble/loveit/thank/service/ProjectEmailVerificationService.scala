@@ -12,7 +12,7 @@ import play.api.libs.json.{Json, OFormat}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class EmailVerificationToken(
+case class ProjectOwnershipByEmailToken(
   user: UserID,
   email: Email,
   url: Resource,
@@ -20,42 +20,47 @@ case class EmailVerificationToken(
   created: LocalDateTime = LocalDateTime.now()
 ) extends Token with ResourceAware
 
-object EmailVerificationToken {
+object ProjectOwnershipByEmailToken {
 
-  implicit val json: OFormat[EmailVerificationToken] = Json.format[EmailVerificationToken]
+  implicit val json: OFormat[ProjectOwnershipByEmailToken] = Json.format[ProjectOwnershipByEmailToken]
 
 }
 
-trait EmailVerificationTokenService {
+trait ProjectOwnershipByEmailService {
 
-  def verifyWithWHOIS(user: UserID, url: Resource): Future[Option[EmailVerificationToken]]
+  def verifyWithWHOIS(user: UserID, url: Resource): Future[Option[ProjectOwnershipByEmailToken]]
 
-  def verifyWithDomainEmail(user: UserID, email: String, url: Resource): Future[EmailVerificationToken]
+  def verifyWithDomainEmail(user: UserID, email: String, url: Resource): Future[ProjectOwnershipByEmailToken]
 
-  def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]]
+  def validate(user: UserID, token: UUID): Future[Option[ProjectOwnershipByEmailToken]]
 
 }
 
 @Singleton
-case class SimpleEmailVerificationTokenService @Inject()(
+case class SimpleProjectOwnershipByEmailService @Inject()(
   whoisService: WHOISService,
   emailService: EmailService,
-  repo: TokenRepository[EmailVerificationToken]
-)(implicit ec: ExecutionContext) extends EmailVerificationTokenService {
+  repo: TokenRepository[ProjectOwnershipByEmailToken]
+)(implicit ec: ExecutionContext) extends ProjectOwnershipByEmailService {
 
-  private def sendEmailAndUpdateProject(user: UserID, email: Email, url: Resource): Future[EmailVerificationToken] = {
-    val token = EmailVerificationToken(user, email, url)
-    repo.save(token)
+  private def sendEmailAndUpdateProject(user: UserID, email: Email, url: Resource): Future[ProjectOwnershipByEmailToken] = {
+    for {
+      token <- repo.save(ProjectOwnershipByEmailToken(user, email, url))
+      emailSent <- emailService.sendDomainVerificationEmail(email, token)
+    } yield {
+      if (!emailSent) throw new IllegalArgumentException("Failed to send email")
+      token
+    }
   }
 
-  override def verifyWithWHOIS(user: UserID, url: Resource): Future[Option[EmailVerificationToken]] = {
+  override def verifyWithWHOIS(user: UserID, url: Resource): Future[Option[ProjectOwnershipByEmailToken]] = {
     whoisService.fetchEmail(url).flatMap({
       case Some(email) => sendEmailAndUpdateProject(user, email, url).map(Some(_))
       case None => Future.successful(None)
     })
   }
 
-  override def verifyWithDomainEmail(user: UserID, email: Email, url: Resource): Future[EmailVerificationToken] = {
+  override def verifyWithDomainEmail(user: UserID, email: Email, url: Resource): Future[ProjectOwnershipByEmailToken] = {
     val emailDomain = email.toEmailDomain()
     val resDomain = url.toParentDomain()
     if (emailDomain != resDomain) {
@@ -64,7 +69,7 @@ case class SimpleEmailVerificationTokenService @Inject()(
     sendEmailAndUpdateProject(user, email, url)
   }
 
-  override def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]] = {
+  override def validate(user: UserID, token: UUID): Future[Option[ProjectOwnershipByEmailToken]] = {
     repo.findAndRemoveByToken(token).map({
       case Some(verification) if verification.user != user =>
         throw new IllegalArgumentException("Token was created by different user")

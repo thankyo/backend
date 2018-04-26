@@ -11,7 +11,6 @@ import play.api.libs.ws.WSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 sealed trait SubscriptionManager {
 
   def signedUpUser(user: User): Future[Boolean]
@@ -22,11 +21,13 @@ sealed trait SubscriptionManager {
 }
 
 case object TestSubscriptionManager extends SubscriptionManager {
+
   override def signedUpUser(user: User): Future[Boolean] = Future.successful(true)
 
   override def subscribeCreator(email: String): Future[Boolean] = Future.successful(true)
 
   override def subscribeContributor(email: String): Future[Boolean] = Future.successful(true)
+
 }
 
 case class SubscriptionOnSignUpListener(subscriptionManager: SubscriptionManager) extends Actor with Logger {

@@ -6,7 +6,10 @@ import play.api.libs.json.Json
 
 case class UserProjects(
   user: UserID,
-  owned: Seq[OwnedProject] = Seq.empty[OwnedProject],
+  google: Seq[OwnedProject] = Seq.empty[OwnedProject],
+  tumblr: Seq[OwnedProject] = Seq.empty[OwnedProject],
+  email: Seq[OwnedProject] = Seq.empty[OwnedProject],
+  dibs: Seq[OwnedProject] = Seq.empty[OwnedProject],
   installed: Seq[Project] = Seq.empty[Project]
 ) extends UserAware
 

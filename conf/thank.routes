@@ -6,6 +6,9 @@ DELETE      /post/:post                        @com.clemble.loveit.thank.control
 
 POST        /refresh/post/:post                @com.clemble.loveit.thank.controller.PostController.refresh(post)
 
+#POST        /refresh/google                    ???
+#POST        /refresh/tumblr                    ???
+
 GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
 POST        /project                           @com.clemble.loveit.thank.controller.ProjectController.create()
 PUT         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.updateProject(project)
@@ -15,6 +18,9 @@ GET         /project/:project/feed             @com.clemble.loveit.thank.control
 
 GET         /user/:user/supported              @com.clemble.loveit.thank.controller.ProjectController.getSupportedByUser(user)
 GET         /user/:user/project                @com.clemble.loveit.thank.controller.ProjectController.getProjectsByUser(user)
+
+#POST        /user/my/owned/email/verify        ???
+#GET         /owned/dibs                        ???
 
 GET         /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.getOwnedProjects()
 POST        /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.dibsOnUrl()

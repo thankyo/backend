@@ -1,16 +1,19 @@
 package com.clemble.loveit.thank.service
 
-import com.clemble.loveit.common.model.{Post, UserID}
-import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, UserService, WSClientAware}
+import com.clemble.loveit.common.model.UserID
+import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, WSClientAware}
 import com.mohiva.play.silhouette.impl.providers.OAuth1Info
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
+import play.api.http.Status
 import play.api.libs.json.JsObject
 import play.api.libs.ws.{WSClient, WSSignatureCalculator}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 trait TumblrAPI {
+
+  def findUser(user: String): Future[Option[JsObject]]
 
   def findPost(user: String, blog: String, post: String): Future[Option[JsObject]]
 
@@ -20,7 +23,6 @@ trait TumblrAPI {
 
 @Singleton
 case class SimpleTumblrAPI @Inject()(
-  userService: UserService,
   oAuthService: UserOAuthService,
   tumblrProvider: TumblrProvider,
 
@@ -33,9 +35,7 @@ case class SimpleTumblrAPI @Inject()(
 
   private def getSigner(user: UserID): Future[Option[WSSignatureCalculator]] = {
     for {
-      userOpt <- userService.findById(user)
-      tumblrLoginOpt = userOpt.flatMap(_.profiles.asTumblrLogin())
-      tumblrAuthOpt <- tumblrLoginOpt.map(oAuthService.findAuthInfo).getOrElse(Future.successful(None))
+      tumblrAuthOpt <- oAuthService.findAuthInfo(user, TumblrProvider.ID)
     } yield {
       tumblrAuthOpt match {
         case Some(info: OAuth1Info) =>
@@ -44,6 +44,20 @@ case class SimpleTumblrAPI @Inject()(
           None
       }
     }
+  }
+
+  override def findUser(user: String): Future[Option[JsObject]] = {
+    oAuthService.findAuthInfo(user, TumblrProvider.ID).flatMap({
+      case Some(info: OAuth1Info) =>
+        val url = s"https://api.tumblr.com/v2/user/info"
+        client
+          .url(url)
+          .sign(tumblrProvider.service.sign(info))
+          .get()
+          .map(res => if (res.status == Status.OK) res.json.asOpt[JsObject] else None)
+      case _ =>
+        Future.successful(None)
+    })
   }
 
   override def findPost(user: String, blog: String, post: String): Future[Option[JsObject]] = {

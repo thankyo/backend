@@ -35,7 +35,6 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[ProjectLookupService]).to(classOf[SimpleProjectLookupService])
     bind(classOf[ProjectFeedService]).to(classOf[SimpleProjectFeedService])
-    bind(classOf[ProjectOwnershipService]).to(classOf[SimpleProjectOwnershipService])
 
     bind(classOf[TumblrIntegrationService]).to(classOf[SimpleTumblrIntegrationService]).asEagerSingleton()
     bind(classOf[UserProjectsRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
@@ -50,7 +49,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
       bind(classOf[String]).annotatedWith(Names.named("thank.whois.key")).toInstance(conf.get[String]("thank.whois.key"))
       bind(classOf[WHOISService]).to(classOf[SimpleWHOISService])
     }
-    bind(classOf[EmailVerificationTokenService]).to(classOf[SimpleEmailVerificationTokenService])
+    bind(classOf[ProjectOwnershipByEmailService]).to(classOf[SimpleProjectOwnershipByEmailService])
 
     bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()
     bind(classOf[ProjectSupportTrackService]).to(classOf[SimpleProjectSupportTrackService]).asEagerSingleton()
@@ -71,18 +70,12 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     } else {
       bind(classOf[PostEnrichService]).to(classOf[SimplePostEnrichService])
     }
-
-    if (env.mode == Mode.Test || env.mode == Mode.Dev) {
-      bind(classOf[ProjectOwnershipVerificationService]).toInstance(TestProjectOwnershipVerificationService)
-    } else {
-      bind(classOf[ProjectOwnershipVerificationService]).to(classOf[SimpleProjectOwnershipVerificationService])
-    }
   }
 
   @Provides
   @Singleton
-  def projectVerificationByEmailRepo(factory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[EmailVerificationToken] = {
-    MongoTokenRepository[EmailVerificationToken](factory.create("prj_email_verification_token"))
+  def projectVerificationByEmailRepo(factory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[ProjectOwnershipByEmailToken] = {
+    MongoTokenRepository[ProjectOwnershipByEmailToken](factory.create("prj_email_verification_token"))
   }
 
   @Provides

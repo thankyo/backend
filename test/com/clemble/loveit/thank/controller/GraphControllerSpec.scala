@@ -37,7 +37,7 @@ class GraphControllerSpec extends PaymentControllerTestExecutor {
 
       val giver = createUser()
       val owner = createUser()
-      createProject(getMyUser(owner).id, masterUrl) shouldNotEqual None
+      createProject(owner, masterUrl) shouldNotEqual None
 
       perform(giver, FakeRequest(POST, s"/api/v1/thank/graph/my/support").withJsonBody(Json.obj("url" -> masterUrl)))
 

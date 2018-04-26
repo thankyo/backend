@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service
 
 import akka.actor.ActorSystem
 import akka.pattern
-import com.clemble.loveit.common.model.{DibsVerification, OwnedProject, Resource, Tag, UserID, WebStack}
+import com.clemble.loveit.common.model.{OwnedProject, Resource, Tag, UserID, WebStack}
 import com.clemble.loveit.common.service.{UserService, WSClientAware}
 import javax.inject.Inject
 import org.jsoup.Jsoup
@@ -133,7 +133,6 @@ case class SimpleProjectEnrichService @Inject()(
         webStack = webStack,
         title = title,
         shortDescription = description,
-        verification = DibsVerification,
         description = None,
         tags = tags,
         rss = rss
@@ -146,7 +145,7 @@ case class SimpleProjectEnrichService @Inject()(
 case object TestProjectEnrichService extends ProjectEnrichService {
 
   override def enrich(user: UserID, url: Resource): Future[OwnedProject] = {
-    Future.successful(OwnedProject(url, "Test title", "Test description", DibsVerification))
+    Future.successful(OwnedProject(url, "Test title", "Test description"))
   }
 
 }

@@ -6,7 +6,7 @@ import org.matthicks.mailgun.{EmailAddress, Mailgun, Message}
 import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
 import com.clemble.loveit.auth.views.txt.emails
 import com.clemble.loveit.common.model.{Email, User}
-import com.clemble.loveit.thank.service.EmailVerificationToken
+import com.clemble.loveit.thank.service.ProjectOwnershipByEmailToken
 import com.mohiva.play.silhouette.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -15,7 +15,7 @@ trait EmailService {
 
   def sendResetPasswordEmail(email: Email, authToken: ResetPasswordToken): Future[Boolean]
 
-  def sendDomainVerificationEmail(email: Email, token: EmailVerificationToken): Future[Boolean]
+  def sendDomainVerificationEmail(email: Email, token: ProjectOwnershipByEmailToken): Future[Boolean]
 
 }
 
@@ -36,7 +36,7 @@ case class MailgunEmailService(mailgun: Mailgun)(implicit val messagesApi: Messa
     ).map(_ => true)
   }
 
-  override def sendDomainVerificationEmail(email: Email, token: EmailVerificationToken): Future[Boolean] = {
+  override def sendDomainVerificationEmail(email: Email, token: ProjectOwnershipByEmailToken): Future[Boolean] = {
     Future.successful(true)
   }
 
@@ -50,7 +50,7 @@ class StubEmailService extends EmailService with Logger {
     Future.successful(true)
   }
 
-  override def sendDomainVerificationEmail(email: Email, verification: EmailVerificationToken): Future[Boolean] = {
+  override def sendDomainVerificationEmail(email: Email, verification: ProjectOwnershipByEmailToken): Future[Boolean] = {
     val url = s"http://localhost:8080/auth/reset/${verification.token}"
     logger.info(s"Restore url is ${url}")
     Future.successful(true)

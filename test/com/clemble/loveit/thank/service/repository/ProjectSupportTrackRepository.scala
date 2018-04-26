@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.{Project, Resource, UserID, Verification}
+import com.clemble.loveit.common.model.{Project, Resource, UserID}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 

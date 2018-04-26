@@ -22,32 +22,32 @@ class UserProjectRepositorySpec extends RepositorySpec {
     val user = createUser()
 
     val ownedProject = someRandom[OwnedProject]
-    await(repo.saveOwnedProject(user, Seq(ownedProject)))
+    await(repo.saveDibsProjects(user, Seq(ownedProject)))
 
-    await(repo.findById(user)).get.owned should containAllOf(Seq(ownedProject))
+    await(repo.findById(user)).get.dibs should containAllOf(Seq(ownedProject))
   }
 
   "Update Owned Project with additional details" in {
     val user = createUser()
 
     val ownedProject = someRandom[OwnedProject]
-    await(repo.saveOwnedProject(user, Seq(ownedProject)))
+    await(repo.saveDibsProjects(user, Seq(ownedProject)))
 
     val modifiedProject = ownedProject.copy(title = "Another title")
-    await(repo.saveOwnedProject(user, Seq(modifiedProject)))
+    await(repo.saveDibsProjects(user, Seq(modifiedProject)))
 
-    await(repo.findById(user)).get.owned shouldEqual Seq(modifiedProject)
+    await(repo.findById(user)).get.dibs shouldEqual Seq(modifiedProject)
   }
 
   "Delete Owned Project" in {
     val user = createUser()
 
     val ownedProject = someRandom[OwnedProject]
-    await(repo.saveOwnedProject(user, Seq(ownedProject)))
-    await(repo.deleteOwnedProject(user, ownedProject.url))
+    await(repo.saveDibsProjects(user, Seq(ownedProject)))
+    await(repo.deleteDibsProject(user, ownedProject.url))
 
-    await(repo.findById(user)).get.owned should not(containAllOf(Seq(ownedProject)))
-    await(repo.findById(user)).get.owned shouldEqual List.empty
+    await(repo.findById(user)).get.dibs should not(containAllOf(Seq(ownedProject)))
+    await(repo.findById(user)).get.dibs shouldEqual List.empty
   }
 
 }

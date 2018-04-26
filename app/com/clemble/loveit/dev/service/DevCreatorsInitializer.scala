@@ -24,6 +24,7 @@ case class DevCreatorsInitializer @Inject()(
   postService: PostService,
   prjLookupService: ProjectLookupService,
   prjService: ProjectService,
+  dibsOwnSvc: DibsProjectOwnershipService,
   usrPrjService: UserProjectsService,
   prjRepo: ProjectRepository,
   eventBusManager: EventBusManager,
@@ -71,7 +72,7 @@ case class DevCreatorsInitializer @Inject()(
           case Some(prj) => Future.successful(prj)
           case None =>
             for {
-              _ <- usrPrjService.dibsOnUrl(creator, project.url)
+              _ <- dibsOwnSvc.dibsOnUrl(creator, project.url)
               project <- prjService.create(creator, project)
             } yield {
               project

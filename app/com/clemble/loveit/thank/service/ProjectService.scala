@@ -21,7 +21,6 @@ trait ProjectService {
 class SimpleProjectService @Inject()(
   repo: UserProjectsRepository,
   postService: PostService,
-  verificationService: ProjectOwnershipVerificationService,
   implicit val ec: ExecutionContext
 ) extends ProjectService {
 
@@ -29,8 +28,7 @@ class SimpleProjectService @Inject()(
     for {
       existingProjectOpt <- repo.findProjectByUrl(project.url)
       _ = if (existingProjectOpt.isDefined) throw ResourceException.projectAlreadyCreated()
-      verification <- verificationService.verify(user, project.url)
-      save <- repo.saveProject(Project.from(user, project.copy(verification = verification)))
+      save <- repo.saveProject(Project.from(user, project))
     } yield {
       save
     }

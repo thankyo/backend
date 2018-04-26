@@ -4,41 +4,6 @@ import com.clemble.loveit.common.util.{IDGenerator, WriteableUtils}
 import play.api.http.Writeable
 import play.api.libs.json._
 
-sealed trait Verification
-case object GoogleVerification extends Verification
-case object TumblrVerification extends Verification
-case object DibsVerification extends Verification
-case object EmailVerification extends Verification
-
-object Verification {
-
-  implicit val json: Format[Verification] = new Format[Verification] {
-
-    val GOOGLE = JsString("google")
-    val TUMBLR = JsString("tumblr")
-    val DIBS = JsString("dibs")
-    val EMAIL = JsString("email")
-
-    override def reads(json: JsValue): JsResult[Verification] = json match {
-      case GOOGLE => JsSuccess(GoogleVerification)
-      case TUMBLR => JsSuccess(TumblrVerification)
-      case DIBS => JsSuccess(DibsVerification)
-      case EMAIL => JsSuccess(EmailVerification)
-      case _ => JsError("Unknown verification type")
-    }
-
-    override def writes(o: Verification): JsValue = {
-      o match {
-        case GoogleVerification => GOOGLE
-        case TumblrVerification => TUMBLR
-        case DibsVerification => DIBS
-        case EmailVerification => EMAIL
-      }
-    }
-  }
-
-}
-
 trait ProjectLike {
   val url: Resource
   val title: String
@@ -47,7 +12,6 @@ trait ProjectLike {
   val avatar: Option[String]
   val webStack: Option[WebStack]
   val tags: Set[Tag]
-  val verification: Verification
   val rss: Option[String]
 }
 
@@ -77,7 +41,6 @@ case class Project(
   user: UserID,
   title: String,
   shortDescription: String,
-  verification: Verification,
   description: Option[String] = None,
   avatar: Option[String] = None,
   webStack: Option[WebStack] = None,
@@ -92,7 +55,7 @@ case class Project(
 
 object Project {
 
-  def error(url: Resource): Project = Project(url, User.UNKNOWN, "No owner registered for this resource", "Error on project location", DibsVerification)
+  def error(url: Resource): Project = Project(url, User.UNKNOWN, "No owner registered for this resource", "Error on project location")
 
   implicit val jsonFormat: OFormat[Project] = Json.format[Project]
 
@@ -109,7 +72,6 @@ object Project {
       avatar = constructor.avatar,
       webStack = constructor.webStack,
       tags = constructor.tags,
-      verification = constructor.verification,
       rss = constructor.rss
     )
   }
@@ -119,7 +81,6 @@ case class OwnedProject(
   url: Resource,
   title: String,
   shortDescription: String,
-  verification: Verification,
   description: Option[String] = None,
   avatar: Option[String] = None,
   webStack: Option[WebStack] = None,

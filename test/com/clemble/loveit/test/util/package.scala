@@ -80,19 +80,11 @@ package object util {
       case 1 => Tumblr
     }
   }
-  implicit val verificationGenerator: Generator[Verification] = () => {
-    nextInt(0, 3) match {
-      case 0 => GoogleVerification
-      case 1 => TumblrVerification
-      case 2 => DibsVerification
-    }
-  }
   implicit val ownedProjectGenerator: Generator[OwnedProject] = () => {
     OwnedProject(
       randomResource,
       someRandom[String],
       someRandom[String],
-      someRandom[Verification],
       optionRandom[String],
       optionRandom[String],
       optionRandom[WebStack],
@@ -107,6 +99,9 @@ package object util {
   implicit val userProjectsGenerator: Generator[UserProjects] = () => {
     UserProjects(
       someRandom[UserID],
+      someRandom[Seq[OwnedProject]],
+      someRandom[Seq[OwnedProject]],
+      someRandom[Seq[OwnedProject]],
       someRandom[Seq[OwnedProject]],
       someRandom[Seq[Project]]
     )

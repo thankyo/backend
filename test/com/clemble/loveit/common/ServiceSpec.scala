@@ -2,9 +2,9 @@ package com.clemble.loveit.common
 
 import com.clemble.loveit.auth.controller.SocialAuthController
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{OwnedProject, Project, Resource, User, UserID, Verification}
+import com.clemble.loveit.common.model.{Project, Resource, User, UserID}
 import com.clemble.loveit.payment.service.UserPaymentService
-import com.clemble.loveit.thank.service.{PostService, ProjectService, UserProjectsService}
+import com.clemble.loveit.thank.service.{DibsProjectOwnershipService, PostService, ProjectService, UserProjectsService}
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import com.clemble.loveit.common.service.UserService
 import com.clemble.loveit.user.service.repository.UserRepository
@@ -21,6 +21,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
   lazy val prjRepo: ProjectRepository = dependency[ProjectRepository]
   lazy val prjService: ProjectService = dependency[ProjectService]
   lazy val postService: PostService = dependency[PostService]
+  lazy val dibsOwnService: DibsProjectOwnershipService = dependency[DibsProjectOwnershipService]
 
   override def createUser(register: RegistrationRequest = someRandom[RegistrationRequest]): UserID = {
     val fUserID = for {
@@ -38,7 +39,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    val ownedProject = await(userPrjService.dibsOnUrl(user, url))
+    val ownedProject = await(dibsOwnService.dibsOnUrl(user, url))
     await(prjService.create(user, ownedProject))
   }
 

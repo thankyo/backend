@@ -11,10 +11,14 @@ trait UserProjectsRepository extends ProjectRepository {
 
   def save(projects: UserProjects): Future[UserProjects]
 
-  def saveOwnedProject(user: UserID, owned: Seq[OwnedProject]): Future[UserProjects]
+  def saveDibsProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects]
+
+  def saveGoogleProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects]
+
+  def saveTumblrProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects]
 
   def saveProject(project: Project): Future[Project]
 
-  def deleteOwnedProject(user: UserID, url: String): Future[UserProjects]
+  def deleteDibsProject(user: UserID, url: String): Future[UserProjects]
 
 }

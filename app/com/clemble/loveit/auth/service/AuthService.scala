@@ -126,7 +126,7 @@ case class SimpleAuthService @Inject()(
     }
   }
 
-  override def findAuthInfo(loginInfo: LoginInfo): Future[Option[AuthInfo]] = {
+  private def fetchAuthInfo(loginInfo: LoginInfo): Future[Option[AuthInfo]] = {
     authInfoRepository.find[AuthInfo](loginInfo).flatMap({
       case Some(info: OAuth2Info) if info.refreshToken.isDefined && AuthInfoUtils.hasExpired(info) => {
         val providerOpt = socialProviderRegistry.get[SocialProvider with RefreshableOAuth2Provider](loginInfo.providerID)
@@ -145,6 +145,16 @@ case class SimpleAuthService @Inject()(
       case other =>
         Future.successful(other)
     })
+  }
+
+  override def findAuthInfo(user: UserID, provider: String): Future[Option[AuthInfo]] = {
+    for {
+      userOpt <- userService.findById(user)
+      loginInfoOpt = userOpt.flatMap(_.profiles.get(provider))
+      authInfoOpt <- loginInfoOpt.map(fetchAuthInfo).getOrElse(Future.successful(None))
+    } yield {
+      authInfoOpt
+    }
   }
 
   override def removeSocial(user: UserID, provider: String): Future[Option[User]] = {

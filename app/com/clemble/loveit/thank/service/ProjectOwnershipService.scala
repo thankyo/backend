@@ -5,6 +5,7 @@ import java.net.URLEncoder
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.service._
+import com.clemble.loveit.thank.model.UserProjects
 import com.clemble.loveit.thank.service.repository.UserProjectsRepository
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
@@ -18,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectOwnershipService {
 
-  def refresh(user: UserID): Future[Seq[OwnedProject]]
+  def refresh(user: UserID): Future[UserProjects]
 
 }
 
@@ -60,12 +61,12 @@ case class TumblrProjectOwnershipService @Inject()(
     })
   }
 
-  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
+  override def refresh(user: UserID): Future[UserProjects] = {
     for {
       projects <- fetchProjects(user)
-      _ <- repo.saveTumblrProjects(user, projects)
+      userProjects <- repo.saveTumblrProjects(user, projects)
     } yield {
-      projects
+      userProjects
     }
   }
 
@@ -127,13 +128,13 @@ case class GoogleProjectOwnershipService @Inject()(
   }
 
 
-  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
+  override def refresh(user: UserID): Future[UserProjects] = {
     for {
       urls <- fetchOwned(user)
       projects <- Future.sequence(urls.map(enrichService.enrich(user, _)))
-      _ <- repo.saveGoogleProjects(user, projects)
+      userProjects <- repo.saveGoogleProjects(user, projects)
     } yield {
-      projects
+      userProjects
     }
   }
 
@@ -160,22 +161,8 @@ case class DibsProjectOwnershipService @Inject()(
     }
   }
 
-  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
-    repo.findById(user).map(_.map(_.dibs).getOrElse(Seq.empty[OwnedProject]))
-  }
-
-}
-
-@Singleton
-case class SimpleProjectOwnershipService @Inject()(
-  googleOwnershipService: GoogleProjectOwnershipService,
-  tumblrOwnershipService: TumblrProjectOwnershipService,
-  implicit val ec: ExecutionContext
-) extends ProjectOwnershipService {
-
-  override def refresh(user: UserID): Future[Seq[OwnedProject]] = {
-    val fResources = Seq(googleOwnershipService, tumblrOwnershipService).map(_.refresh(user))
-    Future.sequence(fResources).map(_.flatten)
+  override def refresh(user: UserID): Future[UserProjects] = {
+    repo.findById(user).map(_.get)
   }
 
 }

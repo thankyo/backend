@@ -6,8 +6,8 @@ DELETE      /post/:post                        @com.clemble.loveit.thank.control
 
 POST        /refresh/post/:post                @com.clemble.loveit.thank.controller.PostController.refresh(post)
 
-#POST        /refresh/google                    ???
-#POST        /refresh/tumblr                    ???
+POST        /refresh/google                    @com.clemble.loveit.thank.controller.ProjectController.refreshGoogle()
+POST        /refresh/tumblr                    @com.clemble.loveit.thank.controller.ProjectController.refreshTumblr()
 
 GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
 POST        /project                           @com.clemble.loveit.thank.controller.ProjectController.create()

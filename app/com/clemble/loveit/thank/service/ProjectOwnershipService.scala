@@ -3,13 +3,12 @@ package com.clemble.loveit.thank.service
 import java.net.URLEncoder
 
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.service.{TumblrProvider, UserOAuthService, UserService, WSClientAware}
+import com.clemble.loveit.common.service._
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider.SpecifiedProfileError
 import com.mohiva.play.silhouette.impl.providers.{OAuth1Info, OAuth2Info}
 import javax.inject.{Inject, Singleton}
-import WSClientAware._
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.libs.ws.WSClient
 
@@ -81,6 +80,7 @@ case class GoogleProjectOwnershipService @Inject()(
   oAuthService: UserOAuthService,
   tumblrProvider: TumblrProvider,
   enrichService: ProjectEnrichService,
+  urlValidator: URLValidator,
   client: WSClient,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService with WSClientAware {
@@ -97,16 +97,14 @@ case class GoogleProjectOwnershipService @Inject()(
       throw new ProfileRetrievalException(SpecifiedProfileError.format(GoogleProvider.ID, errorCode, errorMsg))
     })
 
-    val resources = (json \ "items" \\ "site").flatMap(site => {
+    val resources = (json \ "items" \\ "site").map(site => {
       (site \ "type").as[String] match {
         case INET_DOMAIN =>
           val domain = (site \ "identifier").as[String]
-          List(s"http://${domain}", s"https://${domain}")
+          domain
         case SITE =>
           val url = (site \ "identifier").as[Resource].normalize()
-          List(url)
-        case _ =>
-          List.empty
+          url
       }
     })
 
@@ -127,12 +125,10 @@ case class GoogleProjectOwnershipService @Inject()(
             .get()
             .map(res => readGoogleResources(user, res.json))
             .flatMap(urls => {
-              val enrichedUrls = urls.map(url => {
-                client.isAlive(url).flatMap({
-                  case true => enrichService.enrich(user, url).map(Some(_))
-                  case false => Future.successful(None)
-                })
-              })
+              val enrichedUrls = urls.map(url => urlValidator.findAlive(url).flatMap({
+                case Some(url) => enrichService.enrich(user, url).map(Some(_))
+                case _ => Future.successful(None)
+              }))
               Future.sequence(enrichedUrls).map(_.flatten)
             })
             .map(_.map(_.copy(verification = GoogleVerification)))

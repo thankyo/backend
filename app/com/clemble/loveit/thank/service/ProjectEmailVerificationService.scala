@@ -3,7 +3,8 @@ package com.clemble.loveit.thank.service
 import java.time.LocalDateTime
 import java.util.UUID
 
-import com.clemble.loveit.common.error.{FieldValidationError, RepositoryException}
+import com.clemble.loveit.auth.service.EmailService
+import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.service.TokenRepository
 import javax.inject.{Inject, Singleton}
@@ -27,23 +28,40 @@ object EmailVerificationToken {
 
 trait EmailVerificationTokenService {
 
-  def create(user: UserID, email: String, url: Resource): Future[EmailVerificationToken]
+  def verifyWithWHOIS(user: UserID, url: Resource): Future[Option[EmailVerificationToken]]
+
+  def verifyWithDomainEmail(user: UserID, email: String, url: Resource): Future[EmailVerificationToken]
 
   def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]]
 
 }
 
 @Singleton
-case class SimpleEmailVerificationTokenService @Inject()(repo: TokenRepository[EmailVerificationToken])(implicit ec: ExecutionContext) extends EmailVerificationTokenService {
+case class SimpleEmailVerificationTokenService @Inject()(
+  whoisService: WHOISService,
+  emailService: EmailService,
+  repo: TokenRepository[EmailVerificationToken]
+)(implicit ec: ExecutionContext) extends EmailVerificationTokenService {
 
-  override def create(user: UserID, email: Email, url: Resource): Future[EmailVerificationToken] = {
+  private def sendEmailAndUpdateProject(user: UserID, email: Email, url: Resource): Future[EmailVerificationToken] = {
+    val token = EmailVerificationToken(user, email, url)
+    repo.save(token)
+  }
+
+  override def verifyWithWHOIS(user: UserID, url: Resource): Future[Option[EmailVerificationToken]] = {
+    whoisService.fetchEmail(url).flatMap({
+      case Some(email) => sendEmailAndUpdateProject(user, email, url).map(Some(_))
+      case None => Future.successful(None)
+    })
+  }
+
+  override def verifyWithDomainEmail(user: UserID, email: Email, url: Resource): Future[EmailVerificationToken] = {
     val emailDomain = email.toEmailDomain()
     val resDomain = url.toParentDomain()
     if (emailDomain != resDomain) {
       throw new FieldValidationError("email", s"Domain does not match ${url}")
     }
-    val token = EmailVerificationToken(user, email, url)
-    repo.save(token)
+    sendEmailAndUpdateProject(user, email, url)
   }
 
   override def validate(user: UserID, token: UUID): Future[Option[EmailVerificationToken]] = {

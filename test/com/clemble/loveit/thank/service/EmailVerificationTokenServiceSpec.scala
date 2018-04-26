@@ -18,7 +18,7 @@ class EmailVerificationTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${randomResource.toParentDomain()}"
 
-      await(emailVerService.create(user, email, res)) should throwA[Exception]
+      await(emailVerService.verifyWithDomainEmail(user, email, res)) should throwA[Exception]
     }
 
     "Allow creation in the same domain" in {
@@ -27,7 +27,7 @@ class EmailVerificationTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
-      await(emailVerService.create(user, email, res)) should not(throwA[Exception])
+      await(emailVerService.verifyWithDomainEmail(user, email, res)) should not(throwA[Exception])
     }
 
   }
@@ -40,7 +40,7 @@ class EmailVerificationTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
-      val token = await(emailVerService.create(user, email, res)).token
+      val token = await(emailVerService.verifyWithDomainEmail(user, email, res)).token
 
       val anotherUser = createUser()
 
@@ -54,7 +54,7 @@ class EmailVerificationTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
-      val token = await(emailVerService.create(user, email, res)).token
+      val token = await(emailVerService.verifyWithDomainEmail(user, email, res)).token
 
       await(emailVerService.validate(user, token)) shouldNotEqual None
     }

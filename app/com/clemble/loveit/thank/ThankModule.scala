@@ -5,11 +5,12 @@ import akka.actor.{ActorSystem, Scheduler}
 import com.clemble.loveit.common.model.WordPress
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.service.repository.MongoTokenRepository
-import com.clemble.loveit.common.service.{TokenRepository, UserService}
+import com.clemble.loveit.common.service._
 import com.clemble.loveit.thank.service._
 import com.clemble.loveit.thank.service.repository._
 import com.clemble.loveit.thank.service.repository.mongo._
 import com.google.inject.Provides
+import com.google.inject.name.Names
 import com.mohiva.play.silhouette.api.crypto.Crypter
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings}
 import net.codingwell.scalaguice.ScalaModule
@@ -23,6 +24,12 @@ import scala.io.Source
 class ThankModule @Inject()(env: Environment, conf: Configuration) extends ScalaModule {
 
   override def configure(): Unit = {
+    if (env.mode == Mode.Test) {
+      bind(classOf[URLValidator]).toInstance(TestURLValidator)
+    } else {
+      bind(classOf[URLValidator]).to(classOf[SimpleURLValidator])
+    }
+
     bind(classOf[PostService]).to(classOf[SimplePostService])
     bind(classOf[PostRepository]).to(classOf[MongoPostRepository])
 
@@ -37,6 +44,12 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()
 
+    if (env.mode == Mode.Test) {
+      bind(classOf[WHOISService]).toInstance(TestWHOISService)
+    } else {
+      bind(classOf[String]).annotatedWith(Names.named("thank.whois.key")).toInstance(conf.get[String]("thank.whois.key"))
+      bind(classOf[WHOISService]).to(classOf[SimpleWHOISService])
+    }
     bind(classOf[EmailVerificationTokenService]).to(classOf[SimpleEmailVerificationTokenService])
 
     bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()

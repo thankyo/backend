@@ -8,8 +8,6 @@ import javax.inject.Inject
 import org.jsoup.Jsoup
 import play.api.libs.json.JsObject
 import play.api.libs.ws.WSClient
-import WSClientAware._
-import com.clemble.loveit.common.error.FieldValidationError
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -117,7 +115,7 @@ case class SimpleProjectEnrichService @Inject()(
     possibleFeeds.map(rssResults => rssResults.zip(rssUrls).find(_._1 == true).map(_._2))
   }
 
-  private def doEnrich(user: UserID, url: Resource): Future[OwnedProject] = {
+  override def enrich(user: UserID, url: Resource): Future[OwnedProject] = {
     val fNone = pattern.after[Option[Nothing]](DELAY, actorSystem.scheduler)(Future.successful(None))
     val fWebStack = Future.firstCompletedOf(Seq(webStackAnalyzer.analyze(url), fNone))
     val fDescription = Future.firstCompletedOf(Seq(enrichDescription(url), fNone.map(_ => descriptionFromUrl(url))))
@@ -141,29 +139,6 @@ case class SimpleProjectEnrichService @Inject()(
         rss = rss
       )
     }
-  }
-
-  private def toVariations(url: Resource): List[Resource] = {
-    if (url.startsWith("http")) {
-      List(url)
-    } else {
-      List(s"https://${url}", s"https://www.${url}", s"http://${url}", s"http://www.${url}")
-    }
-  }
-
-  private def enrichFirstValid(user: UserID, variations: List[Resource]): Future[OwnedProject] = {
-    variations match {
-      case Nil => Future.failed(FieldValidationError("url", s"Can't connect"))
-      case url :: xs =>
-        client.isAlive(url).flatMap({
-          case true => doEnrich(user, url)
-          case false => enrichFirstValid(user, xs)
-        })
-    }
-  }
-
-  override def enrich(user: UserID, url: Resource): Future[OwnedProject] = {
-    enrichFirstValid(user, toVariations(url))
   }
 
 }

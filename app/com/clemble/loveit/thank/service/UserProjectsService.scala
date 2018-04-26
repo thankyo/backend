@@ -2,11 +2,13 @@ package com.clemble.loveit.thank.service
 
 import akka.actor.{Actor, Props}
 import com.clemble.loveit.common.model.{OwnedProject, Resource, User, UserID}
+import com.clemble.loveit.common.service.{URLValidator, WSClientAware}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.thank.model.UserProjects
 import com.clemble.loveit.thank.service.repository.UserProjectsRepository
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
 import javax.inject.{Inject, Singleton}
+import com.clemble.loveit.common.error.FieldValidationError
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,10 +39,12 @@ case class UserProjectsServiceSignUpListener @Inject()(uPrjS: UserProjectsServic
 }
 
 @Singleton
-class SimpleUserProjectsService @Inject()(
+case class SimpleUserProjectsService @Inject()(
   eventBusManager: EventBusManager,
   projectEnrichService: ProjectEnrichService,
   ownershipService: ProjectOwnershipService,
+  emailVerSvc: EmailVerificationTokenService,
+  urlValidator: URLValidator,
   repo: UserProjectsRepository,
   implicit val ec: ExecutionContext
 ) extends UserProjectsService {
@@ -55,9 +59,12 @@ class SimpleUserProjectsService @Inject()(
 
   override def dibsOnUrl(user: UserID, url: Resource): Future[OwnedProject] = {
     for {
-      ownedProject <- projectEnrichService.enrich(user, url)
+      urlOpt <- urlValidator.findAlive(url)
+      _ = if (urlOpt.isEmpty) throw FieldValidationError("url", "Can't connect")
+      ownedProject <- projectEnrichService.enrich(user, urlOpt.get)
       _ <- repo.saveOwnedProject(user, Seq(ownedProject))
     } yield {
+      emailVerSvc.verifyWithWHOIS(user, urlOpt.get)
       ownedProject
     }
   }

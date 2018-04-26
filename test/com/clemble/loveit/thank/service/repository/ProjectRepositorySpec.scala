@@ -99,6 +99,8 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
     }
 
     "override ownership" in {
+      skipped("Ignore for now")
+
       val A = createUser()
       val B = createUser()
 
@@ -114,7 +116,8 @@ class ProjectRepositorySpec(implicit val ee: ExecutionEnv) extends RepositorySpe
 
       listOwned(A) shouldEqual List(res)
       listOwned(B) shouldEqual List.empty[Resource]
-    }.isSkipped // TODO This is some strange behavior index either created or not tried to fix this, but does not work
+    }
+    // TODO This is some strange behavior index either created or not tried to fix this, but does not work
     // This won't happen in production, hopefully, so I'll leave it be for now
 
   }

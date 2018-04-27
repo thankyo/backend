@@ -19,9 +19,9 @@ class ProjectController @Inject()(
   feedService: ProjectFeedService,
   lookupService: ProjectLookupService,
   trackService: ProjectSupportTrackService,
-  dibsOwnSvc: DibsProjectOwnershipService,
-  googleOwnSvc: GoogleProjectOwnershipService,
-  tumblrOwnSvc: TumblrProjectOwnershipService,
+  dibsOwnSvc: ProjectOwnershipByDibsService,
+  googleOwnSvc: ProjectOwnershipByGoogleService,
+  tumblrOwnSvc: ProjectOwnershipByTumblrService,
   silhouette: Silhouette[AuthEnv],
   components: ControllerComponents,
   implicit val ec: ExecutionContext
@@ -73,7 +73,7 @@ class ProjectController @Inject()(
   })
 
   def dibsOnUrl() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[String]))(implicit req => {
-    dibsOwnSvc.dibsOnUrl(req.identity.id, req.body).map(Ok(_))
+    dibsOwnSvc.dibs(req.identity.id, req.body).map(Ok(_))
   })
 
   def refreshGoogle() = silhouette.SecuredAction.async(implicit req => {

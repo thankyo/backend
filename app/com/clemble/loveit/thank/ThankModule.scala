@@ -43,7 +43,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()
 
-    if (env.mode == Mode.Test) {
+    if (env.mode == Mode.Test || env.mode == Mode.Dev) {
       bind(classOf[WHOISService]).toInstance(TestWHOISService)
     } else {
       bind(classOf[String]).annotatedWith(Names.named("thank.whois.key")).toInstance(conf.get[String]("thank.whois.key"))

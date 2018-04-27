@@ -26,7 +26,7 @@ object ProjectOwnershipByEmailToken {
 
 }
 
-trait ProjectOwnershipByEmailService {
+trait ProjectOwnershipByEmailService extends ProjectOwnershipService {
 
   def verifyWithWHOIS(user: UserID, url: Resource): Future[Option[ProjectOwnershipByEmailToken]]
 

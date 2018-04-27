@@ -19,12 +19,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectOwnershipService {
 
-  def refresh(user: UserID): Future[UserProjects]
-
 }
 
 @Singleton
-case class TumblrProjectOwnershipService @Inject()(
+case class ProjectOwnershipByTumblrService @Inject()(
   api: TumblrAPI,
   oAuthService: UserOAuthService,
   repo: UserProjectsRepository,
@@ -61,7 +59,7 @@ case class TumblrProjectOwnershipService @Inject()(
     })
   }
 
-  override def refresh(user: UserID): Future[UserProjects] = {
+  def refresh(user: UserID): Future[UserProjects] = {
     for {
       projects <- fetchProjects(user)
       userProjects <- repo.saveTumblrProjects(user, projects)
@@ -72,7 +70,7 @@ case class TumblrProjectOwnershipService @Inject()(
 
 }
 
-case class GoogleProjectOwnershipService @Inject()(
+case class ProjectOwnershipByGoogleService @Inject()(
   oAuthService: UserOAuthService,
   enrichService: ProjectEnrichService,
   urlValidator: URLValidator,
@@ -128,7 +126,7 @@ case class GoogleProjectOwnershipService @Inject()(
   }
 
 
-  override def refresh(user: UserID): Future[UserProjects] = {
+  def refresh(user: UserID): Future[UserProjects] = {
     for {
       urls <- fetchOwned(user)
       projects <- Future.sequence(urls.map(enrichService.enrich(user, _)))
@@ -141,7 +139,7 @@ case class GoogleProjectOwnershipService @Inject()(
 }
 
 @Singleton
-case class DibsProjectOwnershipService @Inject()(
+case class ProjectOwnershipByDibsService @Inject()(
   urlValidator: URLValidator,
   enrichService: ProjectEnrichService,
   emailVerSvc: ProjectOwnershipByEmailService,
@@ -149,20 +147,16 @@ case class DibsProjectOwnershipService @Inject()(
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
 
-  def dibsOnUrl(user: UserID, url: Resource): Future[OwnedProject] = {
+  def dibs(user: UserID, url: Resource): Future[UserProjects] = {
     for {
       urlOpt <- urlValidator.findAlive(url)
       _ = if (urlOpt.isEmpty) throw FieldValidationError("url", "Can't connect")
       ownedProject <- enrichService.enrich(user, urlOpt.get)
-      _ <- repo.saveDibsProjects(user, Seq(ownedProject))
+      usrPrj <- repo.saveDibsProjects(user, Seq(ownedProject))
     } yield {
       emailVerSvc.verifyWithWHOIS(user, urlOpt.get)
-      ownedProject
+      usrPrj
     }
-  }
-
-  override def refresh(user: UserID): Future[UserProjects] = {
-    repo.findById(user).map(_.get)
   }
 
 }

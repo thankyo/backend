@@ -12,6 +12,7 @@ import com.clemble.loveit.payment.model.PendingTransaction
 import com.clemble.loveit.thank.service.repository.ProjectRepository
 import com.clemble.loveit.common.model.User.socialProfileJsonFormat
 import com.clemble.loveit.common.model._
+import com.clemble.loveit.thank.model.UserProjects
 import com.nimbusds.jose.JWSObject
 import play.api.http.Writeable
 import play.api.libs.json.{JsObject, JsString, Json, Reads}
@@ -68,7 +69,7 @@ trait ControllerSpec extends FunctionalThankSpecification {
     val res = perform(user, dibsOnPrj)
 
     res.header.status shouldEqual OK
-    val ownedPrj = res.body.dataStream.readJson[OwnedProject]
+    val ownedPrj = res.body.dataStream.readJson[UserProjects].dibs.find(_.url == url).get
 
     val createPrjReq = FakeRequest(POST, "/api/v1/thank/project").withJsonBody(Json.toJson(ownedPrj))
     val resp = perform(user, createPrjReq)

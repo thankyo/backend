@@ -86,7 +86,8 @@ case class DibsProject(
   webStack: Option[WebStack] = None,
   tags: Set[Tag] = Set.empty,
   rss: Option[String] = None,
-  whoisEmail: Option[Email] = None
+  whoisEmail: Option[Email] = None,
+  verified: Boolean = false
 ) extends ProjectLike
 
 object DibsProject {

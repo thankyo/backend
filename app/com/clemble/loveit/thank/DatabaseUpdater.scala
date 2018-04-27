@@ -7,8 +7,9 @@ import com.clemble.loveit.common.model.{Project, User}
 import com.clemble.loveit.common.mongo.{JSONCollectionFactory, MongoSafeUtils}
 import com.clemble.loveit.thank.model.UserProjects
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json._
 import reactivemongo.play.json._
+import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -27,7 +28,8 @@ class SimpleDatabaseUpdater @Inject()(factory: JSONCollectionFactory, implicit v
   val UPDATES: List[() => Future[Boolean]] = List(
     createUserProjectForExistingUsers,
     moveFromProjectsToUserProject,
-    updateUserProjectsStructure
+    updateUserProjectsStructure,
+    updateDibsFlags
   )
 
   Await.result(updateCollections(), 5 minutes)
@@ -64,6 +66,13 @@ class SimpleDatabaseUpdater @Inject()(factory: JSONCollectionFactory, implicit v
     } yield {
       nextVersion == relevantUpdates.length && updatedVersion
     }
+  }
+
+  def findAndProcessAll[T](collection: JSONCollection, update: (T) => Future[Boolean])(implicit format: Reads[T]): Future[Boolean] = {
+    MongoSafeUtils.findAll[T](collection, Json.obj()).runFoldAsync(true)({
+      case (false, _) => Future.successful(false)
+      case (_, el) => update(el)
+    }).recover({ case _ => false })
   }
 
   def createUserProjectForExistingUsers(): Future[Boolean] = {
@@ -118,6 +127,22 @@ class SimpleDatabaseUpdater @Inject()(factory: JSONCollectionFactory, implicit v
         )))
         MongoSafeUtils.safeSingleUpdate(update)
     })
+  }
+
+  def updateDibsFlags(): Future[Boolean] = {
+    val collection = factory.create("userProject")
+    val update = (usrPrj: JsObject) => {
+      val dibs = (usrPrj \ "dibs").as[List[JsObject]]
+      val needsUpdate = dibs.exists(prj => (prj \ "verified").isEmpty)
+      if (needsUpdate) {
+        val selector = Json.obj("_id" -> (usrPrj \ "_id").as[String])
+        val modification = Json.obj("$set" -> Json.obj("dibs" -> dibs.map(prj => prj + ("verified" -> JsBoolean(false)))))
+        collection.update(selector, modification).map(_.ok)
+      } else {
+        Future.successful(true)
+      }
+    }
+    findAndProcessAll[JsObject](collection, update)
   }
 
 }

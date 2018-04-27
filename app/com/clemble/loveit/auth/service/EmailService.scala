@@ -52,7 +52,7 @@ class StubEmailService extends EmailService with Logger {
 
   override def sendDomainVerificationEmail(email: Email, verification: ProjectOwnershipByEmailToken): Future[Boolean] = {
     val url = s"http://localhost:8080/auth/reset/${verification.token}"
-    logger.info(s"Restore url is ${url}")
+    logger.info(s"Verify domain ownership url is ${url}")
     Future.successful(true)
   }
 

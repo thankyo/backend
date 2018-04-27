@@ -92,6 +92,10 @@ package object util {
     )
   }
 
+  implicit val dibsProjectGenerator: Generator[DibsProject] = () => {
+    someRandom[OwnedProject].asDibsProject(optionRandom[Email])
+  }
+
   implicit val supportedProjectGenerator: Generator[Project] = () => {
     Project.from(someRandom[UserID], someRandom[OwnedProject])
   }
@@ -102,7 +106,7 @@ package object util {
       someRandom[Seq[OwnedProject]],
       someRandom[Seq[OwnedProject]],
       someRandom[Seq[OwnedProject]],
-      someRandom[Seq[OwnedProject]],
+      someRandom[Seq[DibsProject]],
       someRandom[Seq[Project]]
     )
   }

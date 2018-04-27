@@ -4,7 +4,7 @@ import java.time.YearMonth
 
 import javax.inject.Inject
 import com.clemble.loveit.auth.model.requests.RegistrationRequest
-import com.clemble.loveit.common.model.{OwnedProject, Post, UserID}
+import com.clemble.loveit.common.model.{DibsProject, OwnedProject, Post, UserID}
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.payment.model.EOMStatus
 import com.clemble.loveit.payment.service.EOMPaymentService
@@ -31,7 +31,7 @@ object DevInitializerService {
         password = "1234567890",
       ),
       Set(
-        OwnedProject(
+        DibsProject(
           url = "https://zenpencils.com",
           title = "Zen Pencil",
           shortDescription = "My personal blog",
@@ -40,7 +40,7 @@ object DevInitializerService {
           tags = Set("quotes", "inspirational", "motivational", "cartoons", "comics", "webcomic", "inspire", "inspiring", "art", "poetry"),
           rss = Some("https://zenpencils.com/feed")
         ),
-        OwnedProject(
+        DibsProject(
           url = "https://personacentral.com",
           title = "Personal Central",
           shortDescription = "My side japan project",
@@ -59,7 +59,7 @@ object DevInitializerService {
         password = "1234567890"
       ),
       Set(
-        OwnedProject(
+        DibsProject(
           url = "https://readms.net",
           title = "Manga Stream",
           shortDescription = "Awesome scanlation group",
@@ -77,7 +77,7 @@ object DevInitializerService {
         password = "1234567890"
       ),
       Set(
-        OwnedProject(
+        DibsProject(
           url = "https://www.sciencedaily.com",
           title = "Science Daily Blog",
           shortDescription = "Science Daily Blog",

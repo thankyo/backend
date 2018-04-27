@@ -100,10 +100,11 @@ class SimpleDatabaseUpdater @Inject()(factory: JSONCollectionFactory, implicit v
     val userProjectsCollection = factory.create("userProject")
     MongoSafeUtils.findAll[JsObject](userProjectsCollection, Json.obj()).runFoldAsync(true)({
       case (false, _) => Future.successful(false)
+      case (true, usrPrj) if (usrPrj \ "owned").asOpt[List[JsObject]].isEmpty => Future.successful(true)
       case (true, usrPrj) =>
         val selector = Json.obj("_id" -> (usrPrj \ "_id").as[String])
-
         val owned = (usrPrj \ "owned").as[List[JsObject]]
+
         val dibs = owned.filter(prj => (prj \ "verification").asOpt[String].contains("dibs"))
         val tumblr = owned.filter(prj => (prj \ "verification").asOpt[String].contains("tumblr"))
         val google = owned.filter(prj => (prj \ "verification").asOpt[String].contains("google"))

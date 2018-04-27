@@ -53,6 +53,8 @@ object SimpleWHOISService {
 
 case object TestWHOISService extends WHOISService {
 
-  def fetchEmail(url: Resource): Future[Option[Email]] = Future.successful(Option.empty[Email])
+  def fetchEmail(url: Resource): Future[Option[Email]] = Future.successful(
+    Some(s"admin@${url.toParentDomain()}")
+  )
 
 }

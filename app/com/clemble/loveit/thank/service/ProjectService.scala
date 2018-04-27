@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ProjectService {
 
-  def create(user: UserID, project: OwnedProject): Future[Project]
+  def create(user: UserID, project: ProjectLike): Future[Project]
 
   def delete(user: UserID, id: ProjectID): Future[Boolean]
 
@@ -24,7 +24,7 @@ class SimpleProjectService @Inject()(
   implicit val ec: ExecutionContext
 ) extends ProjectService {
 
-  override def create(user: UserID, project: OwnedProject): Future[Project] = {
+  override def create(user: UserID, project: ProjectLike): Future[Project] = {
     for {
       existingProjectOpt <- repo.findProjectByUrl(project.url)
       _ = if (existingProjectOpt.isDefined) throw ResourceException.projectAlreadyCreated()

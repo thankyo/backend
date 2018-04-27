@@ -108,18 +108,16 @@ case class SimpleAuthService @Inject()(
       userByLogin <- userService.retrieve(profile.loginInfo)
       userByEmail <- profileEmail.map(userService.findByEmail).getOrElse(Future.successful(None))
       result <- userById.orElse(userByLogin).orElse(userByEmail) match {
-        case Some(user: User) => {
+        case Some(user: User) =>
           for {
             _ <- authInfoRepository.save(profile.loginInfo, authInfo)
             user <- userService.update(user link profile)
           } yield {
             UserLoggedIn(user, profile.loginInfo)
           }
-        }
-        case _ => {
+        case _ =>
           val newUser = User(id = IDGenerator.generate(), email = profileEmail.get).link(profile)
           createUser(newUser, profile.loginInfo, authInfo)
-        }
       }
     } yield {
       result
@@ -157,8 +155,8 @@ case class SimpleAuthService @Inject()(
     }
   }
 
-  override def removeSocial(user: UserID, provider: String): Future[Option[User]] = {
-    userService.findById(user).flatMap({
+  override def removeSocial(userId: UserID, provider: String): Future[Option[User]] = {
+    userService.findById(userId).flatMap({
       case Some(user) if user.hasProvider(provider) =>
         val loginInfo = user.profiles.get(provider).get
         authInfoRepository.remove(loginInfo)

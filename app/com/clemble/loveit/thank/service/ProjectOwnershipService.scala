@@ -42,12 +42,15 @@ case class ProjectOwnershipByTumblrService @Inject()(
         val shortDescription = (blog \ "description").asOpt[String].getOrElse("")
         val rss = url + "/rss"
 
+        val avatar = s"https://api.tumblr.com/v2/blog/${url.toParentDomain()}/avatar/128"
+
         OwnedProject(
           url = url,
           title = title,
           shortDescription = shortDescription,
           webStack = Some(Tumblr),
-          rss = Some(rss)
+          rss = Some(rss),
+          avatar = Some(avatar)
         )
       })
   }
@@ -151,10 +154,12 @@ case class ProjectOwnershipByDibsService @Inject()(
     for {
       urlOpt <- urlValidator.findAlive(url)
       _ = if (urlOpt.isEmpty) throw FieldValidationError("url", "Can't connect")
-      ownedProject <- enrichService.enrich(user, urlOpt.get)
-      usrPrj <- repo.saveDibsProjects(user, Seq(ownedProject))
+      baseProject <- enrichService.enrich(user, urlOpt.get)
+      verification <- emailVerSvc.verifyWithWHOIS(user, urlOpt.get)
+      emailOpt = verification.map(_.email)
+      dibsProject = baseProject.asDibsProject(emailOpt)
+      usrPrj <- repo.saveDibsProjects(user, Seq(dibsProject))
     } yield {
-      emailVerSvc.verifyWithWHOIS(user, urlOpt.get)
       usrPrj
     }
   }

@@ -8,12 +8,6 @@ import scala.concurrent.Future
 
 trait UserService extends IdentityService[User] {
 
-  /**
-    * Create a new user in the system
-    *
-    * @param user user to create
-    * @return saved user
-    */
   def create(user: User): Future[User]
 
   def retrieve(loginInfo: LoginInfo): Future[Option[User]]

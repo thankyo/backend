@@ -6,11 +6,10 @@ import com.clemble.loveit.common.model.Project._
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.model.{OwnedProject, Project, ProjectID, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.common.mongo.MongoSafeUtils.toException
 import com.clemble.loveit.thank.model.UserProjects
 import com.clemble.loveit.thank.service.repository.UserProjectsRepository
 import javax.inject.{Inject, Named, Singleton}
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json._
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.core.errors.DatabaseException
 import reactivemongo.play.json._
@@ -81,7 +80,7 @@ class MongoUserProjectsRepository @Inject() (
     }).recoverWith(errorHandler)
   }
 
-  private def saveOwnedProject(user: UserID, field: String, owned: Seq[OwnedProject]): Future[UserProjects] = {
+  private def saveOwnedProject[T <: ProjectLike](user: UserID, field: String, owned: Seq[T])(implicit format: OFormat[T]): Future[UserProjects] = {
     val selector = Json.obj("_id" -> user)
     collection
       .update(selector, Json.obj("$pull" -> Json.obj(field -> Json.obj("url" -> Json.obj("$in" -> owned.map(_.url))))))
@@ -101,7 +100,7 @@ class MongoUserProjectsRepository @Inject() (
     saveOwnedProject(user, "tumblr", projects)
   }
 
-  override def saveDibsProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects] = {
+  override def saveDibsProjects(user: UserID, projects: Seq[DibsProject]): Future[UserProjects] = {
     saveOwnedProject(user, "dibs", projects)
   }
 

@@ -77,6 +77,24 @@ object Project {
   }
 }
 
+case class DibsProject(
+  url: Resource,
+  title: String,
+  shortDescription: String,
+  description: Option[String] = None,
+  avatar: Option[String] = None,
+  webStack: Option[WebStack] = None,
+  tags: Set[Tag] = Set.empty,
+  rss: Option[String] = None,
+  whoisEmail: Option[Email] = None
+) extends ProjectLike
+
+object DibsProject {
+
+  implicit val format = Json.format[DibsProject]
+
+}
+
 case class OwnedProject(
   url: Resource,
   title: String,
@@ -86,7 +104,23 @@ case class OwnedProject(
   webStack: Option[WebStack] = None,
   tags: Set[Tag] = Set.empty,
   rss: Option[String] = None
-) extends ProjectLike
+) extends ProjectLike {
+
+  def asDibsProject(email: Option[Email]): DibsProject = {
+    DibsProject(
+      url = url,
+      title = title,
+      shortDescription = shortDescription,
+      description = description,
+      avatar = avatar,
+      webStack = webStack,
+      tags = tags,
+      rss = rss,
+      whoisEmail = email
+    )
+  }
+
+}
 
 object OwnedProject {
 

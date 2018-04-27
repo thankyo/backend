@@ -10,8 +10,8 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsObject, JsString, Json}
 import reactivemongo.play.json._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait DatabaseUpdater {
 
@@ -20,13 +20,14 @@ trait DatabaseUpdater {
 }
 
 @Singleton
-class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit val ec: ExecutionContext, implicit val m: Materializer) extends DatabaseUpdater {
+class SimpleDatabaseUpdater @Inject()(factory: JSONCollectionFactory, implicit val ec: ExecutionContext, implicit val m: Materializer) extends DatabaseUpdater {
 
   val versionCollection = factory.create("appVersion")
 
   val UPDATES: List[() => Future[Boolean]] = List(
     createUserProjectForExistingUsers,
-    moveFromProjectsToUserProject
+    moveFromProjectsToUserProject,
+    updateUserProjectsStructure
   )
 
   Await.result(updateCollections(), 5 minutes)
@@ -93,6 +94,29 @@ class SimpleDatabaseUpdater @Inject() (factory: JSONCollectionFactory, implicit 
           userProjectsCollection.update(selector, update).map(_.ok)
       }
     }).recover({ case _ => false })
+  }
+
+  def updateUserProjectsStructure(): Future[Boolean] = {
+    val userProjectsCollection = factory.create("userProject")
+    MongoSafeUtils.findAll[JsObject](userProjectsCollection, Json.obj()).runFoldAsync(true)({
+      case (false, _) => Future.successful(false)
+      case (true, usrPrj) =>
+        val selector = Json.obj("_id" -> (usrPrj \ "_id").as[String])
+
+        val owned = (usrPrj \ "owned").as[List[JsObject]]
+        val dibs = owned.filter(prj => (prj \ "verification").asOpt[String].contains("dibs"))
+        val tumblr = owned.filter(prj => (prj \ "verification").asOpt[String].contains("tumblr"))
+        val google = owned.filter(prj => (prj \ "verification").asOpt[String].contains("google"))
+        val email = Json.arr()
+
+        val update = userProjectsCollection.update(selector, Json.obj("$set" -> Json.obj(
+          "dibs" -> dibs,
+          "tumblr" -> tumblr,
+          "google" -> google,
+          "email" -> email
+        )))
+        MongoSafeUtils.safeSingleUpdate(update)
+    })
   }
 
 }

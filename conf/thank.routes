@@ -19,19 +19,18 @@ GET         /project/:project/feed             @com.clemble.loveit.thank.control
 GET         /user/:user/supported              @com.clemble.loveit.thank.controller.ProjectController.getSupportedByUser(user)
 GET         /user/:user/project                @com.clemble.loveit.thank.controller.ProjectController.getProjectsByUser(user)
 
-#POST        /user/my/owned/email/verify        ???
-#GET         /owned/dibs                        ???
 
 GET         /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.getOwnedProjects()
-DELETE      /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.deleteOwnedProject(url)
 
 POST        /user/my/owned/dibs                @com.clemble.loveit.thank.controller.ProjectController.dibsOnUrl()
 POST        /user/my/owned/dibs/verify         @com.clemble.loveit.thank.controller.ProjectController.reSendDibsVerification()
 PUT         /user/my/owned/dibs/verify         @com.clemble.loveit.thank.controller.ProjectController.verifyDibs()
+DELETE      /user/my/owned/dibs                @com.clemble.loveit.thank.controller.ProjectController.deleteByDibs()
 
 POST        /user/my/owned/email               @com.clemble.loveit.thank.controller.ProjectController.ownershipByEmail()
 POST        /user/my/owned/email/verify        @com.clemble.loveit.thank.controller.ProjectController.reSendEmailVerification()
 PUT         /user/my/owned/email/verify        @com.clemble.loveit.thank.controller.ProjectController.verifyWithEmail()
+DELETE      /user/my/owned/email               @com.clemble.loveit.thank.controller.ProjectController.deleteByEmail()
 
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()

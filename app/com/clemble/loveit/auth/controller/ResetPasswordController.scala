@@ -3,7 +3,7 @@ package com.clemble.loveit.auth.controller
 import java.util.UUID
 
 import com.clemble.loveit.auth.model.requests.{ResetPasswordRequest, RestorePasswordRequest}
-import com.clemble.loveit.auth.service.{EmailService, ResetPasswordService}
+import com.clemble.loveit.auth.service.ResetPasswordService
 import com.clemble.loveit.common.controller.{CookieUtils, LoveItController}
 import com.clemble.loveit.common.service.UserService
 import com.clemble.loveit.common.util.AuthEnv

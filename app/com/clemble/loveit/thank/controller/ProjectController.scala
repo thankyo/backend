@@ -35,8 +35,12 @@ class ProjectController @Inject()(
     })
   })
 
-  def deleteOwnedProject(url: Resource) = silhouette.SecuredAction.async(implicit req => {
-    dibsOwnSvc.delete(req.identity.id, url).map(Ok(_))
+  def deleteByDibs() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[Resource]))(implicit req => {
+    dibsOwnSvc.delete(req.identity.id, req.body).map(Ok(_))
+  })
+
+  def deleteByEmail() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "email").as[Email]))(implicit req => {
+    emailOwnSvc.delete(req.identity.id, req.body).map(Ok(_))
   })
 
   def getProjectsByUser(user: UserID) = silhouette.SecuredAction.async(implicit req => {

@@ -3,10 +3,9 @@ package com.clemble.loveit.thank.service
 import java.time.LocalDateTime
 import java.util.UUID
 
-import com.clemble.loveit.auth.service.EmailService
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.service.{TokenRepository, URLValidator}
+import com.clemble.loveit.common.service.{EmailService, TokenRepository, URLValidator}
 import com.clemble.loveit.thank.model.UserProjects
 import com.clemble.loveit.thank.service.repository.EmailProjectOwnershipRepository
 import javax.inject.{Inject, Singleton}
@@ -52,7 +51,7 @@ case class EmailProjectOwnershipService @Inject()(
   def sendVerification(user: UserID, email: Email): Future[EmailProjectOwnershipToken] = {
     for {
       token <- tokenRepo.save(EmailProjectOwnershipToken(user, email))
-      emailSent <- emailService.sendDomainVerificationEmail(email, token)
+      emailSent <- emailService.sendDomainVerificationEmail(token)
     } yield {
       if (!emailSent) throw new IllegalArgumentException("Failed to send email")
       token

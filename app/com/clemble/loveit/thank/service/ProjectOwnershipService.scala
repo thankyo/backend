@@ -4,10 +4,9 @@ import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.util.UUID
 
-import com.clemble.loveit.auth.service.EmailService
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.common.service._
+import com.clemble.loveit.common.service.{EmailService, _}
 import com.clemble.loveit.thank.model.UserProjects
 import com.clemble.loveit.thank.service.repository.{DibsProjectOwnershipRepository, UserProjectsRepository}
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
@@ -146,7 +145,7 @@ case class GoogleProjectOwnershipService @Inject()(
 
 case class DibsProjectOwnershipToken(
   user: UserID,
-  email: String,
+  email: Email,
   url: Resource,
   token: UUID = UUID.randomUUID(),
   created: LocalDateTime = LocalDateTime.now()
@@ -178,7 +177,7 @@ case class DibsProjectOwnershipService @Inject()(
       sent <- emailOpt.
         map(email => tokenRepo.
           save(DibsProjectOwnershipToken(user, url, email)).
-          flatMap(token => emailService.sendWHOISVerificationEmail(emailOpt.get, token))
+          flatMap(token => emailService.sendWHOISVerificationEmail(token))
         ).getOrElse(Future.successful(false))
     } yield {
       emailOpt.filter(_ => sent)

@@ -5,7 +5,7 @@ import java.util.UUID
 import com.clemble.loveit.auth.model.ResetPasswordToken
 import com.clemble.loveit.auth.model.requests.{ResetPasswordRequest, RestorePasswordRequest}
 import com.clemble.loveit.common.error.FieldValidationError
-import com.clemble.loveit.common.service.{TokenRepository, UserService}
+import com.clemble.loveit.common.service.{EmailService, TokenRepository, UserService}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.{PasswordHasherRegistry, PasswordInfo}
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException

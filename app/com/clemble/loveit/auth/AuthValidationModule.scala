@@ -6,7 +6,7 @@ import com.clemble.loveit.auth.model.ResetPasswordToken
 import com.clemble.loveit.auth.service._
 import com.clemble.loveit.common.mongo.JSONCollectionFactory
 import com.clemble.loveit.common.service.repository.MongoTokenRepository
-import com.clemble.loveit.common.service.{TokenRepository, UserOAuthService}
+import com.clemble.loveit.common.service._
 import com.clemble.loveit.common.util.{AuthEnv, EventBusManager}
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.Environment

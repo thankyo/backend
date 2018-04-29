@@ -1,7 +1,7 @@
 package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
-import com.clemble.loveit.common.model.{DibsProject, OwnedProject, Project}
+import com.clemble.loveit.common.model.{DibsProject, EmailProject, OwnedProject, Project}
 import com.clemble.loveit.thank.model.UserProjects
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
@@ -63,6 +63,21 @@ class UserProjectRepositorySpec extends RepositorySpec {
     val afterValidation = await(repo.validateDibsProject(user, projectToValidate))
 
     val validatedProject = afterValidation.dibs.find(_.url == projectToValidate)
+    validatedProject shouldNotEqual None
+    validatedProject.get.verified shouldEqual true
+  }
+
+  "Update email on project" in {
+    val user = createUser()
+
+    val dibs = 1 to 10 map(i => someRandom[EmailProject].copy(verified = false))
+    await(repo.saveEmailProjects(user, dibs))
+
+    val projectToValidate = dibs(Random.nextInt(8)).url
+
+    val afterValidation = await(repo.validateEmailProject(user, projectToValidate))
+
+    val validatedProject = afterValidation.email.find(_.url == projectToValidate)
     validatedProject shouldNotEqual None
     validatedProject.get.verified shouldEqual true
   }

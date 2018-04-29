@@ -4,9 +4,8 @@ import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.controller.LoveItController
-import com.clemble.loveit.common.model.{OwnedProject, Project, ProjectID, Resource, UserID}
+import com.clemble.loveit.common.model.{Email, OwnedProject, Project, ProjectID, Resource, UserID}
 import com.clemble.loveit.common.util.AuthEnv
-import com.clemble.loveit.common.model.OwnedProject
 import com.clemble.loveit.thank.service._
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.libs.json.{JsBoolean, JsObject, Json}
@@ -22,6 +21,7 @@ class ProjectController @Inject()(
   lookupService: ProjectLookupService,
   trackService: ProjectSupportTrackService,
   dibsOwnSvc: DibsProjectOwnershipService,
+  emailOwnSvc: EmailProjectOwnershipService,
   googleOwnSvc: GoogleProjectOwnershipService,
   tumblrOwnSvc: TumblrProjectOwnershipService,
   silhouette: Silhouette[AuthEnv],
@@ -36,7 +36,7 @@ class ProjectController @Inject()(
   })
 
   def deleteOwnedProject(url: Resource) = silhouette.SecuredAction.async(implicit req => {
-    usrPrjService.deleteOwned(req.identity.id, url).map(Ok(_))
+    dibsOwnSvc.delete(req.identity.id, url).map(Ok(_))
   })
 
   def getProjectsByUser(user: UserID) = silhouette.SecuredAction.async(implicit req => {
@@ -75,8 +75,9 @@ class ProjectController @Inject()(
   })
 
   def dibsOnUrl() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[Resource]))(implicit req => {
-    dibsOwnSvc.dibs(req.identity.id, req.body).map(Ok(_))
+    dibsOwnSvc.create(req.identity.id, req.body).map(Ok(_))
   })
+
 
   def verifyDibs() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "token").as[UUID]))(implicit req => {
     dibsOwnSvc.verify(req.identity.id, req.body).map(Ok(_))
@@ -84,7 +85,21 @@ class ProjectController @Inject()(
 
   def reSendDibsVerification() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[Resource]))(
     implicit req => {
-      dibsOwnSvc.sendWHOISVerification(req.identity.id, req.body).map(email => Ok(JsBoolean(email.isDefined)))
+      dibsOwnSvc.sendVerification(req.identity.id, req.body).map(email => Ok(JsBoolean(email.isDefined)))
+    }
+  )
+
+  def ownershipByEmail() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "email").as[Email]))(implicit req => {
+    emailOwnSvc.create(req.identity.id, req.body).map(Ok(_))
+  })
+
+  def verifyWithEmail() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "token").as[UUID]))(implicit req => {
+    emailOwnSvc.verify(req.identity.id, req.body).map(Ok(_))
+  })
+
+  def reSendEmailVerification() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "email").as[Email]))(
+    implicit req => {
+      emailOwnSvc.sendVerification(req.identity.id, req.body).map(email => Ok(JsBoolean(true)))
     }
   )
 

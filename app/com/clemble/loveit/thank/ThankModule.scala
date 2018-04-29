@@ -38,7 +38,11 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
     bind(classOf[TumblrIntegrationService]).to(classOf[SimpleTumblrIntegrationService]).asEagerSingleton()
     bind(classOf[UserProjectsRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
+
     bind(classOf[ProjectRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
+    bind(classOf[DibsProjectOwnershipRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
+    bind(classOf[EmailProjectOwnershipRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
+
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
 
     bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()
@@ -49,7 +53,6 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
       bind(classOf[String]).annotatedWith(Names.named("thank.whois.key")).toInstance(conf.get[String]("thank.whois.key"))
       bind(classOf[WHOISService]).to(classOf[SimpleWHOISService])
     }
-    bind(classOf[EmailProjectOwnershipService]).to(classOf[SimpleEmailProjectOwnershipService])
 
     bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()
     bind(classOf[ProjectSupportTrackService]).to(classOf[SimpleProjectSupportTrackService]).asEagerSingleton()

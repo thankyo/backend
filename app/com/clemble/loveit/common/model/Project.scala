@@ -96,6 +96,25 @@ object DibsProject {
 
 }
 
+case class EmailProject(
+  email: Email,
+  url: Resource,
+  title: String,
+  shortDescription: String,
+  description: Option[String] = None,
+  avatar: Option[String] = None,
+  webStack: Option[WebStack] = None,
+  tags: Set[Tag] = Set.empty,
+  rss: Option[String] = None,
+  verified: Boolean = false
+) extends ProjectLike
+
+object EmailProject {
+
+  implicit val format = Json.format[EmailProject]
+
+}
+
 case class OwnedProject(
   url: Resource,
   title: String,
@@ -118,6 +137,20 @@ case class OwnedProject(
       tags = tags,
       rss = rss,
       whoisEmail = email
+    )
+  }
+
+  def asEmailProject(email: Email): EmailProject = {
+    EmailProject(
+      url = url,
+      title = title,
+      shortDescription = shortDescription,
+      description = description,
+      avatar = avatar,
+      webStack = webStack,
+      tags = tags,
+      rss = rss,
+      email = email
     )
   }
 

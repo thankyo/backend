@@ -71,7 +71,7 @@ case class DevCreatorsInitializer @Inject()(
           case Some(prj) => Future.successful(prj)
           case None =>
             for {
-              _ <- dibsOwnSvc.dibs(creator, project.url)
+              _ <- dibsOwnSvc.create(creator, project.url)
               project <- prjService.create(creator, project)
             } yield {
               project

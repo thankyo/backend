@@ -17,8 +17,6 @@ trait UserProjectsService {
 
   def create(user: User): Future[UserProjects]
 
-  def deleteOwned(user: UserID, url: Resource): Future[UserProjects]
-
 }
 
 case class UserProjectsServiceSignUpListener @Inject()(uPrjS: UserProjectsService) extends Actor {
@@ -48,16 +46,6 @@ case class SimpleUserProjectsService @Inject()(
 
   override def get(user: UserID): Future[UserProjects] = {
     repo.findById(user).map(_.get)
-  }
-
-  override def deleteOwned(user: UserID, url: Resource): Future[UserProjects] = {
-    for {
-      installedPrjOpt <- repo.findProjectByUrl(url)
-      _ = if(installedPrjOpt.isDefined) throw new IllegalArgumentException("Remove installed project first")
-      userProject <- repo.deleteDibsProject(user, url)
-    } yield {
-      userProject
-    }
   }
 
 }

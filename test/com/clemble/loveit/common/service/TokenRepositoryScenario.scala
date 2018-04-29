@@ -4,7 +4,8 @@ import com.clemble.loveit.auth.model.ResetPasswordToken
 import com.clemble.loveit.auth.service.SimpleResetPasswordService
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{Email, Token, UserID}
-import com.clemble.loveit.thank.service.{EmailProjectOwnershipToken, SimpleEmailProjectOwnershipService}
+import com.clemble.loveit.thank.service.{DibsProjectOwnershipService, DibsProjectOwnershipToken, EmailProjectOwnershipService, EmailProjectOwnershipToken}
+import com.clemble.loveit.thank.service.repository.DibsProjectOwnershipRepository
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -48,9 +49,17 @@ class ResetPasswordTokenRepositorySpec extends TokenRepositoryScenario[ResetPass
 @RunWith(classOf[JUnitRunner])
 class EmailProjectOwnershipTokenRepositorySpec extends TokenRepositoryScenario[EmailProjectOwnershipToken] {
 
-  val repo: TokenRepository[EmailProjectOwnershipToken] = dependency[SimpleEmailProjectOwnershipService].repo
+  val repo: TokenRepository[EmailProjectOwnershipToken] = dependency[EmailProjectOwnershipService].tokenRepo
 
-  override def newToken(user: UserID): EmailProjectOwnershipToken = EmailProjectOwnershipToken(user, someRandom[Email], randomResource)
+  override def newToken(user: UserID): EmailProjectOwnershipToken = EmailProjectOwnershipToken(user, someRandom[Email])
+
+}
+
+class DibsProjectOwnershipTokenRepositorySpec extends TokenRepositoryScenario[DibsProjectOwnershipToken] {
+
+  val repo: TokenRepository[DibsProjectOwnershipToken] = dependency[DibsProjectOwnershipService].tokenRepo
+
+  override def newToken(user: UserID): DibsProjectOwnershipToken = DibsProjectOwnershipToken(user, someRandom[Email], randomResource)
 
 }
 

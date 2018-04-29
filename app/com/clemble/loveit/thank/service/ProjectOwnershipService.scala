@@ -9,7 +9,7 @@ import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.service._
 import com.clemble.loveit.thank.model.UserProjects
-import com.clemble.loveit.thank.service.repository.UserProjectsRepository
+import com.clemble.loveit.thank.service.repository.{DibsProjectOwnershipRepository, UserProjectsRepository}
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
@@ -146,8 +146,8 @@ case class GoogleProjectOwnershipService @Inject()(
 
 case class DibsProjectOwnershipToken(
   user: UserID,
-  url: Resource,
   email: String,
+  url: Resource,
   token: UUID = UUID.randomUUID(),
   created: LocalDateTime = LocalDateTime.now()
 ) extends Token with ResourceAware
@@ -165,13 +165,13 @@ case class DibsProjectOwnershipService @Inject()(
   whoisService: WHOISService,
   emailService: EmailService,
   tokenRepo: TokenRepository[DibsProjectOwnershipToken],
-  repo: UserProjectsRepository,
+  repo: DibsProjectOwnershipRepository,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService {
 
-  def sendWHOISVerification(user: UserID, url: Resource): Future[Option[Email]] = {
+  def sendVerification(user: UserID, url: Resource): Future[Option[Email]] = {
     for {
-      whoisEmailOpt <- repo.findById(user).map(_.flatMap(_.dibs.find(_.url == url).flatMap(_.whoisEmail)))
+      whoisEmailOpt <- repo.findDibsProject(user).map(_.find(_.url == url).flatMap(_.whoisEmail))
       emailOpt <- whoisEmailOpt.
         map(email => Future.successful(Some(email))).
         getOrElse(whoisService.fetchEmail(url))
@@ -197,7 +197,7 @@ case class DibsProjectOwnershipService @Inject()(
     }
   }
 
-  def dibs(user: UserID, url: Resource): Future[UserProjects] = {
+  def create(user: UserID, url: Resource): Future[UserProjects] = {
     for {
       urlOpt <- urlValidator.findAlive(url)
       _ = if (urlOpt.isEmpty) throw FieldValidationError("url", "Can't connect")
@@ -206,8 +206,16 @@ case class DibsProjectOwnershipService @Inject()(
       dibsProject = baseProject.asDibsProject(emailOpt)
       usrPrj <- repo.saveDibsProjects(user, Seq(dibsProject))
     } yield {
-      sendWHOISVerification(user, urlOpt.get)
+      sendVerification(user, urlOpt.get)
       usrPrj
+    }
+  }
+
+  def delete(user: UserID, url: Resource): Future[UserProjects] = {
+    for {
+      userProject <- repo.deleteDibsProject(user, url)
+    } yield {
+      userProject
     }
   }
 

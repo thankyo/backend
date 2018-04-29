@@ -18,7 +18,7 @@ class EmailProjectOwnershipTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${randomResource.toParentDomain()}"
 
-      await(emailVerService.verifyWithDomainEmail(user, email, res)) should throwA[Exception]
+      await(emailVerService.sendVerification(user, email)) should throwA[Exception]
     }
 
     "Allow creation in the same domain" in {
@@ -27,7 +27,7 @@ class EmailProjectOwnershipTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
-      await(emailVerService.verifyWithDomainEmail(user, email, res)) should not(throwA[Exception])
+      await(emailVerService.sendVerification(user, email)) should not(throwA[Exception])
     }
 
   }
@@ -40,11 +40,11 @@ class EmailProjectOwnershipTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
-      val token = await(emailVerService.verifyWithDomainEmail(user, email, res)).token
+      val token = await(emailVerService.sendVerification(user, email)).token
 
       val anotherUser = createUser()
 
-      await(emailVerService.validate(anotherUser, token)) should throwA[Exception]
+      await(emailVerService.verify(anotherUser, token)) should throwA[Exception]
     }
 
     "Allow validation by the same user" in {
@@ -54,9 +54,9 @@ class EmailProjectOwnershipTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
-      val token = await(emailVerService.verifyWithDomainEmail(user, email, res)).token
+      val token = await(emailVerService.sendVerification(user, email)).token
 
-      await(emailVerService.validate(user, token)) shouldNotEqual None
+      await(emailVerService.verify(user, token)) shouldNotEqual None
     }
 
   }

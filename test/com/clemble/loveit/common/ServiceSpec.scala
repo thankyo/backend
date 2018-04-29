@@ -39,7 +39,7 @@ trait ServiceSpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    val ownedProject = await(dibsOwnService.dibs(user, url))
+    val ownedProject = await(dibsOwnService.create(user, url))
     await(prjService.create(user, ownedProject.dibs.find(_.url == url).get))
   }
 

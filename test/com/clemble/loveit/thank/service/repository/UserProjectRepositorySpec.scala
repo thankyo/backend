@@ -70,14 +70,14 @@ class UserProjectRepositorySpec extends RepositorySpec {
   "Update email on project" in {
     val user = createUser()
 
-    val dibs = 1 to 10 map(i => someRandom[EmailProject].copy(verified = false))
+    val dibs = 1 to 10 map(_ => someRandom[EmailProject].copy(verified = false))
     await(repo.saveEmailProjects(user, dibs))
 
-    val projectToValidate = dibs(Random.nextInt(8)).url
+    val projectToValidate = dibs(Random.nextInt(8)).email
 
     val afterValidation = await(repo.validateEmailProject(user, projectToValidate))
 
-    val validatedProject = afterValidation.email.find(_.url == projectToValidate)
+    val validatedProject = afterValidation.email.find(_.email == projectToValidate)
     validatedProject shouldNotEqual None
     validatedProject.get.verified shouldEqual true
   }

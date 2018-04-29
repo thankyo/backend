@@ -64,8 +64,8 @@ trait ControllerSpec extends FunctionalThankSpecification {
   }
 
   override def createProject(user: UserID = createUser(), url: Resource = randomResource): Project = {
-    val json: JsObject = JsObject(Seq("url" -> JsString(url)))
-    val dibsOnPrj = FakeRequest(POST, "/api/v1/thank/user/my/owned").withJsonBody(json)
+    val dibsOnPrj = FakeRequest(POST, "/api/v1/thank/user/my/owned/dibs").
+      withJsonBody(Json.obj("url" -> url))
     val res = perform(user, dibsOnPrj)
 
     res.header.status shouldEqual OK

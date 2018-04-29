@@ -49,7 +49,7 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
       bind(classOf[String]).annotatedWith(Names.named("thank.whois.key")).toInstance(conf.get[String]("thank.whois.key"))
       bind(classOf[WHOISService]).to(classOf[SimpleWHOISService])
     }
-    bind(classOf[ProjectOwnershipByEmailService]).to(classOf[SimpleProjectOwnershipByEmailService])
+    bind(classOf[EmailProjectOwnershipService]).to(classOf[SimpleEmailProjectOwnershipService])
 
     bind(classOf[ProjectSupportTrackRepository]).to(classOf[MongoProjectSupportTrackRepository]).asEagerSingleton()
     bind(classOf[ProjectSupportTrackService]).to(classOf[SimpleProjectSupportTrackService]).asEagerSingleton()
@@ -74,8 +74,14 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
 
   @Provides
   @Singleton
-  def projectVerificationByEmailRepo(factory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[ProjectOwnershipByEmailToken] = {
-    MongoTokenRepository[ProjectOwnershipByEmailToken](factory.create("prj_email_verification_token"))
+  def projectVerificationByEmailRepo(factory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[EmailProjectOwnershipToken] = {
+    MongoTokenRepository[EmailProjectOwnershipToken](factory.create("prj_email_verification_token"))
+  }
+
+  @Provides
+  @Singleton
+  def dibsProjectOwnershipTokenRepo(factory: JSONCollectionFactory)(implicit ec: ExecutionContext): TokenRepository[DibsProjectOwnershipToken] = {
+    MongoTokenRepository[DibsProjectOwnershipToken](factory.create("prj_dibs_verification_token"))
   }
 
   @Provides

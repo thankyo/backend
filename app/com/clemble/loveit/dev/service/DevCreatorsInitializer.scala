@@ -23,7 +23,7 @@ case class DevCreatorsInitializer @Inject()(
   postService: PostService,
   prjLookupService: ProjectLookupService,
   prjService: ProjectService,
-  dibsOwnSvc: ProjectOwnershipByDibsService,
+  dibsOwnSvc: DibsProjectOwnershipService,
   usrPrjService: UserProjectsService,
   prjRepo: ProjectRepository,
   eventBusManager: EventBusManager,

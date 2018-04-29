@@ -4,7 +4,7 @@ import com.clemble.loveit.auth.model.ResetPasswordToken
 import com.clemble.loveit.auth.service.SimpleResetPasswordService
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{Email, Token, UserID}
-import com.clemble.loveit.thank.service.{ProjectOwnershipByEmailToken, SimpleProjectOwnershipByEmailService}
+import com.clemble.loveit.thank.service.{EmailProjectOwnershipToken, SimpleEmailProjectOwnershipService}
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -46,11 +46,11 @@ class ResetPasswordTokenRepositorySpec extends TokenRepositoryScenario[ResetPass
 }
 
 @RunWith(classOf[JUnitRunner])
-class ProjectOwnershipByEmailTokenRepositorySpec extends TokenRepositoryScenario[ProjectOwnershipByEmailToken] {
+class EmailProjectOwnershipTokenRepositorySpec extends TokenRepositoryScenario[EmailProjectOwnershipToken] {
 
-  val repo: TokenRepository[ProjectOwnershipByEmailToken] = dependency[SimpleProjectOwnershipByEmailService].repo
+  val repo: TokenRepository[EmailProjectOwnershipToken] = dependency[SimpleEmailProjectOwnershipService].repo
 
-  override def newToken(user: UserID): ProjectOwnershipByEmailToken = ProjectOwnershipByEmailToken(user, someRandom[Email], randomResource)
+  override def newToken(user: UserID): EmailProjectOwnershipToken = EmailProjectOwnershipToken(user, someRandom[Email], randomResource)
 
 }
 

@@ -6,6 +6,8 @@ import com.clemble.loveit.thank.model.UserProjects
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
+import scala.util.Random
+
 @RunWith(classOf[JUnitRunner])
 class UserProjectRepositorySpec extends RepositorySpec {
 
@@ -48,6 +50,21 @@ class UserProjectRepositorySpec extends RepositorySpec {
 
     await(repo.findById(user)).get.dibs should not(containAllOf(Seq(dibsProject)))
     await(repo.findById(user)).get.dibs shouldEqual List.empty
+  }
+
+  "Update dibs on project" in {
+    val user = createUser()
+
+    val dibs = 1 to 10 map(i => someRandom[DibsProject].copy(verified = false))
+    await(repo.saveDibsProjects(user, dibs))
+
+    val projectToValidate = dibs(Random.nextInt(8)).url
+
+    val afterValidation = await(repo.validateDibsProject(user, projectToValidate))
+
+    val validatedProject = afterValidation.dibs.find(_.url == projectToValidate)
+    validatedProject shouldNotEqual None
+    validatedProject.get.verified shouldEqual true
   }
 
 }

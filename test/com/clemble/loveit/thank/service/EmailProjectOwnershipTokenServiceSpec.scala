@@ -6,9 +6,9 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ProjectOwnershipByEmailTokenServiceSpec extends ServiceSpec {
+class EmailProjectOwnershipTokenServiceSpec extends ServiceSpec {
 
-  lazy val emailVerService = dependency[ProjectOwnershipByEmailService]
+  lazy val emailVerService = dependency[EmailProjectOwnershipService]
 
   "CREATE" should {
 

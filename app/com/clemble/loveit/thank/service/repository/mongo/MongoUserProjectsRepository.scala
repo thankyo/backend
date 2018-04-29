@@ -104,6 +104,12 @@ class MongoUserProjectsRepository @Inject() (
     saveOwnedProject(user, "dibs", projects)
   }
 
+  override def validateDibsProject(user: UserID, url: Resource): Future[UserProjects] = {
+    val selector = Json.obj("_id" -> user, "dibs.url" -> url)
+    val update = Json.obj("$set" -> Json.obj("dibs.$.verified" -> true))
+    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
+  }
+
   override def deleteDibsProject(user: UserID, url: String): Future[UserProjects] = {
     val selector = Json.obj("_id" -> user)
     val update = Json.obj("$pull" -> Json.obj("dibs" -> Json.obj("url" -> url)))

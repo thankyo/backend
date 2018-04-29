@@ -1,5 +1,7 @@
 package com.clemble.loveit.thank.controller
 
+import java.util.UUID
+
 import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.controller.LoveItController
 import com.clemble.loveit.common.model.{OwnedProject, Project, ProjectID, Resource, UserID}
@@ -19,9 +21,9 @@ class ProjectController @Inject()(
   feedService: ProjectFeedService,
   lookupService: ProjectLookupService,
   trackService: ProjectSupportTrackService,
-  dibsOwnSvc: ProjectOwnershipByDibsService,
-  googleOwnSvc: ProjectOwnershipByGoogleService,
-  tumblrOwnSvc: ProjectOwnershipByTumblrService,
+  dibsOwnSvc: DibsProjectOwnershipService,
+  googleOwnSvc: GoogleProjectOwnershipService,
+  tumblrOwnSvc: TumblrProjectOwnershipService,
   silhouette: Silhouette[AuthEnv],
   components: ControllerComponents,
   implicit val ec: ExecutionContext
@@ -74,6 +76,14 @@ class ProjectController @Inject()(
 
   def dibsOnUrl() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[String]))(implicit req => {
     dibsOwnSvc.dibs(req.identity.id, req.body).map(Ok(_))
+  })
+
+  def verifyDibs(token: UUID) = silhouette.SecuredAction.async(implicit req => {
+    dibsOwnSvc.verify(req.identity.id, token).map(Ok(_))
+  })
+
+  def reSendDibsVerification(url: Resource) = silhouette.SecuredAction.async(implicit req => {
+    dibsOwnSvc.sendWHOISVerification(req.identity.id, url).map(email => Ok(JsBoolean(email.isDefined)))
   })
 
   def refreshGoogle() = silhouette.SecuredAction.async(implicit req => {

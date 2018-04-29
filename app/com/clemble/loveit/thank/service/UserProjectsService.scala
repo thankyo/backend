@@ -33,7 +33,7 @@ case class UserProjectsServiceSignUpListener @Inject()(uPrjS: UserProjectsServic
 @Singleton
 case class SimpleUserProjectsService @Inject()(
   eventBusManager: EventBusManager,
-  emailVerSvc: ProjectOwnershipByEmailService,
+  emailVerSvc: EmailProjectOwnershipService,
   urlValidator: URLValidator,
   repo: UserProjectsRepository,
   implicit val ec: ExecutionContext

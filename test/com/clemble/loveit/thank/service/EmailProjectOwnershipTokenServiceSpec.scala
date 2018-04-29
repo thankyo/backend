@@ -12,22 +12,13 @@ class EmailProjectOwnershipTokenServiceSpec extends ServiceSpec {
 
   "CREATE" should {
 
-    "Forbid creation if url & domain does not match" in {
-      val user = createUser()
-
-      val res = randomResource
-      val email = s"some@${randomResource.toParentDomain()}"
-
-      await(emailVerService.sendVerification(user, email)) should throwA[Exception]
-    }
-
     "Allow creation in the same domain" in {
       val user = createUser()
 
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
-      await(emailVerService.sendVerification(user, email)) should not(throwA[Exception])
+      await(emailVerService.create(user, email)) should not(throwA[Exception])
     }
 
   }
@@ -54,6 +45,7 @@ class EmailProjectOwnershipTokenServiceSpec extends ServiceSpec {
       val res = randomResource
       val email = s"some@${res.toParentDomain()}"
 
+      await(emailVerService.create(user, email))
       val token = await(emailVerService.sendVerification(user, email)).token
 
       await(emailVerService.verify(user, token)) shouldNotEqual None

@@ -118,8 +118,8 @@ class MongoUserProjectsRepository @Inject() (
     saveOwnedProject(user, "email", projects)
   }
 
-  override def validateEmailProject(user: UserID, url: Resource): Future[UserProjects] = {
-    val selector = Json.obj("_id" -> user, "email.url" -> url)
+  override def validateEmailProject(user: UserID, email: Email): Future[UserProjects] = {
+    val selector = Json.obj("_id" -> user, "email.email" -> email)
     val update = Json.obj("$set" -> Json.obj("email.$.verified" -> true))
     collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
   }

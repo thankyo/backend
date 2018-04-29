@@ -74,17 +74,19 @@ class ProjectController @Inject()(
     }
   })
 
-  def dibsOnUrl() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[String]))(implicit req => {
+  def dibsOnUrl() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[Resource]))(implicit req => {
     dibsOwnSvc.dibs(req.identity.id, req.body).map(Ok(_))
   })
 
-  def verifyDibs(token: UUID) = silhouette.SecuredAction.async(implicit req => {
-    dibsOwnSvc.verify(req.identity.id, token).map(Ok(_))
+  def verifyDibs() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "token").as[UUID]))(implicit req => {
+    dibsOwnSvc.verify(req.identity.id, req.body).map(Ok(_))
   })
 
-  def reSendDibsVerification(url: Resource) = silhouette.SecuredAction.async(implicit req => {
-    dibsOwnSvc.sendWHOISVerification(req.identity.id, url).map(email => Ok(JsBoolean(email.isDefined)))
-  })
+  def reSendDibsVerification() = silhouette.SecuredAction.async(parse.json[JsObject].map(json => (json \ "url").as[Resource]))(
+    implicit req => {
+      dibsOwnSvc.sendWHOISVerification(req.identity.id, req.body).map(email => Ok(JsBoolean(email.isDefined)))
+    }
+  )
 
   def refreshGoogle() = silhouette.SecuredAction.async(implicit req => {
     googleOwnSvc.refresh(req.identity.id).map(Ok(_))

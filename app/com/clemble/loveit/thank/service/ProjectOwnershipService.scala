@@ -206,7 +206,7 @@ case class DibsProjectOwnershipService @Inject()(
       dibsProject = baseProject.asDibsProject(emailOpt)
       usrPrj <- repo.saveDibsProjects(user, Seq(dibsProject))
     } yield {
-      sendWHOISVerification(user, url)
+      sendWHOISVerification(user, urlOpt.get)
       usrPrj
     }
   }

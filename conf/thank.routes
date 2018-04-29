@@ -26,6 +26,9 @@ GET         /user/my/owned                     @com.clemble.loveit.thank.control
 POST        /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.dibsOnUrl()
 DELETE      /user/my/owned                     @com.clemble.loveit.thank.controller.ProjectController.deleteOwnedProject(url)
 
+POST        /user/my/owned/dibs/verify         @com.clemble.loveit.thank.controller.ProjectController.reSendDibsVerification()
+PUT         /user/my/owned/dibs/verify         @com.clemble.loveit.thank.controller.ProjectController.verifyDibs()
+
 GET         /graph                             @com.clemble.loveit.thank.controller.GraphController.get(url: com.clemble.loveit.common.model.Resource)
 POST        /graph                             @com.clemble.loveit.thank.controller.GraphController.create()
 POST        /graph/my                          @com.clemble.loveit.thank.controller.GraphController.createMyPost()

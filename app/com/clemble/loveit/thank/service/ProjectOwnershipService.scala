@@ -8,7 +8,7 @@ import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.service.{EmailService, _}
 import com.clemble.loveit.thank.model.UserProject
-import com.clemble.loveit.thank.service.repository.{DibsProjectOwnershipRepository, UserProjectsRepository}
+import com.clemble.loveit.thank.service.repository.{DibsProjectOwnershipRepository, UserProjectRepository}
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
 import com.mohiva.play.silhouette.impl.providers.oauth2.GoogleProvider
@@ -27,7 +27,7 @@ trait ProjectOwnershipService {
 case class TumblrProjectOwnershipService @Inject()(
   api: TumblrAPI,
   oAuthService: UserOAuthService,
-  repo: UserProjectsRepository,
+  repo: UserProjectRepository,
   client: WSClient,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService with WSClientAware {
@@ -79,7 +79,7 @@ case class GoogleProjectOwnershipService @Inject()(
   oAuthService: UserOAuthService,
   enrichService: ProjectEnrichService,
   urlValidator: URLValidator,
-  repo: UserProjectsRepository,
+  repo: UserProjectRepository,
   client: WSClient,
   implicit val ec: ExecutionContext
 ) extends ProjectOwnershipService with WSClientAware {

@@ -9,7 +9,7 @@ POST        /refresh/post/:post                @com.clemble.loveit.thank.control
 POST        /refresh/google                    @com.clemble.loveit.thank.controller.ProjectController.refreshGoogle()
 POST        /refresh/tumblr                    @com.clemble.loveit.thank.controller.ProjectController.refreshTumblr()
 
-GET         /admin/project                     @com.clemble.loveit.thank.controller.AdminProjectController.listProjects(project)
+GET         /admin/project                     @com.clemble.loveit.thank.controller.AdminProjectController.listProjects()
 
 GET         /project/:project                  @com.clemble.loveit.thank.controller.ProjectController.getProject(project)
 POST        /project                           @com.clemble.loveit.thank.controller.ProjectController.create()

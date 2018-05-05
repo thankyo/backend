@@ -19,6 +19,7 @@ object UserProject {
 
   implicit val jsonFormat = Json.format[UserProject]
   implicit val writeable = WriteableUtils.jsonToWriteable[UserProject]
+  implicit val listWriteable = WriteableUtils.jsonToWriteable[List[UserProject]]
 
   def from(user: User): UserProject = {
     UserProject(user.id)

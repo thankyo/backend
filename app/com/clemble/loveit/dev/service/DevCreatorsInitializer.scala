@@ -24,7 +24,7 @@ case class DevCreatorsInitializer @Inject()(
   prjLookupService: ProjectLookupService,
   prjService: ProjectService,
   dibsOwnSvc: DibsProjectOwnershipService,
-  usrPrjService: UserProjectsService,
+  usrPrjService: UserProjectService,
   prjRepo: ProjectRepository,
   eventBusManager: EventBusManager,
   implicit val ec: ExecutionContext

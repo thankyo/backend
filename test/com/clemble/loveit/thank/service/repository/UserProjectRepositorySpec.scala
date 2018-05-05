@@ -11,7 +11,7 @@ import scala.util.Random
 @RunWith(classOf[JUnitRunner])
 class UserProjectRepositorySpec extends RepositorySpec {
 
-  lazy val repo: UserProjectsRepository = dependency[UserProjectsRepository]
+  lazy val repo: UserProjectRepository = dependency[UserProjectRepository]
 
   "Save" in {
     val projects = someRandom[UserProject]

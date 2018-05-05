@@ -5,7 +5,7 @@ import com.clemble.loveit.common.model.{DibsProject, OwnedProject, Project, Reso
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.UserPaymentRepository
 import com.clemble.loveit.thank.model.UserProject
-import com.clemble.loveit.thank.service.repository.{ProjectRepository, UserProjectsRepository}
+import com.clemble.loveit.thank.service.repository.{ProjectRepository, UserProjectRepository}
 import com.clemble.loveit.user.service.repository.UserRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,7 +14,7 @@ trait RepositorySpec extends FunctionalThankSpecification {
 
   lazy val userRepo: UserRepository = dependency[UserRepository]
   lazy val prjRepo: ProjectRepository = dependency[ProjectRepository]
-  lazy val usrPrjRepo: UserProjectsRepository = dependency[UserProjectsRepository]
+  lazy val usrPrjRepo: UserProjectRepository = dependency[UserProjectRepository]
   lazy val payRepo: UserPaymentRepository = dependency[UserPaymentRepository]
 
   override def createUser(register: RegistrationRequest = someRandom[RegistrationRequest]): UserID = {

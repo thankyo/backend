@@ -5,13 +5,13 @@ import com.clemble.loveit.common.model.{Resource, User, UserID}
 import com.clemble.loveit.common.service.URLValidator
 import com.clemble.loveit.common.util.EventBusManager
 import com.clemble.loveit.thank.model.UserProject
-import com.clemble.loveit.thank.service.repository.UserProjectsRepository
+import com.clemble.loveit.thank.service.repository.UserProjectRepository
 import com.mohiva.play.silhouette.api.{LoginEvent, SignUpEvent}
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait UserProjectsService {
+trait UserProjectService {
 
   def get(user: UserID): Future[UserProject]
 
@@ -19,7 +19,7 @@ trait UserProjectsService {
 
 }
 
-case class UserProjectsServiceSignUpListener @Inject()(uPrjS: UserProjectsService) extends Actor {
+case class UserProjectServiceSignUpListener @Inject()(uPrjS: UserProjectService) extends Actor {
 
   override def receive: Receive = {
     case SignUpEvent(user: User, _) =>
@@ -29,15 +29,15 @@ case class UserProjectsServiceSignUpListener @Inject()(uPrjS: UserProjectsServic
 }
 
 @Singleton
-case class SimpleUserProjectsService @Inject()(
+case class SimpleUserProjectService @Inject()(
   eventBusManager: EventBusManager,
   emailVerSvc: EmailProjectOwnershipService,
   urlValidator: URLValidator,
-  repo: UserProjectsRepository,
+  repo: UserProjectRepository,
   implicit val ec: ExecutionContext
-) extends UserProjectsService {
+) extends UserProjectService {
 
-  eventBusManager.onSignUp(Props(UserProjectsServiceSignUpListener(this)))
+  eventBusManager.onSignUp(Props(UserProjectServiceSignUpListener(this)))
 
   override def create(user: User): Future[UserProject] = {
     val projects = UserProject(user.id, Seq.empty, Seq.empty)

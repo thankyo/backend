@@ -37,15 +37,17 @@ class ThankModule @Inject()(env: Environment, conf: Configuration) extends Scala
     bind(classOf[ProjectFeedService]).to(classOf[SimpleProjectFeedService])
 
     bind(classOf[TumblrIntegrationService]).to(classOf[SimpleTumblrIntegrationService]).asEagerSingleton()
-    bind(classOf[UserProjectsRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
+    bind(classOf[UserProjectRepository]).to(classOf[MongoUserProjectRepository]).asEagerSingleton()
 
-    bind(classOf[ProjectRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
-    bind(classOf[DibsProjectOwnershipRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
-    bind(classOf[EmailProjectOwnershipRepository]).to(classOf[MongoUserProjectsRepository]).asEagerSingleton()
+    bind(classOf[ProjectRepository]).to(classOf[MongoUserProjectRepository]).asEagerSingleton()
+    bind(classOf[DibsProjectOwnershipRepository]).to(classOf[MongoUserProjectRepository]).asEagerSingleton()
+    bind(classOf[EmailProjectOwnershipRepository]).to(classOf[MongoUserProjectRepository]).asEagerSingleton()
 
     bind(classOf[ProjectService]).to(classOf[SimpleProjectService]).asEagerSingleton()
 
-    bind[UserProjectsService].to[SimpleUserProjectsService].asEagerSingleton()
+    bind(classOf[AdminProjectService]).to(classOf[SimpleAdminProjectService]).asEagerSingleton()
+
+    bind[UserProjectService].to[SimpleUserProjectService].asEagerSingleton()
 
     if (env.mode == Mode.Test || env.mode == Mode.Dev) {
       bind(classOf[WHOISService]).toInstance(TestWHOISService)

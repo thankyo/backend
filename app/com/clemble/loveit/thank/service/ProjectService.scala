@@ -3,7 +3,7 @@ package com.clemble.loveit.thank.service
 import javax.inject.{Inject, Singleton}
 import com.clemble.loveit.common.error.{RepositoryException, ResourceException}
 import com.clemble.loveit.common.model._
-import com.clemble.loveit.thank.service.repository.{UserProjectsRepository}
+import com.clemble.loveit.thank.service.repository.{UserProjectRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,7 +19,7 @@ trait ProjectService {
 
 @Singleton
 class SimpleProjectService @Inject()(
-  repo: UserProjectsRepository,
+  repo: UserProjectRepository,
   postService: PostService,
   implicit val ec: ExecutionContext
 ) extends ProjectService {

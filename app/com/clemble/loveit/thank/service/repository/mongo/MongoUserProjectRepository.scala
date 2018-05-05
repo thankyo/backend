@@ -7,7 +7,7 @@ import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.model.{OwnedProject, Project, ProjectID, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
 import com.clemble.loveit.thank.model.UserProject
-import com.clemble.loveit.thank.service.repository.UserProjectsRepository
+import com.clemble.loveit.thank.service.repository.UserProjectRepository
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.json._
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -19,13 +19,13 @@ import reactivemongo.play.json.commands.DefaultJSONCommandError
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MongoUserProjectsRepository @Inject() (
+class MongoUserProjectRepository @Inject() (
   @Named("userProject") collection: JSONCollection,
   implicit val m: Materializer,
   implicit val ec: ExecutionContext
-) extends UserProjectsRepository {
+) extends UserProjectRepository {
 
-  MongoUserProjectsRepository.ensureMeta(collection)
+  MongoUserProjectRepository.ensureMeta(collection)
 
   val INSTALLED_PROJECTION = Json.obj("installed" -> 1)
 
@@ -177,7 +177,7 @@ class MongoUserProjectsRepository @Inject() (
 }
 
 
-object MongoUserProjectsRepository {
+object MongoUserProjectRepository {
 
   def ensureMeta(collection: JSONCollection)(implicit ec: ExecutionContext, m: Materializer): Unit = {
     MongoSafeUtils.ensureIndexes(

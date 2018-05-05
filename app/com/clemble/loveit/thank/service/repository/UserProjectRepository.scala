@@ -27,7 +27,7 @@ trait EmailProjectOwnershipRepository {
 
 }
 
-trait UserProjectsRepository extends ProjectRepository with DibsProjectOwnershipRepository with EmailProjectOwnershipRepository {
+trait UserProjectRepository extends ProjectRepository with DibsProjectOwnershipRepository with EmailProjectOwnershipRepository {
 
   def findAll(): Future[List[UserProject]]
 

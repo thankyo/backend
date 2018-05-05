@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ProjectController @Inject()(
-  usrPrjService: UserProjectsService,
+  usrPrjService: UserProjectService,
   service: ProjectService,
   feedService: ProjectFeedService,
   lookupService: ProjectLookupService,

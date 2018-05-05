@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import akka.stream.Materializer
 import com.clemble.loveit.common.model.{Project, User}
 import com.clemble.loveit.common.mongo.{JSONCollectionFactory, MongoSafeUtils}
-import com.clemble.loveit.thank.model.UserProjects
+import com.clemble.loveit.thank.model.UserProject
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
 import reactivemongo.play.json._
@@ -81,10 +81,10 @@ class SimpleDatabaseUpdater @Inject()(factory: JSONCollectionFactory, implicit v
     MongoSafeUtils.findAll[User](userCollection, Json.obj()).runFoldAsync(true)((agg, user) => {
       agg match {
         case false => Future.successful(false)
-        case true => userProjectsCollection.find(Json.obj("_id" -> user.id)).one[UserProjects].flatMap({
+        case true => userProjectsCollection.find(Json.obj("_id" -> user.id)).one[UserProject].flatMap({
           case Some(_) => Future.successful(true)
           case None =>
-            val userProjectJson = Json.toJsObject(UserProjects from user) + ("_id" -> JsString(user.id))
+            val userProjectJson = Json.toJsObject(UserProject from user) + ("_id" -> JsString(user.id))
             userProjectsCollection.insert(userProjectJson).map(_.ok)
         })
       }

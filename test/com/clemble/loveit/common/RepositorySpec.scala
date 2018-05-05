@@ -4,7 +4,7 @@ import com.clemble.loveit.auth.model.requests.RegistrationRequest
 import com.clemble.loveit.common.model.{DibsProject, OwnedProject, Project, Resource, User, UserID}
 import com.clemble.loveit.payment.model.UserPayment
 import com.clemble.loveit.payment.service.repository.UserPaymentRepository
-import com.clemble.loveit.thank.model.UserProjects
+import com.clemble.loveit.thank.model.UserProject
 import com.clemble.loveit.thank.service.repository.{ProjectRepository, UserProjectsRepository}
 import com.clemble.loveit.user.service.repository.UserRepository
 
@@ -21,7 +21,7 @@ trait RepositorySpec extends FunctionalThankSpecification {
     val fUserID = for {
       user <- userRepo.save(register.toUser())
       _ <- payRepo.save(UserPayment from user)
-      _ <- usrPrjRepo.save(UserProjects from user)
+      _ <- usrPrjRepo.save(UserProject from user)
     } yield {
       user.id
     }

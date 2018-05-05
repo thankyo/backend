@@ -7,7 +7,7 @@ import java.util.UUID
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.service.{EmailService, _}
-import com.clemble.loveit.thank.model.UserProjects
+import com.clemble.loveit.thank.model.UserProject
 import com.clemble.loveit.thank.service.repository.{DibsProjectOwnershipRepository, UserProjectsRepository}
 import com.mohiva.play.silhouette.impl.exceptions.ProfileRetrievalException
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
@@ -64,7 +64,7 @@ case class TumblrProjectOwnershipService @Inject()(
     })
   }
 
-  def refresh(user: UserID): Future[UserProjects] = {
+  def refresh(user: UserID): Future[UserProject] = {
     for {
       projects <- fetchProjects(user)
       userProjects <- repo.saveTumblrProjects(user, projects)
@@ -131,7 +131,7 @@ case class GoogleProjectOwnershipService @Inject()(
   }
 
 
-  def refresh(user: UserID): Future[UserProjects] = {
+  def refresh(user: UserID): Future[UserProject] = {
     for {
       urls <- fetchOwned(user)
       projects <- Future.sequence(urls.map(enrichService.enrich(user, _)))
@@ -184,7 +184,7 @@ case class DibsProjectOwnershipService @Inject()(
     }
   }
 
-  def verify(user: UserID, token: UUID): Future[UserProjects] = {
+  def verify(user: UserID, token: UUID): Future[UserProject] = {
     for {
       tokenOpt <- tokenRepo.findAndRemoveByToken(token)
       _ = if (tokenOpt.isEmpty) throw new IllegalArgumentException("Token expired regenerate it")
@@ -196,7 +196,7 @@ case class DibsProjectOwnershipService @Inject()(
     }
   }
 
-  def create(user: UserID, url: Resource): Future[UserProjects] = {
+  def create(user: UserID, url: Resource): Future[UserProject] = {
     for {
       urlOpt <- urlValidator.findAlive(url)
       _ = if (urlOpt.isEmpty) throw FieldValidationError("url", "Can't connect")
@@ -210,7 +210,7 @@ case class DibsProjectOwnershipService @Inject()(
     }
   }
 
-  def delete(user: UserID, url: Resource): Future[UserProjects] = {
+  def delete(user: UserID, url: Resource): Future[UserProject] = {
     for {
       userProject <- repo.deleteDibsProject(user, url)
     } yield {

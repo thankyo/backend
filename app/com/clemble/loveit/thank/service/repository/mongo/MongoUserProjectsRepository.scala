@@ -6,7 +6,7 @@ import com.clemble.loveit.common.model.Project._
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.model.{OwnedProject, Project, ProjectID, Resource, UserID}
 import com.clemble.loveit.common.mongo.MongoSafeUtils
-import com.clemble.loveit.thank.model.UserProjects
+import com.clemble.loveit.thank.model.UserProject
 import com.clemble.loveit.thank.service.repository.UserProjectsRepository
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.json._
@@ -31,14 +31,14 @@ class MongoUserProjectsRepository @Inject() (
 
   override def findProjectById(id: ProjectID): Future[Option[Project]] = {
     val selector = Json.obj("installed._id" -> id)
-    collection.find(selector).one[UserProjects].map(_.flatMap(_.installed.find(p => p._id == id)))
+    collection.find(selector).one[UserProject].map(_.flatMap(_.installed.find(p => p._id == id)))
   }
 
   override def findProjectByUrl(url: Resource): Future[Option[Project]] = {
     val selector = Json.obj("installed.url" -> Json.obj("$in" -> url.parents()))
     collection
       .find(selector)
-      .one[UserProjects]
+      .one[UserProject]
       .map(_.flatMap(_.installed.find(p => url.startsWith(p.url))))
   }
 
@@ -48,10 +48,16 @@ class MongoUserProjectsRepository @Inject() (
       .map(_.flatMap(json => (json \ "installed").asOpt[List[Project]]).getOrElse(List.empty))
   }
 
+
+  override def findAll(): Future[List[UserProject]] = {
+    val selector = Json.obj()
+    MongoSafeUtils.collectAll[UserProject](collection, selector)
+  }
+
   override def findAllProjects(ids: List[ProjectID]): Future[List[Project]] = {
     val selector = Json.obj("installed._id" -> Json.obj("$in" -> ids))
     MongoSafeUtils
-      .collectAll[UserProjects](collection, selector)
+      .collectAll[UserProject](collection, selector)
       .map(_.flatMap(_.installed.filter(project => ids.contains(project._id))))
   }
 
@@ -67,12 +73,12 @@ class MongoUserProjectsRepository @Inject() (
     MongoSafeUtils.safeSingleUpdate(collection.update(selector, deleteQuery))
   }
 
-  override def findById(user: UserID): Future[Option[UserProjects]] = {
+  override def findById(user: UserID): Future[Option[UserProject]] = {
     val selector = Json.obj("_id" -> user)
-    collection.find(selector).one[UserProjects]
+    collection.find(selector).one[UserProject]
   }
 
-  override def save(projects: UserProjects): Future[UserProjects] = {
+  override def save(projects: UserProject): Future[UserProject] = {
     val presentation = Json.toJsObject(projects) + ("_id" -> JsString(projects.user))
     MongoSafeUtils.safeSingleUpdate(collection.insert(presentation)).map({
       case true => projects
@@ -80,23 +86,23 @@ class MongoUserProjectsRepository @Inject() (
     }).recoverWith(errorHandler)
   }
 
-  private def saveOwnedProject[T <: ProjectLike](user: UserID, field: String, owned: Seq[T])(implicit format: OFormat[T]): Future[UserProjects] = {
+  private def saveOwnedProject[T <: ProjectLike](user: UserID, field: String, owned: Seq[T])(implicit format: OFormat[T]): Future[UserProject] = {
     val selector = Json.obj("_id" -> user)
     collection
       .update(selector, Json.obj("$pull" -> Json.obj(field -> Json.obj("url" -> Json.obj("$in" -> owned.map(_.url))))))
       .flatMap(_ => {
         val update = Json.obj("$addToSet" -> Json.obj(field -> Json.obj("$each" -> owned)))
         collection.findAndUpdate(selector, update, true)
-          .map(_.result[UserProjects].get)
+          .map(_.result[UserProject].get)
       }).recoverWith(errorHandler)
   }
 
 
-  override def saveGoogleProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects] = {
+  override def saveGoogleProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProject] = {
     saveOwnedProject(user, "google", projects)
   }
 
-  override def saveTumblrProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProjects] = {
+  override def saveTumblrProjects(user: UserID, projects: Seq[OwnedProject]): Future[UserProject] = {
     saveOwnedProject(user, "tumblr", projects)
   }
 
@@ -110,36 +116,36 @@ class MongoUserProjectsRepository @Inject() (
     })
   }
 
-  override def saveDibsProjects(user: UserID, projects: Seq[DibsProject]): Future[UserProjects] = {
+  override def saveDibsProjects(user: UserID, projects: Seq[DibsProject]): Future[UserProject] = {
     saveOwnedProject(user, "dibs", projects)
   }
 
-  override def saveEmailProjects(user: UserID, projects: Seq[EmailProject]): Future[UserProjects] = {
+  override def saveEmailProjects(user: UserID, projects: Seq[EmailProject]): Future[UserProject] = {
     saveOwnedProject(user, "email", projects)
   }
 
-  override def validateEmailProject(user: UserID, email: Email): Future[UserProjects] = {
+  override def validateEmailProject(user: UserID, email: Email): Future[UserProject] = {
     val selector = Json.obj("_id" -> user, "email.email" -> email)
     val update = Json.obj("$set" -> Json.obj("email.$.verified" -> true))
-    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
+    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProject].get)
   }
 
-  override def validateDibsProject(user: UserID, url: Resource): Future[UserProjects] = {
+  override def validateDibsProject(user: UserID, url: Resource): Future[UserProject] = {
     val selector = Json.obj("_id" -> user, "dibs.url" -> url)
     val update = Json.obj("$set" -> Json.obj("dibs.$.verified" -> true))
-    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
+    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProject].get)
   }
 
-  override def deleteDibsProject(user: UserID, url: String): Future[UserProjects] = {
+  override def deleteDibsProject(user: UserID, url: String): Future[UserProject] = {
     val selector = Json.obj("_id" -> user)
     val update = Json.obj("$pull" -> Json.obj("dibs" -> Json.obj("url" -> url)))
-    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
+    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProject].get)
   }
 
-  override def deleteEmailProject(user: UserID, email: Email): Future[UserProjects] = {
+  override def deleteEmailProject(user: UserID, email: Email): Future[UserProject] = {
     val selector = Json.obj("_id" -> user)
     val update = Json.obj("$pull" -> Json.obj("email" -> Json.obj("email" -> email)))
-    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProjects].get)
+    collection.findAndUpdate(selector, update, fetchNewObject = true).map(_.result[UserProject].get)
   }
 
   override def saveProject(project: Project): Future[Project] = {

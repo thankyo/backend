@@ -104,8 +104,8 @@ package object util {
     Project.from(someRandom[UserID], someRandom[OwnedProject])
   }
 
-  implicit val userProjectsGenerator: Generator[UserProjects] = () => {
-    UserProjects(
+  implicit val userProjectsGenerator: Generator[UserProject] = () => {
+    UserProject(
       someRandom[UserID],
       someRandom[Seq[OwnedProject]],
       someRandom[Seq[OwnedProject]],

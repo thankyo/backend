@@ -6,7 +6,7 @@ import java.util.UUID
 import com.clemble.loveit.common.error.FieldValidationError
 import com.clemble.loveit.common.model._
 import com.clemble.loveit.common.service.{EmailService, TokenRepository, URLValidator}
-import com.clemble.loveit.thank.model.UserProjects
+import com.clemble.loveit.thank.model.UserProject
 import com.clemble.loveit.thank.service.repository.EmailProjectOwnershipRepository
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Json, OFormat}
@@ -35,7 +35,7 @@ case class EmailProjectOwnershipService @Inject()(
   tokenRepo: TokenRepository[EmailProjectOwnershipToken]
 )(implicit ec: ExecutionContext) extends ProjectOwnershipService {
 
-  def create(user: UserID, email: Email): Future[UserProjects] = {
+  def create(user: UserID, email: Email): Future[UserProject] = {
     for {
       urlOpt <- urlValidator.findAlive(email.toEmailDomain())
       _ = if (urlOpt.isEmpty) throw FieldValidationError("url", "Can't connect")
@@ -58,7 +58,7 @@ case class EmailProjectOwnershipService @Inject()(
     }
   }
 
-  def verify(user: UserID, token: UUID): Future[UserProjects] = {
+  def verify(user: UserID, token: UUID): Future[UserProject] = {
     for {
       tokenOpt <- tokenRepo.findAndRemoveByToken(token)
       _ = if (tokenOpt.isEmpty) throw new IllegalArgumentException("Token expired regenerate it")
@@ -70,7 +70,7 @@ case class EmailProjectOwnershipService @Inject()(
     }
   }
 
-  def delete(user: UserID, email: Email): Future[UserProjects] = {
+  def delete(user: UserID, email: Email): Future[UserProject] = {
     for {
       usrPrj <- repo.deleteEmailProject(user, email)
     } yield {

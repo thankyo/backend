@@ -1,6 +1,6 @@
 package com.clemble.loveit.thank.service.repository
 
-import com.clemble.loveit.common.model.{Project, ProjectID, Resource, Tag, UserID}
+import com.clemble.loveit.common.model.{Project, ProjectID, ProjectLike, Resource, Tag, UserID}
 
 import scala.concurrent.Future
 

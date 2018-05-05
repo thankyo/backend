@@ -2,7 +2,7 @@ package com.clemble.loveit.thank.service.repository
 
 import com.clemble.loveit.common.RepositorySpec
 import com.clemble.loveit.common.model.{DibsProject, EmailProject, OwnedProject, Project}
-import com.clemble.loveit.thank.model.UserProjects
+import com.clemble.loveit.thank.model.UserProject
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -14,7 +14,7 @@ class UserProjectRepositorySpec extends RepositorySpec {
   lazy val repo: UserProjectsRepository = dependency[UserProjectsRepository]
 
   "Save" in {
-    val projects = someRandom[UserProjects]
+    val projects = someRandom[UserProject]
 
     await(repo.save(projects)) shouldEqual projects
     await(repo.save(projects)) should throwA[Throwable]

@@ -15,6 +15,8 @@ trait UserRepository {
 
   def retrieve(loginInfo: LoginInfo): Future[Option[User]]
 
+  def findAll(): Future[List[User]]
+
   /**
     * Find [[User]] by ID
     */

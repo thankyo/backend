@@ -87,5 +87,6 @@ object User {
   implicit val jsonFormat: OFormat[User] = Json.format[User]
 
   implicit val userWriteable: Writeable[User] = WriteableUtils.jsonToWriteable[User]
+  implicit val listUserWriteable: Writeable[List[User]] = WriteableUtils.jsonToWriteable[List[User]]
 
 }

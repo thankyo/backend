@@ -29,6 +29,8 @@ class UserModule(env: PlayEnvironment, conf: Configuration) extends ScalaModule 
 
     bind(classOf[InvitationRepository]).to(classOf[MongoInvitationRepository])
     bind(classOf[InvitationService]).to(classOf[SimpleInvitationService])
+
+    bind(classOf[AdminUserService]).to(classOf[SimpleAdminUserService])
   }
 
   @Provides

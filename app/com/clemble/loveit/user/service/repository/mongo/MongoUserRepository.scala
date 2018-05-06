@@ -39,6 +39,10 @@ case class MongoUserRepository @Inject()(
     MongoSafeUtils.safe(user, fUpdate)
   }
 
+  override def findAll(): Future[List[User]] = {
+    MongoSafeUtils.collectAll[User](collection, Json.obj())
+  }
+
   override def findById(id: UserID): Future[Option[User]] = {
     val query = Json.obj("_id" -> id)
     val fUser = collection.find(query).one[User]

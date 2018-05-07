@@ -16,7 +16,7 @@ class PostController @Inject()(
   silhouette: Silhouette[AuthEnv],
   components: ControllerComponents)(
   implicit val ec: ExecutionContext
-) extends LoveItController(components) {
+) extends LoveItController(silhouette, components) {
 
 
   def get(id: PostID) = silhouette.SecuredAction.async(req => {

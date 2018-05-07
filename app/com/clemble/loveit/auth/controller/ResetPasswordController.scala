@@ -33,7 +33,7 @@ class ResetPasswordController @Inject()(
   silhouette: Silhouette[AuthEnv],
   cookieUtils: CookieUtils,
   ex: ExecutionContext
-) extends LoveItController(components) with I18nSupport {
+) extends LoveItController(silhouette, components) with I18nSupport {
 
   /**
     * Sends an email with password reset instructions.

@@ -20,7 +20,7 @@ case class StatisticsController @Inject()(
   (
     implicit val ec: ExecutionContext,
     implicit val cookieUtils: CookieUtils
-  ) extends LoveItController(components) {
+  ) extends LoveItController(silhouette, components) {
 
   def getContributions(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     contributionStatistics.find(idOrMe(user)).map(Ok(_))

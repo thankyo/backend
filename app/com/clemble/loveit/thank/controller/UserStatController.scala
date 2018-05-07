@@ -18,7 +18,7 @@ case class UserStatController @Inject()(
                                     silhouette: Silhouette[AuthEnv],
                                     components: ControllerComponents,
                                     implicit val ec: ExecutionContext
-                                  ) extends LoveItController(components) {
+                                  ) extends LoveItController(silhouette, components) {
 
   def get(supporter: UserID, year: Int, month: Int) = silhouette.SecuredAction.async(implicit req => {
     val user = idOrMe(supporter)

@@ -35,7 +35,7 @@ class SocialAuthController @Inject()(
   ec: ExecutionContext,
   cookieUtils: CookieUtils,
   silhouette: Silhouette[AuthEnv]
-) extends LoveItController(components) with Logger {
+) extends LoveItController(silhouette, components) with Logger {
 
   /**
     * Authenticates a user against a social provider.

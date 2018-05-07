@@ -27,7 +27,7 @@ class RegisterController @Inject()(
                                     silhouette: Silhouette[AuthEnv],
                                     cookieUtils: CookieUtils,
                                     ex: ExecutionContext
-                                ) extends LoveItController(components) with I18nSupport {
+                                ) extends LoveItController(silhouette, components) with I18nSupport {
 
   /**
     * Handles the submitted form.

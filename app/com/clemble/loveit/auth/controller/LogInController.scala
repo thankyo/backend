@@ -28,7 +28,7 @@ class LogInController @Inject()(
                                  silhouette: Silhouette[AuthEnv],
                                  cookieUtils: CookieUtils,
                                  ex: ExecutionContext
-                               ) extends LoveItController(components) with I18nSupport {
+                               ) extends LoveItController(silhouette, components) with I18nSupport {
 
 
   implicit val credentialsJson: OFormat[Credentials] = Json.format[Credentials]

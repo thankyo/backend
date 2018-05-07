@@ -13,6 +13,8 @@ class AdminEOMControllerSpec extends GenericEOMPaymentServiceSpec with PaymentCo
 
   val admin = createUser()
 
+  skipAll
+
   override def getStatus(yom: YearMonth): Option[EOMStatus] = {
     val res = perform(admin, FakeRequest(GET, s"/api/v1/payment/admin/eom/${yom.getYear}/${yom.getMonthValue}"))
     res.header.status match {

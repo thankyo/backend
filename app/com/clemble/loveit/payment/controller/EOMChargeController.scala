@@ -17,7 +17,7 @@ class EOMChargeController @Inject()(
                                      silhouette: Silhouette[AuthEnv],
                                      components: ControllerComponents,
                                      implicit val ec: ExecutionContext
-                                   ) extends LoveItController(components) {
+                                   ) extends LoveItController(silhouette, components) {
 
   def getMyCSV() = silhouette.SecuredAction.async(req => {
     val fCSV = for {

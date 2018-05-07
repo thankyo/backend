@@ -34,7 +34,7 @@ class ChangePasswordController @Inject()(
                                         )(
                                           implicit
                                           ex: ExecutionContext
-                                        ) extends LoveItController(components) with I18nSupport {
+                                        ) extends LoveItController(silhouette, components) with I18nSupport {
 
   /**
     * Changes the password.

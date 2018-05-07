@@ -18,7 +18,7 @@ class GraphController @Inject()(
                                  silhouette: Silhouette[AuthEnv],
                                  components: ControllerComponents)(
                                  implicit val ec: ExecutionContext
-                               ) extends LoveItController(components) {
+                               ) extends LoveItController(silhouette, components) {
 
   def get(url: Resource) = silhouette.UnsecuredAction.async(implicit req => {
     service

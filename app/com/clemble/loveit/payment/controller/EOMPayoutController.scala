@@ -18,7 +18,7 @@ case class EOMPayoutController @Inject()(
                                           components: ControllerComponents
                                         )(
                                           implicit ec: ExecutionContext
-                                        ) extends LoveItController(components) {
+                                        ) extends LoveItController(silhouette, components) {
 
   def getMyCSV() = silhouette.SecuredAction.async(req => {
     val fCSV = for {

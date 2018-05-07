@@ -22,7 +22,7 @@ case class InvitationController @Inject()(
                                            socialProviderRegistry: SocialProviderRegistry,
                                            components: ControllerComponents,
                                            implicit val ec: ExecutionContext
-                                         ) extends LoveItController(components) with Logger {
+                                         ) extends LoveItController(silhouette, components) with Logger {
 
   def invite() = silhouette.SecuredAction.async(parse.json[JsObject].map(_ \ "linkOrEmail"))(implicit req => {
     req.body match {

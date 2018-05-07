@@ -11,7 +11,7 @@ class LogoutController @Inject() (
                                    silhouette: Silhouette[AuthEnv],
                                    cookieUtils: CookieUtils,
                                    components: ControllerComponents
-                                 ) extends LoveItController(components) {
+                                 ) extends LoveItController(silhouette, components) {
 
   def logout() = silhouette.UnsecuredAction(_ => {
     Redirect("/").withCookies(cookieUtils.removeUser())

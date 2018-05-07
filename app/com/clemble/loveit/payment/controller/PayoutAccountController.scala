@@ -24,7 +24,7 @@ class PayoutAccountController @Inject()(
   (
     implicit val ec: ExecutionContext,
     implicit val cookieUtils: CookieUtils
-  ) extends LoveItController(components) {
+  ) extends LoveItController(silhouette, components) {
 
   private val clientId = conf.get[String]("payment.stripe.clientId")
 

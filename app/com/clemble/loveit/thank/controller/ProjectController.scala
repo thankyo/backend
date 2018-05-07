@@ -27,7 +27,7 @@ class ProjectController @Inject()(
   silhouette: Silhouette[AuthEnv],
   components: ControllerComponents,
   implicit val ec: ExecutionContext
-) extends LoveItController(components) {
+) extends LoveItController(silhouette, components) {
 
   def getOwnedProjects() = silhouette.SecuredAction.async(implicit req => {
     usrPrjService.get(req.identity.id).map(userProjects => {

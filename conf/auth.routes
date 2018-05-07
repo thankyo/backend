@@ -1,12 +1,14 @@
-POST        /register                        com.clemble.loveit.auth.controller.RegisterController.submit
-POST        /logIn                           com.clemble.loveit.auth.controller.LogInController.submit
+POST        /admin                           @com.clemble.loveit.auth.controller.AdminAuthController.authenticate
 
-POST        /password/forgot                 com.clemble.loveit.auth.controller.ResetPasswordController.resetPassword
-POST        /password/reset/:token           com.clemble.loveit.auth.controller.ResetPasswordController.restorePassword(token: java.util.UUID)
-POST        /password/change                 com.clemble.loveit.auth.controller.ChangePasswordController.submit
+POST        /register                        @com.clemble.loveit.auth.controller.RegisterController.submit
+POST        /logIn                           @com.clemble.loveit.auth.controller.LogInController.submit
 
-GET         /logout                          com.clemble.loveit.auth.controller.LogoutController.logout()
+POST        /password/forgot                 @com.clemble.loveit.auth.controller.ResetPasswordController.resetPassword
+POST        /password/reset/:token           @com.clemble.loveit.auth.controller.ResetPasswordController.restorePassword(token: java.util.UUID)
+POST        /password/change                 @com.clemble.loveit.auth.controller.ChangePasswordController.submit
 
-GET         /social/:provider                com.clemble.loveit.auth.controller.SocialAuthController.authenticate(provider)
+GET         /logout                          @com.clemble.loveit.auth.controller.LogoutController.logout()
 
-DELETE      /user/my/:provider               com.clemble.loveit.auth.controller.UnRegisterController.removeProvider(provider)
+GET         /social/:provider                @com.clemble.loveit.auth.controller.SocialAuthController.authenticate(provider)
+
+DELETE      /user/my/:provider               @com.clemble.loveit.auth.controller.UnRegisterController.removeProvider(provider)

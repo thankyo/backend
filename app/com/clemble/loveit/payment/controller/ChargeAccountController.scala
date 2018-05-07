@@ -17,7 +17,7 @@ case class ChargeAccountController @Inject()(
                                               components: ControllerComponents,
                                               silhouette: Silhouette[AuthEnv]
                                             )(implicit ec: ExecutionContext
-                                            ) extends LoveItController(components) {
+                                            ) extends LoveItController(silhouette, components) {
 
   def getMyAccount: Action[AnyContent] = silhouette.SecuredAction.async(implicit req => {
     val user = req.identity.id

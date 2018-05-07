@@ -20,7 +20,7 @@ class UnRegisterController @Inject()(
   silhouette: Silhouette[AuthEnv],
   cookieUtils: CookieUtils,
   ex: ExecutionContext
-) extends LoveItController(components){
+) extends LoveItController(silhouette, components){
 
   def removeProvider(provider: String) = silhouette.SecuredAction.async{ req =>
     authService.removeSocial(req.identity.id, provider).map({

@@ -16,7 +16,7 @@ class PaymentLimitController @Inject()(
                                         components: ControllerComponents,
                                         silhouette: Silhouette[AuthEnv],
                                         implicit val ec: ExecutionContext
-                                      ) extends LoveItController(components) {
+                                      ) extends LoveItController(silhouette, components) {
 
   def getMonthlyLimit(user: UserID) = silhouette.SecuredAction.async(implicit req => {
     val userID = idOrMe(user)

@@ -21,7 +21,7 @@ case class PendingTransactionController @Inject()(
                                                    components: ControllerComponents,
                                                    implicit val m: Materializer,
                                                    implicit val ec: ExecutionContext
-                                                 ) extends LoveItController(components) {
+                                                 ) extends LoveItController(silhouette, components) {
 
   private def asCsv(transactions: List[PendingTransaction]): String = {
     val csv = transactions.map(transaction => {

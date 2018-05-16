@@ -40,7 +40,7 @@ case class SimpleResetPasswordService @Inject()(
           })
       authToken <- repo.save(ResetPasswordToken(user.id))
       emailSent <- emailService.sendResetPasswordEmail(user.email, authToken)
-      _ = if (emailSent) throw new IllegalArgumentException("Could not send verification email")
+      _ = if (!emailSent) throw new IllegalArgumentException("Could not send verification email")
     } yield {
       authToken
     }

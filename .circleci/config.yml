@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/backend
     docker:
-      - image: codestar/circleci-scala-sbt-git:scala-2.12.5-sbt-1.1.1
+      - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.1
       - image: mongo:3.4.9
     steps:
       - checkout
